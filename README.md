@@ -1,6 +1,6 @@
 # This.Me  
-<img src="./docs/cleak_me-removebg.png" alt="SVG Image" style="width:89px;">
-<img src="./docs/this.me.png" alt="SVG Image" style="width:89px;">
+<img src="./cleak_me-removebg.png" alt="SVG Image" style="width:89px;">
+<img src="./this.me.png" alt="SVG Image" style="width:89px;">
 
 **This.Me** is a class focused on encapsulating user identity, specifically crafted to facilitate the creation of instances ready for hashing and cryptographic signature generation. It opens the door to coding and decoding through "me" signatures, offering a modular framework that prioritizes privacy and integrity in application-wide identity management.
 

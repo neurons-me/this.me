@@ -4,7 +4,7 @@
   },
   "opts": {
     "destination": "./docs",
-    "template": "../../../../../Sandbox/dev_tools/assets/better-docs",
+    "template": "../../../../../../Sandbox/dev_tools/assets/better-docs",
     "readme": "./README.md"
   },
   "templates": {
