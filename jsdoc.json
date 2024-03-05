@@ -1,6 +1,6 @@
 {
   "source": {
-    "include": ["./src", "./index.js", "./src/cli", "./src/cli/commands.js", "./src/cli/shell.js"]
+    "include": ["./src", "./index.js", "./README.md"]
   },
   "opts": {
     "destination": "./docs",
@@ -33,7 +33,7 @@
     },
           {
               "label": "Github",
-              "href": "https://github.com/suiGn/cleaker"
+              "href": "https://github.com/suiGn/this.me"
           },
           {
               "label": "Cleaker.me",

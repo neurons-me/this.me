@@ -9,7 +9,5 @@
  *  Command Definitions and Interactive Shell.*/
 
 // index.js in the `this.me` package
-export { default } from './src/me.js';
 console.log('this.me loaded successfully.');
-// this.me/index.js
-export { shell } from './src/cli/shell.js';
+

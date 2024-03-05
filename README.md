@@ -1,6 +1,11 @@
 # This.Me  
-<img src="./cleak_me-removebg.png" alt="SVG Image" style="width:89px;">
-<img src="./this.me.png" alt="SVG Image" style="width:89px;">
+<img src="./Cleaker-removebg-preview.png" alt="SVG Image" style="width:89px;">
+
+<img src="https://suign.github.io/assets/imgs/cleak_me-removebg.png" alt="DID Me Art" width="244">
+
+<img src="https://suign.github.io/assets/imgs/Cleaker-removebg-preview.png" alt="Cleak Me Please" width="244">
+
+[UNDER DEVELOPMENT - SUBJECT TO MAJOR CHANGES]
 
 **This.Me** is a class focused on encapsulating user identity, specifically crafted to facilitate the creation of instances ready for hashing and cryptographic signature generation. It opens the door to coding and decoding through "me" signatures, offering a modular framework that prioritizes privacy and integrity in application-wide identity management.
 
@@ -44,21 +49,31 @@ This quick start guide provides a straightforward path to incorporating `this.me
 
 -----
 
-# What is All.This?
-**This.me** serves as the **identity representation** in our system.
+# About All.This
 
-The `[all.this](https://www.neurons.me/what-is-all-this)` collection of packages, along with the proposed `cleaker` functionality, is an approach to create a modular system where each module (like `this.text`, `this.video`, `this.img`, etc.) (all.this family) represents a distinct data structure or class. These modules, when combined with `cleaker`, generate unique **public and private key pairs**, essentially giving each instance its cryptographic identity.
+## Modular Data Structures:
 
+**[this.me](https://suign.github.io/this.me)  - [this.audio](https://suign.github.io/this.audio) - [this.text](https://suign.github.io/this.text) - [this.wallet](https://suign.github.io/this.wallet) - [this.img](https://suign.github.io/this.img) - [this.pixel](https://suign.github.io/Pixels) - [be.this](https://suign.github.io/be.this) - [this.DOM](https://suign.github.io/this.DOM) - [this.env](https://suign.github.io/this.env/) - [this.GUI](https://suign.github.io/this.GUI) - [this.be](https://suign.github.io/this.be) - [this.video](https://suign.github.io/this.video) - [this.atom](https://suign.github.io/this.atom) - [this.dictionaries](https://suign.github.io/this.dictionaries/)**
 
-## Contextual Environment
-**This.Me** adapts to various environments, enabling `.me` objects to function both locally and within a network. A `.me` object authenticated on a network accesses data beyond the local scope, while unauthenticated instances are confined to local data. This dual functionality ensures seamless interoperability and heightened security.
+**Each module** in **[all.this](https://neurons.me/all-this)** represents a specific **datastructure**. These classes encapsulate the functionalities and **data specific to their domain.**
 
-## Setting up your Context. 	👋🏻👋🏼👋🏽👋🏾👋🏿
-Defining the **environment** and context in which your code runs, especially when you're interacting with intelligent agents or services like **me.**
+## **Utils**
 
-Having a clear declaration of the environment and the context can have a series of implications for security, interoperability, and clarity. The codebase is often vast, dynamic, and continually evolving. Given the dynamic nature of such environments, ensuring the integrity of the code and data becomes paramount. You wouldn't want an agent to execute or rely on code that has been tampered with or is different from the expected version. This is where hashing comes into play.
+**[all.this](https://neurons.me/all-this)** not only aggregates these modules but also provides utilities to facilitate the integration, management, and enhancement of these data structures. **For example:**
 
-`.me` objects to serve as both a local identity on the user's host machine and as an identity within a larger network. When a `.me` object is authenticated on a network, it can access data not only on the local host but also from other nodes within that network. Conversely, if it's not authenticated or recognized by the network, it should only access local data. 
+*The integration with [cleaker](https://suign.github.io/cleaker/) ensures each module instance has a **unique cryptographic identity**, enhancing security and data integrity.*
+
+### Neurons.me Ecosystem Glossary:
+
+visit: [Neurons.me Glossary](https://suign.github.io/neurons.me/Glossary) 
+
+Learn more at https://neurons.me
+
+**Author:** SuiGn
+
+[By neurons.me](https://neurons.me)
+
+<img src="https://suign.github.io/neurons.me/neurons_logo.png" alt="neurons.me logo" width="123" height="123" style="width123px; height:123px;">
 
 
 
