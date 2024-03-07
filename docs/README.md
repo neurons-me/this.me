@@ -1,11 +1,22 @@
-# This.Me  
-<img src="./Cleaker-removebg-preview.png" alt="SVG Image" style="width:89px;">
+
 
 <img src="https://suign.github.io/assets/imgs/cleak_me-removebg.png" alt="DID Me Art" width="244">
 
 <img src="https://suign.github.io/assets/imgs/Cleaker-removebg-preview.png" alt="Cleak Me Please" width="244">
 
-[UNDER DEVELOPMENT - SUBJECT TO MAJOR CHANGES]
+# THIS.ME  
+
+-----------
+
+### [Project Status : Experimental and Under Development, Subject to Major Changes]
+
+The module is in active development, and as such, it is subject to significant changes as we refine our approach and methodologies to best support our goals.
+
+visit: https://neurons.me to learn more.
+
+----------
+
+# Introduction
 
 **This.Me** is a class focused on encapsulating user identity, specifically crafted to facilitate the creation of instances ready for hashing and cryptographic signature generation. It opens the door to coding and decoding through "me" signatures, offering a modular framework that prioritizes privacy and integrity in application-wide identity management.
 
@@ -47,7 +58,7 @@
 
 This quick start guide provides a straightforward path to incorporating `this.me` into your project, enabling you to manage user identities and prepare them for secure cryptographic processes efficiently.
 
------
+----------
 
 # About All.This
 
@@ -67,13 +78,21 @@ This quick start guide provides a straightforward path to incorporating `this.me
 
 visit: [Neurons.me Glossary](https://suign.github.io/neurons.me/Glossary) 
 
-Learn more at https://neurons.me
+## License & Policies
 
-**Author:** SuiGn
+- **License**: MIT License (see LICENSE for details).
 
-[By neurons.me](https://neurons.me)
+- **Privacy Policy**: Respects user privacy; no collection/storage of personal data.
 
-<img src="https://suign.github.io/neurons.me/neurons_logo.png" alt="neurons.me logo" width="123" height="123" style="width123px; height:123px;">
+- **Terms of Usage**: Use responsibly. No guarantees/warranties provided. [Terms](https://www.neurons.me/terms-of-use) | [Privacy](https://www.neurons.me/privacy-policy)
+
+  **Learn more** at https://neurons.me
+
+  **Author:** SuiGn
+
+  [By neurons.me](https://neurons.me)
+
+  <img src="https://suign.github.io/neurons.me/neurons_logo.png" alt="neurons.me logo" width="123" height="123" style="width123px; height:123px;">
 
 
 
