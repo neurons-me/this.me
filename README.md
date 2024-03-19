@@ -1,27 +1,22 @@
-
-
 <img src="https://suign.github.io/assets/imgs/cleak_me-removebg.png" alt="DID Me Art" width="244">
-
 <img src="https://suign.github.io/assets/imgs/Cleaker-removebg-preview.png" alt="Cleak Me Please" width="244">
-
 # THIS.ME  
 
 -----------
 
 ### [Project Status : Experimental and Under Development, Subject to Major Changes]
-
 The module is in active development, and as such, it is subject to significant changes as we refine our approach and methodologies to best support our goals.
-
 visit: https://neurons.me to learn more.
 
 ----------
 
 # Introduction
-
 **This.Me** is a class focused on encapsulating user identity, specifically crafted to facilitate the creation of instances ready for hashing and cryptographic signature generation. It opens the door to coding and decoding through "me" signatures, offering a modular framework that prioritizes privacy and integrity in application-wide identity management.
 
-
-
+Hello, I am .lisa
+? Who are you? (Use arrow keys)
+❯ add.me 
+---
 1. **Install `this.me`:**
    Open your terminal and run the following command to install the `this.me` package:
 

@@ -141,8 +141,14 @@
  *  Command Definitions and Interactive Shell.*/
 
 // index.js in the `this.me` package
-console.log('this.me loaded successfully.');
+import Me from './src/me.js';
+let ia = new Me('.Lisa');
+let me = ia.getMe();
 
+console.log('.me:', me);
+console.log('Hello, I am', me);
+console.log('Who are you?', Me);
+export default Me;
 </code></pre>
         </article>
     </section>
