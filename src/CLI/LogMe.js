@@ -1,4 +1,4 @@
-// Source: CLI/ConfirmIdentity.js
+// Source: CLI/LogMe.js
 import inquirer from 'inquirer';
 import chalk from 'chalk';
 
@@ -7,7 +7,7 @@ const getExistingUsers = () => {
   return ['user1', 'user2'];  // Example user names
 };
 
-const ConfirmIdentity = async () => {
+const LogMe = async () => {
   const existingUsers = getExistingUsers();
 
   const response = await inquirer.prompt([
@@ -20,7 +20,7 @@ const ConfirmIdentity = async () => {
   ]);
 
   const selectedUser = response.selectedUser;
-  console.log(chalk.green(`Identity confirmed: ${selectedUser}`));
+  console.log(chalk.green(`.me confirmed: ${selectedUser}`));
 };
 
-export default ConfirmIdentity;
+export default LogMe;
