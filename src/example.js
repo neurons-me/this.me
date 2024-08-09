@@ -14,10 +14,10 @@ console.log(anotherMe.identify());
 // Create a new Me instance with dynamic property name
 let user = 'suign';
 let users = {};
-users[user] = new Me(username);
+users[user] = new Me(user);
 // Add attributes to the identity
 users[user].be({ fullName: "ZZZ", lastName: "WWW" });
 users[user].be({ xy: "axax" });
-console.log(users[user].identify());
+console.log(users[user]);
 
 
