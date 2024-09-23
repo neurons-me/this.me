@@ -1,6 +1,6 @@
 {
   "name": "this.me",
-  "version": "2.9.1",
+  "version": "2.9.3",
   "description": "_me-Centric.",
   "main": "index.js",
   "scripts": {
@@ -16,7 +16,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/suiGn/this.me.git"
+    "url": "git+https://github.com/neurons-me/this.me.git"
   },
   "homepage": "https://www.npmjs.com/package/this.me",
   "docs": "https://suiGn.github.io/this.me",
