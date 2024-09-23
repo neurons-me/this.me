@@ -4,31 +4,35 @@ import os from 'os';
 
 // Define the .me class
 class Me {
+  // Static property to keep track of all users globally
+  static registry = {};
+
   constructor(username = 'monad') {
-    this.username = this.validateUsername(username);
+    if (Me.registry[username]) {
+      throw new Error(`Username ${username} already exists in the registry.`);
+    }
+    this.username = this.validateMe(username);
     this.identity = {
       username: this.username,
       hash: this.sha256(),
       host: this.getHostInfo()
     };
+    Me.registry[username] = this; // Add to global registry
   }
 
-  // Method to validate the username
-  validateUsername(username) {
-    const regex = /^[a-zA-Z0-9]+$/; // Only letters and numbers
+  validateMe(username) {
+    const regex = /^[a-zA-Z0-9]{1,21}$/;
     if (regex.test(username)) {
       return username;
     } else {
-      throw new Error('Incorrect username. Only letters and numbers are allowed.');
+      throw new Error('Incorrect username. Only letters and numbers are allowed, and it must be between 1 and 21 characters.');
     }
   }
 
-  // Method to generate a cryptographic hash of the username
   sha256() {
     return crypto.createHash('sha256').update(this.username).digest('hex');
   }
 
-  // Method to get host information
   getHostInfo() {
     return {
       hostname: os.hostname(),
@@ -37,17 +41,14 @@ class Me {
     };
   }
 
-  // Method to add key-value pairs to the identity object
   be(attributes) {
     for (const [key, value] of Object.entries(attributes)) {
       this.identity[key] = value;
     }
   }
 
-  // Method to get the identity object
-  identify() {
-    return this.be;
+  // Static method to retrieve all users
+  static getAllUsers() {
+    return Me.registry;
   }
 }
-
-export default Me;
