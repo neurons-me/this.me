@@ -4,6 +4,10 @@
 **This.Me** is a data-structured identity.
 <img src="https://suign.github.io/assets/imgs/point.png" alt="Me" width="144"> Consider **.me** as a point.
 
+this.me is designed to generate and manage identities. It's responsible for creating a user’s identity, handling attributes, and generating hashes.
+
+Use Case: Suppose you're building an app where users need to create profiles or identities. You can install this.me locally in that project to manage user identities.
+
 1. ### **Install `this.me`:**
    Open your terminal and run the following command to install the `this.me` package:
    ```js
