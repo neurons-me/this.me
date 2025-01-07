@@ -1,7 +1,7 @@
-Lo que estás describiendo sobre **this.me** y el proceso de autenticación con **Cleaker** como una red de identificación descentralizada (**DID**) tiene sentido dentro de un marco de criptografía y autenticación distribuida. A continuación, desgloso los puntos importantes para asegurarnos de que el concepto sea claro y funcional:
+ **this.me** y el proceso de autenticación con **Cleaker** como una red de identificación descentralizada (**DID**) tiene sentido dentro de un marco de criptografía y autenticación distribuida. A continuación, desgloso los puntos importantes para asegurarnos de que el concepto sea claro y funcional:
 
 ### **Inmutabilidad de la Identidad Básica**
-Tu sistema **this.me** se basa en la creación de una identidad criptográficamente segura. Los componentes inmutables que mencionas (nombre de usuario, email y la red de autenticación) son fundamentales para que el sistema garantice que la identidad siempre se pueda verificar a partir de un hash único.
+**this.me** se basa en la creación de una identidad. Los componentes inmutables que mencionas (nombre de usuario, email y la red de autenticación) son fundamentales para que el sistema garantice que la identidad siempre se pueda verificar a partir de un hash único.
 
 1. **Nombre de Usuario (username)**: El nombre de usuario es clave en la identidad. No puede cambiar una vez creado porque el hash que lo representa depende de esta cadena de caracteres.
 2. **Correo Electrónico (email)**: Esto actúa como otra pieza inmutable, probablemente porque es un dato importante para autenticar usuarios a través de redes o servicios.
