@@ -1,54 +1,54 @@
 //this.me/src/me.js
-import crypto from 'crypto';
-import os from 'os';
-
-// Define the .me class
+import Registry from './registry';
 class Me {
-  // Static property to keep track of all users globally
-  static registry = {};
-
-  constructor(username = 'monad') {
+  static registry = Registry.load();
+  constructor(username = 'default') {
     if (Me.registry[username]) {
-      throw new Error(`Username ${username} already exists in the registry.`);
+      throw new Error(`Username ${username} already exists.`);
     }
-    this.username = this.validateMe(username);
+
+    this.username = username;
     this.identity = {
-      username: this.username,
-      hash: this.sha256(),
-      host: this.getHostInfo()
+      username,
+      devices: [],
     };
-    Me.registry[username] = this; // Add to global registry
+
+    this.addDevice(); // Automatically adds the current device
+    Me.registry[username] = this.identity;
+    Registry.save(Me.registry);
   }
 
-  validateMe(username) {
-    const regex = /^[a-zA-Z0-9]{1,21}$/;
-    if (regex.test(username)) {
-      return username;
-    } else {
-      throw new Error('Incorrect username. Only letters and numbers are allowed, and it must be between 1 and 21 characters.');
+  static load(username) {
+    if (!Me.registry[username]) {
+      throw new Error(`Username ${username} does not exist.`);
     }
+    return new Me(username, Me.registry[username]);
   }
 
-  sha256() {
-    return crypto.createHash('sha256').update(this.username).digest('hex');
-  }
-
-  getHostInfo() {
-    return {
+  addDevice(deviceInfo = null) {
+    const device = deviceInfo || {
+      deviceId: crypto.randomUUID(),
       hostname: os.hostname(),
       platform: os.platform(),
-      networkInterfaces: os.networkInterfaces()
+      isPrimary: this.identity.devices.length === 0,
     };
+
+    this.identity.devices.push(device);
+    Registry.save(Me.registry);
   }
 
-  be(attributes) {
-    for (const [key, value] of Object.entries(attributes)) {
-      this.identity[key] = value;
-    }
+  removeDevice(deviceId) {
+    this.identity.devices = this.identity.devices.filter((d) => d.deviceId !== deviceId);
+    Registry.save(Me.registry);
   }
 
-  // Static method to retrieve all users
+  listDevices() {
+    return this.identity.devices;
+  }
+
   static getAllUsers() {
-    return Me.registry;
+    return Object.keys(Me.registry);
   }
 }
+
+export default Me;

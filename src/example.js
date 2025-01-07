@@ -1,6 +1,6 @@
+//this.me/src/example.js
 import Me from './me.js';
 import chalk from 'chalk';
-
 // Create a new Me instance
 let me = new Me('suign');
 // Add attributes to the identity
