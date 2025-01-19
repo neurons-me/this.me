@@ -1,3 +1,5 @@
+ El mayor acto de rebelión en un mundo que busca controlarte es ser libre de verdad.
+ 
  **this.me** y el proceso de autenticación con **Cleaker** como una red de identificación descentralizada (**DID**) tiene sentido dentro de un marco de criptografía y autenticación distribuida. A continuación, desgloso los puntos importantes para asegurarnos de que el concepto sea claro y funcional:
 
 ### **Inmutabilidad de la Identidad Básica**
