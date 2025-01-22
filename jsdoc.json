@@ -1,6 +1,6 @@
 {
   "source": {
-    "include": ["./src/me.js", "./src/.me.cli.js", "./index.js", "./README.md"]
+    "include": ["./src", "./index.js", "./README.md"]
   },
   "opts": {
     "destination": "/mnt/neuroverse/https-neurons/subDomains/docs/public/this.me",
