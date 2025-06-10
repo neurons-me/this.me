@@ -1,0 +1,26 @@
+[package]
+name = "this_me"
+version = "0.1.0"
+authors = ["suiGn <admin@neurons.me>"]
+edition = "2021"
+description = "Encrypted identity store CLI tool (this.me)"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/neurons-me/this.me"
+homepage = "https://neurons.me"
+readme = "README.md"
+keywords = ["identity", "encryption", "cli"]
+categories = ["command-line-utilities", "cryptography"]
+
+[[bin]]
+name = "me"
+path = "src/main.rs"
+
+[dependencies]
+aes = "0.8"
+block-modes = "0.9"
+sha2 = "0.10"
+rand = "0.8"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+base64 = "0.21"
+dirs = "5.0"
