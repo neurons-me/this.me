@@ -3,9 +3,11 @@
 # THIS.ME  
 > **This.Me** is a data-structured identity designed to generate and manage identities, attributes, properties and more. It combines privacy, user control, and secure interoperability.
 
-**.me** is a local, encrypted identity object designed to return ownership of identity back to the user. Its core philosophy is **user sovereignty**: your identity lives on your machine, under your control, not in someone else’s cloud. It holds attributes, relationships, and keys that define who you are—and crucially, **how you relate to others**.
+<strong>.me</strong> is your identity that lives on your machine, under your control. It holds attributes, relationships, and keys that define who you are—and crucially, <strong>how you relate to others</strong>.
 
-Each **.me** instance can pair with other authorities or identities using its **cryptographic keys**, establishing **trust through signatures and endorsements** rather than centralized verification. Instead of logging in through third-party services, you can validate your identity or vouch for someone else’s using these key exchanges. This enables a decentralized trust model where relationships are verifiable, persistent, and portable—empowering systems to recognize who you are based on real, user-generated signals, not institutional permissions.
+ Each <strong>.me</strong> instance can pair with other authorities or identities using its <strong>cryptographic keys</strong>, establishing <strong>trust through signatures and endorsements</strong>. 
+
+Instead of logging in through third-party services, you can validate your identity or vouch for someone else’s using these key exchanges. This enables a decentralized trust model where relationships are verifiable, persistent, and portable.
 
 # Getting Started:
 1. ##### **Install `this.me`:**
@@ -30,13 +32,21 @@ It can be **created**, **read** (if you have the correct hash), **modified in me
 
 # Command Line Options:
 
-### **me create**
+**Run this commands on your terminal:**
+
+```bash
+me create
+```
+
 - **Description**: Creates a new .me identity.
 - **Flow**: Prompts for username and hash (secret key), then saves an encrypted file at ~/.this/me/username.me.
 
 ------
 
-### **me show [username]**
+```bash
+me show [username]
+```
+
 - **Description**: Shows the decrypted contents of an identity.
 - **Flow**:
   - If [username] is not provided, it prompts for it.
@@ -45,122 +55,94 @@ It can be **created**, **read** (if you have the correct hash), **modified in me
 
 ------
 
-### **me list**
+```bash
+me list
+```
+
 - **Description**: Lists all local .me identities.
 - **Flow**: Reads the ~/.this/me directory and prints all .me files (usernames).
 
 ------
 
-# **Me Class Constructor**
-```
-constructor(username)
+# How this.me **Works (Simplified)**
+
+The Me class creates and manages a **local, encrypted identity file** based on a username and a secret hash.
+
+#### **Creating a new identity**
+
+When you run:
+
+```js
+Me.create('abellae', 'mySecretHash');
 ```
 
-Initializes:
-- this.username: the username
-- this.filePath: path to the encrypted file (/Users/youruser/.this/me/username.me)
-- this.unlocked: whether the identity is unlocked in memory (RAM)
-- this.data: decrypted content (attributes, keys, relationships)
+It does the following:
 
-> It doesn’t load anything yet—just defines the path and initial state.
+- Builds a .me file path: ~/.this/me/abellae.me.
+- Creates some **identity data** (username, keys, attributes, etc.).
+- Uses the hash to **encrypt** that data with AES-256-CBC:
+  - It generates a random iv (initialization vector).
+  - Derives a key from the hash (sha256(hash)).
+  - Stores the encrypted result as iv + encryptedData.
+
+> 🔒 The hash is **never saved** — it’s just used as a secret key.
 
 ------
 
-### **save(hash)**
-```
-save(hash)
+#### Loading an existing identity
+
+When you run:
+
+```js
+Me.load('abellae', 'mySecretHash');
 ```
 
-- Encrypts this.data using AES-256-CBC.
-- Uses a random iv and a key derived from the hash (acting like a passphrase).
-- Saves the file as: iv + encryptedBuffer.
+It:
 
-> ⚠️ Throws an error if this.data is not set.
+- Reads the encrypted .me file.
+- Extracts the first 16 bytes as iv.
+- Recomputes the key from the given hash.
+- Tries to decrypt the file.
+- If it works, it unlocks the identity and loads the data into memory.
 
 ------
 
-### **.unlock(hash)**
-```javascript
-unlock(hash)
-```
+#### **Using the unlocked identity**
 
-- Loads the .me file from disk.
-- Uses the first 16 bytes as the IV.
-- Attempts to decrypt the rest using the key derived from the hash.
-- If successful, stores the content in this.data and marks .unlocked = true.
+Once unlocked, you can:
 
-> 🔒 If it fails, returns false (likely due to a wrong hash or a corrupted file).
+- Set attributes: me.be('developer', true)
+- Add endorsements: me.addEndorsement(...)
+- View attributes: me.getAttributes()
+- Save updates with: me.save('mySecretHash')
 
 ------
 
-### **.lock()**
-```javascript
-lock()
+#### Locking the identity
+
+You can clear the identity from memory with:
+
+```js
+me.lock();
 ```
 
-Clears this.data from memory and sets .unlocked = false.
+This keeps the encrypted file on disk but removes all data from RAM.
 
 ------
 
-### **.create(username, hash) (static)**
-```javascript
-static create(username, hash)
-```
+### **Summary**
 
-- If the file already exists, throws an error.
-- Creates a new Me object with the structure:
+- Your identity is encrypted on your own machine.
+- Only the correct hash can unlock it.
+- No third parties are involved.
+- The .me file is secure, portable, and self-owned.
 
-```javascript
-{
-  identity: { username, publicKey, privateKey },
-  attributes: {},
-  relationships: [],
-  reactions: [],
-  endorsements: []
-}
-```
-
-- Then calls .save(hash) to store the encrypted identity.
-
-------
-
-### **.load(username, hash) (static)**
-```javascript
-static load(username, hash)
-```
-
-- Creates a new Me instance.
-- Calls .unlock(hash) to try decrypting it.
-- If successful, returns the instance.
-- If not, throws an error.
+Let me know if you’d like a diagram or visual flow to go with this explanation!
 
 ---
 
-### **Social Methods**
-#### **.addEndorsement(endorsement)**
-Agrega una firma externa (ej: Alice confía en Bob) a la identidad desbloqueada.
+### 🔍 Core Principles
 
-#### **.be(key, value)**
-The **be** method in the **Me** class accepts an object of **key-value pairs** and **adds these to the identity object**.
-   ​•You can call **me.be()** multiple times with different attributes to dynamically update the identity object.
-
-   ```javascript
-// Create a new Me instance
-let me = new Me("xyxyxy");
-// Add attributes to the identity
-me.be({ a: "XXX", b: "YYY" });
-me.be({ c: "z" });
-   ```
-
-**A less abstract example:**
-```js
-// Add attributes to the identity
-me.be({ name: "Alice", phone: "33550000" });
-```
-
-------
-
-## 🔍 Core Principles
 1. **Freedom to Declare**
    Anyone can generate a `.me` identity locally without external approval.
 2. **Trusted Endorsements**
@@ -169,7 +151,7 @@ me.be({ name: "Alice", phone: "33550000" });
    All sensitive data (including private keys) stays on the user's machine.
 
 ---
-## 📁 File Structure
+### 📁 File Structure
 * `~/.this/me/username.me.json` — Encrypted identity file
 * `.me` includes:
 
@@ -179,7 +161,7 @@ me.be({ name: "Alice", phone: "33550000" });
   * `endorsements`
 
 ---
-## 🔐 Cryptographic Model
+### 🔐 Cryptographic Model
 * Identity is unlocked using a user-defined `hash` (password).
 * This hash decrypts the local `.me` file.
 * The identity includes:
@@ -188,7 +170,7 @@ me.be({ name: "Alice", phone: "33550000" });
   * Optional **endorsements** signed by Cleaker or other authorities.
 
 ---
-## 🛡️ Security Model
+### 🛡️ Security Model
 * No private key ever leaves the local `.me` file.
 * Endorsements are public and verifiable using the public key.
 * If compromised, user can rotate keys and notify authorities.
@@ -220,7 +202,7 @@ me.be({ name: "Alice", phone: "33550000" });
 By default, **this.me** uses the **local file system (~/.this/me/)** to store and manage identity data.
 No external service is required.
 
-​<img src="https://suign.github.io/assets/imgs/monads.png" alt="Cleak Me Please" width="244">Hello, I am **.me**
+<img src="https://suign.github.io/assets/imgs/monads.png" alt="Cleak Me Please" width="244">Hello, I am **.me**
 
 ### ❯ add.me 
 ----
