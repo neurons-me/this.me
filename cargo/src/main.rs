@@ -1,5 +1,5 @@
 mod me;
-use me::Me;
+use me::{Me, MeError};
 
 use std::env;
 
@@ -24,7 +24,11 @@ fn main() {
             let hash = &args[3];
             match Me::create(username, hash) {
                 Ok(_) => println!("🆕 Identidad '{}' creada con éxito.", username),
-                Err(e) => eprintln!("❌ Error: {}", e),
+                Err(MeError::Io(e)) => eprintln!("📁 Error de IO: {}", e),
+                Err(MeError::Crypto(e)) => eprintln!("🔐 Error criptográfico: {}", e),
+                Err(MeError::Serde(e)) => eprintln!("🧩 Error de serialización: {}", e),
+                Err(MeError::InvalidHash) => eprintln!("🚫 Hash incorrecto o archivo corrupto"),
+                Err(e) => eprintln!("❌ Otro error: {}", e),
             }
         }
         "unlock" => {
@@ -41,7 +45,11 @@ fn main() {
                         println!("🧬 Atributos: {:?}", attrs);
                     }
                 }
-                Err(e) => eprintln!("❌ Error: {}", e),
+                Err(MeError::Io(e)) => eprintln!("📁 Error de IO: {}", e),
+                Err(MeError::Crypto(e)) => eprintln!("🔐 Error criptográfico: {}", e),
+                Err(MeError::Serde(e)) => eprintln!("🧩 Error de serialización: {}", e),
+                Err(MeError::InvalidHash) => eprintln!("🚫 Hash incorrecto o archivo corrupto"),
+                Err(e) => eprintln!("❌ Otro error: {}", e),
             }
         }
         "be" => {
@@ -65,7 +73,11 @@ fn main() {
                     }
                     println!("✅ Atributo agregado: {} = {}", key, value);
                 }
-                Err(e) => eprintln!("❌ Error: {}", e),
+                Err(MeError::Io(e)) => eprintln!("📁 Error de IO: {}", e),
+                Err(MeError::Crypto(e)) => eprintln!("🔐 Error criptográfico: {}", e),
+                Err(MeError::Serde(e)) => eprintln!("🧩 Error de serialización: {}", e),
+                Err(MeError::InvalidHash) => eprintln!("🚫 Hash incorrecto o archivo corrupto"),
+                Err(e) => eprintln!("❌ Otro error: {}", e),
             }
         }
         _ => {
