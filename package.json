@@ -1,14 +1,15 @@
 {
   "name": "this.me",
-  "version": "2.9.43",
+  "version": "2.9.5",
   "description": "_me-Centric.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "test"
+    "test": "test",
+    "postinstall": "node src/scripts/setup.js"
   },
   "bin": {
-    ".me": "src/.me.cli.js"
+    "me": "bin/me.cli.js"
   },
   "keywords": [
     "this.me",
