@@ -14,14 +14,15 @@ pub enum MeError {
     NoData,
     #[error("Already exists")]
     Exists,
+    #[error("Invalid hash")]
+    InvalidHash,
 }
 use std::fs::{self, File};
 use std::io::{Read, Write};
 use std::path::PathBuf;
 use std::collections::HashMap;
 use aes::Aes256;
-use block_modes::{BlockMode, Cbc};
-use block_modes::block_padding::Pkcs7;
+use block_modes::{Cbc, block_padding::Pkcs7};
 use sha2::{Sha256, Digest};
 use rand::RngCore;
 use rand::rngs::OsRng;
@@ -81,16 +82,16 @@ impl Me {
 
     pub fn save(&self, hash: &str) -> Result<(), MeError> {
         if let Some(ref data) = self.data {
-            let json = serde_json::to_vec(data).map_err(MeError::from)?;
+            let json = serde_json::to_vec(data).map_err(|e| MeError::from(e))?;
             let key = Self::derive_key(hash);
             let mut iv = [0u8; 16];
             OsRng.fill_bytes(&mut iv);
             let cipher = Aes256Cbc::new_from_slices(&key, &iv).map_err(|e| MeError::Crypto(e.to_string()))?;
             let ciphertext = cipher.encrypt_vec(&json);
 
-            let mut file = File::create(&self.file_path).map_err(MeError::from)?;
-            file.write_all(&iv).map_err(MeError::from)?;
-            file.write_all(&ciphertext).map_err(MeError::from)?;
+            let mut file = File::create(&self.file_path).map_err(|e| MeError::from(e))?;
+            file.write_all(&iv).map_err(|e| MeError::from(e))?;
+            file.write_all(&ciphertext).map_err(|e| MeError::from(e))?;
             Ok(())
         } else {
             Err(MeError::NoData)
@@ -98,16 +99,16 @@ impl Me {
     }
 
     pub fn unlock(&mut self, hash: &str) -> Result<(), MeError> {
-        let mut file = File::open(&self.file_path).map_err(MeError::from)?;
+        let mut file = File::open(&self.file_path).map_err(|e| MeError::from(e))?;
         let mut contents = Vec::new();
-        file.read_to_end(&mut contents).map_err(MeError::from)?;
+        file.read_to_end(&mut contents).map_err(|e| MeError::from(e))?;
 
         let (iv, ciphertext) = contents.split_at(16);
         let key = Self::derive_key(hash);
         let cipher = Aes256Cbc::new_from_slices(&key, iv).map_err(|e| MeError::Crypto(e.to_string()))?;
         let decrypted = cipher.decrypt_vec(ciphertext).map_err(|e| MeError::Crypto(e.to_string()))?;
 
-        self.data = Some(serde_json::from_slice(&decrypted).map_err(MeError::from)?);
+        self.data = Some(serde_json::from_slice(&decrypted).map_err(|e| MeError::from(e))?);
         self.unlocked = true;
         Ok(())
     }
