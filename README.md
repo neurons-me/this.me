@@ -21,7 +21,6 @@ Each **.me** instance can pair with other authorities or identities using its **
    ```
 
 The **Me** class represents a **persistent identity**, stored as an encrypted file (username.me) in ~/.this/me. This file contains:
-
 - An identifier (username)
 - Keys (private/public — currently placeholders)
 - User-defined attributes
@@ -32,14 +31,12 @@ It can be **created**, **read** (if you have the correct hash), **modified in me
 # Command Line Options:
 
 ### **me create**
-
 - **Description**: Creates a new .me identity.
 - **Flow**: Prompts for username and hash (secret key), then saves an encrypted file at ~/.this/me/username.me.
 
 ------
 
 ### **me show [username]**
-
 - **Description**: Shows the decrypted contents of an identity.
 - **Flow**:
   - If [username] is not provided, it prompts for it.
@@ -49,20 +46,17 @@ It can be **created**, **read** (if you have the correct hash), **modified in me
 ------
 
 ### **me list**
-
 - **Description**: Lists all local .me identities.
 - **Flow**: Reads the ~/.this/me directory and prints all .me files (usernames).
 
 ------
 
 # **Me Class Constructor**
-
 ```
 constructor(username)
 ```
 
 Initializes:
-
 - this.username: the username
 - this.filePath: path to the encrypted file (/Users/youruser/.this/me/username.me)
 - this.unlocked: whether the identity is unlocked in memory (RAM)
@@ -73,7 +67,6 @@ Initializes:
 ------
 
 ### **save(hash)**
-
 ```
 save(hash)
 ```
@@ -87,7 +80,6 @@ save(hash)
 ------
 
 ### **.unlock(hash)**
-
 ```javascript
 unlock(hash)
 ```
@@ -102,7 +94,6 @@ unlock(hash)
 ------
 
 ### **.lock()**
-
 ```javascript
 lock()
 ```
@@ -112,7 +103,6 @@ Clears this.data from memory and sets .unlocked = false.
 ------
 
 ### **.create(username, hash) (static)**
-
 ```javascript
 static create(username, hash)
 ```
@@ -135,7 +125,6 @@ static create(username, hash)
 ------
 
 ### **.load(username, hash) (static)**
-
 ```javascript
 static load(username, hash)
 ```
@@ -148,13 +137,10 @@ static load(username, hash)
 ---
 
 ### **Social Methods**
-
 #### **.addEndorsement(endorsement)**
-
 Agrega una firma externa (ej: Alice confía en Bob) a la identidad desbloqueada.
 
 #### **.be(key, value)**
-
 The **be** method in the **Me** class accepts an object of **key-value pairs** and **adds these to the identity object**.
    ​•You can call **me.be()** multiple times with different attributes to dynamically update the identity object.
 
@@ -167,7 +153,6 @@ me.be({ c: "z" });
    ```
 
 **A less abstract example:**
-
 ```js
 // Add attributes to the identity
 me.be({ name: "Alice", phone: "33550000" });
@@ -175,8 +160,7 @@ me.be({ name: "Alice", phone: "33550000" });
 
 ------
 
-   ## 🔍 Core Principles
-
+## 🔍 Core Principles
 1. **Freedom to Declare**
    Anyone can generate a `.me` identity locally without external approval.
 2. **Trusted Endorsements**
@@ -236,7 +220,7 @@ me.be({ name: "Alice", phone: "33550000" });
 By default, **this.me** uses the **local file system (~/.this/me/)** to store and manage identity data.
 No external service is required.
 
-   ​<img src="https://suign.github.io/assets/imgs/monads.png" alt="Cleak Me Please" width="244">Hello, I am **.me**
+​<img src="https://suign.github.io/assets/imgs/monads.png" alt="Cleak Me Please" width="244">Hello, I am **.me**
 
 ### ❯ add.me 
 ----
@@ -253,6 +237,6 @@ If you are interested in collaborating or wish to share your insights, please fe
 #### License & Policies
 - **License**: MIT License.
 - **Learn more** at **https://neurons.me**
-  [Terms](https://docs.neurons.me/terms-and-conditions) | [Privacy](https://docs.neurons.me/privacy-policy)
+  [Terms](https://neurons.me/terms-and-conditions) | [Privacy](https://neurons.me/privacy-policy)
 
   <img src="https://docs.neurons.me/neurons.me.webp" alt="neurons.me logo" width="123" height="123">
