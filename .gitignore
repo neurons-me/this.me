@@ -1,5 +1,22 @@
-node_modules/
-package-lock.json
-yarn.lock
+# General
 .DS_Store
-```
+
+# ─── Rust (cargo/) ──────────────────────────────
+/cargo/target/
+/cargo/Cargo.lock
+
+# ─── Node.js (npm/) ─────────────────────────────
+/npm/node_modules/
+/npm/package-lock.json
+/npm/yarn.lock
+
+# ─── Python (pip/) ──────────────────────────────
+/pip/__pycache__/
+/pip/*.pyc
+/pip/*.pyo
+/pip/*.egg-info/
+/pip/build/
+/pip/dist/
+
+# ─── VSCode (opcional) ──────────────────────────
+.vscode/
