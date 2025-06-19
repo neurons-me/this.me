@@ -22,14 +22,19 @@ use std::io::{Read, Write};
 use std::path::PathBuf;
 use std::collections::HashMap;
 use aes::Aes256;
-use block_modes::{Cbc, block_padding::Pkcs7};
+use cbc::{Encryptor, Decryptor};
+use cipher::{
+    block_padding::Pkcs7,
+    BlockEncryptMut, BlockDecryptMut, KeyIvInit,
+};
 use sha2::{Sha256, Digest};
 use rand::RngCore;
 use rand::rngs::OsRng;
 use serde::{Serialize, Deserialize};
-use base64::{engine::general_purpose, Engine as _}; // ← RECOMENDADO en vez de `encode`, `decode`
+use base64::{engine::general_purpose, Engine as _}; 
 
-type Aes256Cbc = Cbc<Aes256, Pkcs7>;
+type Aes256CbcEnc = cbc::Encryptor<Aes256>;
+type Aes256CbcDec = cbc::Decryptor<Aes256>;
 
 const ROOT_DIR: &str = ".this/me";
 
@@ -86,8 +91,9 @@ impl Me {
             let key = Self::derive_key(hash);
             let mut iv = [0u8; 16];
             OsRng.fill_bytes(&mut iv);
-            let cipher = Aes256Cbc::new_from_slices(&key, &iv).map_err(|e| MeError::Crypto(e.to_string()))?;
-            let ciphertext = cipher.encrypt_vec(&json);
+            let cipher = Aes256CbcEnc::new_from_slices(&key.into(), &iv.into())
+                .map_err(|e| MeError::Crypto(e.to_string()))?;
+            let ciphertext = cipher.encrypt_padded_vec_mut::<Pkcs7>(&json);
 
             let mut file = File::create(&self.file_path).map_err(|e| MeError::from(e))?;
             file.write_all(&iv).map_err(|e| MeError::from(e))?;
@@ -105,8 +111,10 @@ impl Me {
 
         let (iv, ciphertext) = contents.split_at(16);
         let key = Self::derive_key(hash);
-        let cipher = Aes256Cbc::new_from_slices(&key, iv).map_err(|e| MeError::Crypto(e.to_string()))?;
-        let decrypted = cipher.decrypt_vec(ciphertext).map_err(|e| MeError::Crypto(e.to_string()))?;
+        let cipher = Aes256CbcDec::new_from_slices(&key.into(), iv.into())
+            .map_err(|e| MeError::Crypto(e.to_string()))?;
+        let decrypted = cipher.decrypt_padded_vec_mut::<Pkcs7>(ciphertext)
+            .map_err(|e| MeError::Crypto(e.to_string()))?;
 
         self.data = Some(serde_json::from_slice(&decrypted).map_err(|e| MeError::from(e))?);
         self.unlocked = true;
