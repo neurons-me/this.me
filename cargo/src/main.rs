@@ -1,14 +1,8 @@
-#[derive(Debug)]
-struct Me {
-    name: String,
-    age: u32,
-}
+//this.me/cargo/src/main.rs
+use this_me::Me; 
+mod setup;
 
 fn main() {
-    let me = Me {
-        name: "suiGn".to_string(),
-        age: 33,
-    };
-
-    println!("{:?}", me);
+    setup::validate_setup(true); // Ensure ~/.this/me directory exists
+    println!(".me >> init.");
 }

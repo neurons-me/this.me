@@ -1,5 +1,5 @@
 [package]
-name = "this-me"
+name = "this_me"
 version = "0.1.0"
 authors = ["suiGn <admin@neurons.me>"]
 edition = "2021"
@@ -11,4 +11,13 @@ readme = "README.md"
 keywords = ["identity", "encryption", "cli"]
 categories = ["command-line-utilities", "cryptography"]
 
+[[bin]]
+name = "me"
+path = "src/main.rs"
+
 [dependencies]
+aes-gcm = "0.10"
+aes = "0.8"
+rand = "0.8"
+sha2 = "0.10"
+base64 = "0.21"
