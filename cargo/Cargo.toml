@@ -1,6 +1,6 @@
 [package]
 name = "this_me"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["suiGn <admin@neurons.me>"]
 edition = "2021"
 description = "Encrypted identity store CLI tool (this.me)"

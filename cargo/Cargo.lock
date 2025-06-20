@@ -257,7 +257,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "this-me"
+name = "this_me"
 version = "0.1.0"
 dependencies = [
  "aes",
