@@ -1,10 +1,11 @@
 use crate::utils::setup::validate_setup;
 use crate::utils::validate_input::validate_username;
 use crate::utils::validate_input::validate_hash;
-use std::fs::{self, File};
+use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
 use std::env;
+use std::fs;
 
 use aes_gcm::{Aes256Gcm, Key, Nonce}; // AES-GCM cipher
 use aes_gcm::aead::{Aead, KeyInit};
@@ -19,6 +20,7 @@ pub struct Me {
 }
 
 impl Me {
+    /// Initializes a new Me instance with the given username.
     pub fn new(username: &str) -> std::io::Result<Self> {
         match validate_username(username) {
             Ok(_) => {
@@ -27,7 +29,6 @@ impl Me {
                 Ok(Me {
                     username: username.to_string(),
                     file_path,
-                    unlocked: false,
                     data: None,
                 })
             }
@@ -41,6 +42,7 @@ impl Me {
         }
     }
 
+    /// Creates and saves a new encrypted identity file.
     pub fn create(username: &str, hash: &str) -> std::io::Result<Self> {
         let me = Me::new(username)?;
         validate_setup(false)?;
@@ -62,6 +64,7 @@ impl Me {
     }
 
 
+    /// Encrypts the provided plaintext with the given hash.
     pub fn encrypt(&self, plaintext: &str, hash: &str) -> std::io::Result<Vec<u8>> {
         validate_hash(hash)?;
         let key_hash = Sha256::digest(hash.as_bytes());
@@ -77,6 +80,7 @@ impl Me {
         Ok(result)
     }
 
+    /// Decrypts the provided encrypted data using the given hash.
     pub fn decrypt(&self, data: &[u8], hash: &str) -> Result<String, ()> {
         if validate_hash(hash).is_err() {
             return Err(());
@@ -94,6 +98,7 @@ impl Me {
         String::from_utf8(decrypted).map_err(|_| ())
     }
 
+    /// Lists all existing identity files.
     pub fn list() -> std::io::Result<Vec<String>> {
         validate_setup(false)?;
         let home_dir = env::var("HOME").unwrap_or_else(|_| ".".to_string());
@@ -116,6 +121,7 @@ impl Me {
         Ok(identities)
     }
 
+    /// Displays the decrypted content of the identity file.
     pub fn show(&self, password: &str) -> std::io::Result<()> {
         validate_setup(false)?;
         let contents = fs::read(&self.file_path)?;
