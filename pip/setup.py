@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='this-me',
-    version='0.1.0',
+    name='this.me',
+    version='0.1.2',
     author='suiGn',
     description='Identity Declaration of this.me.',
     long_description=open('README.md').read(),
