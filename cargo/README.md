@@ -1,12 +1,16 @@
-cargo install this-me
 # this-me
+`this-me` is a lightweight identity expression built in Rust that allows you to create, manage, and securely store minimal user identity files locally. It is part of the Neurons.me ecosystem and is designed for applications where user-controlled identity and privacy are fundamental. 
 
-`this-me` is a lightweight identity system built in Rust that allows you to create, manage, and securely store minimal user identity files locally. It is part of the Neuroverse ecosystem and is designed for applications where user-controlled identity and privacy are fundamental.
+## 🧱 Architecture
+- The `Me` struct represents an identity.
+- Identity files are loaded using `Me::load(username, hash)`.
+- Verbs (e.g. `have`, `be`, `say`, etc.) are applied as methods on a loaded `Me`.
+- After modifying the identity with verbs, `me.save()` must be called to persist changes.
 
 ## ✨ Features
-- Create a local identity file with a username and a password-derived encryption key
+- Create a local identity file with a username and a hash password-derived encryption key
 - Decrypt and view stored identity data
-- Change the password (hash) for an identity
+- Change the hash (password) for an identity
 - Delete the identity file securely
 
 ## 📦 Installation
@@ -22,19 +26,27 @@ cargo build --release
 ```
 
 ## 🚀 Usage
-Each command is executed via the CLI binary `me`. Here are the available commands:
+Each command is executed via the CLI binary `me`. Identity loading is done automatically and implicitly by each command.
 
 ### Create Identity
 ```bash
 me create <username> <password>
 ```
-Creates a new identity file under `.this/me/<username>.me` using the given password to encrypt it.
+Initializes a new identity file under `.this/me/<username>.me` using the given password to encrypt it.
 
-### Show Identity
+### Display Identity
 ```bash
-me show <username> <password>
+me display <username> <password>
 ```
 Decrypts and displays the identity file contents.
+
+### Verbs (Modify Identity)
+```bash
+me be <username> <password> <key> <value>
+me have <username> <password> <key> <value>
+me say <username> <password> <key> <value>
+```
+These commands modify the identity in memory after loading it, and then save the changes automatically.
 
 ### Delete Identity
 ```bash
@@ -47,6 +59,15 @@ Deletes the identity file, only if the provided password is correct.
 me change-hash <username> <old_password> <new_password>
 ```
 Changes the encryption hash for the identity file.
+
+## 📚 Using as a Library
+```rust
+use this_me::Me;
+
+let mut me = Me::load("suigeneris", "1234")?;
+me.be("musician", "true")?;
+me.save()?;
+```
 
 ## 📂 Identity File Location
 Identity files are stored in:
