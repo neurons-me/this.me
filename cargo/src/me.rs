@@ -177,4 +177,19 @@ impl Me {
 
         Ok(())
     }
+
+    /// Changes the encryption password (hash) of the identity file.
+    pub fn change_hash(&self, old_hash: &str, new_hash: &str) -> std::io::Result<()> {
+        validate_hash(new_hash)?;
+
+        let contents = fs::read(&self.file_path)?;
+        let decrypted = self.decrypt(&contents, old_hash)
+            .map_err(|_| std::io::Error::new(std::io::ErrorKind::PermissionDenied, "❌ Old password incorrect."))?;
+
+        let encrypted = self.encrypt(&decrypted, new_hash)?;
+        let mut file = File::create(&self.file_path)?;
+        file.write_all(&encrypted)?;
+        println!("🔐 Password for '{}' successfully updated.", self.username);
+        Ok(())
+    }
 }
