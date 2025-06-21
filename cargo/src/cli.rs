@@ -22,4 +22,9 @@ pub enum Commands {
         username: String,
         hash: String,
     },
+    /// Delete a .me identity
+    Delete {
+        username: String,
+        hash: String,
+    },
 }

@@ -20,6 +20,43 @@ pub struct Me {
 }
 
 impl Me {
+    /// Initializes a Me instance without validating the username.
+    pub fn from_username_unchecked(username: &str) -> Self {
+        let home_dir = env::var("HOME").unwrap_or_else(|_| ".".to_string());
+        let file_path = PathBuf::from(format!("{}/.this/me/{}.me", home_dir, username));
+        Me {
+            username: username.to_string(),
+            file_path,
+            data: None,
+        }
+    }
+
+    pub fn delete(username: &str, hash: &str) -> std::io::Result<()> {
+        let me = Me::from_username_unchecked(username);
+    
+        if !me.file_path.exists() {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                format!("❌ Identity '{}' does not exist.", username),
+            ));
+        }
+    
+        let contents = fs::read(&me.file_path)?;
+        let decrypted = me.decrypt(&contents, hash);
+    
+        match decrypted {
+            Ok(_) => {
+                fs::remove_file(&me.file_path)?;
+                println!("🗑️ Identity '{}' deleted.", username);
+                Ok(())
+            }
+            Err(_) => Err(std::io::Error::new(
+                std::io::ErrorKind::PermissionDenied,
+                "❌ Invalid password. Deletion aborted.",
+            )),
+        }
+    }
+
     /// Initializes a new Me instance with the given username.
     pub fn new(username: &str) -> std::io::Result<Self> {
         match validate_username(username) {
