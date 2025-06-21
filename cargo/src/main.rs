@@ -1,13 +1,12 @@
 // src/main.rs
 extern crate this_me;
 mod cli;
-use std::fs::File;
-use std::io::Read;
 use this_me::utils::setup::validate_setup;
 use this_me::me::Me;
 use cli::Cli;
 use cli::Commands;
 use clap::Parser;
+use serde_json::{from_str, to_string_pretty, Value};
 
 fn main() {
     if let Err(e) = validate_setup(false) {
@@ -22,12 +21,15 @@ fn main() {
 
     match cli.command {
         Commands::Create { username, hash } => {
-            match Me::create(&username, &hash) {
-                Ok(_) => println!("✅ Identity '{}' created.", username),
+            match Me::new(&username, &hash) {
+                Ok(me) => match me.save(&hash) {
+                    Ok(_) => println!("✅ Identity '{}' created and saved.", username),
+                    Err(e) => eprintln!("❌ Failed to save identity '{}': {}", username, e),
+                },
                 Err(ref e) if e.kind() == std::io::ErrorKind::AlreadyExists => {
                     eprintln!("⚠️ Identity '{}' already exists.", username);
                 }
-                Err(e) => eprintln!("❌ Failed to create identity: {}", e),
+                Err(e) => eprintln!("❌ Failed to create identity '{}': {}", username, e),
             }
         }
         Commands::List => {
@@ -45,32 +47,6 @@ fn main() {
                 Err(e) => eprintln!("❌ Error listing identities: {}", e),
             }
         }
-        Commands::Show { username, hash } => {
-            match Me::new(&username) {
-                Ok(me) => {
-                    let file = File::open(&me.file_path);
-                    if let Ok(mut file) = file {
-                        let mut buffer = Vec::new();
-                        if file.read_to_end(&mut buffer).is_ok() {
-                            match me.decrypt(&buffer, &hash) {
-                                Ok(content) => {
-                                    println!("👁️ Identity '{}':", username);
-                                    println!("{}", content);
-                                }
-                                Err(_) => eprintln!("❌ Failed to unlock identity '{}': incorrect hash or corrupted file.", username),
-                            }
-                        } else {
-                            eprintln!("❌ Failed to read identity file '{}'.", username);
-                        }
-                    } else {
-                        eprintln!("❌ Failed to open identity file '{}'.", username);
-                    }
-                }
-                Err(e) => {
-                    eprintln!("❌ Failed to load identity '{}': {}", username, e);
-                }
-            }
-        }
         Commands::Delete { username, hash } => {
             match Me::delete(&username, &hash) {
                 Ok(_) => println!("🗑️ Identity '{}' deleted.", username),
@@ -78,7 +54,7 @@ fn main() {
             }
         }
         Commands::ChangeHash { username, old_hash, new_hash } => {
-            match Me::new(&username) {
+            match Me::new(&username, &old_hash) {
                 Ok(me) => {
                     match me.change_hash(&old_hash, &new_hash) {
                         Ok(_) => println!("🔐 Password for '{}' changed successfully.", username),
@@ -86,6 +62,89 @@ fn main() {
                     }
                 }
                 Err(e) => eprintln!("❌ Failed to load identity '{}': {}", username, e),
+            }
+        }
+        Commands::Be { username, hash, key, value } => {
+            match Me::load(&username, &hash) {
+                Ok(mut me) => {
+                    if let Err(e) = me.be(&key, &value).and_then(|_| me.save(&hash)) {
+                        eprintln!("❌ Failed to apply 'be' on '{}': {}", username, e);
+                    } else {
+                        println!("✅ Added '{}: {}' to '{}'.", key, value, username);
+                    }
+                }
+                Err(e) => eprintln!("❌ Failed to load identity '{}': {}", username, e),
+            }
+        }
+        Commands::Have { username, hash, key, value } => {
+            match Me::load(&username, &hash) {
+                Ok(mut me) => {
+                    if let Err(e) = me.have(&key, &value).and_then(|_| me.save(&hash)) {
+                        eprintln!("❌ Failed to apply 'have' on '{}': {}", username, e);
+                    } else {
+                        println!("✅ Added '{}: {}' to '{}'.", key, value, username);
+                    }
+                }
+                Err(e) => eprintln!("❌ Failed to load identity '{}': {}", username, e),
+            }
+        }
+        Commands::At { username, hash, key, value } => {
+            match Me::load(&username, &hash) {
+                Ok(mut me) => {
+                    if let Err(e) = me.at(&key, &value).and_then(|_| me.save(&hash)) {
+                        eprintln!("❌ Failed to apply 'at' on '{}': {}", username, e);
+                    } else {
+                        println!("✅ Added '{}: {}' to '{}'.", key, value, username);
+                    }
+                }
+                Err(e) => eprintln!("❌ Failed to load identity '{}': {}", username, e),
+            }
+        }
+        Commands::Relate { username, hash, key, value } => {
+            match Me::load(&username, &hash) {
+                Ok(mut me) => {
+                    if let Err(e) = me.relate(&key, &value).and_then(|_| me.save(&hash)) {
+                        eprintln!("❌ Failed to apply 'relate' on '{}': {}", username, e);
+                    } else {
+                        println!("✅ Added '{}: {}' to '{}'.", key, value, username);
+                    }
+                }
+                Err(e) => eprintln!("❌ Failed to load identity '{}': {}", username, e),
+            }
+        }
+        Commands::React { username, hash, key, value } => {
+            match Me::load(&username, &hash) {
+                Ok(mut me) => {
+                    if let Err(e) = me.react(&key, &value).and_then(|_| me.save(&hash)) {
+                        eprintln!("❌ Failed to apply 'react' on '{}': {}", username, e);
+                    } else {
+                        println!("✅ Added '{}: {}' to '{}'.", key, value, username);
+                    }
+                }
+                Err(e) => eprintln!("❌ Failed to load identity '{}': {}", username, e),
+            }
+        }
+        Commands::Say { username, hash, key, value } => {
+            match Me::load(&username, &hash) {
+                Ok(mut me) => {
+                    if let Err(e) = me.say(&key, &value).and_then(|_| me.save(&hash)) {
+                        eprintln!("❌ Failed to apply 'say' on '{}': {}", username, e);
+                    } else {
+                        println!("✅ Added '{}: {}' to '{}'.", key, value, username);
+                    }
+                }
+                Err(e) => eprintln!("❌ Failed to load identity '{}': {}", username, e),
+            }
+        }
+        Commands::Display { username, hash } => {
+            match Me::display(&username, &hash) {
+                Ok(output) => {
+                    match from_str::<Value>(&output).and_then(|val| to_string_pretty(&val).map_err(|e| e.into())) {
+                        Ok(pretty_output) => println!("📖 Identity Details:\n{}", pretty_output),
+                        Err(_) => println!("📖 Identity Details:\n{}", output),
+                    }
+                }
+                Err(e) => eprintln!("❌ Failed to display identity '{}': {}", username, e),
             }
         }
     }

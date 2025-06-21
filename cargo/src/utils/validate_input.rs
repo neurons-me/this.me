@@ -1,7 +1,7 @@
 use std::io;
 
 pub fn validate_username(username: &str) -> io::Result<()> {
-    println!("🔍 Validando username: '{}' (chars: {}, bytes: {})", username, username.chars().count(), username.len());
+    println!("🔍 Validating username: '{}' (chars: {}, bytes: {})", username, username.chars().count(), username.len());
 
     let username_len = username.len();
     if username_len < 5 || username_len > 21 {
@@ -33,7 +33,7 @@ pub fn validate_username(username: &str) -> io::Result<()> {
 }
 pub fn validate_hash(hash: &str) -> io::Result<()> {
     if hash.len() < 4 {
-        return Err(io::Error::new(io::ErrorKind::InvalidInput, "❌ Password (hash) must be at least 4 characters long."));
+        return Err(io::Error::new(io::ErrorKind::InvalidInput, "❌ Hash (password) must be at least 4 characters long."));
     }
     Ok(())
 }

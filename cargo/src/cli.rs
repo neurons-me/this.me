@@ -10,18 +10,13 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Create a new .me identity
+    /// Initialize and save a new .me identity (uses `Me::new` + `.save`)
     Create {
         username: String,
         hash: String,
     },
     /// List all .me identities
     List,
-    /// Show the contents of a .me identity
-    Show {
-        username: String,
-        hash: String,
-    },
     /// Delete a .me identity
     Delete {
         username: String,
@@ -32,5 +27,52 @@ pub enum Commands {
         username: String,
         old_hash: String,
         new_hash: String,
+    },
+    /// Load and display an existing .me identity
+    Display {
+        username: String,
+        hash: String,
+    },
+    /// Add a `be` attribute to the identity
+    Be {
+        username: String,
+        hash: String,
+        key: String,
+        value: String,
+    },
+    /// Add a `have` attribute to the identity
+    Have {
+        username: String,
+        hash: String,
+        key: String,
+        value: String,
+    },
+    /// Add an `at` attribute to the identity
+    At {
+        username: String,
+        hash: String,
+        key: String,
+        value: String,
+    },
+    /// Add a `relate` attribute to the identity
+    Relate {
+        username: String,
+        hash: String,
+        key: String,
+        value: String,
+    },
+    /// Add a `react` attribute to the identity
+    React {
+        username: String,
+        hash: String,
+        key: String,
+        value: String,
+    },
+    /// Add a `say` attribute to the identity
+    Say {
+        username: String,
+        hash: String,
+        key: String,
+        value: String,
     },
 }

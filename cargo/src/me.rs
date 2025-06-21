@@ -11,12 +11,16 @@ use aes_gcm::{Aes256Gcm, Key, Nonce}; // AES-GCM cipher
 use aes_gcm::aead::{Aead, KeyInit};
 use sha2::{Sha256, Digest};
 use serde_json;  // added import
+use serde::Serialize;
+use crate::verbs::Verbs;
 
 /// Represents a local encrypted identity used in dApps or Web3 environments.
+#[derive(Serialize)]
 pub struct Me {
     pub username: String,
     pub file_path: PathBuf,
     pub data: Option<String>,
+    pub verbs: Verbs,
 }
 
 impl Me {
@@ -28,6 +32,7 @@ impl Me {
             username: username.to_string(),
             file_path,
             data: None,
+            verbs: Verbs::new(),
         }
     }
 
@@ -57,49 +62,25 @@ impl Me {
         }
     }
 
-    /// Initializes a new Me instance with the given username.
-    pub fn new(username: &str) -> std::io::Result<Self> {
-        match validate_username(username) {
-            Ok(_) => {
-                let home_dir = env::var("HOME").unwrap_or_else(|_| ".".to_string());
-                let file_path = PathBuf::from(format!("{}/.this/me/{}.me", home_dir, username));
-                Ok(Me {
-                    username: username.to_string(),
-                    file_path,
-                    data: None,
-                })
-            }
-            Err(e) => {
-                eprintln!("❌ Error validating username: {}", e);
-                Err(std::io::Error::new(
-                    std::io::ErrorKind::InvalidInput,
-                    format!("❌ Error validating username: {}", e),
-                ))
-            }
-        }
-    }
-
-    /// Creates and saves a new encrypted identity file.
-    pub fn create(username: &str, hash: &str) -> std::io::Result<Self> {
-        let me = Me::new(username)?;
-        validate_setup(false)?;
-        
+    /// Initializes a new Me instance with the given username and hash.
+    pub fn new(username: &str, hash: &str) -> std::io::Result<Self> {
+        validate_username(username)?;
         validate_hash(hash)?;
-        if me.file_path.exists() {
+        let home_dir = env::var("HOME").unwrap_or_else(|_| ".".to_string());
+        let file_path = PathBuf::from(format!("{}/.this/me/{}.me", home_dir, username));
+        if file_path.exists() {
             return Err(std::io::Error::new(
                 std::io::ErrorKind::AlreadyExists,
                 format!("❌ Identity '{}' already exists.", username),
             ));
         }
-
-        let data = format!(r#"{{"identity":{{"username":"{}"}}}}"#, username);
-        let encrypted = me.encrypt(&data, hash)?;
-        fs::create_dir_all(me.file_path.parent().unwrap())?;
-        let mut file = File::create(&me.file_path)?;
-        file.write_all(&encrypted)?;
-        Ok(me)
+        Ok(Me {
+            username: username.to_string(),
+            file_path,
+            data: None,
+            verbs: Verbs::new(),
+        })
     }
-
 
     /// Encrypts the provided plaintext with the given hash.
     pub fn encrypt(&self, plaintext: &str, hash: &str) -> std::io::Result<Vec<u8>> {
@@ -158,25 +139,27 @@ impl Me {
         Ok(identities)
     }
 
-    /// Displays the decrypted content of the identity file.
-    pub fn show(&self, password: &str) -> std::io::Result<()> {
-        validate_setup(false)?;
-        let contents = fs::read(&self.file_path)?;
-        let json = self.decrypt(&contents, password).map_err(|_| {
-            std::io::Error::new(std::io::ErrorKind::InvalidData, "❌ Failed to decrypt. Wrong password?")
-        })?;
-
-        match serde_json::from_str::<serde_json::Value>(&json) {
-            Ok(parsed) => {
-                println!("{}", serde_json::to_string_pretty(&parsed)?);
+        /// Displays the decrypted contents of the identity file.
+        pub fn display(username: &str, hash: &str) -> std::io::Result<String> {
+            validate_username(username)?;
+            validate_hash(hash)?;
+            let home_dir = env::var("HOME").unwrap_or_else(|_| ".".to_string());
+            let file_path = PathBuf::from(format!("{}/.this/me/{}.me", home_dir, username));
+            if !file_path.exists() {
+                return Err(std::io::Error::new(
+                    std::io::ErrorKind::NotFound,
+                    format!("❌ Identity '{}' does not exist.", username),
+                ));
             }
-            Err(_) => {
-                println!("{}", json);
-            }
+    
+            let contents = fs::read(&file_path)?;
+            let me_temp = Me::from_username_unchecked(username);
+            let decrypted = me_temp.decrypt(&contents, hash)
+                .map_err(|_| std::io::Error::new(std::io::ErrorKind::PermissionDenied, "❌ Invalid password."))?;
+    
+            Ok(decrypted)
         }
 
-        Ok(())
-    }
 
     /// Changes the encryption password (hash) of the identity file.
     pub fn change_hash(&self, old_hash: &str, new_hash: &str) -> std::io::Result<()> {
@@ -191,5 +174,63 @@ impl Me {
         file.write_all(&encrypted)?;
         println!("🔐 Password for '{}' successfully updated.", self.username);
         Ok(())
+    }
+
+    /// Saves the current identity by encrypting and writing to file.
+    pub fn save(&self, hash: &str) -> std::io::Result<()> {
+        validate_hash(hash)?;
+        let data = serde_json::to_string(&self).map_err(|_| {
+            std::io::Error::new(std::io::ErrorKind::Other, "❌ Failed to serialize identity")
+        })?;
+        let encrypted = self.encrypt(&data, hash)?;
+        fs::create_dir_all(self.file_path.parent().unwrap())?;
+        let mut file = File::create(&self.file_path)?;
+        file.write_all(&encrypted)?;
+        println!("✅ Identity '{}' saved.", self.username);
+        Ok(())
+    }
+
+    pub fn have(&mut self, key: &str, value: &str) -> std::io::Result<()> {
+        self.verbs.have(key, value)
+    }
+
+    pub fn be(&mut self, key: &str, value: &str) -> std::io::Result<()> {
+        self.verbs.be(key, value)
+    }
+
+    pub fn at(&mut self, key: &str, value: &str) -> std::io::Result<()> {
+        self.verbs.at(key, value)
+    }
+
+    pub fn relate(&mut self, key: &str, value: &str) -> std::io::Result<()> {
+        self.verbs.relate(key, value)
+    }
+
+    pub fn react(&mut self, key: &str, value: &str) -> std::io::Result<()> {
+        self.verbs.react(key, value)
+    }
+
+    pub fn say(&mut self, key: &str, value: &str) -> std::io::Result<()> {
+        self.verbs.say(key, value)
+    }
+
+    /// Loads an existing identity by validating and preparing the instance.
+    pub fn load(username: &str, hash: &str) -> std::io::Result<Self> {
+        validate_username(username)?;
+        validate_hash(hash)?;
+        let home_dir = env::var("HOME").unwrap_or_else(|_| ".".to_string());
+        let file_path = PathBuf::from(format!("{}/.this/me/{}.me", home_dir, username));
+        if !file_path.exists() {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                format!("❌ Identity '{}' does not exist.", username),
+            ));
+        }
+        Ok(Me {
+            username: username.to_string(),
+            file_path,
+            data: None,
+            verbs: Verbs::new(),
+        })
     }
 }
