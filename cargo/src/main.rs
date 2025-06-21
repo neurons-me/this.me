@@ -71,5 +71,11 @@ fn main() {
                 }
             }
         }
+        Commands::Delete { username, hash } => {
+            match Me::delete(&username, &hash) {
+                Ok(_) => println!("🗑️ Identity '{}' deleted.", username),
+                Err(e) => eprintln!("❌ Failed to delete identity '{}': {}", username, e),
+            }
+        }
     }
 }
