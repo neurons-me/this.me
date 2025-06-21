@@ -77,5 +77,16 @@ fn main() {
                 Err(e) => eprintln!("❌ Failed to delete identity '{}': {}", username, e),
             }
         }
+        Commands::ChangeHash { username, old_hash, new_hash } => {
+            match Me::new(&username) {
+                Ok(me) => {
+                    match me.change_hash(&old_hash, &new_hash) {
+                        Ok(_) => println!("🔐 Password for '{}' changed successfully.", username),
+                        Err(e) => eprintln!("❌ Failed to change password for '{}': {}", username, e),
+                    }
+                }
+                Err(e) => eprintln!("❌ Failed to load identity '{}': {}", username, e),
+            }
+        }
     }
 }

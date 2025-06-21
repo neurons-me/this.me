@@ -27,4 +27,10 @@ pub enum Commands {
         username: String,
         hash: String,
     },
+    /// Change the hash (password) of a .me identity
+    ChangeHash {
+        username: String,
+        old_hash: String,
+        new_hash: String,
+    },
 }
