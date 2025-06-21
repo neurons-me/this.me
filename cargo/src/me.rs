@@ -15,7 +15,6 @@ use serde_json;  // added import
 pub struct Me {
     pub username: String,
     pub file_path: PathBuf,
-    pub unlocked: bool,
     pub data: Option<String>,
 }
 
@@ -68,10 +67,8 @@ impl Me {
         let key_hash = Sha256::digest(hash.as_bytes());
         let key = Key::<Aes256Gcm>::from_slice(&key_hash);
         let cipher = Aes256Gcm::new(key);
-
         let nonce_bytes: [u8; 12] = rand::random();
         let nonce = Nonce::from_slice(&nonce_bytes);
-
         let ciphertext = cipher.encrypt(nonce, plaintext.as_bytes())
             .map_err(|_| std::io::Error::new(std::io::ErrorKind::Other, "Encryption failed"))?;
 
@@ -91,10 +88,8 @@ impl Me {
         let key_hash = Sha256::digest(hash.as_bytes());
         let key = Key::<Aes256Gcm>::from_slice(&key_hash);
         let cipher = Aes256Gcm::new(key);
-
         let (nonce_bytes, ciphertext) = data.split_at(12);
         let nonce = Nonce::from_slice(nonce_bytes);
-
         let decrypted = cipher.decrypt(nonce, ciphertext).map_err(|_| ())?;
         String::from_utf8(decrypted).map_err(|_| ())
     }
