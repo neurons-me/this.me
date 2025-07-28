@@ -1,127 +1,39 @@
 ### **Index of `this.me` Structure**
 Here’s a comprehensive list of the components and their purposes within the `this.me` class:
 
-#### **1. Identity**
-- **Description:** Immutable attributes defining the core identity of the user.
-  - Incluye claves criptográficas necesarias para autenticación, firma y encriptación.
-#### **2. Attributes**
-- **Description:** Flexible traits and descriptive properties of the user.
-#### **3. Relationships**
-- **Description:** Connections and associations with others.
-#### **4. Reactions**
-- **Description:** User’s interactions and engagements with the world.
-#### **5. Properties**
-- **Description:** Items owned or managed by the user.
+### Declarative Identity Structure (`this.me`)
+
+In `this.me`, identity is built through **verbs** — declarative acts that define what the self *is*, *has*, *feels*, or *relates to*.
+
+There are no static "attributes" or "properties" baked into the model. Instead:
+
+\- `be(key, value)` declares traits
+
+\- `have(key, value)` declares possessions
+
+\- `relate(key, value)` declares connections
+
+\- `react(key, value)` expresses interaction
+
+\- `at(key, value)` defines location/context
+
+\- `say(key, value)` declares thoughts or speech
+
+These verbs are recorded in the local identity database.
+
+🧠 *"The self is not a record; it is a series of acts."*
 
 ------
 
 ### **1. The Me Structure Overview**
 
 #### **Core Components**
-- **Identity:** The foundation of the `this.me` object.
-
-  - Immutable attributes: `username`, `DID`, `publicKey`, `privateKey`.
-  - Core methods for validation, key generation, and secure signing.
-
-  - Example key storage:
-    ```json
-    {
-      "username": "jabellae",
-      "DID": "did:cleaker:xyz123",
-      "publicKey": "abc123...",
-      "privateKey": "<encrypted or local-only>"
-    }
-    ```
-
-  - Example method:
-    ```js
-    jabellae.sign("message to sign"); // Returns signature using stored private key
-    ```
-
-  ---
-
-- **Attributes:** Fundamental identity traits.
-  Store and manage user traits dynamically:
-  - Examples: Name, age, location, pronouns, bio.
-    **Use `.be()` to add or update attributes.**
-    Example: 
-    ```json
-    { name: 'John Doe', age: 30, location: 'Earth' }
-    ```
-    Implement `be()` as a flexible key-value store.
-    Add validation for specific attributes (if required).
-
-  --------
-
-- **Relationships:** Connections with others.
-  - Examples: Friends, groups, networks, organizations.
-    **Contacts:** Individual connections.
-    **Groups:** Collections of users with shared context.
-
-    ```js
-    .relationships.addContact({ username: 'alice', status: 'friend' });
-    .relationships.createGroup({ name: 'Family', members: ['alice', 'bob'] });
-    ```
-
-  Define `addContact` and `createGroup` methods.
-  Enable nested relationship structures (e.g., groups of groups).
-
-  ---------
-
-- **Reactions:** How a user interacts with the world.
-  Streamline all user engagements under `.react()`
-  - Examples: Likes, comments, shares, emotions.
-  - Categorization Rationale:
-    - Keeps all engagements unified.
-    - Expands easily (adding emojis, advanced reactions).
-
-  ```js
-  .react.add({ type: 'like', target: 'PostID' });
-  .react.add({ type: 'comment', target: 'PhotoID', content: 'Great pic!' });
-  ```
-
-  Design a structure to store and retrieve reactions efficiently.
-  Define a `log` system for reaction history.
-
-  -----
-
-- **Properties:** Things the user owns or manages.
-  Attach external, modular objects as user-owned assets:
-  - Use `this.me.properties` as a unified interface for ownership.
-  - Modular objects like `Wallet`, `Device`, `File`.
-  - Examples: Wallets, devices, digital files, accounts.
-  - **Sub-Methods:** Add, Share, Transfer Ownership, Revoke Access.
-
-```js
-const jabellae = new Me('jabellae'); // Create a new Me instance
-const wallet = new Wallet({ type: 'ETH', address: '0x123...' }); // Create a wallet object
-jabellae.addProperty(wallet); // Add wallet as a property to Me
-```
-
-​	Implement `add`, `share`, `transferOwnership`, and `revokeAccess` methods for properties. Define modular objects (`Wallet`, `Device`) independently.
-
-1. **Creating a Wallet**
-    The wallet is created independently and then added to the `Me` instance's properties.
-
-   ```javascript
-   const jabellae = new Me('jabellae'); // Create a new Me instance
-   const wallet = new Wallet({ type: 'ETH', address: '0x123...' }); // Create a wallet object
-   jabellae.addProperty(wallet); // Add wallet as a property to Me
-   ```
-
-2. **Sharing the Wallet**
-    Sharing logic is handled by the `Me` instance, not the property itself.
-
-   ```javascript
-   jabellae.shareProperty(wallet, 'otherMe', { permissions: 'view' });
-   ```
-
-3. **Transferring Ownership**
-    Ownership transfer is also managed by the `Me` instance.
-
-   ```javascript
-   jabellae.transferOwnership(wallet, 'otherMe');
-   ```
+| **Field**       | **Type** | **Why is it essential?**                                     |
+| --------------- | -------- | ------------------------------------------------------------ |
+| **username**    | String   | Your semantic root identifier. It’s used as input from the CLI, interface, or any entry point. |
+| **public_key**  | String   | This is what you expose as a verifiable identity. It’s required for signing/verifying data, relationships, etc. |
+| **private_key** | String   | Must be encrypted, as it’s the master key for signing, unlocking, and encrypting the identity. |
+| **verbs**       | Verbs    | Your behavior container. It represents the evolution of the identity over time. |
 
 ------
 

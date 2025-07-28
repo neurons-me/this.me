@@ -5,62 +5,102 @@
 
 <strong>.me</strong> is your identity that lives on your machine, under your control. It holds attributes, relationships, and keys that define who you are—and crucially, <strong>how you relate to others</strong>.
 
- Each <strong>.me</strong> instance can pair with other authorities or identities using its <strong>cryptographic keys</strong>, establishing <strong>trust through signatures and endorsements</strong>. 
-
-Instead of logging in through third-party services, you can validate your identity or vouch for someone else’s using these key exchanges. This enables a decentralized trust model where relationships are verifiable, persistent, and portable.
-
 # Getting Started:
-1. ##### **Install `this.me`:**
-   Open your terminal and run the following command to install the `this.me` package:
-   ```js
-   npm i -g this.me
-   ```
 
-2. **Run this command on your terminal:**
+You can use **this.me** both in the browser and in Node environments. The library automatically detects the environment and provides a single global instance of `me` once initialized.
 
-   ```bash
-   me
-   ```
+### **1. Installation**
 
-The **Me** class represents a **persistent identity**, stored as an encrypted file (username.me) in ~/.this/me. This file contains:
-- An identifier (username)
-- Keys (private/public — currently placeholders)
-- User-defined attributes
-- Relationships and other social elements (reactions, attributies, properties, endorsements...)
-
-It can be **created**, **read** (if you have the correct hash), **modified in memory**, and then **saved again** in encrypted form.
-
-# Command Line Options:
-
-**Run this commands on your terminal:**
+If you are using npm:
 
 ```bash
-me create
+npm install this.me
 ```
 
-- **Description**: Creates a new .me identity.
-- **Flow**: Prompts for username and hash (secret key), then saves an encrypted file at ~/.this/me/username.me.
+Or load it directly in the browser (after building):
 
-------
-
-```bash
-me show [username]
+```html
+<script src="this.me.umd.js"></script>
+<script>
+  // Global instance automatically attached to `window.me`
+  console.log(me); // Ready to use after initialization
+</script>
 ```
 
-- **Description**: Shows the decrypted contents of an identity.
-- **Flow**:
-  - If [username] is not provided, it prompts for it.
-  - Always prompts for the hash to unlock the identity.
-  - If successful, prints the identity as JSON.
+---
 
-------
+### **2. Initialization**
 
-```bash
-me list
+You need to initialize the `.me` instance before using it:
+
+```js
+import me from "this.me";
+
+await me.init({
+  monadEndpoint: "http://localhost:7777" // optional, defaults to 7777
+});
 ```
 
-- **Description**: Lists all local .me identities.
-- **Flow**: Reads the ~/.this/me directory and prints all .me files (usernames).
+Once initialized, the `me` instance will maintain its state (status, loaded identities, etc.) globally.
+
+---
+
+### **3. Checking Daemon Status**
+
+You can verify if the local daemon is running:
+
+```js
+const status = await me.status();
+console.log("Daemon active:", status.active);
+```
+
+The floating components or any GUI indicators (green/red) can rely directly on `me.status()`.
+
+---
+
+### **4. Listing Identities**
+
+```js
+const list = await me.listUs();
+console.log(list);
+/*
+[
+  { alias: "suign", path: "/Users/abellae/.this/me/suign" }
+]
+*/
+```
+
+---
+
+### **5. Loading an Identity**
+
+```js
+await me.load("abellae", "mySecretHash");
+console.log(me.active); // true if identity is successfully loaded
+```
+
+After loading, you can use all available methods (`be`, `have`, `do`, etc.).
+
+---
+
+### **6. Example in the Browser Console**
+
+If you include the UMD bundle:
+
+```html
+<script src="this.me.umd.js"></script>
+<script>
+  (async () => {
+    await me.init();
+    console.log(await me.status());
+    console.log(await me.listUs());
+  })();
+</script>
+```
+
+- `me` is a **singleton instance** that lives in memory once initialized.
+- Works in both browser and Node.
+- Provides methods for status, identity management, and attribute handling.
 
 ------
 
@@ -118,18 +158,6 @@ Once unlocked, you can:
 
 ------
 
-#### Locking the identity
-
-You can clear the identity from memory with:
-
-```js
-me.lock();
-```
-
-This keeps the encrypted file on disk but removes all data from RAM.
-
-------
-
 ### **Summary**
 
 - Your identity is encrypted on your own machine.
@@ -151,25 +179,6 @@ Let me know if you’d like a diagram or visual flow to go with this explanation
    All sensitive data (including private keys) stays on the user's machine.
 
 ---
-### 📁 File Structure
-* `~/.this/me/username.me.json` — Encrypted identity file
-* `.me` includes:
-
-  * `username`
-  * `publicKey`, `privateKey` (encrypted)
-  * `attributes`, `relationships`, `reactions`, `properties`, `relationships`
-  * `endorsements`
-
----
-### 🔐 Cryptographic Model
-* Identity is unlocked using a user-defined `hash` (password).
-* This hash decrypts the local `.me` file.
-* The identity includes:
-
-  * A **key pair** (public/private) for signing and verification.
-  * Optional **endorsements** signed by Cleaker or other authorities.
-
----
 ### 🛡️ Security Model
 * No private key ever leaves the local `.me` file.
 * Endorsements are public and verifiable using the public key.
@@ -181,17 +190,6 @@ Let me know if you’d like a diagram or visual flow to go with this explanation
 * New devices can be authorized using signatures from old devices.
 
 ---
-## ⚖️ Responsibilities
-* **this.me**
-  * Local file management, encryption, signing.
-  * CLI + API for usage.
-
-* **Cleaker / Authorities**
-
-  * Store trusted records of `username` + `publicKey`
-  * Provide validation/endorsement services.
-
----
 ## 🌍 Use Cases
 * Digital signature of documents
 * Smart contract interaction
@@ -199,9 +197,6 @@ Let me know if you’d like a diagram or visual flow to go with this explanation
 * Group identity and shared contexts (`me && you && them in context/friends`)
 
 ---
-By default, **this.me** uses the **local file system (~/.this/me/)** to store and manage identity data.
-No external service is required.
-
 <img src="https://suign.github.io/assets/imgs/monads.png" alt="Cleak Me Please" width="244">Hello, I am **.me**
 
 ### ❯ add.me 
