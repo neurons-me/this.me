@@ -1,34 +1,47 @@
 {
   "name": "this.me",
-  "version": "2.9.51",
-  "description": "_me-Centric.",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js",
-    "test": "test",
-    "postinstall": "node src/scripts/setup.js"
+  "version": "3.0.0",
+  "description": ".me is your identity. It enables decentralized trust through cryptographic signatures.",
+  "main": "dist/this-me.cjs.js",
+  "module": "dist/this-me.esm.js",
+  "browser": "dist/this-me.umd.js",
+  "exports": {
+    ".": {
+      "import": "./dist/this-me.esm.js",
+      "require": "./dist/this-me.cjs.js",
+      "browser": "./dist/this-me.umd.js"
+    }
   },
-  "bin": {
-    "me": "bin/me.cli.js"
-  },
+  "type": "module",
   "keywords": [
     "this.me",
-    "user"
+    "identity",
+    "decentralized",
+    "cryptographic",
+    "trust",
+    "signature",
+    "local",
+    "self-sovereign",
+    "monad"
   ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/neurons-me/this.me.git"
   },
   "homepage": "https://www.npmjs.com/package/this.me",
-  "docs": "https://suiGn.github.io/this.me",
-  "type": "module",
   "author": "suiGn",
   "license": "MIT",
-  "repoType": "NPM Package",
-  "category": "dataformatter",
-  "dependencies": {
-    "chalk": "^5.3.0",
-    "commander": "^12.1.0",
-    "inquirer": "^9.2.16"
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rollup -c"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-json": "^6.0.0",
+    "@rollup/plugin-terser": "^0.4.4",
+    "rollup": "^4.14.0"
   }
 }
