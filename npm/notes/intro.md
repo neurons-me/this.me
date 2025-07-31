@@ -1,9 +1,5 @@
-Aquí te dejo un intro.md completo y bien estructurado para que siempre tengas claro cómo funciona this.me en el browser y en general.
-
-⸻
 
 ⊙ this.me – Browser Integration Guide
-
 ✅ ¿Qué es this.me?
 
 this.me es una librería autocontenida que se conecta al daemon local de this.me (corriendo usualmente en localhost:7777).
@@ -11,51 +7,38 @@ Su objetivo es proveer una instancia viva en el navegador, capaz de:
 	•	Consultar si el daemon está activo (status).
 	•	Listar identidades registradas (listUs).
 	•	Mantenerse sincronizada en tiempo real vía WebSocket.
-	•	(Próximamente) Cargar identidades (loadMe) y ejecutar verbos (be, have, do, etc.).
-
 ⸻
 
 ✅ Instancia única y global
-
 Al cargar la librería:
 	•	Se crea automáticamente una instancia única de la clase Me.
 	•	En el navegador, esta instancia se expone como window.me.
 
-console.log(window.me); // ✅ Ya está disponible
+console.log(window.me);
 
 Si la importas en React o cualquier bundler:
-
 import me from "this.me";
-
 
 ⸻
 
 ✅ Inicialización
-
 La inicialización ocurre en dos fases:
 	1.	Automática al cargar:
 	•	En el constructor, la clase ya ejecuta:
 
-this.status();
-
-
+me.status();
 	•	Esto intenta consultar el daemon inmediatamente.
-
 	2.	Manual para estado completo:
 	•	Para levantar status + listUs + WebSocket:
 
 await me.init();
 
-
-
 ⸻
 
 ✅ Principales métodos
-
 1. status()
 
 Consulta si el daemon está activo:
-
 const s = await me.status();
 console.log(s);
 // { active: true, version: "0.1.0", uptime: "..." }
@@ -64,7 +47,6 @@ console.log(s);
 ⸻
 
 2. listUs()
-
 Lista todas las identidades disponibles:
 
 const us = await me.listUs();
@@ -75,9 +57,7 @@ console.log(us);
 ⸻
 
 3. startSocket()
-
 Abre el WebSocket con el daemon para mantener sincronización en tiempo real.
-
 await me.startSocket();
 
 me.subscribe((state) => {
@@ -85,11 +65,9 @@ me.subscribe((state) => {
 });
 
 El socket recibe actualizaciones automáticas de status y en el futuro también de eventos en tiempo real.
-
 ⸻
 
 ✅ Estado Reactivo
-
 La instancia mantiene un state interno accesible así:
 
 console.log(me.getState());
@@ -129,12 +107,6 @@ const unsubscribe = me.subscribe((newState) => {
 	2.	Se inicializa con init() → obtiene status y listUs.
 	3.	WebSocket activo → mantiene el estado en tiempo real.
 	4.	La instancia me es viva → cualquier componente o script puede consumirla directamente.
-
-⸻
-
-⬜ Próximos pasos
-	•	Añadir métodos como loadMe, be, have, do directamente en esta instancia.
-	•	Enviar y recibir eventos complejos vía WebSocket (sin depender de heartbeats).
 
 ⸻
 

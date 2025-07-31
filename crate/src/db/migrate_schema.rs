@@ -5,7 +5,7 @@ pub fn migrate_schema(conn: &Connection) -> SqlResult<()> {
     // Table for identity metadata
     conn.execute(
         "CREATE TABLE IF NOT EXISTS me (
-            alias TEXT PRIMARY KEY,
+            username TEXT PRIMARY KEY,
             public_key TEXT NOT NULL,
             private_key TEXT NOT NULL,
             created_at TEXT NOT NULL
@@ -17,8 +17,7 @@ pub fn migrate_schema(conn: &Connection) -> SqlResult<()> {
         "CREATE TABLE IF NOT EXISTS be (
             key TEXT NOT NULL,
             value TEXT NOT NULL,
-            timestamp TEXT NOT NULL,
-            is_private INTEGER NOT NULL DEFAULT 0
+            timestamp TEXT NOT NULL
         )",
         [],
     )?;
@@ -28,8 +27,7 @@ pub fn migrate_schema(conn: &Connection) -> SqlResult<()> {
         "CREATE TABLE IF NOT EXISTS have (
             key TEXT NOT NULL,
             value TEXT NOT NULL,
-            timestamp TEXT NOT NULL,
-            is_private INTEGER NOT NULL DEFAULT 0
+            timestamp TEXT NOT NULL
         )",
         [],
     )?;
@@ -39,8 +37,7 @@ pub fn migrate_schema(conn: &Connection) -> SqlResult<()> {
         "CREATE TABLE IF NOT EXISTS at (
             key TEXT NOT NULL,
             value TEXT NOT NULL,
-            timestamp TEXT NOT NULL,
-            is_private INTEGER NOT NULL DEFAULT 0
+            timestamp TEXT NOT NULL
         )",
         [],
     )?;
@@ -51,8 +48,7 @@ pub fn migrate_schema(conn: &Connection) -> SqlResult<()> {
             target TEXT NOT NULL,
             key TEXT,
             value TEXT,
-            timestamp TEXT NOT NULL,
-            is_private INTEGER NOT NULL DEFAULT 0
+            timestamp TEXT NOT NULL
         )",
         [],
     )?;
@@ -62,8 +58,7 @@ pub fn migrate_schema(conn: &Connection) -> SqlResult<()> {
         "CREATE TABLE IF NOT EXISTS react (
             target TEXT NOT NULL,
             emoji TEXT NOT NULL,
-            timestamp TEXT NOT NULL,
-            is_private INTEGER NOT NULL DEFAULT 0
+            timestamp TEXT NOT NULL
         )",
         [],
     )?;
@@ -74,8 +69,7 @@ pub fn migrate_schema(conn: &Connection) -> SqlResult<()> {
         "CREATE TABLE IF NOT EXISTS do_ (
             key TEXT NOT NULL,
             value TEXT NOT NULL,
-            timestamp TEXT NOT NULL,
-            is_private INTEGER NOT NULL DEFAULT 0
+            timestamp TEXT NOT NULL
         )",
         [],
     )?;
@@ -86,8 +80,7 @@ pub fn migrate_schema(conn: &Connection) -> SqlResult<()> {
             target TEXT NOT NULL,
             message TEXT NOT NULL,
             lang TEXT DEFAULT 'en',
-            timestamp TEXT NOT NULL,
-            is_private INTEGER NOT NULL DEFAULT 0
+            timestamp TEXT NOT NULL
         )",
         [],
     )?;

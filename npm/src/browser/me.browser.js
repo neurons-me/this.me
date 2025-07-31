@@ -86,14 +86,24 @@ class Me {
       return;
     }
     this.socket = new MeWebSocket(this.endpoint.replace("/graphql", ""));
-    this.socket.onMessage((data) => {
-      if (data.type === "status") {
-        this.#update({ status: { active: true, error: false, data: data.payload } });
-      }
-      if (data.type === "listUs") {
-        this.#update({ listUs: data.payload });
-      }
+    // Inline socket event listeners
+    this.socket.on("status", (payload) => {
+      this._updateFromSocket({
+        status: { active: true, error: false, data: payload }
+      });
     });
+
+    this.socket.on("listUs", (payload) => {
+      this._updateFromSocket({ listUs: payload });
+    });
+
+    this.socket.on("update", (payload) => {
+      console.log("[this.me] update event", payload);
+    });
+  }
+
+  _updateFromSocket(newPartialState) {
+    this.#update(newPartialState);
   }
 
   setEndpoint(url) {
@@ -139,7 +149,6 @@ class Me {
         status {
           active
           version
-          uptime
         }
       }
     `;

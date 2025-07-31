@@ -3,13 +3,12 @@
   "version": "3.0.0",
   "description": ".me is your identity. It enables decentralized trust through cryptographic signatures.",
   "main": "dist/this-me.cjs.js",
-  "module": "dist/this-me.esm.js",
-  "browser": "dist/this-me.umd.js",
+"module": "dist/this-me.es.js",
+"browser": "dist/this-me.umd.js",
   "exports": {
     ".": {
-      "import": "./dist/this-me.esm.js",
-      "require": "./dist/this-me.cjs.js",
-      "browser": "./dist/this-me.umd.js"
+    "import": "./dist/this-me.es.js",
+      "require": "./dist/this-me.cjs.js"
     }
   },
   "type": "module",
@@ -35,13 +34,9 @@
     "dist"
   ],
   "scripts": {
-    "build": "rollup -c"
+  "build": "vite build"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^25.0.7",
-    "@rollup/plugin-node-resolve": "^15.2.3",
-    "@rollup/plugin-json": "^6.0.0",
-    "@rollup/plugin-terser": "^0.4.4",
-    "rollup": "^4.14.0"
+    "vite": "^7.0.6"
   }
 }
