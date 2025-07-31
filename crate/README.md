@@ -74,6 +74,22 @@ me relate --username exampleUser --password 123456 --key "project" --value "clea
 me react --username exampleUser --password 123456 --key "neurons.me" --value "🚀"
 ```
 
+---
+
+# Get
+```bashç
+me get --username exampleUser --password 123456 --verb be
+me get --username exampleUser --password 123456 --verb all
+me get --username exampleUser --password 123456 --verb have --key tools
+```
+
+Retrieves stored verb entries for a given user. You can filter by:
+- `--verb`: specify the verb table (`be`, `do`, `have`, etc.) or use `all` to search across all.
+- `--key` and `--value` (optional): refine the search for specific attributes.
+Results are printed with timestamped entries.
+
+----
+
 If you are running from the project and not the binary run:
 cargo run -- instead of me
 **Example:**
@@ -85,6 +101,8 @@ cargo run -- list
 cargo run -- create --username newUser --password secret123
 ```
 
+--- EXPLICA GET
+
 ----
 
 ## ⚠️ Username & Password Rules
@@ -95,4 +113,3 @@ cargo run -- create --username newUser --password secret123
 ---
 
 Built with ❤️ as part of the [Neuroverse](https://neurons.me) initiative.
-
