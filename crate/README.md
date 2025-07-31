@@ -1,79 +1,89 @@
 # this-me
-`this-me` is a lightweight identity expression that allows you to create, manage, and securely store minimal user identity files locally. It is part of the **neurons.me ecosystem** and is designed for applications where user-controlled identity and privacy are fundamental. 
 
-- The `Me` struct represents a crypto identity.
-- Verbs (e.g. `have`, `be`, `say`, etc.) are applied as methods on a loaded `Me`.
+`this-me` is a lightweight, local-first identity system designed for decentralized and privacy-conscious applications. It allows users to create, manage, and securely store encrypted identity files. Part of the **neurons.me** ecosystem, `this-me` treats identity as a living structure, expressed semantically through verbs.
+
+- The `Me` struct represents an encrypted identity file.
+- Verbs (e.g. `be`, `have`, `do`, `say`, etc.) are invoked as methods on a loaded `Me`.
+
+---
 
 # 📦 Installation
-To install `this-me`, you need to have Rust installed. Then run:
+
+If published to crates.io:
 
 ```bash
 cargo install this-me
+```
+
+If installing locally from source:
+
+```bash
+cargo install --path .
 ```
 
 ---
 
 # 🚀 .me CLI Usage
 
-Each command is executed via the CLI binary me. Identity loading is done automatically and implicitly by each command.
+Each command is executed via the CLI binary `me`. Identity loading is automatic and based on the provided username and password.
 
-#### **✅** **Create Identity**
+### ✅ Create Identity
 
-```
-me create <alias> <password>
-```
-
-Initializes a new identity file under:
-
-```
-~/.this/me/<alias>/
+```bash
+me create --username <username> --password <password>
 ```
 
-using the given password (hash) to encrypt it.
+### 🔄 Change Identity Password
 
-#### **🔄** **Change Identity Password (Hash)**
-
-```
-me change-hash <alias> <old-password> <new-password>
+```bash
+me change-password --username <username> --old-password <old_password> --new-password <new_password>
 ```
 
-Changes the password (hash) protecting the identity.
+Updates the password protecting the identity.
 
-*(Currently in progress: implemented but still uses* *todo!()* *internally).*
+### 📖 Display Identity
 
-#### **📖** **Display Identity**
-
-```
-me display <alias> <password>
+```bash
+me display --username <username> --password <password>
 ```
 
-Decrypts and displays the identity file contents in pretty JSON.
+Decrypts and displays the identity contents in pretty JSON.
 
-#### 📂 **List Identities**
+### 📂 List Identities
 
-```
+```bash
 me list
 ```
 
-Lists all identities stored under ~/.this/me.
+Lists all existing identities stored under `~/.this/me`.
 
-------
+## Verbs
 
-# 📚 .me Using as a Library
-```rust
-use this_me::Me;
-
-let mut me = Me::load("suigeneris", "1234")?;
-me.be("musician", "true")?;
-me.save()?;
+```bash
+# be
+me be --username exampleUser --password 123456 --key "identity" --value "creator"
+# do
+me do --username exampleUser --password 123456 --key "task" --value "build"
+# have
+me have --username exampleUser --password 123456 --key "tools" --value "rust"
+# at
+me at --username exampleUser --password 123456 --key "location" --value "Cancun"
+# relate
+me relate --username exampleUser --password 123456 --key "project" --value "cleaker"
+# react
+me react --username exampleUser --password 123456 --key "neurons.me" --value "🚀"
 ```
 
-# 📂 .me Locations
-Identity files are stored in:
+If you are running from the project and not the binary run:
+cargo run -- instead of me
+**Example:**
+
+```bash
+# list (identidades registradas)
+cargo run -- list
+# create (crear nueva identidad)
+cargo run -- create --username newUser --password secret123
 ```
-~/.this/me/<username>.me
-```
-This path is hidden and local to your machine.
 
 ----
 
@@ -85,3 +95,4 @@ This path is hidden and local to your machine.
 ---
 
 Built with ❤️ as part of the [Neuroverse](https://neurons.me) initiative.
+
