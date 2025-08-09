@@ -79,6 +79,7 @@ me react --username exampleUser --password 123456 --key "neurons.me" --value "ðŸ
 # Get
 ```bashÃ§
 me get --username exampleUser --password 123456 --verb be
+me get --username exampleUser --password 123456 --verb do
 me get --username exampleUser --password 123456 --verb all
 me get --username exampleUser --password 123456 --verb have --key tools
 ```

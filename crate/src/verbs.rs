@@ -6,6 +6,17 @@ at() - Estar en algún lugar
 relate() - Relacionarse con algo
 react() - Reaccionar a algo
 say() - Decir algo */
+// Los verbos se almacenan en tablas separadas y están ligados a un `context_id`.
+// Un `context_id` es un hash derivado de combinaciones como:
+// - me1
+// - me1 + me2
+// - me1 + me2 + secret
+// - wikipedia.org/page + cleaker:public
+//
+// Esto permite registrar acciones (ser, tener, reaccionar, decir, etc.)
+// dentro de espacios semánticos compartidos o privados, sin depender de alias explícitos (alias).
+//
+// Los alias (wallets, etc.) son otra capa que puede firmar, pero no son necesarios para registrar o consultar verbos por default.
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use rusqlite::{Connection, params};
@@ -31,11 +42,13 @@ impl Verbs {
   ▐▌ ▐▌▐▌   
   ▐▛▀▚▖▐▛▀▀▘
   ▐▙▄▞▘▐▙▄▄▖*/
-    pub fn be(&self, conn: &Connection, key: &str, value: &str) -> std::io::Result<()> {
+    /// Registra que algo "es" en un contexto específico.
+    /// El `context_id` define el espacio (privado, público, derivado, etc.) en el que se guarda el verbo.
+    pub fn be(&self, conn: &Connection, context_id: &str, key: &str, value: &str) -> std::io::Result<()> {
         let timestamp = Self::now_timestamp();
         conn.execute(
-            "INSERT INTO be (key, value, timestamp) VALUES (?1, ?2, ?3)",
-            params![key, value, timestamp],
+            "INSERT INTO be (context_id, key, value, timestamp) VALUES (?1, ?2, ?3, ?4)",
+            params![context_id, key, value, timestamp],
         ).map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))?;
         Ok(())
     }
@@ -43,11 +56,13 @@ impl Verbs {
   ▐▌  █ ▐▌ ▐▌
   ▐▌  █ ▐▌ ▐▌
   ▐▙▄▄▀ ▝▚▄▞*/
-    pub fn do_(&self, conn: &Connection, key: &str, value: &str) -> std::io::Result<()> {
+    /// Registra que algo 'hace' en un contexto específico.
+    /// El `context_id` define el espacio (privado, público, derivado, etc.) en el que se guarda el verbo.
+    pub fn do_(&self, conn: &Connection, context_id: &str, key: &str, value: &str) -> std::io::Result<()> {
         let timestamp = Self::now_timestamp();
         conn.execute(
-            "INSERT INTO do_ (key, value, timestamp) VALUES (?1, ?2, ?3)",
-            params![key, value, timestamp],
+            "INSERT INTO do_ (context_id, key, value, timestamp) VALUES (?1, ?2, ?3, ?4)",
+            params![context_id, key, value, timestamp],
         ).map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))?;
         Ok(())
     }
@@ -55,11 +70,13 @@ impl Verbs {
   ▐▌ ▐▌▐▌ ▐▌▐▌  ▐▌▐▌   
   ▐▛▀▜▌▐▛▀▜▌▐▌  ▐▌▐▛▀▀▘
   ▐▌ ▐▌▐▌ ▐▌ ▝▚▞▘ ▐▙▄▄▖*/
-    pub fn have(&self, conn: &Connection, key: &str, value: &str) -> std::io::Result<()> {
+    /// Registra que algo 'tiene' en un contexto específico.
+    /// El `context_id` define el espacio (privado, público, derivado, etc.) en el que se guarda el verbo.
+    pub fn have(&self, conn: &Connection, context_id: &str, key: &str, value: &str) -> std::io::Result<()> {
         let timestamp = Self::now_timestamp();
         conn.execute(
-            "INSERT INTO have (key, value, timestamp) VALUES (?1, ?2, ?3)",
-            params![key, value, timestamp],
+            "INSERT INTO have (context_id, key, value, timestamp) VALUES (?1, ?2, ?3, ?4)",
+            params![context_id, key, value, timestamp],
         ).map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))?;
         Ok(())
     }
@@ -67,11 +84,13 @@ impl Verbs {
   ▐▌ ▐▌ █  
   ▐▛▀▜▌ █  
   ▐▌ ▐▌ █ */
-    pub fn at(&self, conn: &Connection, key: &str, value: &str) -> std::io::Result<()> {
+    /// Registra que algo 'está' en un contexto específico.
+    /// El `context_id` define el espacio (privado, público, derivado, etc.) en el que se guarda el verbo.
+    pub fn at(&self, conn: &Connection, context_id: &str, key: &str, value: &str) -> std::io::Result<()> {
         let timestamp = Self::now_timestamp();
         conn.execute(
-            "INSERT INTO at (key, value, timestamp) VALUES (?1, ?2, ?3)",
-            params![key, value, timestamp],
+            "INSERT INTO at (context_id, key, value, timestamp) VALUES (?1, ?2, ?3, ?4)",
+            params![context_id, key, value, timestamp],
         ).map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))?;
         Ok(())
     }
@@ -79,11 +98,13 @@ impl Verbs {
   ▐▌ ▐▌▐▌   ▐▌   ▐▌ ▐▌ █  ▐▌   
   ▐▛▀▚▖▐▛▀▀▘▐▌   ▐▛▀▜▌ █  ▐▛▀▀▘
   ▐▌ ▐▌▐▙▄▄▖▐▙▄▄▖▐▌ ▐▌ █  ▐▙▄▄▖*/
-    pub fn relate(&self, conn: &Connection, key: &str, value: &str) -> std::io::Result<()> {
+    /// Registra una relación entre entidades en un contexto.
+    /// El `context_id` define el espacio (privado, público, derivado, etc.) en el que se guarda el verbo.
+    pub fn relate(&self, conn: &Connection, context_id: &str, key: &str, value: &str) -> std::io::Result<()> {
         let timestamp = Self::now_timestamp();
         conn.execute(
-            "INSERT INTO relate (target, key, value, timestamp) VALUES (?1, ?2, ?3, ?4)",
-            params![key, "", value, timestamp],
+            "INSERT INTO relate (context_id, target, key, value, timestamp) VALUES (?1, ?2, ?3, ?4, ?5)",
+            params![context_id, key, "", value, timestamp],
         ).map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))?;
         Ok(())
     }
@@ -91,29 +112,32 @@ impl Verbs {
   ▐▌ ▐▌▐▌   ▐▌ ▐▌▐▌     █  
   ▐▛▀▚▖▐▛▀▀▘▐▛▀▜▌▐▌     █  
   ▐▌ ▐▌▐▙▄▄▖▐▌ ▐▌▝▚▄▄▖  █ */
-    pub fn react(&self, conn: &Connection, key: &str, value: &str) -> std::io::Result<()> {
+    /// Registra una reacción (emoji) a un target dentro de un contexto.
+    /// El `context_id` define el espacio (privado, público, derivado, etc.) en el que se guarda la reacción.
+    pub fn react(&self, conn: &Connection, context_id: &str, key: &str, value: &str) -> std::io::Result<()> {
         let timestamp = Self::now_timestamp();
         conn.execute(
-            "INSERT INTO react (target, emoji, timestamp) VALUES (?1, ?2, ?3)",
-            params![key, value, timestamp],
+            "INSERT INTO react (context_id, key, target, emoji, timestamp) VALUES (?1, ?2, ?3, ?4, ?5)",
+            params![context_id, "", key, value, timestamp],
         ).map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))?;
         Ok(())
     }
 /*Communication */
-    pub fn communication(&self, conn: &Connection, key: &str, value: &str) -> std::io::Result<()> {
+    /// Registra un mensaje dirigido a un target dentro de un contexto.
+    /// El `context_id` define el espacio (privado, público, derivado, etc.) en el que se guarda el mensaje.
+    pub fn communicate(&self, conn: &Connection, context_id: &str, key: &str, value: &str) -> std::io::Result<()> {
         let timestamp = Self::now_timestamp();
         conn.execute(
-            "INSERT INTO communication (target, message, timestamp) VALUES (?1, ?2, ?3)",
-            params![key, value, timestamp],
+            "INSERT INTO communicate (context_id, key, target, message, timestamp) VALUES (?1, ?2, ?3, ?4, ?5)",
+            params![context_id, key, key, value, timestamp],
         ).map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))?;
         Ok(())
     }
-    /// Retrieves a list of actions recorded under a specific verb,
-    /// optionally filtered by key and value. This allows for retrospective 
-    /// inspection of the current identity's stored behaviors or attributes.
-    /// Results are returned in reverse chronological order.
-    pub fn get(&self, conn: &Connection, verb: &str, key: Option<&str>, value: Option<&str>) -> std::io::Result<Vec<Action>> {
-        let verbs_list = ["be", "do_", "have", "at", "relate", "react", "communication"];
+    /// Recupera acciones registradas bajo un verbo específico en un `context_id`.
+    /// Puede ser filtrado por campo y valor. Devuelve los resultados en orden cronológico inverso.
+    /// El `context_id` representa un espacio derivado de oye identidades, secretos, dominios, o combinaciones.
+    pub fn get(&self, conn: &Connection, verb: &str, context_id: Option<&str>, key: Option<&str>, value: Option<&str>, _json_path: Option<&str>, limit: Option<usize>, offset: Option<usize>, since: Option<&str>, until: Option<&str>) -> std::io::Result<Vec<(String, Action)>> {
+        let verbs_list = ["be", "do_", "have", "at", "relate", "react", "communicate"];
         let mut results = Vec::new();
 
         let target_verbs: Vec<&str> = if verb == "all" {
@@ -125,41 +149,127 @@ impl Verbs {
         for v in target_verbs {
             let table = match v {
                 "do" => "do_",
-                "react" | "communication" => v,
+                "react" | "communicate" => v,
                 _ => v,
             };
 
             let mut query = match table {
                 "react" => String::from("SELECT target AS key, emoji AS value, timestamp FROM react"),
-                "communication" => String::from("SELECT target AS key, message AS value, timestamp FROM communication"),
+                "communicate" => String::from("SELECT target AS key, message AS value, timestamp FROM communicate"),
                 _ => format!("SELECT key, value, timestamp FROM {}", table),
             };
 
-            // Remove args and arg_refs declarations, and use owned Strings for key/value to avoid borrowing conflicts.
+            let mut context_id_owned = None;
             let mut key_owned = None;
             let mut value_owned = None;
+            let mut since_owned = None;
+            let mut until_owned = None;
 
-            if key.is_some() || value.is_some() {
-                query.push_str(" WHERE 1=1");
-                if let Some(k) = key {
-                    key_owned = Some(k.to_string());
-                    query.push_str(" AND key = ?");
-                }
-                if let Some(vv) = value {
-                    value_owned = Some(vv.to_string());
-                    query.push_str(" AND value = ?");
+            let mut json_key_filter: Option<(String, String)> = None;
+            if let Some(vv) = value {
+                if vv.starts_with("json:") && vv.contains('=') {
+                    let without_prefix = &vv[5..];
+                    if let Some((json_key, json_val)) = without_prefix.split_once('=') {
+                        json_key_filter = Some((json_key.to_string(), json_val.to_string()));
+                    }
                 }
             }
 
-            let arg_refs: Vec<&dyn rusqlite::ToSql> = [
-                key_owned.as_ref().map(|s| s as &dyn rusqlite::ToSql),
-                value_owned.as_ref().map(|s| s as &dyn rusqlite::ToSql),
-            ]
-            .iter()
-            .filter_map(|&x| x)
-            .collect();
+            if context_id.is_some() || key.is_some() || value.is_some() || since.is_some() || until.is_some() {
+                query.push_str(" WHERE 1=1");
+                if let Some(cid) = context_id {
+                    context_id_owned = Some(cid.to_string());
+                    query.push_str(" AND context_id = ?");
+                }
+                if let Some((json_k, json_v)) = &json_key_filter {
+                    query.push_str(&format!(" AND json_valid(value) AND json_extract(value, '$.{}') = ?", json_k));
+                    value_owned = Some(json_v.clone());
+                } else if let Some(vv) = value {
+                    if vv.starts_with("like:") {
+                        let like_pattern = format!("%{}%", &vv[5..]);
+                        value_owned = Some(like_pattern);
+                        query.push_str(" AND value LIKE ?");
+                    } else {
+                        value_owned = Some(vv.to_string());
+                        query.push_str(" AND value = ?");
+                    }
+                }
+                if let Some(k) = key {
+                    if k.starts_with("like:") {
+                        let like_pattern = format!("%{}%", &k[5..]);
+                        key_owned = Some(like_pattern);
+                        query.push_str(" AND key LIKE ?");
+                    } else {
+                        key_owned = Some(k.to_string());
+                        query.push_str(" AND key = ?");
+                    }
+                }
+                if let Some(since_val) = since {
+                    since_owned = Some(since_val.to_string());
+                    query.push_str(" AND timestamp >= ?");
+                }
+                if let Some(until_val) = until {
+                    until_owned = Some(until_val.to_string());
+                    query.push_str(" AND timestamp <= ?");
+                }
+            } else {
+                if let Some(k) = key {
+                    if k.starts_with("like:") {
+                        let like_pattern = format!("%{}%", &k[5..]);
+                        key_owned = Some(like_pattern);
+                        query.push_str(" WHERE key LIKE ?");
+                    } else {
+                        key_owned = Some(k.to_string());
+                        query.push_str(" WHERE key = ?");
+                    }
+                }
+                if let Some(since_val) = since {
+                    since_owned = Some(since_val.to_string());
+                    if query.contains("WHERE") {
+                        query.push_str(" AND timestamp >= ?");
+                    } else {
+                        query.push_str(" WHERE timestamp >= ?");
+                    }
+                }
+                if let Some(until_val) = until {
+                    until_owned = Some(until_val.to_string());
+                    if query.contains("WHERE") {
+                        query.push_str(" AND timestamp <= ?");
+                    } else {
+                        query.push_str(" WHERE timestamp <= ?");
+                    }
+                }
+            }
 
             query.push_str(" ORDER BY timestamp DESC");
+
+            if let Some(lim) = limit {
+                query.push_str(&format!(" LIMIT {}", lim));
+            } else {
+                query.push_str(" LIMIT 100");
+            }
+
+            if let Some(off) = offset {
+                query.push_str(&format!(" OFFSET {}", off));
+            }
+
+            let mut arg_refs: Vec<&dyn rusqlite::ToSql> = Vec::new();
+
+            if let Some(cid) = &context_id_owned {
+                arg_refs.push(cid);
+            }
+            if let Some(k) = &key_owned {
+                arg_refs.push(k);
+            }
+            if let Some(vv) = &value_owned {
+                arg_refs.push(vv);
+            }
+            if let Some(since_v) = &since_owned {
+                arg_refs.push(since_v);
+            }
+            if let Some(until_v) = &until_owned {
+                arg_refs.push(until_v);
+            }
 
             let mut stmt = match conn.prepare(&query) {
                 Ok(s) => s,
@@ -178,12 +288,21 @@ impl Verbs {
 
             for row in rows {
                 if let Ok(action) = row {
-                    results.push(action);
+                    results.push((v.to_string(), action));
                 }
             }
         }
 
-        results.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
+        results.sort_by(|a, b| b.1.timestamp.cmp(&a.1.timestamp));
+
+        if !results.is_empty() {
+            let first_ts = &results.last().unwrap().1.timestamp;
+            let last_ts = &results.first().unwrap().1.timestamp;
+            println!("⏳ Showing {} results from {} to {}", results.len(), first_ts, last_ts);
+        } else {
+            println!("⚠️ No se encontraron resultados.");
+        }
+
         Ok(results)
     }
 }

@@ -2,19 +2,32 @@
 // by suiGn 
 use rusqlite::{Connection, Result as SqlResult};
 pub fn migrate_schema(conn: &Connection) -> SqlResult<()> {
-    // Table for identity metadata
+    // Table for identity metadata (keys encrypted locally)
     conn.execute(
         "CREATE TABLE IF NOT EXISTS me (
-            username TEXT PRIMARY KEY,
+            alias TEXT PRIMARY KEY,
             public_key TEXT NOT NULL,
-            private_key TEXT NOT NULL,
+            encrypted_private_key TEXT NOT NULL,
             created_at TEXT NOT NULL
         )",
         [],
     )?;
+    // Table for registered keys (secrets)
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS keys (
+            context_id TEXT PRIMARY KEY,
+            alias TEXT,
+            type TEXT DEFAULT 'generic',
+            public_address TEXT,
+            created_at TEXT NOT NULL
+        )",
+        [],
+    )?;
+
     // Table for "be" verb
     conn.execute(
         "CREATE TABLE IF NOT EXISTS be (
+            context_id TEXT NOT NULL,
             key TEXT NOT NULL,
             value TEXT NOT NULL,
             timestamp TEXT NOT NULL
@@ -25,6 +38,7 @@ pub fn migrate_schema(conn: &Connection) -> SqlResult<()> {
     // Table for "have" verb
     conn.execute(
         "CREATE TABLE IF NOT EXISTS have (
+            context_id TEXT NOT NULL,
             key TEXT NOT NULL,
             value TEXT NOT NULL,
             timestamp TEXT NOT NULL
@@ -35,6 +49,7 @@ pub fn migrate_schema(conn: &Connection) -> SqlResult<()> {
     // Table for "at" verb
     conn.execute(
         "CREATE TABLE IF NOT EXISTS at (
+            context_id TEXT NOT NULL,
             key TEXT NOT NULL,
             value TEXT NOT NULL,
             timestamp TEXT NOT NULL
@@ -45,8 +60,9 @@ pub fn migrate_schema(conn: &Connection) -> SqlResult<()> {
     // Table for "relate" verb
     conn.execute(
         "CREATE TABLE IF NOT EXISTS relate (
+            context_id TEXT NOT NULL,
+            key TEXT NOT NULL,
             target TEXT NOT NULL,
-            key TEXT,
             value TEXT,
             timestamp TEXT NOT NULL
         )",
@@ -56,6 +72,8 @@ pub fn migrate_schema(conn: &Connection) -> SqlResult<()> {
     // Table for "react" verb
     conn.execute(
         "CREATE TABLE IF NOT EXISTS react (
+            context_id TEXT NOT NULL,
+            key TEXT NOT NULL,
             target TEXT NOT NULL,
             emoji TEXT NOT NULL,
             timestamp TEXT NOT NULL
@@ -67,6 +85,7 @@ pub fn migrate_schema(conn: &Connection) -> SqlResult<()> {
     // Table for "do" verb
     conn.execute(
         "CREATE TABLE IF NOT EXISTS do_ (
+            context_id TEXT NOT NULL,
             key TEXT NOT NULL,
             value TEXT NOT NULL,
             timestamp TEXT NOT NULL
@@ -74,9 +93,11 @@ pub fn migrate_schema(conn: &Connection) -> SqlResult<()> {
         [],
     )?;
 
-    // Table for "communication" verb
+    // Table for "communicate" verb
     conn.execute(
-        "CREATE TABLE IF NOT EXISTS communication (
+        "CREATE TABLE IF NOT EXISTS communicate (
+            context_id TEXT NOT NULL,
+            key TEXT NOT NULL,
             target TEXT NOT NULL,
             message TEXT NOT NULL,
             lang TEXT DEFAULT 'en',
