@@ -5,7 +5,7 @@ pub fn migrate_schema(conn: &Connection) -> SqlResult<()> {
     // Table for identity metadata (keys encrypted locally)
     conn.execute(
         "CREATE TABLE IF NOT EXISTS me (
-            alias TEXT PRIMARY KEY,
+            username TEXT PRIMARY KEY,
             public_key TEXT NOT NULL,
             encrypted_private_key TEXT NOT NULL,
             created_at TEXT NOT NULL
@@ -16,7 +16,7 @@ pub fn migrate_schema(conn: &Connection) -> SqlResult<()> {
     conn.execute(
         "CREATE TABLE IF NOT EXISTS keys (
             context_id TEXT PRIMARY KEY,
-            alias TEXT,
+            username TEXT,
             type TEXT DEFAULT 'generic',
             public_address TEXT,
             created_at TEXT NOT NULL

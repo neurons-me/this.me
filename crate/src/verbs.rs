@@ -14,9 +14,9 @@ say() - Decir algo */
 // - wikipedia.org/page + cleaker:public
 //
 // Esto permite registrar acciones (ser, tener, reaccionar, decir, etc.)
-// dentro de espacios semánticos compartidos o privados, sin depender de alias explícitos (alias).
+// dentro de espacios semánticos compartidos o privados, sin depender de usernames explícitos.
 //
-// Los alias (wallets, etc.) son otra capa que puede firmar, pero no son necesarios para registrar o consultar verbos por default.
+// Los usernames/alias (wallets, etc.) son otra capa que puede firmar, pero no son necesarios para registrar o consultar verbos por default.
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use rusqlite::{Connection, params};
@@ -103,7 +103,7 @@ impl Verbs {
     pub fn relate(&self, conn: &Connection, context_id: &str, key: &str, value: &str) -> std::io::Result<()> {
         let timestamp = Self::now_timestamp();
         conn.execute(
-            "INSERT INTO relate (context_id, target, key, value, timestamp) VALUES (?1, ?2, ?3, ?4, ?5)",
+            "INSERT INTO relate (context_id, key, target, value, timestamp) VALUES (?1, ?2, ?3, ?4, ?5)",
             params![context_id, key, "", value, timestamp],
         ).map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))?;
         Ok(())
@@ -135,7 +135,7 @@ impl Verbs {
     }
     /// Recupera acciones registradas bajo un verbo específico en un `context_id`.
     /// Puede ser filtrado por campo y valor. Devuelve los resultados en orden cronológico inverso.
-    /// El `context_id` representa un espacio derivado de oye identidades, secretos, dominios, o combinaciones.
+    /// El `context_id` representa un espacio derivado de varias identidades, secretos, dominios, o combinaciones.
     pub fn get(&self, conn: &Connection, verb: &str, context_id: Option<&str>, key: Option<&str>, value: Option<&str>, _json_path: Option<&str>, limit: Option<usize>, offset: Option<usize>, since: Option<&str>, until: Option<&str>) -> std::io::Result<Vec<(String, Action)>> {
         let verbs_list = ["be", "do_", "have", "at", "relate", "react", "communicate"];
         let mut results = Vec::new();
