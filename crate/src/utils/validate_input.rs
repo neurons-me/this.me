@@ -1,3 +1,4 @@
+
 use std::io;
 
 pub fn validate_username(username: &str) -> io::Result<()> {

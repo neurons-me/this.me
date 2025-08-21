@@ -62,20 +62,20 @@ class Me {
 /** 🔹 Get public identity info
  * Queries public data like alias and publicKey.
  */
-async publicInfo(alias) {
+async publicInfo(username) {
   const query = `
-    query($alias: String!) {
-      publicInfo(alias: $alias) {
-        alias
+    query($username: String!) {
+      publicInfo(username: $username) {
+        username
         publicKey
       }
     }
   `;
   try {
-    const data = await this.#graphqlRequest(query, { alias });
+    const data = await this.#graphqlRequest(query, { username });
     if (data.publicInfo && typeof data.publicInfo === "object") {
-      const { alias: a, publicKey } = data.publicInfo;
-      return a && publicKey ? { alias: a, publicKey } : null;
+      const { username: u, publicKey } = data.publicInfo;
+      return u && publicKey ? { username: u, publicKey } : null;
     }
     return null;
   } catch {
@@ -91,28 +91,28 @@ async publicInfo(alias) {
     const query = `
       query {
         listIdentities {
-          alias
+          username
         }
       }
     `;
     try {
       const data = await this.#graphqlRequest(query);
       const list = Array.isArray(data.listIdentities)
-        ? data.listIdentities.map(({ alias }) => ({ alias, path: null }))
+        ? data.listIdentities.map(({ username }) => ({ username, path: null }))
         : [];
-      this.#update({ list_Identities: list });
+      this.#update({ listUs: list });
       return list;
     } catch {
-      this.#update({ list_Identities: [] });
+      this.#update({ listUs: [] });
       return [];
     }
   }
 
   /** 🔹 Get entries with filters */
-  async get(alias, password, filter = {}) {
+  async get(username, password, filter = {}) {
     const query = `
-      query($alias: String!, $password: String!, $filter: GetFilter!) {
-        get(alias: $alias, password: $password, filter: $filter) {
+      query($username: String!, $password: String!, $filter: GetFilter!) {
+        get(username: $username, password: $password, filter: $filter) {
           verb
           key
           value
@@ -121,7 +121,7 @@ async publicInfo(alias) {
       }
     `;
     try {
-      const data = await this.#graphqlRequest(query, { alias, password, filter });
+      const data = await this.#graphqlRequest(query, { username, password, filter });
       return data.get || [];
     } catch {
       return [];
@@ -129,14 +129,14 @@ async publicInfo(alias) {
   }
 
   /** 🔹 Base helper for verb mutations */
-  async #verbMutation(type, alias, password, key, value, context_id = null) {
+  async #verbMutation(type, username, password, key, value, context_id = null) {
     const query = `
-      mutation($alias: String!, $password: String!, $key: String!, $value: String!, $context_id: String) {
-        ${type}(alias: $alias, password: $password, key: $key, value: $value, context_id: $context_id)
+      mutation($username: String!, $password: String!, $key: String!, $value: String!, $context_id: String) {
+        ${type}(username: $username, password: $password, key: $key, value: $value, context_id: $context_id)
       }
     `;
     try {
-      const data = await this.#graphqlRequest(query, { alias, password, key, value, context_id });
+      const data = await this.#graphqlRequest(query, { username, password, key, value, context_id });
       return !!data[type];
     } catch {
       return false;
@@ -144,32 +144,32 @@ async publicInfo(alias) {
   }
 
   // Shorthand verb methods
-  async be(alias, password, key, value, context_id = null) {
-    return this.#verbMutation("be", alias, password, key, value, context_id);
+  async be(username, password, key, value, context_id = null) {
+    return this.#verbMutation("be", username, password, key, value, context_id);
   }
 
-  async have(alias, password, key, value, context_id = null) {
-    return this.#verbMutation("have", alias, password, key, value, context_id);
+  async have(username, password, key, value, context_id = null) {
+    return this.#verbMutation("have", username, password, key, value, context_id);
   }
 
-  async do(alias, password, key, value, context_id = null) {
-    return this.#verbMutation("do", alias, password, key, value, context_id);
+  async do(username, password, key, value, context_id = null) {
+    return this.#verbMutation("do", username, password, key, value, context_id);
   }
 
-  async at(alias, password, key, value, context_id = null) {
-    return this.#verbMutation("at", alias, password, key, value, context_id);
+  async at(username, password, key, value, context_id = null) {
+    return this.#verbMutation("at", username, password, key, value, context_id);
   }
 
-  async relate(alias, password, key, value, context_id = null) {
-    return this.#verbMutation("relate", alias, password, key, value, context_id);
+  async relate(username, password, key, value, context_id = null) {
+    return this.#verbMutation("relate", username, password, key, value, context_id);
   }
 
-  async react(alias, password, key, value, context_id = null) {
-    return this.#verbMutation("react", alias, password, key, value, context_id);
+  async react(username, password, key, value, context_id = null) {
+    return this.#verbMutation("react", username, password, key, value, context_id);
   }
 
-  async communicate(alias, password, key, value, context_id = null) {
-    return this.#verbMutation("communicate", alias, password, key, value, context_id);
+  async communicate(username, password, key, value, context_id = null) {
+    return this.#verbMutation("communicate", username, password, key, value, context_id);
   }
 
 

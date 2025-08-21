@@ -4,16 +4,20 @@ use std::fs;
 use std::path::PathBuf;
 use crate::utils::me_error::MeError;
 
+#[cfg(feature = "sqlite")]
+use rusqlite;
+
 #[derive(Debug)]
 pub struct MeSummary {
-    pub alias: String,
+    pub username: String,
     pub path: PathBuf,
 }
 
-/// Loads public data (e.g., alias and public_key) for an identity
-pub fn load_public(alias: &str) -> Result<(String, String), MeError> {
+/// Loads public data (e.g., username and public_key) for an identity
+#[cfg(feature = "sqlite")]
+pub fn load_public(username: &str) -> Result<(String, String), MeError> {
     let home = dirs::home_dir().ok_or_else(|| MeError::Validation("No HOME dir".to_string()))?;
-    let db_path = home.join(".this").join("me").join(alias).join(format!("{}.db", alias));
+    let db_path = home.join(".this").join("me").join(username).join(format!("{}.db", username));
     if !db_path.exists() {
         return Err(MeError::Validation("Identity does not exist.".to_string()));
     }
@@ -25,7 +29,7 @@ pub fn load_public(alias: &str) -> Result<(String, String), MeError> {
 
     if let Some(row) = rows.next().map_err(MeError::Database)? {
         let public_key: String = row.get(0).map_err(MeError::Database)?;
-        Ok((alias.to_string(), public_key))
+        Ok((username.to_string(), public_key))
     } else {
         Err(MeError::Validation("Public key not found.".to_string()))
     }
@@ -42,7 +46,7 @@ pub fn list_us() -> Result<Vec<MeSummary>, MeError> {
             if entry.path().is_dir() {
                 if let Some(username) = entry.file_name().to_str() {
                     list.push(MeSummary {
-                        alias: username.to_string(),
+                        username: username.to_string(),
                         path: entry.path(),
                     });
                 }

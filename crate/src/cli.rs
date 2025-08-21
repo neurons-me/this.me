@@ -13,7 +13,7 @@ pub enum Commands {
     /// Initialize and save a new .me alias (uses `Me::new` + `.save`). An alias must be explicitly provided.
     Create {
         #[arg(long)]
-        alias: String,
+        username: String,
         #[arg(long)]
         password: String,
     },
@@ -22,7 +22,7 @@ pub enum Commands {
     /// Change the password of a .me alias
     ChangePassword {
         #[arg(long)]
-        alias: String,
+        username: String,
         #[arg(long)]
         old_password: String,
         #[arg(long)]
@@ -31,14 +31,14 @@ pub enum Commands {
     /// Load and display an existing .me alias
     Display {
         #[arg(long)]
-        alias: String,
+        username: String,
         #[arg(long)]
         password: String,
     },
     /// Set a 'be' attribute for a .me identity
     Be {
         #[arg(long)]
-        alias: String,
+        username: String,
         #[arg(long)]
         password: String,
         #[arg(long)]
@@ -52,7 +52,7 @@ pub enum Commands {
     /// Set a 'do' attribute for a .me identity
     Do {
         #[arg(long)]
-        alias: String,
+        username: String,
         #[arg(long)]
         password: String,
         #[arg(long)]
@@ -66,7 +66,7 @@ pub enum Commands {
     /// Set a 'have' attribute for a .me identity
     Have {
         #[arg(long)]
-        alias: String,
+        username: String,
         #[arg(long)]
         password: String,
         #[arg(long)]
@@ -80,7 +80,7 @@ pub enum Commands {
     /// Set an 'at' attribute for a .me identity
     At {
         #[arg(long)]
-        alias: String,
+        username: String,
         #[arg(long)]
         password: String,
         #[arg(long)]
@@ -94,7 +94,7 @@ pub enum Commands {
     /// Set a 'relate' attribute for a .me identity
     Relate {
         #[arg(long)]
-        alias: String,
+        username: String,
         #[arg(long)]
         password: String,
         #[arg(long)]
@@ -108,7 +108,7 @@ pub enum Commands {
     /// Set a 'react' attribute for a .me identity
     React {
         #[arg(long)]
-        alias: String,
+        username: String,
         #[arg(long)]
         password: String,
         #[arg(long)]
@@ -122,7 +122,7 @@ pub enum Commands {
     /// Set a 'communicate' attribute for a .me identity
     Communicate {
         #[arg(long)]
-        alias: String,
+        username: String,
         #[arg(long)]
         password: String,
         #[arg(long)]
@@ -136,7 +136,7 @@ pub enum Commands {
     /// Retrieve a value from .me using the `get` method
     Get {
         #[arg(long)]
-        alias: String,
+        username: String,
         #[arg(long)]
         password: String,
         #[arg(long)]

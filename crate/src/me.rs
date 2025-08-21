@@ -16,7 +16,7 @@ use std::convert::TryFrom;  // Added this line
 /// Represents a local encrypted identity used in dApps or Web3 environments.
 #[derive(Serialize)]
 pub struct Me {
-    pub alias: String,
+    pub username: String,
     pub public_key: String,
     pub private_key: String, // stored encrypted
     pub context_id: String,
@@ -27,10 +27,10 @@ pub struct Me {
 }
 
 impl Me {
-    fn derive_key(alias: &str, password: &str) -> Result<Vec<u8>, MeError> {
+    fn derive_key(username: &str, password: &str) -> Result<Vec<u8>, MeError> {
         use sha2::{Sha256, Digest};
         let mut hasher = Sha256::new();
-        hasher.update(alias.as_bytes());
+        hasher.update(username.as_bytes());
         hasher.update(password.as_bytes());
         let result = hasher.finalize();
         Ok(result[..].to_vec())
@@ -39,7 +39,7 @@ impl Me {
     /// Changes the encryption hash of the private key.
     pub fn change_password(&mut self, _old_password: &str, new_password: &str) -> Result<(), MeError> {
         // Re-encrypt the private key using the new password, base64-encoded as in new()
-        let key = Me::derive_key(&self.alias, new_password)?;
+        let key = Me::derive_key(&self.username, new_password)?;
         let encoded_key = base64::engine::general_purpose::STANDARD.encode(&key);
         let encrypted_binary = encrypt_string(&encoded_key, &self.private_key)
             .map_err(|_| MeError::Crypto("Encryption failed".into()))?;
@@ -57,17 +57,17 @@ impl Me {
         serde_json::to_string_pretty(self).map_err(|e| MeError::Serialization(e))
     }
 
-    /// Loads an existing Me instance from the local database using alias and password.
-    pub fn load(alias: &str, password: &str) -> Result<Self, MeError> {
-        validate_username(alias).map_err(|e| MeError::Validation(e.to_string()))?;
+    /// Loads an existing Me instance from the local database using username and password.
+    pub fn load(username: &str, password: &str) -> Result<Self, MeError> {
+        validate_username(username).map_err(|e| MeError::Validation(e.to_string()))?;
         validate_password(password).map_err(|e| MeError::Validation(e.to_string()))?;
         let home = dirs::home_dir().ok_or_else(|| MeError::Validation("No HOME dir".to_string()))?;
-        let db_path = home.join(".this").join("me").join(alias).join(format!("{}.db", alias));
+        let db_path = home.join(".this").join("me").join(username).join(format!("{}.db", username));
         if !db_path.exists() {
             return Err(MeError::Validation("Identity does not exist.".to_string()));
         }
 
-        let (conn, _) = connect(alias, false).map_err(MeError::Database)?;
+        let (conn, _) = connect(username, false).map_err(MeError::Database)?;
         let (public_key, private_key_raw) = {
             let mut stmt = conn.prepare("SELECT public_key, private_key FROM identity_keys LIMIT 1")
                 .map_err(MeError::Database)?;
@@ -77,7 +77,7 @@ impl Me {
                 let encrypted_private_key: String = row.get(1).map_err(MeError::Database)?;
                 let encrypted_bytes = STANDARD.decode(&encrypted_private_key)
                     .map_err(|_| MeError::Crypto("Base64 decode failed".into()))?;
-                let key = Me::derive_key(alias, password)?;
+                let key = Me::derive_key(username, password)?;
                 let encoded_key = base64::engine::general_purpose::STANDARD.encode(&key);
                 let private_key_raw = crate::utils::crypto::decrypt_string(&encoded_key, &encrypted_bytes)
                     .map_err(|_| MeError::Crypto("Decryption failed".into()))?;
@@ -94,7 +94,7 @@ impl Me {
             base64::engine::general_purpose::STANDARD.encode(hasher.finalize())
         };
         Ok(Me {
-            alias: alias.to_string(),
+            username: username.to_string(),
             public_key,
             private_key: private_key_raw,
             context_id,
@@ -103,17 +103,17 @@ impl Me {
         })
     }
 
-    /// Initializes a new Me instance with the given alias and password.
-    pub fn new(alias: &str, password: &str) -> Result<(Self, bool), MeError> {
-        validate_username(alias).map_err(|e| MeError::Validation(e.to_string()))?;
+    /// Initializes a new Me instance with the given username and password.
+    pub fn new(username: &str, password: &str) -> Result<(Self, bool), MeError> {
+        validate_username(username).map_err(|e| MeError::Validation(e.to_string()))?;
         validate_password(password).map_err(|e| MeError::Validation(e.to_string()))?;
         let home = dirs::home_dir().ok_or_else(|| MeError::Validation("No HOME dir".to_string()))?;
-        let db_path = home.join(".this").join("me").join(alias).join(format!("{}.db", alias));
+        let db_path = home.join(".this").join("me").join(username).join(format!("{}.db", username));
         if db_path.exists() {
             return Err(MeError::Validation("Identity already exists.".to_string()));
         }
 
-        let (conn, _) = connect(alias, true).map_err(MeError::Database)?;
+        let (conn, _) = connect(username, true).map_err(MeError::Database)?;
         let mut csprng = OsRng {};
         let mut secret_bytes = [0u8; 32];
         csprng.fill_bytes(&mut secret_bytes);
@@ -123,7 +123,7 @@ impl Me {
         let verify_key = VerifyingKey::from(&signing_key);
         let public_key = STANDARD.encode(verify_key.to_bytes());
         let private_key_raw = STANDARD.encode(signing_key.to_bytes());
-        let key = Me::derive_key(alias, password)?;
+        let key = Me::derive_key(username, password)?;
         let encoded_key = base64::engine::general_purpose::STANDARD.encode(&key);
         let encrypted_binary = encrypt_string(&encoded_key, &private_key_raw)
             .map_err(|_| MeError::Crypto("Encryption failed".into()))?;
@@ -156,7 +156,7 @@ impl Me {
             base64::engine::general_purpose::STANDARD.encode(hasher.finalize())
         };
         Ok((Me {
-            alias: alias.to_string(),
+            username: username.to_string(),
             public_key,
             private_key: private_key_raw,
             context_id,
