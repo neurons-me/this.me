@@ -1,4 +1,3 @@
-// this.me/crate/src/db/pg/store.rs
 use async_trait::async_trait;
 use sqlx::{Pool, Postgres, Row, QueryBuilder};
 use crate::core::store::MeStore;
@@ -32,7 +31,7 @@ impl PgStore {
 
 #[async_trait]
 impl MeStore for PgStore {
-    async fn createIdentity(
+    async fn create_identity(
         &self,
         username: &str,
         public_key: &str,
@@ -98,14 +97,67 @@ impl MeStore for PgStore {
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let table = Self::table_for_verb(verb)
             .ok_or_else(|| format!("Unsupported verb for insert: {}", verb))?;
-        let sql = format!("INSERT INTO me.{table} (context_id, key, value, timestamp) VALUES ($1,$2,$3,$4)");
-        sqlx::query(&sql)
-            .bind(context_id)
-            .bind(key)
-            .bind(value)
-            .bind(timestamp)
-            .execute(&self.pool)
-            .await?;
+
+        match table {
+            // mirror SQLite schema
+            "react" => {
+                // INSERT INTO react(context_id, key, target, emoji, timestamp)
+                sqlx::query(
+                    r#"INSERT INTO me.react (context_id, key, target, emoji, timestamp)
+                       VALUES ($1,$2,$3,$4,$5)"#,
+                )
+                .bind(context_id)
+                .bind("")            // key empty (as in SQLite)
+                .bind(key)           // target = provided "key"
+                .bind(value)         // emoji = provided "value"
+                .bind(timestamp)
+                .execute(&self.pool)
+                .await?;
+            }
+            "communicate" => {
+                // INSERT INTO communicate(context_id, key, target, message, timestamp)
+                sqlx::query(
+                    r#"INSERT INTO me.communicate (context_id, key, target, message, timestamp)
+                       VALUES ($1,$2,$3,$4,$5)"#,
+                )
+                .bind(context_id)
+                .bind(key)           // key
+                .bind(key)           // target = key (as in SQLite)
+                .bind(value)         // message
+                .bind(timestamp)
+                .execute(&self.pool)
+                .await?;
+            }
+            "relate" => {
+                // INSERT INTO relate(context_id, key, target, value, timestamp)
+                sqlx::query(
+                    r#"INSERT INTO me.relate (context_id, key, target, value, timestamp)
+                       VALUES ($1,$2,$3,$4,$5)"#,
+                )
+                .bind(context_id)
+                .bind(key)           // key
+                .bind("")            // target empty (as in SQLite)
+                .bind(value)         // value
+                .bind(timestamp)
+                .execute(&self.pool)
+                .await?;
+            }
+            // default generic schema: (context_id, key, value, timestamp)
+            _ => {
+                let sql = format!(
+                    "INSERT INTO me.{table} (context_id, key, value, timestamp)
+                     VALUES ($1,$2,$3,$4)"
+                );
+                sqlx::query(&sql)
+                    .bind(context_id)
+                    .bind(key)
+                    .bind(value)
+                    .bind(timestamp)
+                    .execute(&self.pool)
+                    .await?;
+            }
+        }
+
         Ok(())
     }
 
@@ -123,9 +175,17 @@ impl MeStore for PgStore {
         let mut out: Vec<Entry> = Vec::new();
 
         for table in tables {
-            let mut qb = QueryBuilder::new(format!(
-                "SELECT key, value, timestamp AS ts FROM me.{table} WHERE 1=1"
-            ));
+            // Build base SELECT depending on table schema
+            let base_sql = match table {
+                "react" => "SELECT target AS key, emoji AS value, timestamp AS ts FROM me.react WHERE 1=1",
+                "communicate" => "SELECT target AS key, message AS value, timestamp AS ts FROM me.communicate WHERE 1=1",
+                _ => {
+                    // be, have, at, relate, do_
+                    &*format!("SELECT key, value, timestamp AS ts FROM me.{table} WHERE 1=1")
+                }
+            };
+
+            let mut qb = QueryBuilder::new(base_sql.to_string());
             if let Some(cid) = &filter.context_id { qb.push(" AND context_id = ").push_bind(cid); }
             if let Some(k) = &filter.key { qb.push(" AND key = ").push_bind(k); }
             if let Some(vv) = &filter.value { qb.push(" AND value = ").push_bind(vv); }
@@ -133,8 +193,8 @@ impl MeStore for PgStore {
             if let Some(until) = &filter.until { qb.push(" AND timestamp <= ").push_bind(until); }
 
             qb.push(" ORDER BY timestamp DESC ");
-            if let Some(lim) = filter.limit { qb.push(" LIMIT ").push_bind(lim as i64); } else { qb.push(" LIMIT 100 "); }
-            if let Some(off) = filter.offset { qb.push(" OFFSET ").push_bind(off as i64); }
+            if let Some(lim) = &filter.limit { qb.push(" LIMIT ").push_bind(*lim as i64); } else { qb.push(" LIMIT 100 "); }
+            if let Some(off) = &filter.offset { qb.push(" OFFSET ").push_bind(*off as i64); }
 
             let rows = qb.build().fetch_all(&self.pool).await?;
             for row in rows {

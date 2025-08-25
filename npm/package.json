@@ -3,8 +3,8 @@
   "version": "3.0.0",
   "description": ".me is your identity. It enables decentralized trust through cryptographic signatures.",
   "main": "dist/this-me.cjs.js",
-"module": "dist/this-me.es.js",
-"browser": "dist/this-me.umd.js",
+  "module": "dist/this-me.es.js",
+  "browser": "dist/this-me.umd.js",
   "exports": {
     ".": {
     "import": "./dist/this-me.es.js",

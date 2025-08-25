@@ -261,5 +261,5 @@ export default me;
 // ✅ If running in a browser, expose a global instance automatically
 if (typeof window !== "undefined") {
   window.me = me;
-  console.log("[this.me] Global instance available as window.me");
+  console.log(".me loaded.");
 }
