@@ -46,8 +46,8 @@ impl Me {
         let new_encrypted = base64::engine::general_purpose::STANDARD.encode(&encrypted_binary);
         // Update the database with the new encrypted private key
         self.conn.execute(
-            "UPDATE identity_keys SET private_key = ?1",
-            [&new_encrypted],
+            "UPDATE me SET encrypted_private_key = ?1 WHERE username = ?2",
+            (&new_encrypted, &self.username),
         ).map_err(MeError::Database)?;
         Ok(())
     }
@@ -69,13 +69,15 @@ impl Me {
 
         let (conn, _) = connect(username, false).map_err(MeError::Database)?;
         let (public_key, private_key_raw) = {
-            let mut stmt = conn.prepare("SELECT public_key, private_key FROM identity_keys LIMIT 1")
+            let mut stmt = conn
+                .prepare("SELECT public_key, encrypted_private_key FROM me WHERE username = ?1 LIMIT 1")
                 .map_err(MeError::Database)?;
-            let mut rows = stmt.query([]).map_err(MeError::Database)?;
+            let mut rows = stmt.query([username]).map_err(MeError::Database)?;
             if let Some(row) = rows.next().map_err(MeError::Database)? {
                 let public_key: String = row.get(0).map_err(MeError::Database)?;
                 let encrypted_private_key: String = row.get(1).map_err(MeError::Database)?;
-                let encrypted_bytes = STANDARD.decode(&encrypted_private_key)
+                let encrypted_bytes = STANDARD
+                    .decode(&encrypted_private_key)
                     .map_err(|_| MeError::Crypto("Base64 decode failed".into()))?;
                 let key = Me::derive_key(username, password)?;
                 let encoded_key = base64::engine::general_purpose::STANDARD.encode(&key);
@@ -129,25 +131,19 @@ impl Me {
             .map_err(|_| MeError::Crypto("Encryption failed".into()))?;
         let encrypted_private_key = STANDARD.encode(&encrypted_binary);
         conn.execute(
-            "CREATE TABLE IF NOT EXISTS identity_keys (public_key TEXT NOT NULL, private_key TEXT NOT NULL)",
+            "CREATE TABLE IF NOT EXISTS me (
+                username TEXT PRIMARY KEY,
+                public_key TEXT NOT NULL,
+                encrypted_private_key TEXT NOT NULL,
+                created_at TEXT NOT NULL
+            )",
             [],
-        ).map_err(MeError::Database)?;
-        conn.execute(
-            "INSERT INTO identity_keys (public_key, private_key) VALUES (?1, ?2)",
-            (&public_key, &encrypted_private_key),
         ).map_err(MeError::Database)?;
         use chrono::Utc;
         let created_at = Utc::now().to_rfc3339();
         conn.execute(
-            "CREATE TABLE IF NOT EXISTS me (
-                public_key TEXT NOT NULL,
-                encrypted_private_key TEXT NOT NULL,
-                created_at TEXT NOT NULL
-            )", [],
-        ).map_err(MeError::Database)?;
-        conn.execute(
-            "INSERT INTO me (public_key, encrypted_private_key, created_at) VALUES (?1, ?2, ?3)",
-            (&public_key, &encrypted_private_key, &created_at),
+            "INSERT INTO me (username, public_key, encrypted_private_key, created_at) VALUES (?1, ?2, ?3, ?4)",
+            (&username, &public_key, &encrypted_private_key, &created_at),
         ).map_err(MeError::Database)?;
         let context_id = {
             use sha2::{Sha256, Digest};
