@@ -10,26 +10,26 @@
 .idea/
 
 # ─── Node (JavaScript / npm) ──────────────────
-npm/node_modules/
-npm/dist/
-npm/build/
-npm/coverage/
-npm/package-lock.json
-npm/yarn.lock
+me.npm/node_modules/
+me.npm/dist/
+me.npm/build/
+me.npm/coverage/
+me.npm/package-lock.json
+me.npm/yarn.lock
 
 # ─── Python (py) ─────────────────────────────
-py/__pycache__/
-py/**/*.pyc
-py/**/*.pyo
-py/**/*.egg-info/
-py/dist/
-py/build/
-py/*.egg
-py/venv/
-py/.venv/
-py/Pipfile.lock
-py/poetry.lock
+me.py/__pycache__/
+me.py/**/*.pyc
+me.py/**/*.pyo
+me.py/**/*.egg-info/
+me.py/dist/
+me.py/build/
+me.py/*.egg
+me.py/venv/
+me.py/.venv/
+me.py/Pipfile.lock
+me.py/poetry.lock
 
 # ─── Rust (crate) ─────────────────────────────
-crate/target/
-crate/Cargo.lock
+me.crate/target/
+me.crate/Cargo.lock
