@@ -1,3 +1,4 @@
+## This.Me
  Nota – Próximo paso con this.me y LLM
 	•	Una vez terminada la página, implementar un prototipo declarativo conectado a un LLM.
 	•	Usar un enfoque RAG (Retrieval-Augmented Generation) con la documentación y código de this.me para que el modelo pueda responder sobre la estructura y el ecosistema sin reentrenarse.
