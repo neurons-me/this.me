@@ -33,3 +33,5 @@ me.pip/poetry.lock
 # ─── Rust (crate) ─────────────────────────────
 me.crate/target/
 me.crate/Cargo.lock
+me.crate/target/
+me.crate/.cargo/
