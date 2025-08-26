@@ -18,17 +18,17 @@ me.npm/package-lock.json
 me.npm/yarn.lock
 
 # ─── Python (py) ─────────────────────────────
-me.py/__pycache__/
-me.py/**/*.pyc
-me.py/**/*.pyo
-me.py/**/*.egg-info/
-me.py/dist/
-me.py/build/
-me.py/*.egg
-me.py/venv/
-me.py/.venv/
-me.py/Pipfile.lock
-me.py/poetry.lock
+me.pip/__pycache__/
+me.pip/**/*.pyc
+me.pip/**/*.pyo
+me.pip/**/*.egg-info/
+me.pip/dist/
+me.pip/build/
+me.pip/*.egg
+me.pip/venv/
+me.pip/.venv/
+me.pip/Pipfile.lock
+me.pip/poetry.lock
 
 # ─── Rust (crate) ─────────────────────────────
 me.crate/target/
