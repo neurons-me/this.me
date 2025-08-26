@@ -1,0 +1,10 @@
+/target/
+/node_modules/
+/dist/
+*.db
+*.log
+*.zip
+*.mp4
+*.mp3
+*.wasm
+*.bin
