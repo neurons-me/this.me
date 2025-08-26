@@ -1,0 +1,15 @@
+Metadata-Version: 2.4
+Name: this.me
+Version: 0.1.2
+Summary: Identity Declaration of this.me.
+Author: suiGn
+Classifier: Programming Language :: Python :: 3
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Dynamic: author
+Dynamic: classifier
+Dynamic: description-content-type
+Dynamic: license-file
+Dynamic: requires-python
+Dynamic: summary

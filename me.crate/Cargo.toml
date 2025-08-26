@@ -1,0 +1,43 @@
+[package]
+name = "this-me"
+version = "0.1.6"
+authors = ["suiGn <admin@neurons.me>"]
+edition = "2021"
+description = "Encrypted identity store CLI tool (this.me)"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/neurons-me/this.me"
+homepage = "https://neurons.me"
+readme = "README.md"
+keywords = ["identity", "encryption", "cli"]
+categories = ["command-line-utilities", "cryptography"]
+
+[[bin]]
+name = "me"
+path = "src/main.rs"
+
+[dependencies]
+aes-gcm = "0.10"
+aes = "0.8"
+rand = "0.8"
+sha2 = "0.10"
+base64 = "0.21"
+clap = { version = "4", features = ["derive"] }
+actix-web = "4"
+serde_json = "1.0.140"
+serde = { version = "1", features = ["derive"] }
+dirs = "5" 
+regex = "1"
+chrono      = { version = "0.4", features = ["serde"] }
+thiserror = "2.0.12"
+hex = "0.4"
+chacha20poly1305 = "0.10.1"
+ed25519-dalek = "2.2.0"
+reqwest = { version = "0.11", features = ["json", "blocking"] }
+async-trait = "0.1"
+rusqlite = { version = "0.29.0", features = ["bundled"], optional = true }
+sqlx = { version = "0.7.0", default-features = false, features = ["runtime-tokio", "macros", "postgres", "chrono"], optional = true }
+
+[features]
+default = ["sqlite"]
+sqlite = ["rusqlite"]
+pg = ["sqlx"]

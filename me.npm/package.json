@@ -1,0 +1,42 @@
+{
+  "name": "this.me",
+  "version": "3.0.0",
+  "description": ".me is your identity. It enables decentralized trust through cryptographic signatures.",
+  "main": "dist/this-me.cjs.js",
+  "module": "dist/this-me.es.js",
+  "browser": "dist/this-me.umd.js",
+  "exports": {
+    ".": {
+    "import": "./dist/this-me.es.js",
+      "require": "./dist/this-me.cjs.js"
+    }
+  },
+  "type": "module",
+  "keywords": [
+    "this.me",
+    "identity",
+    "decentralized",
+    "cryptographic",
+    "trust",
+    "signature",
+    "local",
+    "self-sovereign",
+    "monad"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neurons-me/this.me.git"
+  },
+  "homepage": "https://www.npmjs.com/package/this.me",
+  "author": "suiGn",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+  "build": "vite build"
+  },
+  "devDependencies": {
+    "vite": "^7.0.6"
+  }
+}

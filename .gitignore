@@ -1,10 +1,35 @@
-/target/
-/node_modules/
-/dist/
-*.db
+# ─── System Files ─────────────────────────────
+.DS_Store
+**/.DS_Store
 *.log
-*.zip
-*.mp4
-*.mp3
-*.wasm
-*.bin
+*.tmp
+
+# ─── General Ignore ───────────────────────────
+.env
+.vscode/
+.idea/
+
+# ─── Node (JavaScript / npm) ──────────────────
+npm/node_modules/
+npm/dist/
+npm/build/
+npm/coverage/
+npm/package-lock.json
+npm/yarn.lock
+
+# ─── Python (py) ─────────────────────────────
+py/__pycache__/
+py/**/*.pyc
+py/**/*.pyo
+py/**/*.egg-info/
+py/dist/
+py/build/
+py/*.egg
+py/venv/
+py/.venv/
+py/Pipfile.lock
+py/poetry.lock
+
+# ─── Rust (crate) ─────────────────────────────
+crate/target/
+crate/Cargo.lock
