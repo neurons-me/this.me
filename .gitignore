@@ -14,8 +14,6 @@ me.npm/node_modules/
 me.npm/dist/
 me.npm/build/
 me.npm/coverage/
-me.npm/package-lock.json
-me.npm/yarn.lock
 
 # ─── Python (py) ─────────────────────────────
 me.pip/__pycache__/
@@ -31,7 +29,5 @@ me.pip/Pipfile.lock
 me.pip/poetry.lock
 
 # ─── Rust (crate) ─────────────────────────────
-me.crate/target/
-me.crate/Cargo.lock
 me.crate/target/
 me.crate/.cargo/
