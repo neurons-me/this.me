@@ -255,11 +255,76 @@ async publicInfo(username) {
 
 
 /** ✅ Export a single shared instance */
-const me = new Me();
+// Create the raw instance
+const _meRaw = new Me();
+// Wrap with a Proxy to auto-log async method results in the browser console
+const me = new Proxy(_meRaw, {
+  get(target, prop, receiver) {
+    const value = Reflect.get(target, prop, receiver);
+    // If it's not a function, return as-is
+    if (typeof value !== "function") return value;
+    // Wrap functions to preserve `this` and auto-handle Promises
+    return (...args) => {
+      try {
+        const result = value.apply(target, args);
+        // If the method returned a Promise, log when it resolves/rejects
+        if (result && typeof result.then === "function") {
+          result
+            .then((data) => {
+              if (typeof window !== "undefined") {
+                console.log(`[this.me] ${String(prop)} ✓`, data);
+              }
+              return data;
+            })
+            .catch((err) => {
+              if (typeof window !== "undefined") {
+                console.error(`[this.me] ${String(prop)} ✗`, err);
+              }
+              // Re-throw so callers can still catch
+              throw err;
+            });
+        }
+        return result; // still return Promise (or value) for programmatic use
+      } catch (err) {
+        if (typeof window !== "undefined") {
+          console.error(`[.me] ${String(prop)} ✗`, err);
+        }
+        throw err;
+      }
+    };
+  }
+});
+
+// ✅ Helper: Log available methods when typing `me` in the browser console
+const _printMeHelp = () => {
+  console.log("%c[this.me] Available Methods:", "color: #4CAF50; font-weight: bold;");
+  console.table({
+    status: "Get daemon status and version",
+    publicInfo: "Fetch public info (alias, public key)",
+    listIdentities: "List all known identities",
+    get: "Fetch entries for a username",
+    be: "Set or mutate data (verb: be)",
+    have: "Set or mutate data (verb: have)",
+    do: "Set or mutate data (verb: do)",
+    at: "Set or mutate data (verb: at)",
+    relate: "Set or mutate data (verb: relate)",
+    react: "Set or mutate data (verb: react)",
+    communicate: "Set or mutate data (verb: communicate)",
+    subscribe: "Subscribe to state changes",
+    getState: "Retrieve current state snapshot",
+    setEndpoint: "Change the GraphQL endpoint",
+    startSocket: "Start real-time WebSocket updates"
+  });
+  console.log("%cTip:%c Call any method like `me.status()` or `me.listIdentities()`", "color: #2196F3; font-weight: bold;", "color: #333;");
+};
+
 export default me;
 
 // ✅ If running in a browser, expose a global instance automatically
 if (typeof window !== "undefined") {
+  // Expose global instance without auto-printing
   window.me = me;
-  console.log(".me loaded.");
+  // Provide explicit helper
+  me.help = _printMeHelp;
+  console.log(".me loaded. Tip: type `me.help()` to see available methods.");
 }

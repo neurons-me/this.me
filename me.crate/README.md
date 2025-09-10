@@ -3,12 +3,11 @@
 `this-me` is a lightweight, local-first identity system designed for decentralized and privacy-conscious applications. It allows users to create, manage, and securely store encrypted identity files. Part of the **neurons.me** ecosystem, `this-me` treats identity as a living structure, expressed semantically through verbs.
 
 - The `Me` struct represents an encrypted identity file.
-- Verbs (e.g. `be`, `have`, `do`, `say`, etc.) are invoked as methods on a loaded `Me`.
+- Verbs (e.g. `be`, `do`, `have`, `communicate`, `at`, `react`, `relate` ) are invoked as methods on a loaded `Me`.
 
 ---
 
 # 📦 Installation
-
 If published to crates.io:
 
 ```bash
@@ -24,17 +23,14 @@ cargo install --path .
 ---
 
 # 🚀 .me CLI Usage
-
 Each command is executed via the CLI binary `me`. Identity loading is automatic and based on the provided username and password.
 
 ### ✅ Create Identity
-
 ```bash
 me create --username <username> --password <password>
 ```
 
 ### 🔄 Change Identity Password
-
 ```bash
 me change-password --username <username> --old-password <old_password> --new-password <new_password>
 ```
@@ -42,7 +38,6 @@ me change-password --username <username> --old-password <old_password> --new-pas
 Updates the password protecting the identity.
 
 ### 📖 Display Identity
-
 ```bash
 me display --username <username> --password <password>
 ```
@@ -50,7 +45,6 @@ me display --username <username> --password <password>
 Decrypts and displays the identity contents in pretty JSON.
 
 ### 📂 List Identities
-
 ```bash
 me list
 ```
@@ -58,7 +52,6 @@ me list
 Lists all existing identities stored under `~/.this/me`.
 
 ## Verbs
-
 ```bash
 # be
 me be --username exampleUser --password 123456 --key "identity" --value "creator"
@@ -92,9 +85,11 @@ Results are printed with timestamped entries.
 ----
 
 If you are running from the project and not the binary run:
+```bash
 cargo run -- instead of me
-**Example:**
+```
 
+**Example:**
 ```bash
 # list (identidades registradas)
 cargo run -- list
@@ -102,12 +97,9 @@ cargo run -- list
 cargo run -- create --username newUser --password secret123
 ```
 
---- EXPLICA GET
-
 ----
 
 ## ⚠️ Username & Password Rules
-
 - Usernames must be 5–21 characters long and only include letters, numbers, `.` or `_`.
 - Passwords must be at least 4 characters long.
 

@@ -1,12 +1,13 @@
-Key Questions to Address
-Identity Core: What defines the essence of .me?
-Relationships: How does .me relate to others, groups, or larger entities?
-Belongings: What does .me own or have as personal items?
-Modularity: How do we allow external objects to seamlessly integrate with .me?
-Hierarchy of Interactions: How do we classify interactions into tiers (self, relationships, society, etc.)?
----
+### Key Questions to Address
 
-### **1. Identity Core: What defines the essence of `.me`?**
+**Identity Core:** What defines the essence of .me?
+**Relationships:** How does .me relate to others, groups, or larger entities?
+**Belongings:** What does .me own or have as personal items?
+**Modularity:** How do we allow external objects to seamlessly integrate with .me?                            **Hierarchy of Interactions:** How do we classify interactions into tiers (self, relationships, society, etc.)?
+
+----
+
+#### **1. Identity Core: What defines the essence of `.me`?**
    - **Essence Defined:**
      - **Immutable Core Attributes:** `username` and `DID` (Decentralized Identifier).
      - Clearly distinguishes the user's unique existence in the digital realm.
@@ -15,7 +16,7 @@ Hierarchy of Interactions: How do we classify interactions into tiers (self, rel
 
 ---
 
-### **2. Relationships: How does `.me` relate to others, groups, or larger entities?**
+#### **2. Relationships: How does `.me` relate to others, groups, or larger entities?**
    - **Connections Defined:**
      - **Contacts:** Direct relationships (e.g., friends, acquaintances).
      - **Groups:** Collections with shared contexts (e.g., family, organizations, societies).
@@ -27,7 +28,7 @@ Hierarchy of Interactions: How do we classify interactions into tiers (self, rel
 
 ---
 
-### **3. Belongings: What does `.me` own or have as personal items?**
+#### **3. Belongings: What does `.me` own or have as personal items?**
    - **Properties Defined:**
      - Everything the user owns or manages (e.g., wallets, devices, digital files).
    - **Methods for Ownership:**
@@ -37,7 +38,7 @@ Hierarchy of Interactions: How do we classify interactions into tiers (self, rel
 
 ---
 
-### **4. Modularity: How do we allow external objects to seamlessly integrate with `.me`?**
+#### **4. Modularity: How do we allow external objects to seamlessly integrate with `.me`?**
    - **Independent Objects:**
      - Objects like `Wallet`, `Device`, etc., are designed and managed outside the `this.me` instance.
    - **Integration:**
@@ -49,7 +50,7 @@ Hierarchy of Interactions: How do we classify interactions into tiers (self, rel
 
 ---
 
-### **5. Hierarchy of Interactions: How do we classify interactions into tiers (self, relationships, society, etc.)?**
+#### **5. Hierarchy of Interactions: How do we classify interactions into tiers (self, relationships, society, etc.)?**
    - **Tiers of Interactions:**
      - **Reactions:** Personal engagements (`like`, `comment`, `share`).
      - **Relationships:** Broader social connections (individuals, groups, organizations).

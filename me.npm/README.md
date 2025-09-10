@@ -1,15 +1,13 @@
 <img src="https://docs.neurons.me/media/all-this/webP/this.me.webp" alt="SVG Image" width="250" height="250">
 
 # THIS.ME  
-> **This.Me** is a data-structured identity designed to generate and manage identities, attributes, properties and more. It combines privacy, user control, and secure interoperability.
-
 <strong>.me</strong> is your identity that lives on your machine, under your control. It holds attributes, relationships, and keys that define who you are—and crucially, <strong>how you relate to others</strong>.
 
-# Getting Started:
+## Getting Started:
 
 You can use **this.me** both in the browser and in Node environments. The library automatically detects the environment and provides a single global instance of `me` once initialized.
 
-### **1. Installation**
+#### **1. Installation**
 
 If you are using npm:
 
@@ -29,7 +27,7 @@ Or load it directly in the browser (after building):
 
 ---
 
-### **2. Initialization**
+#### **2. Initialization**
 
 You need to initialize the `.me` instance before using it:
 
@@ -45,7 +43,7 @@ Once initialized, the `me` instance will maintain its state (status, loaded iden
 
 ---
 
-### **3. Checking Daemon Status**
+#### **3. Checking Daemon Status**
 
 You can verify if the local daemon is running:
 
@@ -58,7 +56,7 @@ The floating components or any GUI indicators (green/red) can rely directly on `
 
 ---
 
-### **4. Listing Identities**
+#### **4. Listing Identities**
 
 ```js
 const list = await me.listUs();
@@ -72,7 +70,7 @@ console.log(list);
 
 ---
 
-### **5. Loading an Identity**
+#### **5. Loading an Identity**
 
 ```js
 await me.load("abellae", "mySecretHash");
@@ -83,7 +81,7 @@ After loading, you can use all available methods (`be`, `have`, `do`, etc.).
 
 ---
 
-### **6. Example in the Browser Console**
+#### **6. Example in the Browser Console**
 
 If you include the UMD bundle:
 
@@ -104,9 +102,9 @@ If you include the UMD bundle:
 
 ------
 
-# How this.me **Works (Simplified)**
+### How this.me **Works (Simplified)**
 
-The Me class creates and manages a **local, encrypted identity file** based on a username and a secret hash.
+The **Me** class creates and manages a **local, encrypted identity file** based on a username and a secret hash.
 
 #### **Creating a new identity**
 
@@ -199,17 +197,7 @@ Let me know if you’d like a diagram or visual flow to go with this explanation
 ---
 <img src="https://suign.github.io/assets/imgs/monads.png" alt="Cleak Me Please" width="244">Hello, I am **.me**
 
-### ❯ add.me 
 ----
-
-# What is All.This?
-###### Modular Data Structures:
-**Each module** in **[all.this](https://neurons.me/all-this)** represents a specific **datastructure**. These **classes** encapsulate the functionalities and **data specific to their domain.**
-
-**[this.me](https://docs.neurons.me/this.me/index.html)  - [this.audio](https://docs.neurons.me/this.audio/index.html) - [this.text](https://docs.neurons.me/this.text/index.html) - [this.wallet](https://docs.neurons.me/this.wallet/index.html) - [this.img](https://docs.neurons.me/this.img/index.html) - [this.pixel](https://docs.neurons.me/this.pixel/index.html) - [be.this](https://docs.neurons.me/be.this/index.html) - [this.DOM](https://docs.neurons.me/this.DOM/index.html) - [this.env](https://docs.neurons.me/this.env/index.html) - [this.GUI](https://docs.neurons.me/this.GUI/index.html) - [this.be](https://docs.neurons.me/this.be/index.html) - [this.video](https://docs.neurons.me/this.video/index.html) - [this.dictionaries](https://docs.neurons.me/this.dictionaries/index.html)** 
-
-#### Contribution
-If you are interested in collaborating or wish to share your insights, please feel free to reach out or contribute to the project.
 
 #### License & Policies
 - **License**: MIT License.

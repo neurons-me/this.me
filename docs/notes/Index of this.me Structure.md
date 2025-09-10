@@ -2,21 +2,13 @@
 Here’s a comprehensive list of the components and their purposes within the `this.me` class:
 
 ### Declarative Identity Structure (`this.me`)
-
 In `this.me`, identity is built through **verbs** — declarative acts that define what the self *is*, *has*, *feels*, or *relates to*.
-
 There are no static "attributes" or "properties" baked into the model. Instead:
-
 \- `be(key, value)` declares traits
-
 \- `have(key, value)` declares possessions
-
 \- `relate(key, value)` declares connections
-
 \- `react(key, value)` expresses interaction
-
 \- `at(key, value)` defines location/context
-
 \- `say(key, value)` declares thoughts or speech
 
 These verbs are recorded in the local identity database.
@@ -38,7 +30,6 @@ These verbs are recorded in the local identity database.
 ------
 
 ### **2. Why Independent Objects?**
-
 #### **Modularity**
 - Keeps the `this.me` instance *agnostic* of specifics.
 - Allows new property types to integrate seamlessly.
@@ -49,12 +40,6 @@ These verbs are recorded in the local identity database.
 
 #### **Transferability**
 - Ownership is a property-level concern.
-- Example:
-
-  ```javascript
-  const wallet = new Wallet(owner = "me");
-  wallet.transferOwnership("otherMeInstance");
-  ```
 
 #### **Separation of Concerns**
 - Identity (`this.me`) manages relationships, attributes, and higher-level user interactions.
