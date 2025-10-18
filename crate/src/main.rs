@@ -53,125 +53,11 @@ fn main() {
     let cli = Cli::parse();
     let colored_output = std::io::stdout().is_terminal();
     if colored_output {
-        // Print a compact merged QR code and .me ASCII logo (logo embedded in QR)
-        {
-            // Use fast_qr::qr (or qrcodegen) for high error correction, small QR, logo overlay
-            use owo_colors::OwoColorize;
-            use std::io::{self, Write};
-            let active_user = "suign";
-            let qr_data = format!("me://{}#public_key_example", active_user);
-
-            // Get terminal width to scale QR accordingly
-            let term_width = match std::env::var("COLUMNS")
-                .ok()
-                .and_then(|v| v.parse::<usize>().ok())
-            {
-                Some(w) if w > 0 => w,
-                _ => {
-                    // Try to detect with term_size or fallback
-                    #[cfg(unix)]
-                    {
-                        use libc::{ioctl, winsize, STDOUT_FILENO, TIOCGWINSZ};
-                        unsafe {
-                            let mut ws: winsize = std::mem::zeroed();
-                            if ioctl(STDOUT_FILENO, TIOCGWINSZ, &mut ws) == 0 && ws.ws_col > 0 {
-                                ws.ws_col as usize
-                            } else {
-                                80
-                            }
-                        }
-                    }
-                    #[cfg(not(unix))]
-                    {
-                        80
-                    }
-                }
-            };
-
-            // --- Generate QR code with high error correction (H), size <= 30x30 ---
-            // Use qrcodegen (already in qrcode crate as qrcodegen::QrCode)
-            use qrcode::QrCode;
-            use qrcode::types::QrErrorCorrectionLevel;
-            let qr = QrCode::with_error_correction_level(qr_data.as_bytes(), QrErrorCorrectionLevel::High).unwrap();
-            let orig_size = qr.size();
-            // Clamp QR to max 30x30
-            let qr_size = if orig_size > 30 { 30 } else { orig_size };
-            // If QR is too big, crop (rare for short data)
-            // We'll only render a qr_size x qr_size region from the center
-            let qr_offset = if orig_size > qr_size { (orig_size - qr_size) / 2 } else { 0 };
-
-            // .me logo ASCII, bold, bright green (same as before)
-            let me_art = [
-                "▄ ▄▄▄▄  ▗▞▀▚▖",
-                "  █ █ █ ▐▛▀▀▘",
-                "  █   █ ▝▚▄▄▖",
-            ];
-            let me_h = me_art.len();
-            let me_w = me_art[0].chars().count();
-
-            // Determine scaling: each QR module is 2 chars wide, so actual width = qr_size*2 + quiet*2*2
-            let quiet_zone = 2usize; // 2 modules is enough for terminal
-            let max_qr_display_w = term_width.saturating_sub(2); // leave a little margin
-            let qr_display_w = (qr_size + quiet_zone * 2) * 2;
-            // If too wide, shrink QR (rare)
-            let mut scale = 1usize;
-            if qr_display_w > max_qr_display_w {
-                // Try to shrink by reducing QR size
-                let max_modules = (max_qr_display_w / 2).saturating_sub(quiet_zone * 2);
-                if max_modules < qr_size {
-                    scale = 1;
-                }
-            }
-            // Overlay logo to be ~1/3 of QR width
-            let overlay_w = (qr_size as f32 / 3.0).round() as usize;
-            let logo_scale = if me_w > 0 { overlay_w.saturating_div(me_w).max(1) } else { 1 };
-            let scaled_me_w = me_w * logo_scale;
-            let scaled_me_h = me_h * logo_scale;
-            let me_start_y = if qr_size > scaled_me_h { qr_size / 2 - scaled_me_h / 2 } else { 0 };
-            let me_start_x = if qr_size > scaled_me_w { qr_size / 2 - scaled_me_w / 2 } else { 0 };
-
-            // Print top quiet zone
-            let margin_line = " ".repeat((qr_size + quiet_zone * 2) * 2);
-            for _ in 0..quiet_zone {
-                println!("{}", margin_line);
-            }
-            // Each QR line
-            for y in 0..qr_size {
-                let mut line = String::new();
-                // Left quiet zone
-                line.push_str(&" ".repeat(quiet_zone * 2));
-                for x in 0..qr_size {
-                    // Overlay .me ASCII art in the center, scaled
-                    let in_overlay = y >= me_start_y && y < me_start_y + scaled_me_h
-                        && x >= me_start_x && x < me_start_x + scaled_me_w;
-                    if in_overlay {
-                        let char_x = (x - me_start_x) / logo_scale;
-                        let char_y = (y - me_start_y) / logo_scale;
-                        let c = me_art[char_y].chars().nth(char_x).unwrap_or(' ');
-                        if c != ' ' {
-                            line.push_str(&c.to_string().bright_green().bold().to_string());
-                            line.push(' '); // keep width even
-                            continue;
-                        } else {
-                            // fall through to QR rendering
-                        }
-                    }
-                    let is_dark = qr.get_module(x as i32 + qr_offset as i32, y as i32 + qr_offset as i32);
-                    if is_dark {
-                        line.push_str("██");
-                    } else {
-                        line.push_str("  ");
-                    }
-                }
-                // Right quiet zone
-                line.push_str(&" ".repeat(quiet_zone * 2));
-                println!("{}", line);
-            }
-            // Bottom quiet zone
-            for _ in 0..quiet_zone {
-                println!("{}", margin_line);
-            }
-        }
+        println!("{}", "
+▄ ▄▄▄▄  ▗▞▀▚▖
+  █ █ █ ▐▛▀▀▘
+  █   █ ▝▚▄▄▖
+             ".bright_green().bold());
     } else {
         println!(".me CLI.");
     }
@@ -188,7 +74,7 @@ fn main() {
 ┓┏┏┣┓┏┓┏┛
 ┗┻┛┛┗┗┛•
          "
-            .bright_white()
+                .bright_white()
                 .bold()
         );
 
@@ -233,7 +119,16 @@ fn main() {
                 "",
                 w1 = username_col_width
             );
- 
+            let header = format!(
+                "│{:<w1$}│",
+                "user".bright_white().bold(),
+                w1 = username_col_width
+            );
+            let sep = format!(
+                "├{:─<w1$}┤",
+                "",
+                w1 = username_col_width
+            );
             let bottom = format!(
                 "└{:─<w1$}┘",
                 "",
@@ -274,7 +169,7 @@ fn main() {
                 Err(MeError::Io(ref err)) if err.kind() == std::io::ErrorKind::AlreadyExists => {
                     eprintln!("⚠️ Identity '{}' already exists.", username);
                 }
-                Err(e) => eprintln!("❌ '{}': {}", username, e),
+                Err(e) => eprintln!("❌ Failed to create identity '{}': {}", username, e),
             }
         }
         Some(Commands::ChangePassword { old_password, new_password }) => {
