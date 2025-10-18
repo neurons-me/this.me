@@ -2,6 +2,7 @@
 // ---- Common utilities and legacy (SQLite) API ----
 pub mod utils;
 pub mod manager;
+pub mod host;
 // Legacy local-first API (SQLite-backed) that you already have working.
 // Kept intact for backwards compatibility with the existing CLI.
 #[cfg(feature = "sqlite")]

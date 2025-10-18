@@ -81,6 +81,19 @@ pub fn migrate_schema(conn: &Connection) -> SqlResult<()> {
         [],
     )?;
 
+    // Table for "arc" (Affinity–Reality–Communication)
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS arc (
+            context_id TEXT NOT NULL,
+            actor TEXT NOT NULL,
+            target TEXT NOT NULL,
+            affinity REAL DEFAULT 0.0,
+            reality REAL DEFAULT 0.0,
+            communication REAL DEFAULT 0.0,
+            timestamp TEXT NOT NULL
+        )",
+        [],
+    )?;
 
     // Table for "do" verb
     conn.execute(

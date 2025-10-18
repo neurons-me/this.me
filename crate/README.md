@@ -1,12 +1,8 @@
 # this-me
-
-`this-me` is a lightweight, local-first identity system designed for decentralized and privacy-conscious applications. It allows users to create, manage, and securely store encrypted identity files. Part of the **neurons.me** ecosystem, `this-me` treats identity as a living structure, expressed semantically through verbs.
-
-- The `Me` struct represents an encrypted identity file.
+-  `Me` represents an encrypted identity file.
 - Verbs (e.g. `be`, `do`, `have`, `communicate`, `at`, `react`, `relate` ) are invoked as methods on a loaded `Me`.
 
 ---
-
 # 📦 Installation
 If published to crates.io:
 
@@ -15,7 +11,6 @@ cargo install this-me
 ```
 
 If installing locally from source:
-
 ```bash
 cargo install --path .
 ```
@@ -25,31 +20,15 @@ cargo install --path .
 # 🚀 .me CLI Usage
 Each command is executed via the CLI binary `me`. Identity loading is automatic and based on the provided username and password.
 
-### ✅ Create Identity
-```bash
-me create --username <username> --password <password>
-```
-
-### 🔄 Change Identity Password
-```bash
-me change-password --username <username> --old-password <old_password> --new-password <new_password>
-```
-
-Updates the password protecting the identity.
-
-### 📖 Display Identity
-```bash
-me display --username <username> --password <password>
-```
-
-Decrypts and displays the identity contents in pretty JSON.
-
-### 📂 List Identities
-```bash
-me list
-```
-
-Lists all existing identities stored under `~/.this/me`.
+| **Subcomando**                               | **Descripción**                                              | **Ejemplo**                                                  |
+| -------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| ✅ Create                                     | Crea una nueva identidad .me                                 | me create --username abella --password secret                |
+| 📂 List                                       | Muestra todas las identidades                                | me list                                                      |
+| 🔄ChangePassword                              | Cambia la contraseña de una identidad                        | me changepassword --username abella --old-password secret --new-password newpass |
+| 📖 Display                                    | Muestra una identidad guardada                               | me display --username abella --password secret               |
+| Be, Do, Have, At, Relate, React, Communicate | Son verbos declarativos del modelo semántico de this.me (atributos del yo) | me have --username abella --password secret --value "synthesizer" |
+| Get                                          | Recupera un valor guardado, con filtros (context, key, tiempo, etc.) | me get --username abella --password secret --verb have       |
+| Host                                         | Muestra información del host (hostname, IP, LAN, etc.)       | me host                                                      |
 
 ## Verbs
 ```bash
