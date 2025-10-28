@@ -4,7 +4,7 @@
 
 ---
 # 📦 Installation
-If published to **crates.io:**
+**crates.io:**
 
 ```bash
 cargo install this-me
