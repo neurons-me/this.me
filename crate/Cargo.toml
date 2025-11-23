@@ -1,76 +1,25 @@
+
 [package]
 name = "this-me"
-version = "0.1.7"
-authors = ["suiGn <admin@neurons.me>"]
+version = "0.2.2"
 edition = "2021"
-description = "Encrypted identity store CLI tool (this.me)"
+authors = ["suiGn <admin@neurons.me>"]
+description = "Minimal ME identity engine (email, host, secret)"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/neurons-me/this.me"
 homepage = "https://neurons.me"
 readme = "README.md"
-keywords = ["identity", "encryption", "cli"]
-categories = ["command-line-utilities", "cryptography"]
+keywords = ["identity", "hashing", "cryptography"]
+categories = ["cryptography"]
 default-run = "me"
+
+[dependencies]  
+sha3 = "0.10"
+hex = "0.4"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+owo-colors = "4.2.3"
 
 [[bin]]
 name = "me"
 path = "src/main.rs"
-
-[dependencies]
-aes-gcm = "0.10"
-aes = "0.8"
-rand = "0.8"
-sha2 = "0.10"
-base64 = "0.21"
-clap = { version = "4.4", features = ["derive"] }
-actix-web = "4"
-serde_json = "1.0"
-serde = { version = "1.0", features = ["derive"] }
-dirs = "5.0"
-regex = "1.10"
-chrono = { version = "0.4", features = ["serde"] }
-thiserror = "2.0"
-get_if_addrs = "0.5"
-hex = "0.4"
-chacha20poly1305 = "0.10"
-ed25519-dalek = "2.2"
-reqwest = { version = "0.11", features = ["json", "blocking"] }
-async-trait = "0.1"
-rusqlite = { version = "0.29", features = ["bundled"], optional = true }
-sqlx = { version = "0.7", default-features = false, features = ["runtime-tokio", "macros", "postgres", "chrono"], optional = true }
-owo-colors = "4.2"
-atty = "0.2"
-ab_glyph = "0.2"
-libc = "0.2"
-terminal_size = "0.3"
-
-# Unified image + QR stack
-image = "0.25.8"
-imageproc = "0.25.0"
-rusttype = "0.9"
-qrcode = { version = "0.13", default-features = false, features = ["image"] }
-
-[features]
-default = ["sqlite"]
-sqlite = ["rusqlite"]
-pg = ["sqlx"]
-
-# === Packaging Configuration ===
-[package.metadata.bundle]
-name = ".me"
-identifier = "neurons.me"
-version = "0.1.6"
-icon = "assets/icon.png"
-copyright = "Copyright (c) 2025 suiGn"
-category = "Utility"
-
-# === Build Options ===
-[profile.release]
-opt-level = "z"
-lto = true
-strip = true
-codegen-units = 1
-panic = "abort"
-# === Dependency Version Pin ===
-# Ensure all crates (including qrcode and imageproc) share the same version of image.
-# No patching is required since all depend on image 0.25.8.
