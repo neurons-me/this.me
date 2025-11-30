@@ -22,10 +22,24 @@
 
 
 # 		Get Started
-```structured text
-  me1 = hash
-  me1 + me2 = hash2
-  me1 + me2 + me3 = hash3 
+```js
+//These functions simply read the identity graph, nothing else.
+me.rooms() //reads whats in rooms
+me.channels() //reads whats in channel 
+me.contacts() //and so...
+me.tags()
+me.follows()
+me.metadata()
 ```
 
+```text
+// Law Of Sets
+me1 = hash // node
+me1 + me2 = hash2 //Set 
+me1 + me2 + me3 = hash3  //Set
+```
+
+```js
+cleaker(me).on(Expression) = Block
+```
 

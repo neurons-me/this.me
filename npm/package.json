@@ -1,6 +1,6 @@
 {
   "name": "this.me",
-  "version": "3.0.25",
+  "version": "3.0.29",
   "description": ".me is your identity trust through cryptographic signatures.",
   "main": "dist/me.cjs.js",
   "module": "dist/me.es.js",
@@ -14,18 +14,19 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:esm": "node tests/test-esm.mjs",
+    "test:cjs": "node tests/test-cjs.cjs",
+    "test:ts": "tsc --noEmit",
+    "test:build": "npm run build && npm run test:esm && npm run test:cjs && npm run test:ts"
   },
   "type": "module",
   "keywords": [
-    "this.me",
+    ".me",
     "identity",
     "decentralized",
     "cryptographic",
-    "trust",
-    "signature",
-    "local",
-    "monad"
+    "signature"
   ],
   "repository": {
     "type": "git",

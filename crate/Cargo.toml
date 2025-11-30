@@ -1,10 +1,9 @@
-
 [package]
 name = "this-me"
 version = "0.2.2"
 edition = "2021"
 authors = ["suiGn <admin@neurons.me>"]
-description = "Minimal ME identity engine (email, host, secret)"
+description = ".me identity engine."
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/neurons-me/this.me"
 homepage = "https://neurons.me"
