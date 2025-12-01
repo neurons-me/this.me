@@ -18,6 +18,7 @@ export class ME {
   identityRoot: string;
   publicKey: string;
   identityHash: string;
+  blockchain: string;
 
   // Encrypted semantic tree
   payload: any = {};
@@ -30,27 +31,22 @@ export class ME {
   // Preserve encrypted blobs per branch + secret so switching secrets does not
   // destroy previous encrypted universes.
   private branchVersions: Record<string, Record<string, string>> = {};
-
-  constructor(username: string, secret: string) {
+  constructor(username: string, secret: string, blockchain: string) {
     this.username = username;
     this.secret = secret;
-
+    this.blockchain = blockchain;
     this.identityRoot = "0x" + keccak256(secret);
     this.publicKey = "0x" + keccak256("public:" + secret);
     this.identityHash = "0x" + keccak256(this.publicKey + this.username);
-
     // root secret
     this.secrets[""] = secret;
-
     // Create the root proxy so we can do me.foo.bar(123) and me("path")
     const rootProxy = this.createProxy([]);
-
     // Make the proxy also behave like an ME instance:
     // - attach ME prototype so instanceof checks work
     // - copy over instance fields so tools/consumers can inspect state if needed
     Object.setPrototypeOf(rootProxy as any, ME.prototype);
     Object.assign(rootProxy as any, this);
-
     return rootProxy as MEProxy;
   }
 
@@ -60,7 +56,6 @@ export class ME {
    */
   private createProxy(path: string[]): MEProxy {
     const self = this;
-
     // target function used so that the proxy is callable
     const fn: any = (...args: any[]) => {
       return self.handleCall(path, args);
@@ -73,7 +68,6 @@ export class ME {
         // "secret" is a reserved semantic operation; do not expose the internal field
         if (prop === "secret") return self.createProxy([...path, String(prop)]);
         if (prop in self) return (self as any)[prop];
-
         const newPath = [...path, String(prop)];
         return self.createProxy(newPath);
       },
@@ -105,17 +99,13 @@ export class ME {
     }
 
     const last = path[path.length - 1];
-
     // Special method: secret() — sets a secret for the parent path
     if (last === "secret") {
       const parentPath = path.slice(0, -1);
       const parentKey = parentPath.join(".");
-
       const newSecret = String(args[0] ?? "");
       if (!newSecret) return this.createProxy(parentPath) as MEProxy;
-
       this.secrets[parentKey] = newSecret;
-
       // Optionally register a declaration that a secret was set (without leaking its value)
       const signature = "0x" + keccak256(this.secret + parentKey + "::secret-set");
       this.declarations.push({
@@ -138,14 +128,11 @@ export class ME {
     // Normal semantic assignment: me.foo.bar(value)
     const keyPath = path.join(".");
     let value: any;
-
     if (args.length === 0) value = undefined;
     else if (args.length === 1) value = args[0];
     else value = args;
-
     // Write encrypted value into the semantic tree
     this.ensurePath(path, value);
-
     // Use the resolved secret for this path to sign the declaration
     const effectiveSecret = this.resolveSecret(path);
     const signature = "0x" + keccak256(

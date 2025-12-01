@@ -7,19 +7,15 @@
 npm install this.me
 ```
 
-##### **2. Browser:**
-
-```html
-<script src="me.umd.js"></script>
-<script>
-  const me = new Me.ME("secret");
-</script>
-```
-
 <img src="https://suign.github.io/assets/imgs/monads.png" alt="Cleak Me Please" width="244">Hello, I am **.me**
 ----
 
 ## A Declarative Identity Language  
+
+###### me(username, secret, blockchain) ✅
+> 🔄 **Update:** `.me` now includes the `blockchain` parameter as part of its identity derivation surface.  
+This allows identities to exist deterministically across different ledgers while preserving parallel universes of meaning.  
+Each blockchain becomes a **jurisdiction of identity**, enabling global usernames (via cleaker.me) and local identities (via any host), all verifiable and mathematically consistent.
 
 Minimal, expressive and infinitely nested identity calculus.
 
