@@ -1,3 +1,4 @@
 // me/npm/index.ts
-import { ME } from "./src/me.js";
-export { ME };
+// .me = local crypto runtime (it can exist with no ledger)
+export { ME as default } from "./src/me.js";
+

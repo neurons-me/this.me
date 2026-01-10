@@ -1,81 +1,110 @@
-/**
- * example.ts
- * -----------------------------------------
- * A gradual introduction to ME:
- * 1. Simple semantic assignments
- * 2. Nested proxies
- * 3. Secrets + encrypted branches
- * 4. Nested secrets (fractal crypto)
- * 5. Returning to previous channels
- * -----------------------------------------
- */
+// Smoke-test using the built ESM bundle.
+// NOTE: This file must be treated as an ES module because we use top-level await.
+// We keep `me` as `any` so TS doesn't lose the callable Proxy behavior.
+import ME from "../dist/me.es.js";
+const me: any = new ME();
+function log(title: string) {
+  console.log("\n====================");
+  console.log(title);
+  console.log("====================");
+  console.log("last thoughts:", me.shortTermMemory.slice(-8));
+  console.log("index peek:", {
+    root: me(""), // note: ME is a callable Proxy at runtime; TS typing is `any` in this smoke test
+    username: me("__id") ?? me("@") ?? me("username"), // depends on your get() semantics
+    profileName: me("profile.name"),
+    walletIncome: me("wallet.income"),
+    walletNet: me("wallet.net"),
+    primaryCard: me("profile.cards.primary"),
+  });
+}
 
-import { ME } from "../src/me.ts";
-// -----------------------------------------
-// 0. Create your identity
-// -----------------------------------------
-const me: any = new ME("abellae", "rootSecret123");
-console.log("\n------------------------------");
-console.log("STEP 1 — Simple Assignments");
-console.log("------------------------------\n");
-// -----------------------------------------
-// 1. Simple leaf assignments
-// -----------------------------------------
-me.instrument("Moog");
-me.dogs("Luna", "Dogo");
-me.meta.color("blue");
-console.log("Exported payload (encrypted):");
-console.log(JSON.stringify(me.export().payload, null, 2));
-console.log("\nExport Branch: meta.color");
-console.log(me("meta.color")); // "blue"
-// -----------------------------------------
-console.log("\n------------------------------");
-console.log("STEP 2 — Nested Proxies");
-console.log("------------------------------\n");
-// -----------------------------------------
-me.system.audio.filters.lowpass.cutoff(1200);
-me.system.audio.filters.lowpass.resonance(0.7);
-console.log("GET: system.audio.filters.lowpass");
-console.log(me("system.audio.filters.lowpass"));
-// -----------------------------------------
-console.log("\n-------------------------------------------");
-console.log("STEP 3 — Introduce a Secret (Encrypted Blob)");
-console.log("-------------------------------------------\n");
-// -----------------------------------------
-me.wallet.secret("XYZ");
-me.wallet.balance(500);
-me.wallet.transactions.list([1, 2, 3]);
-console.log("Encrypted wallet subtree:");
-console.log(JSON.stringify(me.export().payload.wallet, null, 2));
-console.log("\nDecrypted wallet subtree:");
-console.log(me("wallet"));
-// -----------------------------------------
-console.log("\n-------------------------------------------");
-console.log("STEP 4 — Nested Secrets (Fractal Crypto)");
-console.log("-------------------------------------------\n");
-// -----------------------------------------
-me.wallet.transactions.secret("ABC"); // deeper secret
-me.wallet.transactions.hidden("private-note");
-me.wallet.transactions.deep.secret("DEEP"); // nested again
-me.wallet.transactions.deep.value("super hidden");
-console.log("Decrypted wallet:");
-console.log(JSON.stringify(me("wallet"), null, 2));
-// -----------------------------------------
-console.log("\n-------------------------------------------");
-console.log("STEP 5 — Return to a Previous Secret Channel");
-console.log("-------------------------------------------\n");
-// -----------------------------------------
-console.log("Current (last secret used = DEEP):");
-console.log(JSON.stringify(me("wallet"), null, 2));
-console.log("\nSwitch back to secret XYZ (wallet root):");
-me.wallet.secret("XYZ");
-console.log(JSON.stringify(me("wallet"), null, 2));
-console.log("\nSwitch back to secret ABC (transactions level):");
-me.wallet.transactions.secret("ABC");
-console.log(me("wallet.transactions"));
-console.log("\n-------------------------------------------");
-console.log("END OF PAYLOADS EXAMPLE");
-console.log("-------------------------------------------\n");
-console.log("------------EXPORT() EXAMPLE--------------\n");
+// ------------------------------------------------------------
+// 1) Public identity claims (root)
+// ------------------------------------------------------------
+console.log("\n--- 1) PUBLIC @ CLAIMS ---");
+// public username (domain-safe identity claim)
+me["@"]("jabellae");              // root claim: username / id
+// optional: attach “ledger namespace” (still public), like where you intend to cleak
+me.ledger.host("localhost:8161"); // public context
+me.ledger.protocol("http");       // public context
+log("after @ + public ledger context");
+// ------------------------------------------------------------
+// 2) Secret scope for private profile + wallet data
+// ------------------------------------------------------------
+console.log("\n--- 2) SECRET SCOPE ( _ ) ---");
+me._("secret123");
+// under secret: these get encrypted in payload/index
+me.profile.name("Abella");
+me.profile.city("Veracruz");
+me.wallet.income(1000);
+me.wallet.expenses.rent(500);
+// also stash a sensitive branch
+me.wallet.hidden.notes("private note");
+log("after _ secret123 + private writes");
+// ------------------------------------------------------------
+// 3) Noise reset (~) to “break inheritance” and start a new root secret chain
+// ------------------------------------------------------------
+console.log("\n--- 3) NOISE (~) RESET ---");
+// noise becomes a new “root” for subsequent secrets (doesn't inherit the previous)
+me["~"]("identityNoise#A");   // think: identity root seed / noise token
+me._("betaSecret");           // now this secret is derived from noise, not old secret
+me.wallet.hidden.seed("only beta sees this");
+me.keys.eth(["0xabc...", "0xdef..."]);
+log("after ~ + betaSecret + beta-only writes");
+// ------------------------------------------------------------
+// 4) POINTERS (__ / ->) as symbolic links
+// ------------------------------------------------------------
+console.log("\n--- 4) POINTERS (__ / ->) ---");
+// create a public-ish “pointer slot” (still stored in encrypted tree depending on scope)
+me.profile.cards.primary.__("wallet"); // "primary card points to wallet" (example)
+me.profile.cards.backup["->"]("profile"); // alias pointer operator
+log("after pointers");
+// ------------------------------------------------------------
+// 5) '=' eval + assign (derived values)
+// ------------------------------------------------------------
+console.log("\n--- 5) '=' EVAL + ASSIGN ---");
+// compute wallet.net = income - rent
+// (your engine likely parses strings, so we give it an expression string)
+me.wallet["="]("net", "wallet.income - wallet.expenses.rent");
+// more creative: compute a “badge” label that mixes public and private
+me.profile["="]("badge", "`@${__id}` + ' • ' + profile.city"); // assumes template/string support
+log("after '=' derived assignments");
+// ------------------------------------------------------------
+// 6) '=' using POINTERS (compute from a pointer target)
+// ------------------------------------------------------------
+console.log("\n--- 6) '=' USING POINTERS ---");
+// if profile.cards.primary points to "wallet", derive something at the pointer target
+// Example: pointerNet = <ptr>.income - <ptr>.expenses.rent
+me.profile.cards.primary["="](
+  "pointerNet",
+  "__ptr.income - __ptr.expenses.rent"
+);
 
-console.log(me.export());
+log("after '=' from pointer target");
+// ------------------------------------------------------------
+// 7) '?' collect/query (pick multiple values in one go)
+// ------------------------------------------------------------
+console.log("\n--- 7) '?' COLLECT ---");
+// collect keys from profile (example)
+const pickedProfile = me.profile["?"]("name", "city", "badge");
+console.log("pickedProfile =", pickedProfile);
+// collect wallet summary
+const pickedWallet = me.wallet["?"]("income", "expenses.rent", "net");
+console.log("pickedWallet =", pickedWallet);
+log("after '?' collects");
+// ------------------------------------------------------------
+// 8) Remove (-) to delete branches (optional)
+// ------------------------------------------------------------
+console.log("\n--- 8) '-' REMOVE ---");
+// remove a sensitive note branch
+me.wallet.hidden["-"]("notes");
+log("after '-' remove wallet.hidden.notes");
+// ------------------------------------------------------------
+// 9) Final dump
+// ------------------------------------------------------------
+console.log("\n--- FINAL shortTermMemory (full) ---");
+console.log(me.shortTermMemory);
+console.log("\n--- Quick gets ---");
+console.log("me('profile.name') =", me("profile.name"));
+console.log("me('wallet.net')   =", me("wallet.net"));
+console.log("me('wallet.hidden.seed') =", me("wallet.hidden.seed"));

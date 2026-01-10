@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "NodeNext",
+    "types": ["node"],
     "moduleResolution": "nodenext",
     "declaration": true,
     "emitDeclarationOnly": false,

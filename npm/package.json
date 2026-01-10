@@ -1,48 +1,49 @@
 {
   "name": "this.me",
-  "version": "3.0.30",
-  "description": ".me is your identity trust through cryptographic signatures.",
-  "main": "dist/me.cjs.js",
-  "module": "dist/me.es.js",
-  "browser": "dist/me.umd.js",
+  "version": "3.0.34",
+  "type": "module",
+  "main": "./dist/me.cjs",
+  "module": "./dist/me.es.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
+      "browser": "./dist/me.es.js",
       "import": "./dist/me.es.js",
-      "require": "./dist/me.cjs.js"
+      "require": "./dist/me.cjs"
     }
   },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test:esm": "node tests/test-esm.mjs",
-    "test:cjs": "node tests/test-cjs.cjs",
     "test:ts": "tsc --noEmit",
-    "test:build": "npm run build && npm run test:esm && npm run test:cjs && npm run test:ts"
+    "prepublishOnly": "npm run build"
   },
-  "type": "module",
-  "keywords": [
-    ".me",
-    "identity",
-    "decentralized",
-    "cryptographic",
-    "signature"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/neurons-me/this.me.git"
-  },
-  "homepage": "https://www.npmjs.com/package/this.me",
-  "author": "suiGn",
-  "license": "MIT",
   "files": [
     "dist"
   ],
+  "dependencies": {
+    "js-sha3": "^0.9.3"
+  },
   "devDependencies": {
+    "@types/node": "^24.10.1",
     "vite": "^7.0.6",
     "vite-plugin-dts": "^4.5.4"
   },
-  "dependencies": {
-    "js-sha3": "^0.9.3"
-  }
+  "description": ".me is your identity trust through cryptographic signatures.",
+  "keywords": [
+    "this.me",
+    "decentralized identity",
+    "cryptographic identity",
+    "self-sovereign identity",
+    "digital identity",
+    "identity verification",
+    "blockchain identity",
+    "secure identity",
+    "identity management",
+    "decentralized authentication"
+  ],
+  "license": "MIT",
+  "author": "suiGn@neurons.me"
 }
