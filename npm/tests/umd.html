@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h3>UMD Test</h3>
+    <script src="../dist/me.umd.js"></script>
+    <script>
+      console.log("=== UMD BUILD TEST ===");
+      try {
+        window.me = new Me.ME("test", "secret");
+        me.profile.name("Abella");
+        me.profile.age(30);
+        const name = me("profile.name");
+        const age = me("profile.age");
+        console.log("profile.name =", name);
+        console.log("profile.age  =", age);
+        if (name === "Abella" && age === 30) {
+          console.log("✔ UMD Test PASSED");
+        } else {
+          console.log("❌ UMD Test FAILED (values mismatch)");
+        }
+      } catch (err) {
+        console.error("❌ UMD Test FAILED with error:");
+        console.error(err);
+      }
+    </script>
+  </body>
+</html>

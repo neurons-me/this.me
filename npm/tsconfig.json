@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "NodeNext",
+    "types": ["node"],
+    "moduleResolution": "nodenext",
+    "declaration": true,
+    "emitDeclarationOnly": false,
+    "outDir": "dist/types",
+    "strict": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["src/**/*", "index.ts"]
+}
