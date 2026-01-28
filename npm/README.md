@@ -13,10 +13,6 @@ npm install this.me
 ## A Declarative Identity Language  
 
 ###### me(username, secret, blockchain) ✅
-> 🔄 **Update:** `.me` now includes the `blockchain` parameter as part of its identity derivation surface.  
-This allows identities to exist deterministically across different ledgers while preserving parallel universes of meaning.  
-Each blockchain becomes a **jurisdiction of identity**, enabling global usernames (via cleaker.me) and local identities (via any host), all verifiable and mathematically consistent.
-
 Minimal, expressive and infinitely nested identity calculus.
 
 `.me` is a **language** — a semantic engine that builds identity, meaning, structure, and **encrypted universes** through simple expressions.
@@ -201,8 +197,7 @@ me.cars.keys.secret("X");
   (anything you declare after calling secret)
   → encrypted under "X"
 
-##### **✔ Exactly that.**
-### **🧠 So to answer common questions:**
+### **🧠 Answer to common questions:**
 ##### **✔ Yes — you can declare secrets at specific positions.**
 ##### **✔ Yes — everything under that branch becomes encrypted.**
 ##### **✔ Yes — you can put another secret deeper.**

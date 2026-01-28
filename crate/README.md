@@ -20,30 +20,3 @@ cargo install --path .
 
 ## Basic Usage
 
-```
-fn main() {
-    // Header / logo
-    println!(
-        "{}",
-        "
-▄ ▄▄▄▄  ▗▞▀▚▖
-  █ █ █ ▐▛▀▀▘
-  █   █ ▝▚▄▄▖
-             "
-            .bright_green()
-            .bold()
-    );
-
-    // Additional header block
-    println!(
-        "{}",
-        "
-   ┓   ┏┓
-┓┏┏┣┓┏┓┏┛
-┗┻┛┛┗┗┛•
-        "
-        .bright_white()
-        .bold()
-    );
-```
-

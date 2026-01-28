@@ -10,7 +10,7 @@
 // We keep runtime import simple and patch types locally.
 import assert from "node:assert/strict";
 // eslint-disable-next-line import/extensions
-import ME from "../dist/me.es.js";
+import ME from "../dist/this-me.es.js";
 
 // Treat runtime value as callable Proxy.
 type MEProxy = any;

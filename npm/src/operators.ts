@@ -239,14 +239,11 @@ export function isQueryCall(
   const { scope, leaf } = splitPath(path);
   if (!leaf) return null;
   if (opKind(operators, leaf) !== "query") return null;
-
   let pathsArg: any = null;
   let fn: Function | undefined;
-
   if (Array.isArray(expression) && expression.length > 0) {
     const looksLikeTuple =
       Array.isArray(expression[0]) && (expression.length === 1 || typeof expression[1] === "function");
-
     if (looksLikeTuple) {
       pathsArg = expression[0];
       fn = typeof expression[1] === "function" ? (expression[1] as Function) : undefined;
@@ -258,12 +255,10 @@ export function isQueryCall(
   }
 
   if (!Array.isArray(pathsArg) || pathsArg.length === 0) return null;
-
   const paths = pathsArg
     .map((p: any) => String(p))
     .map((p: string) => p.trim())
     .filter((p: string) => p.length > 0);
-
   if (paths.length === 0) return null;
   return { targetPath: scope, paths, fn };
 }
@@ -277,7 +272,6 @@ export function isRemoveCall(
   const { scope, leaf } = splitPath(path);
   if (!leaf) return null;
   if (opKind(operators, leaf) !== "remove") return null;
-
   // Allow:
   //   me.foo.bar["-"]()          -> removes subtree rooted at foo.bar
   //   me["-"]("a.b.c")           -> removes subtree rooted at a.b.c (root operator)
@@ -298,7 +292,6 @@ export function isRemoveCall(
 // -----------------------------
 // Bundled recognizer surface
 // -----------------------------
-
 export const Operators = {
   OP_DEFINE,
   opKind,

@@ -1,3 +1,4 @@
+// me/npm/src/me.ts
 import type { Thought, SemanticPath, EncryptedBlob } from "./types.js";
 import {
   isThought,
@@ -32,8 +33,6 @@ function hashFn(input: string): string {
   }
   return ("00000000" + (h >>> 0).toString(16)).slice(-8);
 }
-
-
 
 export class ME {
   [key: string]: any;
@@ -103,7 +102,6 @@ export class ME {
     const { scope, leaf } = splitPath(path);
     if (!leaf) return null;
     if (this.opKind(leaf) !== "remove") return null;
-
     // Allow:
     //   me.foo.bar["-"]()          -> removes subtree rooted at foo.bar
     //   me["-"]("a.b.c")           -> removes subtree rooted at a.b.c (root operator)
@@ -126,7 +124,6 @@ export class ME {
   // ---------------------------------------------------------
   private createProxy(path: SemanticPath): MEProxy {
     const self = this;
-
     const fn: any = (...args: any[]) => {
       return handleCallFn(
         {
@@ -146,7 +143,6 @@ export class ME {
     return new Proxy(fn, {
       get(target, prop) {
         if (typeof prop === "symbol") return (target as any)[prop];
-
         // Support direct access to real instance methods/props.
         // IMPORTANT: if the property exists on the ME instance prototype (methods like `postulate`, etc)
         // or is a real data accessor (like `shortTermMemory` getter), we should return it.
@@ -253,7 +249,6 @@ export class ME {
     const { scope, leaf } = splitPath(path);
     if (!leaf) return null;
     if (this.opKind(leaf) !== "eval") return null;
-
     // Thunk form
     if (typeof expression === "function") {
       return { mode: "thunk", targetPath: scope, thunk: expression };
@@ -283,10 +278,8 @@ export class ME {
     const { scope, leaf } = splitPath(path);
     if (!leaf) return null;
     if (this.opKind(leaf) !== "query") return null;
-
     let pathsArg: any = null;
     let fn: Function | undefined;
-
     // normalize args: expression may be either:
     //  - tuple array: [pathsArray, fn]
     //  - a paths array directly: ["a.b", "c.d"]
@@ -295,7 +288,6 @@ export class ME {
       const looksLikeTuple =
         Array.isArray(expression[0]) &&
         (expression.length === 1 || typeof expression[1] === "function");
-
       if (looksLikeTuple) {
         pathsArg = expression[0];
         fn = typeof expression[1] === "function" ? (expression[1] as Function) : undefined;
@@ -307,12 +299,10 @@ export class ME {
     }
 
     if (!Array.isArray(pathsArg) || pathsArg.length === 0) return null;
-
     const paths = pathsArg
       .map((p: any) => String(p))
       .map((p: string) => p.trim())
       .filter((p: string) => p.length > 0);
-
     if (paths.length === 0) return null;
     return { targetPath: scope, paths, fn };
   }
@@ -337,7 +327,6 @@ export class ME {
   private postulate(path: SemanticPath, expression: any, operator: string | null = null): any {
     let targetPath = path;
     let storedValue: any = expression;
-
     // Operator definition (kernel-only): me["+"]("op", "kind")
     const def = this.isDefineOpCall(targetPath, expression);
     if (def) {
@@ -355,7 +344,6 @@ export class ME {
     if (ev) {
       if (ev.mode === "thunk") {
         const value = ev.thunk();
-
         // root eval: me["="](() => ...) returns the computed value
         if (ev.targetPath.length === 0) {
           return value;
@@ -381,7 +369,6 @@ export class ME {
     if (q) {
       const values = q.paths.map((p) => this.readPath(p.split(".").filter(Boolean)));
       const out = q.fn ? (q.fn as any)(...values) : values;
-
       // root query: me["?"](...) returns the result
       if (q.targetPath.length === 0) {
         return out;
@@ -404,7 +391,6 @@ export class ME {
     const scopeCall = this.isSecretScopeCall(targetPath, expression);
     if (scopeCall) {
       this.localSecrets[scopeCall.scopeKey] = expression;
-
       // Record an operator thought without leaking the secret value.
       const scopePath = scopeCall.scopeKey ? scopeCall.scopeKey.split(".").filter(Boolean) : [];
       const pathStr = scopePath.join(".");
@@ -440,7 +426,6 @@ export class ME {
     const noiseCall = this.isNoiseScopeCall(targetPath, expression);
     if (noiseCall) {
       this.localNoises[noiseCall.scopeKey] = expression;
-
       // Record an operator thought without leaking the noise value.
       const scopePath = noiseCall.scopeKey ? noiseCall.scopeKey.split(".").filter(Boolean) : [];
       const pathStr = scopePath.join(".");
@@ -493,10 +478,8 @@ export class ME {
     }
 
     const pathStr = targetPath.join(".");
-
     // 2) Calcular secretos efectivos fractales
     const effectiveSecret = this.computeEffectiveSecret(targetPath);
-
     // Guard: if a caller tries to write into a hidden scope via a userland alias (e.g. `.secret("x")`)
     // without having declared a kernel scope (`_(...)`), DO NOT auto-create an encrypted branch.
     // This keeps secret scoping purely structural.
@@ -510,7 +493,6 @@ export class ME {
     if (scope && scope.length > 0) {
       const scopeSecret = this.computeEffectiveSecret(scope);
       const rel = targetPath.slice(scope.length);
-
       // Decrypt existing branch object (if any)
       const existingBlob = this.getBranchBlob(scope);
       let branchObj: any = {};
@@ -546,7 +528,6 @@ export class ME {
       // ALSO: derived/eval/query operator outputs should stay readable as plain values.
       //       (You can still store secrets by putting them under a secret scope branch.)
       const shouldEncryptValue = operator !== "=" && operator !== "?";
-
       if (isPointer(expression) || isIdentityRef(expression) || !shouldEncryptValue) {
         storedValue = expression;
       } else {
@@ -558,7 +539,6 @@ export class ME {
 
     // 4) Calcular hash/firma de esta triada
     const value = storedValue;
-
     const hashInput = JSON.stringify({
       path: pathStr,
       operator,
@@ -567,7 +547,6 @@ export class ME {
       effectiveSecret,
     });
     const hash = hashFn(hashInput);
-
     const timestamp = Date.now();
     const thought: Thought = {
       path: pathStr,
@@ -578,7 +557,6 @@ export class ME {
       hash,
       timestamp,
     };
-
     this._shortTermMemory.push(thought);
     this.rebuildIndex();
     return thought;
@@ -647,7 +625,6 @@ export class ME {
     // If present, it becomes the new base seed for subsequent secret chaining *below it*.
     let noiseKey: string | null = null;
     let noiseValue: string | null = null;
-
     if (this.localNoises[""] !== undefined) {
       noiseKey = "";
       noiseValue = this.localNoises[""];
@@ -674,7 +651,6 @@ export class ME {
     // If noiseKey is null, we chain secrets from root through the full path.
     // If noiseKey is set, we chain only secrets at/under that noise scope.
     const startDepth = noiseKey === null ? 1 : noiseKey === "" ? 0 : noiseKey.split(".").filter(Boolean).length;
-
     for (let i = 1; i <= path.length; i++) {
       const p = path.slice(0, i).join(".");
       if (this.localSecrets[p]) {
@@ -708,7 +684,6 @@ export class ME {
       const pathParts = p.split(".").filter(Boolean);
       const scope = this.resolveBranchScope(pathParts);
       const inSecret = scope && scope.length > 0 && pathStartsWith(pathParts, scope);
-
       if (t.operator === "-") {
         if (p === "") {
           for (const k of Object.keys(next)) delete next[k];
@@ -774,23 +749,18 @@ export class ME {
     const scope = this.resolveBranchScope(path);
     if (scope && scope.length > 0 && pathStartsWith(path, scope)) {
       if (path.length === scope.length) return undefined; // hide scope root
-
       const scopeSecret = this.computeEffectiveSecret(scope);
       if (!scopeSecret) return null;
-
       const blob = this.getBranchBlob(scope);
       if (!blob) return undefined;
-
       const branchObj = xorDecrypt(blob, scopeSecret, scope);
       if (!branchObj || typeof branchObj !== "object") return undefined;
-
       const rel = path.slice(scope.length);
       let ref: any = branchObj;
       for (const part of rel) {
         if (!ref || typeof ref !== "object") return undefined;
         ref = ref[part];
       }
-
       if (isPointer(ref)) return this.readPath(ref.__ptr.split(".").filter(Boolean));
       if (isIdentityRef(ref)) return ref;
       return ref;
@@ -799,13 +769,10 @@ export class ME {
     // 2) Non-secret: read from derived index, resolve pointers, decrypt if needed.
     const resolved = this.resolveIndexPointerPath(path);
     const raw = resolved.raw;
-
     if (raw === undefined) return undefined;
     if (isPointer(raw)) return this.readPath(raw.__ptr.split(".").filter(Boolean));
     if (isIdentityRef(raw)) return raw;
-
     if (!isEncryptedBlob(raw)) return raw;
-
     // IMPORTANT:
     // Decrypt using the caller's requested path, not the pointer-resolved path.
     // This avoids mismatch when a pointer hops across a noise boundary.
