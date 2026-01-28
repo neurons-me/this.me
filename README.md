@@ -12,5 +12,4 @@
     <img src="https://badge.fury.io/js/neurons-me.svg" alt="npm version">
   </a>
 
-# Get Started
 
