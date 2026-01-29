@@ -10,12 +10,9 @@ npm install this.me
 <img src="https://suign.github.io/assets/imgs/monads.png" alt="Cleak Me Please" width="244">Hello, I am **.me**
 ----
 
-## A Declarative Identity Language  
+## A Declarative Language  
 
-###### me(username, secret, blockchain) ✅
-Minimal, expressive and infinitely nested identity calculus.
-
-`.me` is a **language** — a semantic engine that builds identity, meaning, structure, and **encrypted universes** through simple expressions.
+Minimal, expressive and infinite.
 
 Everything emerges from two primitives:
 
