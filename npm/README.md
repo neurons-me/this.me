@@ -1,26 +1,10 @@
 <img src="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1761149332/this.me-removebg-preview_2_j1eoiy.png" alt=".me Logo" width="144" />
 
 # .me  
-
 ##### **1. NPM:**
 ```bash
 npm install this.me
 ```
-
-<img src="https://suign.github.io/assets/imgs/monads.png" alt="Cleak Me Please" width="244">Hello, I am **.me**
-----
-
-## A Declarative Language  
-
-Minimal, expressive and infinite.
-
-Everything emerges from two primitives:
-
-```text
-Declare meaning
-Resolve meaning
-```
-
 ---
 
 ## .me in 20 Seconds
@@ -272,58 +256,6 @@ console.log(JSON.stringify(me.export(), null, 2));
 
 ---
 
-## 🧬 Self-Semantic Runtime Invariance
-The runtime of `.me` is written **in the same semantic model that it interprets**, making it a *self-describing* and *self-sustaining* identity system.  
-This property is known as **Self‑Semantic Runtime Invariance**.
-
-### Why this matters
-- The language can describe itself using its own primitives.  
-- The runtime’s behavior is encoded in the same declarative structures users write.  
-- Every semantic operation becomes both:
-  - a computation, and  
-  - a piece of meaning inside the identity universe.  
-- The system is *reflexive*: the runtime can observe, narrate, and export its own evolution.
-
-### In practice
-Every declaration you make, `.me` writes it not only into your semantic tree, but also into:
-
-```
-me.runtime.thoughts[]
-```
-
-This creates a self-referential timeline of meaning — the system *thinking about what you're thinking*.
-
-Traditional systems separate:
-- language
-- program
-- runtime
-- identity
-- data model
-
-But `.me` unifies all of them into **one semantic calculus**.
-
-The system remains stable because it is congruent with itself:  
-**the runtime follows the same rules as the identities it executes.**
-
-This is the foundation of **.me Calculus** — a universal, self-describing identity engine.
-
----
-
-## ▵ The Philosophy
-
-> **Human owns meaning. Everything else asks.**
-
-A semantic language for identity, built from recursive declarations and symbolic paths.
-
-`me` is ▵ **meaning** ▵ **identities** ▵ **universes**.
-
-With one primitive:
-
-```
-me
-```
-
-What **.me** unlocks is something the entire industry has failed to deliver: **true ownership of your identity**. Not through passwords, dashboards, cookie banners, or corporate “trust us” slogans — but **through architecture**. In **.me**, your data isn’t stored anywhere. It isn’t synced. It isn’t saved on a server you don’t control. Your identity is *derived*, meaning it only exists when *you* decide to bring it into existence. Secrets carve out private worlds inside your identity that are mathematically unreachable without your key. That means you can create layers of meaning, memory, and structure that no platform, provider, or device can see — or even detect. **No one can mine it**, leak it, subpoena it, or surveil it. Not because they’re nice, but because the system simply doesn’t expose what you don’t reveal. This is data freedom not as a policy, but as a *calculable fact*. A shift from platforms owning your life — to you owning your universes. - [suiGn](https://suign.github.io/)
 
 <a href="https://www.neurons.me" target="_blank">
 <img src="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1760893633/npm-neurons-me_9b3e3a.jpg" style="zoom:16%;" /></a>
