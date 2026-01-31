@@ -16,7 +16,19 @@
     <img src="https://badge.fury.io/js/neurons-me.svg" alt="npm version">
   </a>
 
-<img src="https://suign.github.io/assets/imgs/monads.png" alt="Cleak Me Please" width="244">Hello, I am **.me**
+<table>
+  <tr>
+    <td width="260" align="center" valign="middle">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1769896443/.me%20as%20a%20coordinate..png" />
+        <img src="https://suign.github.io/assets/imgs/monads.png" alt=".me as a coordinate" width="200" />
+      </picture>
+    </td>
+    <td valign="middle">
+      <h2>Hello, I am <code>.me</code></h2>
+    </td>
+  </tr>
+</table>
 ----
 
 ## A Declarative Language  
