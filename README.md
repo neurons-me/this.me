@@ -16,11 +16,11 @@
     <img src="https://badge.fury.io/js/neurons-me.svg" alt="npm version">
   </a>
 
-<table>
+<table border="0" cellspacing="0" cellpadding="0" style="border:none;">
   <tr>
     <td width="260" align="center" valign="middle">
       <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1769896443/.me%20as%20a%20coordinate..png" />
+        <source media="(prefers-color-scheme: dark)" srcset="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1769897639/c2443a79f783f2bf63c8702671f481ab9f420c9a5c4673bcdb70cf2a80b224d4_q68n2u.png" />
         <img src="https://suign.github.io/assets/imgs/monads.png" alt=".me as a coordinate" width="200" />
       </picture>
     </td>
