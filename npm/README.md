@@ -7,15 +7,15 @@ npm install this.me
 ```
 ---
 
-## .me in 20 Seconds
+## **Start .me in 20 seconds**
 
-###### **Declare**
+###### **Declare** Your Data.
 ```ts
 me.profile.name("Abella");
 me.profile.age(30);
 ```
 
-###### **Read**
+###### **Read **Your Data
 ```ts
 me("profile.name"); // → "Abella"
 me("profile.age");  // → 30
@@ -263,5 +263,3 @@ console.log(JSON.stringify(me.export(), null, 2));
 ##### License
 MIT © 2025 by https://neurons.me
 See the [LICENSE](./LICENSE) file for details.
-
-</file>

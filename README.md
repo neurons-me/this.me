@@ -1,4 +1,7 @@
-<img src="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1761149332/this.me-removebg-preview_2_j1eoiy.png" alt=".me Logo" width="144" />
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1769890772/this.me.png" />
+  <img src="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1761149332/this.me-removebg-preview_2_j1eoiy.png" alt=".me Logo" width="144" />
+</picture>
 
 # .me  
 ##### **Do what you say.**
@@ -12,8 +15,6 @@
   <a href="https://www.npmjs.com/package/neurons-me">
     <img src="https://badge.fury.io/js/neurons-me.svg" alt="npm version">
   </a>
-
-
 
 <img src="https://suign.github.io/assets/imgs/monads.png" alt="Cleak Me Please" width="244">Hello, I am **.me**
 ----
