@@ -15,6 +15,7 @@
     <img src="https://badge.fury.io/js/neurons-me.svg" alt="npm version">
   </a>
 
+
 <table border="0" cellspacing="0" cellpadding="0" style="border:none;">
   <tr>
     <td width="260" align="center" valign="middle">
@@ -39,7 +40,7 @@ Resolve meaning
 ```
 ---
 
-## 🧬 Self-Semantic Runtime Invariance
+## 𓅓 Self-Semantic Runtime Invariance
 The runtime of `.me` is written **in the same semantic model that it interprets**, making it a *self-describing* and *self-sustaining* identity system.  
 This property is known as **Self‑Semantic Runtime Invariance**.
 
