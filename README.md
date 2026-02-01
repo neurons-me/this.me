@@ -56,12 +56,13 @@ This property is known as **Self‑Semantic Runtime Invariance**.
 
 \> ***\*Human owns meaning. Everything else asks.\****
 A semantic language for identity, built from recursive declarations and symbolic paths.
-`me` is ▵ ***\*meaning\**** ▵ ***\*identities\**** ▵ ***\*universes\****.
+**▵ meaning** / **⊙ identities** / **● universes.**
 With one primitive:
 > me
-What **.me** unlocks is: 
 
-**True ownership of your identity**. 
+What **.me** unlocks is: 
+>**True ownership of your identity**. 
+
 Not through passwords, dashboards, cookie banners, or corporate **“trust us”** slogans — but **through architecture**. 
 Your identity is **derived**, meaning it only exists when **you** decide to bring it into existence. 
 [suiGn](https://suign.github.io/)
