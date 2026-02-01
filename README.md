@@ -10,8 +10,7 @@
     <img src="https://badge.fury.io/py/neurons-me.svg" alt="PyPI version">
   </a>
   <a href="https://crates.io/crates/this-me">
-    <img src="https://img.shields.io/crates/v/this-me.svg" alt="Crates.io version">
-  </a>
+    <img src="https://img.shields.io/crates/v/this-me.svg" alt="Crates.io version">  </a>
   <a href="https://www.npmjs.com/package/neurons-me">
     <img src="https://badge.fury.io/js/neurons-me.svg" alt="npm version">
   </a>
@@ -20,7 +19,7 @@
   <tr>
     <td width="260" align="center" valign="middle">
       <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1769897639/c2443a79f783f2bf63c8702671f481ab9f420c9a5c4673bcdb70cf2a80b224d4_q68n2u.png" />
+        <source media="(prefers-color-scheme: dark)" srcset="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1760915741/this.me-removebg-preview_1_nrj6pe.png" />
         <img src="https://suign.github.io/assets/imgs/monads.png" alt=".me as a coordinate" width="200" />
       </picture>
     </td>
@@ -29,7 +28,6 @@
     </td>
   </tr>
 </table>
-----
 
 ## A Declarative Language  
 Minimal, expressive and infinite.
@@ -39,7 +37,6 @@ Everything emerges from two primitives:
 Declare meaning
 Resolve meaning
 ```
-
 ---
 
 ## 🧬 Self-Semantic Runtime Invariance
@@ -57,21 +54,13 @@ This property is known as **Self‑Semantic Runtime Invariance**.
 # **▵ The Philosophy**
 
 \> ***\*Human owns meaning. Everything else asks.\****
-
 A semantic language for identity, built from recursive declarations and symbolic paths.
-
 `me` is ▵ ***\*meaning\**** ▵ ***\*identities\**** ▵ ***\*universes\****.
-
 With one primitive:
-
 > me
-
-What ***\*.me\**** unlocks is: 
+What **.me** unlocks is: 
 
 **True ownership of your identity**. 
-
 Not through passwords, dashboards, cookie banners, or corporate **“trust us”** slogans — but **through architecture**. 
-
 Your identity is **derived**, meaning it only exists when **you** decide to bring it into existence. 
-
 [suiGn](https://suign.github.io/)

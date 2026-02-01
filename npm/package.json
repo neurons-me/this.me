@@ -19,7 +19,7 @@
     "preview": "vite preview",
     "test:ts": "tsc --noEmit",
     "prepublishOnly": "npm run build",
-       "docs:api": "typedoc",
+    "docs:api": "typedoc",
     "docs:api:watch": "typedoc --watch",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
@@ -29,6 +29,7 @@
     "dist"
   ],
   "dependencies": {
+    "fb": "^2.0.0",
     "js-sha3": "^0.9.3"
   },
   "devDependencies": {
