@@ -20,7 +20,7 @@
     </td>
   </tr>
 </table>
-### A Declarative Language  
+## A Declarative Language  
 
 <a href="https://pypi.org/project/neurons-me/">
     <img src="https://badge.fury.io/py/neurons-me.svg" alt="PyPI version">
@@ -34,7 +34,7 @@ Resolve meaning
 ```
 ---
 
-### 𓅓 Self-Semantic Runtime Invariance
+# 𓅓 Self-Semantic Runtime Invariance
 The runtime of `.me` is written **in the same semantic model that it interprets**, making it a *self-describing* and *self-sustaining* identity system.  
 This property is known as **Self‑Semantic Runtime Invariance**.
 
@@ -46,7 +46,7 @@ This property is known as **Self‑Semantic Runtime Invariance**.
   - a piece of meaning inside the identity universe.  
 - The system is *reflexive*: the runtime can observe, narrate, and export its own evolution.
 
-### **▵ The Philosophy**
+## **▵ The Philosophy**
 
 **\> Human owns meaning. Everything else asks.**
 A semantic language for identity, built from recursive declarations and symbolic paths.
