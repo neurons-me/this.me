@@ -1,7 +1,9 @@
-import ME from "this.me";
+import Me from "this.me";
 
-async function runProfile(n) {
-  const me = new ME();
+type CallableMe = InstanceType<typeof Me> & ((expr: string) => unknown);
+
+async function runProfile(n: number) {
+  const me = new Me() as CallableMe;
   // Setup masivo
   for (let i = 1; i <= n; i++) me.x[i](10);
   me.factor(5);

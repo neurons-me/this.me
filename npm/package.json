@@ -1,6 +1,6 @@
 {
   "name": "this.me",
-  "version": "3.2.0",
+  "version": "3.2.2",
   "type": "module",
   "main": "./dist/me.cjs",
   "module": "./dist/me.es.js",
@@ -46,16 +46,23 @@
   "description": ".me is your identity trust through cryptographic signatures.",
   "keywords": [
     "this.me",
-    "decentralized identity",
-    "cryptographic identity",
-    "self-sovereign identity",
-    "digital identity",
-    "identity verification",
-    "blockchain identity",
-    "secure identity",
-    "identity management",
-    "decentralized authentication"
+    "semantic kernel",
+    "identity runtime",
+    "deterministic identity",
+    "cryptographic signatures",
+    "secret scopes",
+    "encrypted memory",
+    "semantic graph",
+    "deterministic inference",
+    "decentralized authentication",
+    "inverted dependency index",
+    "contextual reasoning",
+    "secure data storage",
+    "personalized AI",
+    "hermetic rpn evaluator",
+    "functional reactive logic",
+    "content-addressable dependency graph"
   ],
   "license": "MIT",
-  "author": "suiGn@neurons.me"
+  "author": "suiGn"
 }

@@ -174,7 +174,7 @@ me("wallet.hidden.note");// → "Deep dark secret"
 - Reads are path-based; there is no global `me.secret(...)` unlock call.
 
 ###### Structural view (public vs secret planes)
-```txt
+```bash
 Public index plane (inspect().index):
   "" -> { __id: "jabellae" }
 
@@ -253,7 +253,7 @@ me.exportSnapshot();  // full portable state (Phase 7B)
 # 𓃭 The Engine: Why it’s so fast?𓃭
 While traditional databases get bogged down in heavy scans and slow joins, the **.me Kernel** doesn't "search" for data—it navigates a **Semantic Algebra.**
 
-#### 𓎛 Incremental Intelligence (Phase 8) 
+## 𓎛 Incremental Intelligence (Phase 8) 
 Unlike standard reactive frameworks that re-render everything, **.me** uses an **Inverted Dependency Index.**
 When you define a formula (=), the Kernel maps the relationship.
 On mutation, only the affected nodes wake up.
@@ -261,12 +261,34 @@ On mutation, only the affected nodes wake up.
  complexity (where 
  is the specific dependency chain, not the size of the tree).
 
-#### 𓁟 Hermetic Sandbox (Phase C)
+ # 𓂀 The .me Behavioral Contract
+
+The `.me` kernel is governed by a rigorous 9-phase behavioral contract, validated through **Hermetic RPN Evaluation** and **Inverted Dependency Indexing**.
+
+### 𓎛 Core Identity & Privacy
+*   **𓂋 Phase 0 | Identity + Secret Scope**: Validates `@` identity claims and `_` stealth roots. Secret branches resolve to `undefined` at the root while remaining readable at the leaf via derived keys.
+*   **𓆣 Phase 8 | Stealth Masking & Explainability**: The `me.explain(path)` method provides a full audit trace. Inputs from secret scopes are flagged as `origin: "stealth"` and masked (`●●●●`), ensuring **Zero-Knowledge-ish observability**.
+
+### 𓏏 Structural Intelligence
+*   **𓐍 Phase 1 | Navigation**: Supports nested `[]` selectors and infinite proxy-chaining.
+*   **𓌳 Phase 2 | [i] Broadcast**: One-to-many formula application using `=` syntax.
+*   **𓍝 Phase 3 | Logical Filters**: Declarative selection using predicates (e.g., `trucks[efficiency < 4.5]`).
+*   **𓎼 Phase 4 | Deterministic Slicing**: Range `[a..b]` and sparse `[[a,c]]` multi-selection.
+
+### ⚙ Reactive Runtime
+*   **Phase 6 | Contract Integrity**: Deterministic arithmetic crossing public and secret boundaries.
+*   **Phase 8 | Incremental Recompute**: Dependency tracking (Ref → Targets). Mutating a leaf triggers targeted re-evaluation in **~50ms**, bypassing global recompute costs.
+
+### Sovereignty & Portability
+*   **Phase 7A | Temporal Replay**: Full state reconstruction via cryptographic thought-log replay.
+*   **Phase 7B | Atomic Snapshots**: Bit-level portability of the entire kernel (memory + secrets + noise seeds + encrypted branches).
+
+# 𓁟 Hermetic Sandbox (Phase C)
 Security isn't a "check"; it's a grammar.
 We replaced `eval()` with a custom **Shunting-yard + RPN evaluator.**
 The Kernel is physically incapable of executing arbitrary code. **It only resolves math and logic** over its own validated paths.
 
-#### Fractal Stealth (Phase 0 & 6)
+### Fractal Stealth (Phase 0 & 6)
 ###### Privacy is woven into the tree's geometry.
 **Stealth Roots:** Secret scopes `("_")` are invisible to standard lookups.
 **Deterministic Integrity:** Calculations can cross from public to secret scopes **(Phase 6)** without ever exposing the sensitive keys in the audit trail (me.explain).

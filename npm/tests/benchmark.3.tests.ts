@@ -1,7 +1,9 @@
 import ME from "this.me";
 
-async function runProfile(n) {
-  const me = new ME();
+type CallableMe = InstanceType<typeof ME> & ((expr: string) => unknown);
+
+async function runProfile(n: number) {
+  const me = new ME() as CallableMe;
   
   // 1. Setup (esto es lo que tarda, estamos creando miles de Proxies)
   for (let i = 1; i <= n; i++) {

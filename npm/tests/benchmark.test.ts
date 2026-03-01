@@ -2,51 +2,48 @@ import ME from "this.me";
 import assert from "node:assert/strict";
 
 /**
- * BENCHMARK: ESCALABILIDAD ALGORÍTMICA
- * Objetivo: Demostrar que el esfuerzo de .me es constante (O(k)) 
- * mientras que el de sistemas tradicionales es proporcional al tamaño (O(n)).
+ * BENCHMARK: ALGORITHMIC SCALING
+ * Goal: Show that .me work stays constant per recompute path (O(k)),
+ * while traditional systems scale with total dataset size (O(n)).
  */
 
-async function runBenchmark(nodeCount) {
-  const me = new ME();
-  
-  // 1. Setup del Universo
-  // Creamos una colección de N elementos
+async function runBenchmark(nodeCount: number) {
+  const me = new ME() as any;
+
+  // 1. Universe setup
+  // Create a collection of N elements
   for (let i = 1; i <= nodeCount; i++) {
     me.collection[i].value(10);
   }
 
-  // 2. Establecemos una lógica reactiva (Inferencia)
-  // 'total' depende de un solo nodo 'master_switch'
+  // 2. Define reactive logic (Inference)
+  // 'result' depends on one local field + one shared field 'master_switch'
   me.master_switch(5);
   me.collection["[i]"]["="]("result", "value * master_switch");
 
-  // Forzamos el primer cálculo global para limpiar el mapa
+  // Force initial compute so dependency mapping is established
   me("collection[1].result");
 
-  // --- EL MOMENTO DE LA VERDAD ---
-  
-  // En una BD tradicional, cambiar 'master_switch' obligaría a revisar N elementos.
-  // En .me, medimos cuántos pasos toma la actualización local.
-  
+  // --- MOMENT OF TRUTH ---
+  // In traditional systems, changing 'master_switch' can force broad rescans.
+  // In .me, we measure targeted invalidation + recompute behavior.
   const start = performance.now();
-  
-  // Realizamos la mutación
-  me.master_switch(10); 
-  
-  // Accedemos a un valor para asegurar que la propagación ocurrió
+
+  // Apply mutation
+  me.master_switch(10);
+
+  // Read one value to confirm propagation happened
   const val = me(`collection[${nodeCount}].result`);
-  
   const duration = performance.now() - start;
 
-  // Extraemos métricas del Kernel (P8 - Explain)
+  // Extract kernel metrics (Phase 8 - explain)
   const trace = me.explain(`collection.${nodeCount}.result`);
-  
+
   return {
     nodes: nodeCount,
     duration: duration.toFixed(4),
-    steps: trace.meta.dependsOn.length, // Cuántas piezas de información tocó
-    result: val
+    steps: trace.meta.dependsOn.length, // How many inputs this derivation depends on
+    result: val,
   };
 }
 
@@ -54,22 +51,24 @@ async function start() {
   console.log("\n========================================================");
   console.log(".me ALGORITHMIC SCALING BENCHMARK (Hardware Agnostic)");
   console.log("========================================================\n");
-  console.log("Testing how the kernel reacts as the dataset grows...");
-  console.log("Goal: O(k) efficiency (Work stays flat regardless of N)\n");
+  console.log("Testing how the kernel behaves as the dataset grows...");
+  console.log("Goal: O(k) efficiency (work stays flat regardless of N)\n");
 
   const sizes = [10, 100, 1000, 5000];
-  const results = [];
+  const results: Array<{ nodes: number; duration: string; steps: number; result: any }> = [];
 
   for (const size of sizes) {
     const res = await runBenchmark(size);
     results.push(res);
-    console.log(`> N = ${size.toString().padEnd(6)} | Time: ${res.duration.padEnd(8)}ms | Effort: ${res.steps} inputs per node`);
+    console.log(
+      `> N = ${size.toString().padEnd(6)} | Time: ${res.duration.padEnd(8)}ms | Effort: ${res.steps} inputs per node`
+    );
   }
 
   console.log("\n--- Comparison Table ---");
   console.table(results);
 
-  // Verificación de Superioridad
+  // Superiority check
   const first = results[0];
   const last = results[results.length - 1];
 
@@ -77,9 +76,9 @@ async function start() {
   if (parseFloat(last.duration) < 20) {
     console.log(`✅ SUPERIORITY PROVEN: Response time stayed under 20ms even with ${last.nodes} nodes.`);
   }
-  
+
   console.log(`✅ ALGORITHMIC CONSTANCY: Each node only processed ${last.steps} dependencies.`);
-  console.log("Traditional DBs would have scaled linear effort; .me stayed surgical.");
+  console.log("Traditional systems would scale with linear effort; .me stayed surgical.");
   console.log("========================================================\n");
 }
 
