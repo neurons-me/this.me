@@ -1,4 +1,17 @@
 // me/npm/src/me.ts
+/**
+ * 𓋹 .me Semantic Kernel v1.0
+ * ---------------------------------------------------------
+ * Core Logic & O(k) Complexity Architecture
+ * Designed and Authored by: J. Abella Eggleton (suiGn)
+ * Location: Cordoba, Veracruz, Mexico | 2026
+ * 
+ * Intellectual Property Note:
+ * This kernel implements a custom Inverted Dependency Index 
+ * and a Hermetic RPN Evaluator for deterministic inference.
+ * Licensed under MIT.
+ * ---------------------------------------------------------
+ */
 import type { Thought, SemanticPath, EncryptedBlob, MappingInstruction, OperatorRegistry } from "./types.js";
 import {
   isThought,
