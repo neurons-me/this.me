@@ -26,6 +26,10 @@ export default defineConfig({
     nav: [
       { text: "Home", link: "/" },
       { text: "Installation", link: "/Builds" },
+      { text: "Operators", link: "/Operators" },
+      { text: "Syntax", link: "/Syntax" },
+      { text: "Shared Meaning", link: "/Shared-Meaning" },
+      { text: "Tests", link: "/tests/Overview" },
       { text: "Axioms", link: "/Axioms" },
       { text: "Phases", link: "/Phases" }],
     sidebar: [
@@ -34,6 +38,9 @@ export default defineConfig({
         items: [
           { text: "Home", link: "/" },
           { text: "Installation", link: "/Builds" },
+          { text: "Operators", link: "/Operators" },
+          { text: "Syntax", link: "/Syntax" },
+          { text: "Shared Meaning", link: "/Shared-Meaning" },
           { text: "Axioms", link: "/Axioms" },
           { text: "Phases", link: "/Phases" }],
       },
@@ -52,7 +59,14 @@ export default defineConfig({
       },
       {
         text: "Tests",
-        items: [{ text: "Memory", link: "/Memory" }],
+        items: [
+          { text: "Overview", link: "/tests/Overview" },
+          { text: "Axioms & Phases", link: "/tests/Axioms-and-Phases" },
+          { text: "Build Compatibility", link: "/tests/Build-Compatibility" },
+          { text: "Examples & Contracts", link: "/tests/Examples-and-Contracts" },
+          { text: "Performance", link: "/tests/Performance" },
+          { text: "Memory", link: "/Memory" }
+        ],
       }]
   }
 });

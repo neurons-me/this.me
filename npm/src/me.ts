@@ -52,7 +52,7 @@ export class ME {
   private localSecrets: Record<string, string> = {};
   private localNoises: Record<string, string> = {};
   // Encrypted branch blobs stored at scope roots ("wallet" -> cipherblob)
-  private encryptedBranches: Record<string, EncryptedBlob> = {};
+  private encryptedBranches: Record<string, EncryptedBlob | Record<string, EncryptedBlob>> = {};
   // Derived read index (path -> latest committed value). Canonical truth is memory log.
   private index: Record<string, any> = {};
   // Runtime log lives as a semantic node, but is updated via a kernel write (no extra events).
@@ -83,6 +83,8 @@ export class ME {
   private scopeCache = new Map<string, { epoch: number; scope: SemanticPath | null }>();
   private effectiveSecretCache = new Map<string, { epoch: number; value: string }>();
   private decryptedBranchCache = new Map<string, { epoch: number; blob: EncryptedBlob; data: any }>();
+  private readonly secretChunkSize = 256;
+  private readonly secretHashBuckets = 16;
   private readonly unsafeEval = false;
   /**
    * @deprecated Use `memory` or `inspect().memory`.
@@ -207,7 +209,7 @@ export class ME {
     shortTermMemory: Thought[];
     localSecrets: Record<string, string>;
     localNoises: Record<string, string>;
-    encryptedBranches: Record<string, EncryptedBlob>;
+    encryptedBranches: Record<string, EncryptedBlob | Record<string, EncryptedBlob>>;
     operators: Record<string, { kind: string }>;
   } {
     return this.cloneValue({
@@ -226,7 +228,7 @@ export class ME {
     shortTermMemory?: Thought[];
     localSecrets?: Record<string, string>;
     localNoises?: Record<string, string>;
-    encryptedBranches?: Record<string, EncryptedBlob>;
+    encryptedBranches?: Record<string, EncryptedBlob | Record<string, EncryptedBlob>>;
     operators?: Record<string, { kind: string }>;
   }): void {
     const data = this.cloneValue(snapshot ?? {});
@@ -270,7 +272,7 @@ export class ME {
     shortTermMemory?: Thought[];
     localSecrets?: Record<string, string>;
     localNoises?: Record<string, string>;
-    encryptedBranches?: Record<string, EncryptedBlob>;
+    encryptedBranches?: Record<string, EncryptedBlob | Record<string, EncryptedBlob>>;
     operators?: Record<string, { kind: string }>;
   }): void {
     this.importSnapshot(snapshot);
@@ -825,12 +827,11 @@ export class ME {
     if (scope && scope.length > 0) {
       const scopeSecret = this.computeEffectiveSecret(scope);
       const rel = targetPath.slice(scope.length);
-      // Decrypt existing branch object (if any)
-      const existingBlob = this.getBranchBlob(scope);
+      const chunkId = this.getChunkId(targetPath, scope);
       let branchObj: any = {};
-      if (existingBlob && scopeSecret) {
-        const dec = xorDecrypt(existingBlob, scopeSecret, scope);
-        if (dec && typeof dec === "object") branchObj = dec;
+      if (scopeSecret) {
+        const dec = this.getDecryptedChunk(scope, scopeSecret, chunkId);
+        if (dec && typeof dec === "object") branchObj = this.cloneValue(dec);
       }
 
       // Mutate branch object at relative path
@@ -851,7 +852,7 @@ export class ME {
       // Re-encrypt and store at scope root.
       if (scopeSecret) {
         const blob = xorEncrypt(branchObj, scopeSecret, scope);
-        this.setBranchBlob(scope, blob);
+        this.setChunkBlob(scope, chunkId, blob, scopeSecret);
       }
       storedValue = expression;
     } else if (effectiveSecret) {
@@ -1380,10 +1381,12 @@ export class ME {
     for (const key of Object.keys(this.encryptedBranches)) {
       if (prefix === "") {
         delete this.encryptedBranches[key];
+        this.clearScopeChunkCache(key);
         continue;
       }
       if (key === prefix || key.startsWith(prefix + ".")) {
         delete this.encryptedBranches[key];
+        this.clearScopeChunkCache(key);
         continue;
       }
 
@@ -1393,12 +1396,15 @@ export class ME {
       if (!pathStartsWith(targetPath, scope) || targetPath.length <= scope.length) continue;
       const scopeSecret = this.computeEffectiveSecret(scope);
       if (!scopeSecret) continue;
-
-      const blob = this.getBranchBlob(scope);
-      if (!blob) continue;
-
-      const branchObj = xorDecrypt(blob, scopeSecret, scope);
+      const chunkId = this.getChunkId(targetPath, scope);
+      let branchObj = this.getDecryptedChunk(scope, scopeSecret, chunkId);
+      let writeChunkId = chunkId;
+      if (!branchObj && chunkId !== "default") {
+        branchObj = this.getDecryptedChunk(scope, scopeSecret, "default");
+        writeChunkId = "default";
+      }
       if (!branchObj || typeof branchObj !== "object") continue;
+      branchObj = this.cloneValue(branchObj);
 
       const rel = targetPath.slice(scope.length);
       let ref: any = branchObj;
@@ -1413,7 +1419,7 @@ export class ME {
       if (ref && typeof ref === "object") {
         delete ref[rel[rel.length - 1]];
         const nextBlob = xorEncrypt(branchObj, scopeSecret, scope);
-        this.setBranchBlob(scope, nextBlob);
+        this.setChunkBlob(scope, writeChunkId, nextBlob, scopeSecret);
       }
     }
 
@@ -1598,29 +1604,123 @@ export class ME {
     return { path: curPath, raw: undefined };
   }
 
-  private setBranchBlob(scope: SemanticPath, blob: EncryptedBlob) {
-    const key = scope.join(".");
-    this.encryptedBranches[key] = blob;
-    this.decryptedBranchCache.delete(key);
+  private chunkCacheKey(scopeKey: string, chunkId: string): string {
+    return `${scopeKey}::${chunkId}`;
+  }
+
+  private clearScopeChunkCache(scopeKey: string): void {
+    const prefix = `${scopeKey}::`;
+    for (const k of Array.from(this.decryptedBranchCache.keys())) {
+      if (k.startsWith(prefix)) this.decryptedBranchCache.delete(k);
+    }
+  }
+
+  private getChunkId(path: SemanticPath, scope: SemanticPath): string {
+    const rel = path.slice(scope.length);
+    if (rel.length === 0) return "root";
+    const head = rel[0] || "root";
+    const next = rel[1];
+    if (next === undefined) return `${head}_root`;
+    const n = Number(next);
+    if (Number.isFinite(n) && String(n) === String(next)) {
+      return `${head}_${Math.floor(Math.abs(n) / this.secretChunkSize)}`;
+    }
+    const h = parseInt(hashFn(String(next)).slice(-6), 16) % this.secretHashBuckets;
+    return `${head}_h${h}`;
+  }
+
+  private setAtPath(obj: any, rel: SemanticPath, value: any): void {
+    if (rel.length === 0) return;
+    let ref = obj;
+    for (let i = 0; i < rel.length - 1; i++) {
+      const part = rel[i];
+      if (!ref[part] || typeof ref[part] !== "object") ref[part] = {};
+      ref = ref[part];
+    }
+    ref[rel[rel.length - 1]] = value;
+  }
+
+  private flattenLeaves(node: any, rel: SemanticPath, out: Array<{ rel: SemanticPath; value: any }>): void {
+    if (isPointer(node) || isIdentityRef(node) || node === null || typeof node !== "object" || Array.isArray(node)) {
+      out.push({ rel, value: node });
+      return;
+    }
+    const keys = Object.keys(node);
+    if (keys.length === 0) {
+      out.push({ rel, value: node });
+      return;
+    }
+    for (const k of keys) this.flattenLeaves(node[k], [...rel, k], out);
+  }
+
+  private migrateLegacyScopeToChunks(scope: SemanticPath, legacyBlob: EncryptedBlob, scopeSecret: string): void {
+    const scopeKey = scope.join(".");
+    const legacyObj = xorDecrypt(legacyBlob, scopeSecret, scope);
+    if (!legacyObj || typeof legacyObj !== "object") {
+      this.encryptedBranches[scopeKey] = { default: legacyBlob };
+      return;
+    }
+
+    const leaves: Array<{ rel: SemanticPath; value: any }> = [];
+    this.flattenLeaves(legacyObj, [], leaves);
+    const chunkObjs: Record<string, any> = {};
+    for (const leaf of leaves) {
+      const chunkId = this.getChunkId([...scope, ...leaf.rel], scope);
+      if (!chunkObjs[chunkId] || typeof chunkObjs[chunkId] !== "object") chunkObjs[chunkId] = {};
+      this.setAtPath(chunkObjs[chunkId], leaf.rel, leaf.value);
+    }
+
+    const next: Record<string, EncryptedBlob> = {};
+    for (const [chunkId, chunkObj] of Object.entries(chunkObjs)) {
+      next[chunkId] = xorEncrypt(chunkObj, scopeSecret, scope);
+    }
+    this.encryptedBranches[scopeKey] = next;
+    this.clearScopeChunkCache(scopeKey);
+  }
+
+  private ensureScopeChunks(scope: SemanticPath, scopeSecret: string): Record<string, EncryptedBlob> {
+    const scopeKey = scope.join(".");
+    const current = this.encryptedBranches[scopeKey];
+    if (!current) {
+      const next: Record<string, EncryptedBlob> = {};
+      this.encryptedBranches[scopeKey] = next;
+      return next;
+    }
+    if (typeof current === "string") {
+      this.migrateLegacyScopeToChunks(scope, current as EncryptedBlob, scopeSecret);
+      return this.encryptedBranches[scopeKey] as Record<string, EncryptedBlob>;
+    }
+    return current as Record<string, EncryptedBlob>;
+  }
+
+  private getChunkBlob(scope: SemanticPath, chunkId: string): EncryptedBlob | undefined {
+    const scopeKey = scope.join(".");
+    const current = this.encryptedBranches[scopeKey];
+    if (!current) return undefined;
+    if (typeof current === "string") return chunkId === "default" ? (current as EncryptedBlob) : undefined;
+    return (current as Record<string, EncryptedBlob>)[chunkId];
+  }
+
+  private setChunkBlob(scope: SemanticPath, chunkId: string, blob: EncryptedBlob, scopeSecret: string): void {
+    const scopeKey = scope.join(".");
+    const chunks = this.ensureScopeChunks(scope, scopeSecret);
+    chunks[chunkId] = blob;
+    this.decryptedBranchCache.delete(this.chunkCacheKey(scopeKey, chunkId));
     // Intentionally do NOT mirror encrypted blobs into the index.
     // The index should not reveal that a secret scope even exists.
   }
 
-  private getBranchBlob(scope: SemanticPath): EncryptedBlob | undefined {
-    const key = scope.join(".");
-    return this.encryptedBranches[key];
-  }
-
-  private getDecryptedBranch(scope: SemanticPath, scopeSecret: string): any | undefined {
+  private getDecryptedChunk(scope: SemanticPath, scopeSecret: string, chunkId: string): any | undefined {
     const scopeKey = scope.join(".");
-    const blob = this.getBranchBlob(scope);
+    const blob = this.getChunkBlob(scope, chunkId);
     if (!blob) return undefined;
-    const hit = this.decryptedBranchCache.get(scopeKey);
+    const ck = this.chunkCacheKey(scopeKey, chunkId);
+    const hit = this.decryptedBranchCache.get(ck);
     if (hit && hit.epoch === this.secretEpoch && hit.blob === blob) return hit.data;
 
     const data = xorDecrypt(blob, scopeSecret, scope);
     if (!data || typeof data !== "object") return undefined;
-    this.decryptedBranchCache.set(scopeKey, { epoch: this.secretEpoch, blob, data });
+    this.decryptedBranchCache.set(ck, { epoch: this.secretEpoch, blob, data });
     return data;
   }
 
@@ -2084,7 +2184,11 @@ export class ME {
       if (path.length === scope.length) return undefined; // hide scope root
       const scopeSecret = this.computeEffectiveSecret(scope);
       if (!scopeSecret) return null;
-      const branchObj = this.getDecryptedBranch(scope, scopeSecret);
+      const chunkId = this.getChunkId(path, scope);
+      let branchObj = this.getDecryptedChunk(scope, scopeSecret, chunkId);
+      if (!branchObj && chunkId !== "default") {
+        branchObj = this.getDecryptedChunk(scope, scopeSecret, "default");
+      }
       if (!branchObj) return undefined;
       const rel = path.slice(scope.length);
       let ref: any = branchObj;
