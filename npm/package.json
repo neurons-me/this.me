@@ -18,7 +18,7 @@
     "build": "vite build --config vite.config.ts",
     "preview": "vite preview --config vite.config.ts",
     "test:ts": "tsc --noEmit",
-    "test:umd": "node tests/umd.test.cjs",
+    "test:umd": "node tests/Builds/umd.test.cjs",
     "test:prebuild": "node tests/pre-build.test.mjs",
     "test:contracts": "node tests/contracts/dsl.contract.test.mjs",
     "prepublishOnly": "npm run build",

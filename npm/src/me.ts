@@ -68,6 +68,21 @@ export class ME {
     }
   > = {};
   private refSubscribers: Record<string, string[]> = {};
+  // Recompute strategy:
+  // - eager: recompute subscribers immediately on writes (current behavior)
+  // - lazy: mark downstream derivations stale and recompute on read
+  private recomputeMode: "eager" | "lazy" = "eager";
+  // Per-reference monotonic versions used by lazy mode.
+  private refVersions: Record<string, number> = {};
+  // Snapshot of dependency versions at the last successful recompute per target.
+  private derivationRefVersions: Record<string, Record<string, number>> = {};
+  // Lazy dirty-set: derived targets that must be refreshed on read.
+  private staleDerivations = new Set<string>();
+  // Security-structure cache: only invalidates when secret/noise topology changes.
+  private secretEpoch = 0;
+  private scopeCache = new Map<string, { epoch: number; scope: SemanticPath | null }>();
+  private effectiveSecretCache = new Map<string, { epoch: number; value: string }>();
+  private decryptedBranchCache = new Map<string, { epoch: number; blob: EncryptedBlob; data: any }>();
   private readonly unsafeEval = false;
   /**
    * @deprecated Use `memory` or `inspect().memory`.
@@ -90,6 +105,8 @@ export class ME {
     encryptedScopes: string[];
     secretScopes: string[];
     noiseScopes: string[];
+    recomputeMode: "eager" | "lazy";
+    staleDerivations: number;
   } {
     const last = opts?.last;
     const memory =
@@ -103,7 +120,25 @@ export class ME {
       encryptedScopes: Object.keys(this.encryptedBranches),
       secretScopes: Object.keys(this.localSecrets),
       noiseScopes: Object.keys(this.localNoises),
+      recomputeMode: this.recomputeMode,
+      staleDerivations: this.staleDerivations.size,
     };
+  }
+
+  setRecomputeMode(mode: "eager" | "lazy"): this {
+    this.recomputeMode = mode;
+    return this;
+  }
+
+  getRecomputeMode(): "eager" | "lazy" {
+    return this.recomputeMode;
+  }
+
+  private bumpSecretEpoch(): void {
+    this.secretEpoch++;
+    this.scopeCache.clear();
+    this.effectiveSecretCache.clear();
+    this.decryptedBranchCache.clear();
   }
 
   explain(path: string): {
@@ -120,6 +155,7 @@ export class ME {
   } {
     const target = this.normalizeSelectorPath(String(path ?? "").split(".").filter(Boolean));
     const key = target.join(".");
+    if (this.recomputeMode === "lazy") this.ensureTargetFresh(key);
     const value = this.readPath(target);
     const d = this.derivations[key];
     if (!d) {
@@ -201,10 +237,14 @@ export class ME {
       : [];
     this.localSecrets = data.localSecrets && typeof data.localSecrets === "object" ? data.localSecrets : {};
     this.localNoises = data.localNoises && typeof data.localNoises === "object" ? data.localNoises : {};
+    this.bumpSecretEpoch();
     this.encryptedBranches =
       data.encryptedBranches && typeof data.encryptedBranches === "object" ? data.encryptedBranches : {};
     this.derivations = {};
     this.refSubscribers = {};
+    this.refVersions = {};
+    this.derivationRefVersions = {};
+    this.staleDerivations.clear();
 
     const defaults: Record<string, { kind: string }> = {
       "_": { kind: "secret" },
@@ -240,10 +280,14 @@ export class ME {
     this.localSecrets = {};
     this.localNoises = {};
     this.encryptedBranches = {};
+    this.bumpSecretEpoch();
     this.index = {};
     this._shortTermMemory = [];
     this.derivations = {};
     this.refSubscribers = {};
+    this.refVersions = {};
+    this.derivationRefVersions = {};
+    this.staleDerivations.clear();
 
     for (const t of thoughts || []) {
       const path = String(t.path || "")
@@ -313,6 +357,7 @@ export class ME {
     this.localSecrets = {};
     this.localNoises = {};
     this.encryptedBranches = {};
+    this.bumpSecretEpoch();
     this.index = {};
     this.operators = {
       "_": { kind: "secret" },
@@ -600,6 +645,24 @@ export class ME {
       if (this.refSubscribers[ref.path].length === 0) delete this.refSubscribers[ref.path];
     }
     delete this.derivations[targetKey];
+    delete this.derivationRefVersions[targetKey];
+    this.staleDerivations.delete(targetKey);
+  }
+
+  private getRefVersion(refPath: string): number {
+    return this.refVersions[refPath] ?? 0;
+  }
+
+  private bumpRefVersion(refPath: string): void {
+    this.refVersions[refPath] = this.getRefVersion(refPath) + 1;
+  }
+
+  private snapshotDerivationRefVersions(targetKey: string): void {
+    const d = this.derivations[targetKey];
+    if (!d) return;
+    const snap: Record<string, number> = {};
+    for (const ref of d.refs) snap[ref.path] = this.getRefVersion(ref.path);
+    this.derivationRefVersions[targetKey] = snap;
   }
 
   private registerDerivation(targetPath: SemanticPath, evalScope: SemanticPath, expr: string): void {
@@ -626,6 +689,8 @@ export class ME {
       refs,
       lastComputedAt: Date.now(),
     };
+    this.snapshotDerivationRefVersions(targetKey);
+    this.staleDerivations.delete(targetKey);
   }
 
   private recomputeTarget(targetKey: string): boolean {
@@ -635,12 +700,51 @@ export class ME {
     const evaluated = this.tryEvaluateAssignExpression(d.evalScope, d.expression);
     this.postulate(targetPath, evaluated.ok ? evaluated.value : d.expression, "=");
     d.lastComputedAt = Date.now();
+    this.snapshotDerivationRefVersions(targetKey);
+    this.staleDerivations.delete(targetKey);
     return true;
+  }
+
+  private isDerivationVersionStale(targetKey: string): boolean {
+    const d = this.derivations[targetKey];
+    if (!d) return false;
+    const snap = this.derivationRefVersions[targetKey] || {};
+    for (const ref of d.refs) {
+      if ((snap[ref.path] ?? 0) !== this.getRefVersion(ref.path)) return true;
+    }
+    return false;
+  }
+
+  private ensureTargetFresh(targetKey: string, visiting: Set<string> = new Set()): boolean {
+    if (this.recomputeMode !== "lazy") return false;
+    const d = this.derivations[targetKey];
+    if (!d) return false;
+    if (visiting.has(targetKey)) return false;
+    visiting.add(targetKey);
+
+    for (const ref of d.refs) {
+      if (this.derivations[ref.path]) this.ensureTargetFresh(ref.path, visiting);
+    }
+
+    const needsRefresh = this.staleDerivations.has(targetKey) || this.isDerivationVersionStale(targetKey);
+    let changed = false;
+    if (needsRefresh) changed = this.recomputeTarget(targetKey);
+
+    visiting.delete(targetKey);
+    return changed;
   }
 
   private invalidateFromPath(path: SemanticPath): void {
     const root = this.normalizeSelectorPath(path).join(".");
     if (!root) return;
+    this.bumpRefVersion(root);
+
+    if (this.recomputeMode === "lazy") {
+      // True lazy mode: O(1) write path.
+      // We only bump the changed ref version and defer graph traversal/recompute to read-time.
+      return;
+    }
+
     const queue: string[] = [root];
     const seenTargets = new Set<string>();
 
@@ -695,7 +799,7 @@ export class ME {
       timestamp,
     };
     this._shortTermMemory.push(thought);
-    this.rebuildIndex();
+    this.applyThoughtToIndex(thought);
     return thought;
   }
 
@@ -780,6 +884,7 @@ export class ME {
         if (typeof instruction.value !== "string") return undefined;
         const scopeKey = instruction.path.join(".");
         this.localSecrets[scopeKey] = instruction.value;
+        this.bumpSecretEpoch();
         return this.commitThoughtOnly(instruction.path, "_", "***", "***");
       }
       default:
@@ -1229,6 +1334,7 @@ export class ME {
     const noiseCall = this.isNoiseScopeCall(targetPath, expression);
     if (noiseCall) {
       this.localNoises[noiseCall.scopeKey] = expression;
+      this.bumpSecretEpoch();
       const scopePath = noiseCall.scopeKey ? noiseCall.scopeKey.split(".").filter(Boolean) : [];
       return this.commitThoughtOnly(scopePath, "~", "***", "***");
     }
@@ -1240,16 +1346,19 @@ export class ME {
 
   private removeSubtree(targetPath: SemanticPath) {
     this.clearDerivationsByPrefix(targetPath);
+    let securityTopologyChanged = false;
     // Remove secrets declared at/under this path (excluding root unless targetPath is root)
     const prefix = targetPath.join(".");
     for (const key of Object.keys(this.localSecrets)) {
       if (prefix === "") {
         // wiping root removes all
         delete this.localSecrets[key];
+        securityTopologyChanged = true;
         continue;
       }
       if (key === prefix || key.startsWith(prefix + ".")) {
         delete this.localSecrets[key];
+        securityTopologyChanged = true;
       }
     }
 
@@ -1257,12 +1366,15 @@ export class ME {
     for (const key of Object.keys(this.localNoises)) {
       if (prefix === "") {
         delete this.localNoises[key];
+        securityTopologyChanged = true;
         continue;
       }
       if (key === prefix || key.startsWith(prefix + ".")) {
         delete this.localNoises[key];
+        securityTopologyChanged = true;
       }
     }
+    if (securityTopologyChanged) this.bumpSecretEpoch();
 
     // Remove encrypted branch blobs at/under this path
     for (const key of Object.keys(this.encryptedBranches)) {
@@ -1330,13 +1442,17 @@ export class ME {
       timestamp,
     };
     this._shortTermMemory.push(thought);
-    this.rebuildIndex();
+    this.applyThoughtToIndex(thought);
   }
 
   // ---------------------------------------------------------
   // Fractal secret: combina todos los secrets a lo largo de la ruta, o noise acts as a new root for chaining
   // ---------------------------------------------------------
   private computeEffectiveSecret(path: SemanticPath): string {
+    const pathKey = path.join(".");
+    const hit = this.effectiveSecretCache.get(pathKey);
+    if (hit && hit.epoch === this.secretEpoch) return hit.value;
+
     // 0) Noise root: pick the deepest noise declared along the path.
     // If present, it becomes the new base seed for subsequent secret chaining *below it*.
     let noiseKey: string | null = null;
@@ -1385,14 +1501,50 @@ export class ME {
 
     // If nothing contributed, return empty.
     // (This preserves old behavior where an empty effectiveSecret means "no encryption" for non-secret writes.)
-    if (seed === "root") return "";
-    return seed;
+    const out = seed === "root" ? "" : seed;
+    this.effectiveSecretCache.set(pathKey, { epoch: this.secretEpoch, value: out });
+    return out;
   }
 
 
   // ---------------------------------------------------------
   // Índice derivado
   // ---------------------------------------------------------
+  private applyThoughtToIndex(t: Thought): void {
+    const p = t.path;
+    const pathParts = p.split(".").filter(Boolean);
+    if (t.operator === "_") {
+      // Declaring a non-root secret scope must immediately hide that prefix from public index.
+      if (pathParts.length > 0) this.removeIndexPrefix(pathParts);
+      return;
+    }
+    const scope = this.resolveBranchScope(pathParts);
+    const inSecret = scope && scope.length > 0 && pathStartsWith(pathParts, scope);
+    if (t.operator === "-") {
+      if (p === "") {
+        for (const k of Object.keys(this.index)) delete this.index[k];
+        return;
+      }
+      const prefix = p + ".";
+      for (const k of Object.keys(this.index)) {
+        if (k === p || k.startsWith(prefix)) delete this.index[k];
+      }
+      return;
+    }
+
+    if (inSecret) return;
+    this.index[p] = t.value;
+  }
+
+  private removeIndexPrefix(prefixPath: SemanticPath): void {
+    const prefix = prefixPath.join(".");
+    if (!prefix) return;
+    const dot = prefix + ".";
+    for (const k of Object.keys(this.index)) {
+      if (k === prefix || k.startsWith(dot)) delete this.index[k];
+    }
+  }
+
   private rebuildIndex() {
     const next: Record<string, any> = {};
     const orderedThoughts = this._shortTermMemory
@@ -1404,27 +1556,10 @@ export class ME {
       })
       .map((x) => x.t);
 
-    for (const t of orderedThoughts) {
-      const p = t.path;
-      const pathParts = p.split(".").filter(Boolean);
-      const scope = this.resolveBranchScope(pathParts);
-      const inSecret = scope && scope.length > 0 && pathStartsWith(pathParts, scope);
-      if (t.operator === "-") {
-        if (p === "") {
-          for (const k of Object.keys(next)) delete next[k];
-          continue;
-        }
-        const prefix = p + ".";
-        for (const k of Object.keys(next)) {
-          if (k === p || k.startsWith(prefix)) delete next[k];
-        }
-        continue;
-      }
-
-      if (inSecret) continue;
-      next[p] = t.value;
-    }
     this.index = next;
+    for (const t of orderedThoughts) {
+      this.applyThoughtToIndex(t);
+    }
   }
 
   private getIndex(path: SemanticPath): any {
@@ -1466,6 +1601,7 @@ export class ME {
   private setBranchBlob(scope: SemanticPath, blob: EncryptedBlob) {
     const key = scope.join(".");
     this.encryptedBranches[key] = blob;
+    this.decryptedBranchCache.delete(key);
     // Intentionally do NOT mirror encrypted blobs into the index.
     // The index should not reveal that a secret scope even exists.
   }
@@ -1475,7 +1611,24 @@ export class ME {
     return this.encryptedBranches[key];
   }
 
+  private getDecryptedBranch(scope: SemanticPath, scopeSecret: string): any | undefined {
+    const scopeKey = scope.join(".");
+    const blob = this.getBranchBlob(scope);
+    if (!blob) return undefined;
+    const hit = this.decryptedBranchCache.get(scopeKey);
+    if (hit && hit.epoch === this.secretEpoch && hit.blob === blob) return hit.data;
+
+    const data = xorDecrypt(blob, scopeSecret, scope);
+    if (!data || typeof data !== "object") return undefined;
+    this.decryptedBranchCache.set(scopeKey, { epoch: this.secretEpoch, blob, data });
+    return data;
+  }
+
   private resolveBranchScope(path: SemanticPath): SemanticPath | null {
+    const pathKey = path.join(".");
+    const hit = this.scopeCache.get(pathKey);
+    if (hit && hit.epoch === this.secretEpoch) return hit.scope ? [...hit.scope] : null;
+
     // pick the deepest scope root that has a secret declared
     let best: SemanticPath | null = null;
     if (this.localSecrets[""]) best = [];
@@ -1484,6 +1637,7 @@ export class ME {
       const k = p.join(".");
       if (this.localSecrets[k]) best = p;
     }
+    this.scopeCache.set(pathKey, { epoch: this.secretEpoch, scope: best ? [...best] : null });
     return best;
   }
 
@@ -1917,6 +2071,10 @@ export class ME {
     if (selected !== undefined) return selected;
 
     path = this.normalizeSelectorPath(path);
+    if (this.recomputeMode === "lazy") {
+      const key = path.join(".");
+      if (this.derivations[key]) this.ensureTargetFresh(key);
+    }
     const filtered = this.evaluateFilterPath(path);
     if (filtered !== undefined) return filtered;
 
@@ -1926,10 +2084,8 @@ export class ME {
       if (path.length === scope.length) return undefined; // hide scope root
       const scopeSecret = this.computeEffectiveSecret(scope);
       if (!scopeSecret) return null;
-      const blob = this.getBranchBlob(scope);
-      if (!blob) return undefined;
-      const branchObj = xorDecrypt(blob, scopeSecret, scope);
-      if (!branchObj || typeof branchObj !== "object") return undefined;
+      const branchObj = this.getDecryptedBranch(scope, scopeSecret);
+      if (!branchObj) return undefined;
       const rel = path.slice(scope.length);
       let ref: any = branchObj;
       for (const part of rel) {
@@ -1937,7 +2093,8 @@ export class ME {
         ref = ref[part];
       }
       if (isPointer(ref)) return this.readPath(ref.__ptr.split(".").filter(Boolean));
-      if (isIdentityRef(ref)) return ref;
+      if (isIdentityRef(ref)) return this.cloneValue(ref);
+      if (ref && typeof ref === "object") return this.cloneValue(ref);
       return ref;
     }
 

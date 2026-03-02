@@ -5,7 +5,7 @@ const vm = require("node:vm");
 console.log("=== UMD BUILD TEST ===");
 
 try {
-  const umdPath = path.resolve(__dirname, "../dist/me.umd.js");
+  const umdPath = path.resolve(__dirname, "../../dist/me.umd.js");
   const umdCode = fs.readFileSync(umdPath, "utf8");
 
   const sandbox = {

@@ -1,7 +1,5 @@
 import { defineConfig } from "vitepress";
-
 const base = process.env.VITEPRESS_BASE || "/.me/docs/";
-
 export default defineConfig({
   title: ".me",
   description: "Documentation for .me",
@@ -29,8 +27,7 @@ export default defineConfig({
       { text: "Home", link: "/" },
       { text: "Installation", link: "/Builds" },
       { text: "Axioms", link: "/Axioms" },
-      { text: "Phases", link: "/Phases" },
-    ],
+      { text: "Phases", link: "/Phases" }],
     sidebar: [
       {
         text: "Guide",
@@ -38,26 +35,24 @@ export default defineConfig({
           { text: "Home", link: "/" },
           { text: "Installation", link: "/Builds" },
           { text: "Axioms", link: "/Axioms" },
-          { text: "Phases", link: "/Phases" },
-        ],
+          { text: "Phases", link: "/Phases" }],
       },
       {
         text: "Examples",
         items: [
         { text: "Social Graph", link: "/examples/Social_Graph" },
         { text: "CoffeeShops", link: "/examples/Shops_Admin" },
-        { text: "Wallet Split", link: "/examples/WalletSplit" }
-        ],
+        { text: "Wallet Split", link: "/examples/WalletSplit" }],
       },
       {
         text: "Kernel",
         items: [{ text: "Core", link: "/kernel/Core" }, 
-        { text: "Intelligence", link: "/kernel/Intelligence" }],
+        { text: "Intelligence", link: "/kernel/Intelligence" },
+        { text: "Benchmarks", link: "/kernel/Benchmarks" }]
       },
       {
         text: "Tests",
         items: [{ text: "Memory", link: "/Memory" }],
-      }
-    ],
-  },
+      }]
+  }
 });

@@ -305,7 +305,7 @@ The behavior is identical, bit-by-bit, because the logic is part of the state.
 
 
 ##### License
-**MIT © 2025 by https://neurons.me**
+**MIT © 2025  https://neurons.me**
 
 See the `LICENSE` file in the package root for details.
 
