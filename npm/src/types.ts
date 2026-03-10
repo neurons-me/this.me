@@ -60,6 +60,7 @@ export type EncryptedBlob = `0x${string}`;
 // Path / call representation
 // -----------------------------
 export type SemanticPath = string[];
+
 // Opaque ME instance shape (runtime class lives in `me.ts`).
 // Useful for typing APIs without importing the class type.
 export type MEInstance = Record<string, any>;

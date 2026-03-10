@@ -258,6 +258,48 @@ export class ME {
     this.importSnapshot(snapshot);
   }
 
+  learn(memory: unknown): void {
+    const next = this.cloneValue(memory ?? {}) as Partial<Memory>;
+    const path = String(next.path || "")
+      .split(".")
+      .filter(Boolean);
+
+    if (next.operator === "_") {
+      this.postulate([...path, "_"], typeof next.expression === "string" ? next.expression : "***");
+      return;
+    }
+    if (next.operator === "~") {
+      this.postulate([...path, "~"], typeof next.expression === "string" ? next.expression : "***");
+      return;
+    }
+    if (next.operator === "@") {
+      const id =
+        (next.expression && (next.expression as any).__id) ||
+        (next.value && (next.value as any).__id) ||
+        next.value;
+      if (typeof id === "string" && id.length > 0) this.postulate([...path, "@"], id);
+      return;
+    }
+    if (next.operator === "__" || next.operator === "->") {
+      const ptr =
+        (next.expression && (next.expression as any).__ptr) ||
+        (next.value && (next.value as any).__ptr) ||
+        next.value;
+      if (typeof ptr === "string" && ptr.length > 0) this.postulate([...path, "__"], ptr);
+      return;
+    }
+    if (next.operator === "-") {
+      this.removeSubtree(path);
+      return;
+    }
+    if (next.operator === "=" || next.operator === "?") {
+      this.postulate(path, next.value, next.operator);
+      return;
+    }
+
+    this.postulate(path, next.expression, next.operator ?? null);
+  }
+
   replayMemories(memories: Memory[]): void {
     this.localSecrets = {};
     this.localNoises = {};
