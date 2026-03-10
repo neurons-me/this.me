@@ -89,7 +89,7 @@ The kernel maintains a dual-plane state model:
 - Local noise scopes
 ### Atomic Snapshot
 Exports the entire kernel into a single portable blob, including:
-- Thought log
+- Memory log
 - Dependency definitions
 - Secret scopes
 ### Rehydration
@@ -103,7 +103,7 @@ A new kernel instance can ingest a snapshot and resume operations with:
 # 5. Technical Constraints & Guarantees
 
 ## Immutability
-Every state change is recorded as a **Thought**.
+Every state change is recorded as a **Memory**.
 
 ## Cycle Protection
 The dependency engine detects and halts circular references.

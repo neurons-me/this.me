@@ -173,7 +173,7 @@ me.wallet.hidden["-"]("notes");
 me.wallet.hidden.notes["-"]();
 ```
 
-Removes subtree and records auditable tombstone thought.
+Removes subtree and records auditable tombstone memory.
 
 ## `+` Define operator (kernel-level)
 

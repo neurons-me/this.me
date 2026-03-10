@@ -10,7 +10,7 @@
  * - Username normalization/validation used by the identity operator
  *
  * What stays in `me.ts` (kernel):
- * - Storage planes (index / encryptedBranches / shortTermMemory)
+ * - Storage planes (index / encryptedBranches / memories)
  * - Crypto primitives (xorEncrypt/xorDecrypt)
  * - Secret/noise derivation (computeEffectiveSecret)
  * - The actual postulate()/readPath() machinery
@@ -23,7 +23,7 @@ import type {
   SemanticPath,
   MePointer,
   MeIdentityRef,
-  Thought,
+  Memory,
 } from "./types.js";
 
 export const OP_DEFINE: OperatorToken = "+";
@@ -48,7 +48,7 @@ export function isIdentityRef(obj: any): obj is MeIdentityRef {
   return !!obj && typeof obj === "object" && typeof obj.__id === "string" && obj.__id.length > 0;
 }
 
-export function isThought(obj: any): obj is Thought {
+export function isMemory(obj: any): obj is Memory {
   return (
     !!obj &&
     typeof obj === "object" &&
@@ -301,7 +301,7 @@ export const Operators = {
   isPointer,
   makeIdentityRef,
   isIdentityRef,
-  isThought,
+  isMemory,
   normalizeAndValidateUsername,
   isDefineOpCall,
   isSecretScopeCall,

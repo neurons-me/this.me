@@ -7,7 +7,7 @@ function show(step: string, focus: string[] = []) {
   for (const p of focus) console.log(`${p} ->`, me(p));
   console.log(
     "last memory events:",
-    state.memory.map((t: any) => ({ path: t.path, op: t.operator, value: t.value }))
+    state.memories.map((t: any) => ({ path: t.path, op: t.operator, value: t.value }))
   );
 }
 

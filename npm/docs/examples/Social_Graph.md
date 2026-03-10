@@ -24,7 +24,7 @@ function show(step: string, focus: string[] = []) {
   for (const p of focus) console.log(`${p} ->`, me(p));
   console.log(
     "last memory events:",
-    state.memory.map((t: any) => ({ path: t.path, op: t.operator, value: t.value }))
+    state.memories.map((t: any) => ({ path: t.path, op: t.operator, value: t.value }))
   );
 }
 
@@ -124,7 +124,7 @@ me("friends[age > 18].name");
 
 - `index keys`: current public resolved surface
 - focused reads: direct proof of expected values
-- `last memory events`: latest commits from `state.memory`
+- `last memory events`: latest commits from `state.memories`
 
 This gives you a real-time audit trail of how `.me` builds and resolves the graph.
 

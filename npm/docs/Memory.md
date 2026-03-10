@@ -1,24 +1,18 @@
 # Memory
 
-In `.me`, **Memory** is the canonical event log of the runtime.
+In `.me`, **Memory** is the canonical event unit of the runtime.
 
-- Preferred API: `me.memory`
-- Preferred inspect field: `me.inspect().memory`
-- Preferred replay API: `me.replayMemory(memory)`
-
-Legacy aliases remain for compatibility:
-
-- `shortTermMemory` (legacy alias of `memory`)
-- `inspect().thoughts` (legacy alias of `inspect().memory`)
-- `replayThoughts(...)` (legacy alias of `replayMemory(...)`)
+- Preferred API: `me.memories`
+- Preferred inspect field: `me.inspect().memories`
+- Preferred replay API: `me.replayMemories(memories)`
 
 ### Quick example
 
 ```ts
 const state = me.inspect();
-console.log(state.memory.length);
+console.log(state.memories.length);
 
 const snapshot = me.exportSnapshot();
 const me2 = new Me();
-me2.replayMemory(snapshot.memory);
+me2.replayMemories(snapshot.memories);
 ```

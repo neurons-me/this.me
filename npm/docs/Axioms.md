@@ -84,8 +84,8 @@ private isIdentityCall(path: SemanticPath, expression: any): { id: string; targe
 ```ts
 const me = new ME() as any;
 me["@"]("Abella");
-console.log(me.inspect({ last: 1 }).memory[0].operator); // "@"
-console.log(me.inspect({ last: 1 }).memory[0].value); // { __id: "abella" }
+console.log(me.inspect({ last: 1 }).memories[0].operator); // "@"
+console.log(me.inspect({ last: 1 }).memories[0].value); // { __id: "abella" }
 ```
 
 ---
@@ -98,7 +98,7 @@ console.log(me.inspect({ last: 1 }).memory[0].value); // { __id: "abella" }
 if (instruction.op === "secret") {
   const scopeKey = instruction.path.join(".");
   this.localSecrets[scopeKey] = instruction.value;
-  return this.commitThoughtOnly(instruction.path, "_", "***", "***");
+  return this.commitMemoryOnly(instruction.path, "_", "***", "***");
 }
 ```
 
@@ -185,7 +185,7 @@ const me = new ME() as any;
 me.profile["_"]("alpha");
 me.profile.name("Abella");
 me.profile["?"]("name", "city");
-console.log(me.inspect({ last: 1 }).memory[0].operator); // "?"
+console.log(me.inspect({ last: 1 }).memories[0].operator); // "?"
 ```
 
 ---
@@ -195,14 +195,14 @@ console.log(me.inspect({ last: 1 }).memory[0].operator); // "?"
 
 **Kernel evidence (`src/me.ts`):**
 ```ts
-const thought: Thought = {
+const memory: Memory = {
   path: pathStr,
   operator: "-",
   expression: "-",
   value: "-",
   /* ... */
 };
-this._shortTermMemory.push(thought);
+this._memories.push(memory);
 ```
 
 ```ts
@@ -249,7 +249,7 @@ console.log(me("profile")); // undefined
 
 **Kernel evidence (`src/me.ts`):**
 ```ts
-const prevHash = this.getPrevThoughtHash();
+const prevHash = this.getPrevMemoryHash();
 const hashInput = JSON.stringify({ path, operator, expression, value, effectiveSecret, prevHash });
 const hash = hashFn(hashInput);
 ```
@@ -259,7 +259,7 @@ const hash = hashFn(hashInput);
 const me = new ME() as any;
 me["@"]("jabellae");
 me.ledger.host("localhost:8161");
-const m = me.memory;
+const m = me.memories;
 console.log(m[0].prevHash === ""); // true
 console.log(m[1].prevHash === m[0].hash); // true
 ```
@@ -271,7 +271,7 @@ console.log(m[1].prevHash === m[0].hash); // true
 
 **Kernel evidence (`src/me.ts`):**
 ```ts
-const orderedThoughts = this._shortTermMemory
+const orderedMemories = this._memories
   .map((t, i) => ({ t, i }))
   .sort((a, b) => {
     if (a.t.timestamp !== b.t.timestamp) return a.t.timestamp - b.t.timestamp;

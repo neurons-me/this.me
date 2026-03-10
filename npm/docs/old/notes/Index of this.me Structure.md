@@ -9,7 +9,7 @@ There are no static "attributes" or "properties" baked into the model. Instead:
 \- `relate(key, value)` declares connections
 \- `react(key, value)` expresses interaction
 \- `at(key, value)` defines location/context
-\- `say(key, value)` declares thoughts or speech
+\- `say(key, value)` declares memories or speech
 
 These verbs are recorded in the local identity database.
 

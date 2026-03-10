@@ -99,12 +99,12 @@ Expected:
 - `me("fleet.trucks[2].total_cost")` -> `350 * 24.5`
 
 ## Phase 7A | Temporal Rehydration (Replay Equivalence)
-Purpose: behavioral persistence via thought replay.
+Purpose: behavioral persistence via memory replay.
 
 ```js
-const memory = me.inspect().memory;
+const memories = me.inspect().memories;
 const me2 = new ME();
-me2.replayMemory(memory);
+me2.replayMemories(memory);
 ```
 
 Expected:

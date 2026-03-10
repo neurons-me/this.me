@@ -1,6 +1,6 @@
 // me/npm/src/me.ts
 /**
- * 𓋹 .me Semantic Kernel v1.0
+ * 𓋹 .me Semantic Kernel 
  * ---------------------------------------------------------
  * Core Logic & O(k) Complexity Architecture
  * Designed and Authored by: J. Abella Eggleton (suiGn)
@@ -12,9 +12,9 @@
  * Licensed under MIT.
  * ---------------------------------------------------------
  */
-import type { Thought, SemanticPath, EncryptedBlob, MappingInstruction, OperatorRegistry } from "./types.js";
+import type { Memory, SemanticPath, EncryptedBlob, MappingInstruction, OperatorRegistry } from "./types.js";
 import {
-  isThought,
+  isMemory,
   isPointer,
   isIdentityRef,
   normalizeAndValidateUsername,
@@ -57,7 +57,7 @@ export class ME {
   private index: Record<string, any> = {};
   // Runtime log lives as a semantic node, but is updated via a kernel write (no extra events).
   // This avoids the infinite recursion problem of: postulate -> write memory -> postulate -> ...
-  private _shortTermMemory: Thought[] = [];
+  private _memories: Memory[] = [];
   private derivations: Record<
     string,
     {
@@ -86,23 +86,13 @@ export class ME {
   private readonly secretChunkSize = 256;
   private readonly secretHashBuckets = 16;
   private readonly unsafeEval = false;
-  /**
-   * @deprecated Use `memory` or `inspect().memory`.
-   */
-  get shortTermMemory(): Thought[] {
-    return this._shortTermMemory;
-  }
-
-  // Preferred memory accessor (alias of legacy shortTermMemory).
-  get memory(): Thought[] {
-    return this._shortTermMemory;
+  get memories(): Memory[] {
+    return this._memories;
   }
 
   // Explicit debug API (kept outside DSL semantics).
   inspect(opts?: { last?: number }): {
-    memory: Thought[];
-    /** @deprecated Use memory */
-    thoughts: Thought[];
+    memories: Memory[];
     index: Record<string, any>;
     encryptedScopes: string[];
     secretScopes: string[];
@@ -111,13 +101,12 @@ export class ME {
     staleDerivations: number;
   } {
     const last = opts?.last;
-    const memory =
+    const memories =
       typeof last === "number" && Number.isFinite(last) && last > 0
-        ? this._shortTermMemory.slice(-Math.floor(last))
-        : this._shortTermMemory.slice();
+        ? this._memories.slice(-Math.floor(last))
+        : this._memories.slice();
     return {
-      memory,
-      thoughts: memory,
+      memories,
       index: { ...this.index },
       encryptedScopes: Object.keys(this.encryptedBranches),
       secretScopes: Object.keys(this.localSecrets),
@@ -204,17 +193,14 @@ export class ME {
   }
 
   exportSnapshot(): {
-    memory: Thought[];
-    /** @deprecated Use memory */
-    shortTermMemory: Thought[];
+    memories: Memory[];
     localSecrets: Record<string, string>;
     localNoises: Record<string, string>;
     encryptedBranches: Record<string, EncryptedBlob | Record<string, EncryptedBlob>>;
     operators: Record<string, { kind: string }>;
   } {
     return this.cloneValue({
-      memory: this._shortTermMemory,
-      shortTermMemory: this._shortTermMemory,
+      memories: this._memories,
       localSecrets: this.localSecrets,
       localNoises: this.localNoises,
       encryptedBranches: this.encryptedBranches,
@@ -223,19 +209,15 @@ export class ME {
   }
 
   importSnapshot(snapshot: {
-    memory?: Thought[];
-    /** @deprecated Use memory */
-    shortTermMemory?: Thought[];
+    memories?: Memory[];
     localSecrets?: Record<string, string>;
     localNoises?: Record<string, string>;
     encryptedBranches?: Record<string, EncryptedBlob | Record<string, EncryptedBlob>>;
     operators?: Record<string, { kind: string }>;
   }): void {
     const data = this.cloneValue(snapshot ?? {});
-    this._shortTermMemory = Array.isArray(data.memory)
-      ? data.memory
-      : Array.isArray(data.shortTermMemory)
-      ? data.shortTermMemory
+    this._memories = Array.isArray(data.memories)
+      ? data.memories
       : [];
     this.localSecrets = data.localSecrets && typeof data.localSecrets === "object" ? data.localSecrets : {};
     this.localNoises = data.localNoises && typeof data.localNoises === "object" ? data.localNoises : {};
@@ -267,9 +249,7 @@ export class ME {
   }
 
   rehydrate(snapshot: {
-    memory?: Thought[];
-    /** @deprecated Use memory */
-    shortTermMemory?: Thought[];
+    memories?: Memory[];
     localSecrets?: Record<string, string>;
     localNoises?: Record<string, string>;
     encryptedBranches?: Record<string, EncryptedBlob | Record<string, EncryptedBlob>>;
@@ -278,20 +258,20 @@ export class ME {
     this.importSnapshot(snapshot);
   }
 
-  replayThoughts(thoughts: Thought[]): void {
+  replayMemories(memories: Memory[]): void {
     this.localSecrets = {};
     this.localNoises = {};
     this.encryptedBranches = {};
     this.bumpSecretEpoch();
     this.index = {};
-    this._shortTermMemory = [];
+    this._memories = [];
     this.derivations = {};
     this.refSubscribers = {};
     this.refVersions = {};
     this.derivationRefVersions = {};
     this.staleDerivations.clear();
 
-    for (const t of thoughts || []) {
+    for (const t of memories || []) {
       const path = String(t.path || "")
         .split(".")
         .filter(Boolean);
@@ -321,7 +301,7 @@ export class ME {
         continue;
       }
 
-      // For derived/query thoughts, commit final resolved value at the same path.
+      // For derived/query memories, commit final resolved value at the same path.
       if (t.operator === "=" || t.operator === "?") {
         this.postulate(path, t.value, t.operator);
         continue;
@@ -332,9 +312,6 @@ export class ME {
     this.rebuildIndex();
   }
 
-  replayMemory(memory: Thought[]): void {
-    this.replayThoughts(memory);
-  }
   // Kernel operator registry (editable through me["+"]("op", kind))
   // kind: "secret" | "pointer" | "identity" | "custom" | "remove" | "eval" | "query" | "noise"
   private operators: Record<string, { kind: string }> = {
@@ -371,7 +348,7 @@ export class ME {
       "?": { kind: "query" },
       "-": { kind: "remove" },
     };
-    this._shortTermMemory = [];
+    this._memories = [];
     // Si hay triada inicial, la registramos en la raíz ("")
     if (expression !== undefined) {
       this.postulate([], expression);
@@ -419,7 +396,7 @@ export class ME {
           postulate: (p, e) => self.postulate(p, e),
           opKind: (op) => self.opKind(op),
           splitPath,
-          isThought,
+          isMemory,
         },
         path,
         args
@@ -431,7 +408,7 @@ export class ME {
         if (typeof prop === "symbol") return (target as any)[prop];
         // Support direct access to real instance methods/props.
         // IMPORTANT: if the property exists on the ME instance prototype (methods like `postulate`, etc)
-        // or is a real data accessor (like `shortTermMemory` getter), we should return it.
+        // or is a real data accessor (like `memories` getter), we should return it.
         if (prop in self) {
           const existing = (self as any)[prop];
           if (typeof existing === "function") return existing.bind(self);
@@ -607,8 +584,8 @@ export class ME {
     return { op, kind };
   }
 
-  private getPrevThoughtHash(): string {
-    const prev = this._shortTermMemory[this._shortTermMemory.length - 1];
+  private getPrevMemoryHash(): string {
+    const prev = this._memories[this._memories.length - 1];
     return prev?.hash ?? "";
   }
 
@@ -771,15 +748,15 @@ export class ME {
     }
   }
 
-  private commitThoughtOnly(
+  private commitMemoryOnly(
     targetPath: SemanticPath,
     operator: string | null,
     expression: any,
     value: any
-  ): Thought {
+  ): Memory {
     const pathStr = targetPath.join(".");
     const effectiveSecret = this.computeEffectiveSecret(targetPath);
-    const prevHash = this.getPrevThoughtHash();
+    const prevHash = this.getPrevMemoryHash();
     const hashInput = JSON.stringify({
       path: pathStr,
       operator,
@@ -790,7 +767,7 @@ export class ME {
     });
     const hash = hashFn(hashInput);
     const timestamp = Date.now();
-    const thought: Thought = {
+    const memory: Memory = {
       path: pathStr,
       operator,
       expression,
@@ -800,16 +777,16 @@ export class ME {
       prevHash,
       timestamp,
     };
-    this._shortTermMemory.push(thought);
-    this.applyThoughtToIndex(thought);
-    return thought;
+    this._memories.push(memory);
+    this.applyMemoryToIndex(memory);
+    return memory;
   }
 
   private commitValueMapping(
     targetPath: SemanticPath,
     expression: any,
     operator: string | null = null
-  ): Thought {
+  ): Memory {
     let storedValue: any = expression;
     const pathStr = targetPath.join(".");
     // 2) Calcular secretos efectivos fractales
@@ -870,10 +847,10 @@ export class ME {
       storedValue = expression;
     }
 
-    return this.commitThoughtOnly(targetPath, operator, expression, storedValue);
+    return this.commitMemoryOnly(targetPath, operator, expression, storedValue);
   }
 
-  private commitMapping(instruction: MappingInstruction, fallbackOperator: string | null = null): Thought | undefined {
+  private commitMapping(instruction: MappingInstruction, fallbackOperator: string | null = null): Memory | undefined {
     switch (instruction.op) {
       case "set":
         return this.commitValueMapping(instruction.path, instruction.value, fallbackOperator);
@@ -886,7 +863,7 @@ export class ME {
         const scopeKey = instruction.path.join(".");
         this.localSecrets[scopeKey] = instruction.value;
         this.bumpSecretEpoch();
-        return this.commitThoughtOnly(instruction.path, "_", "***", "***");
+        return this.commitMemoryOnly(instruction.path, "_", "***", "***");
       }
       default:
         return undefined;
@@ -1212,7 +1189,7 @@ export class ME {
     // Operator definition (kernel-only): me["+"]("op", "kind")
     const def = this.isDefineOpCall(targetPath, expression);
     if (def) {
-      // Kernel-only: do not generate thoughts
+      // Kernel-only: do not generate memories
       this.operators[def.op] = { kind: def.kind };
       return;
     }
@@ -1229,7 +1206,7 @@ export class ME {
         const supportedOps = new Set(["set", "secret", "ptr", "id"]);
         const delegable = normalized.instructions.every((i) => supportedOps.has(i.op));
         if (delegable) {
-          let out: Thought | undefined;
+          let out: Memory | undefined;
           const changed: SemanticPath[] = [];
           for (const instruction of normalized.instructions) {
             const maybe = this.commitMapping(instruction, operator);
@@ -1247,7 +1224,7 @@ export class ME {
     }
 
     // Eval operator: evaluate a thunk and optionally assign the result
-    //   me["="](() => expr)               -> records a thought only
+    //   me["="](() => expr)               -> records a memory only
     //   me.foo.bar["="](() => expr)       -> assigns evaluated result to foo.bar
     //   me.foo["="]("net", "a - b")       -> assigns derived value to foo.net
     //   me.foo["="](["net", "a - b"])     -> same as above
@@ -1306,8 +1283,8 @@ export class ME {
     }
 
     // Query operator: collect values from paths and optionally transform
-    //   me["?"](["a.b","c.d"])                   -> records collected array as a thought
-    //   me["?"](["a.b","c.d"], (a,b)=>...)       -> records fn(a,b) as a thought
+    //   me["?"](["a.b","c.d"])                   -> records collected array as a memory
+    //   me["?"](["a.b","c.d"], (a,b)=>...)       -> records fn(a,b) as a memory
     //   me.foo["?"](["a.b"], (a)=>...)           -> assigns result to foo
     const q = this.isQueryCall(targetPath, expression);
     if (q) {
@@ -1331,18 +1308,18 @@ export class ME {
 
     // Noise declaration nodes:
     //   me.layer1["~"]("NOISE") -> declares a noise override for scope `layer1`
-    // Record an operator thought without leaking the noise value.
+    // Record an operator memory without leaking the noise value.
     const noiseCall = this.isNoiseScopeCall(targetPath, expression);
     if (noiseCall) {
       this.localNoises[noiseCall.scopeKey] = expression;
       this.bumpSecretEpoch();
       const scopePath = noiseCall.scopeKey ? noiseCall.scopeKey.split(".").filter(Boolean) : [];
-      return this.commitThoughtOnly(scopePath, "~", "***", "***");
+      return this.commitMemoryOnly(scopePath, "~", "***", "***");
     }
 
-    const thought = this.commitValueMapping(targetPath, expression, operator);
+    const memory = this.commitValueMapping(targetPath, expression, operator);
     this.invalidateFromPath(targetPath);
-    return thought;
+    return memory;
   }
 
   private removeSubtree(targetPath: SemanticPath) {
@@ -1423,11 +1400,11 @@ export class ME {
       }
     }
 
-    // (optional but helpful) Record a thought/declaration for auditing.
+    // (optional but helpful) Record a memory/declaration for auditing.
     const pathStr = targetPath.join(".");
     const timestamp = Date.now();
     const effectiveSecret = this.computeEffectiveSecret(targetPath);
-    const prevHash = this.getPrevThoughtHash();
+    const prevHash = this.getPrevMemoryHash();
     const hashInput = JSON.stringify({
       path: pathStr,
       operator: "-",
@@ -1437,7 +1414,7 @@ export class ME {
       prevHash,
     });
     const hash = hashFn(hashInput);
-    const thought: Thought = {
+    const memory: Memory = {
       path: pathStr,
       operator: "-",
       expression: "-",
@@ -1447,8 +1424,8 @@ export class ME {
       prevHash,
       timestamp,
     };
-    this._shortTermMemory.push(thought);
-    this.applyThoughtToIndex(thought);
+    this._memories.push(memory);
+    this.applyMemoryToIndex(memory);
   }
 
   // ---------------------------------------------------------
@@ -1516,7 +1493,7 @@ export class ME {
   // ---------------------------------------------------------
   // Índice derivado
   // ---------------------------------------------------------
-  private applyThoughtToIndex(t: Thought): void {
+  private applyMemoryToIndex(t: Memory): void {
     const p = t.path;
     const pathParts = p.split(".").filter(Boolean);
     if (t.operator === "_") {
@@ -1553,7 +1530,7 @@ export class ME {
 
   private rebuildIndex() {
     const next: Record<string, any> = {};
-    const orderedThoughts = this._shortTermMemory
+    const orderedMemories = this._memories
       .map((t, i) => ({ t, i }))
       .sort((a, b) => {
         if (a.t.timestamp !== b.t.timestamp) return a.t.timestamp - b.t.timestamp;
@@ -1563,8 +1540,8 @@ export class ME {
       .map((x) => x.t);
 
     this.index = next;
-    for (const t of orderedThoughts) {
-      this.applyThoughtToIndex(t);
+    for (const t of orderedMemories) {
+      this.applyMemoryToIndex(t);
     }
   }
 

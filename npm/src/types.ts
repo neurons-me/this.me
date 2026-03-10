@@ -32,10 +32,10 @@ export type OperatorRegistry = Record<OperatorToken, OperatorRegistryEntry>;
  * Canonical semantic log item in ME.
  * This mirrors the shape in `me.ts` exactly.
  */
-export interface Thought {
+export interface Memory {
   /** semantic destination path (where the write/claim lands). root is "" */
   path: string;
-  /** operator used to produce this thought (null for normal writes) */
+  /** operator used to produce this memory (null for normal writes) */
   operator: string | null;
   /** expression as provided by the user (pre-eval / pre-resolve). */
   expression: any;
@@ -45,7 +45,7 @@ export interface Thought {
   effectiveSecret: string;
   /** portable hash (FNV-1a 32-bit in me.ts) */
   hash: string;
-  /** previous thought hash for chain integrity (genesis = "") */
+  /** previous memory hash for chain integrity (genesis = "") */
   prevHash?: string;
   timestamp: number;
 }
@@ -115,10 +115,10 @@ export type OperatorMatch =
        */
       rewrittenExpression?: any;
       /**
-       * If operator is producing a semantic thought, what should be recorded as `operator`.
+       * If operator is producing a semantic memory, what should be recorded as `operator`.
        * (me.ts uses "__" for both "__" and "->" pointer calls).
        */
-      thoughtOperator?: string;
+      memoryOperator?: string;
       /**
        * Some operators return a value instead of writing when invoked at root.
        * - root "=" thunk returns computed value
@@ -149,11 +149,7 @@ export interface OperatorKernel {
   encryptedBranches?: Record<string, EncryptedBlob>;
 
   // canonical log + index
-  memory?: Thought[];
-  /**
-   * @deprecated Use memory.
-   */
-  shortTermMemory?: Thought[];
+  memories?: Memory[];
   rebuildIndex(): void;
 
   // --- crypto & secret derivation
@@ -179,13 +175,13 @@ export interface OperatorKernel {
   readPath(path: SemanticPath): any;
 
   /**
-   * Append an event to memory and rebuild index.
-   * Operators that are “kernel-only” should avoid emitting thoughts.
+   * Append an event to memories and rebuild index.
+   * Operators that are “kernel-only” should avoid emitting memories.
    */
-  commitThought?(t: Thought): void;
+  commitMemory?(t: Memory): void;
 
   /**
-   * Remove a subtree: deletes matching localSecrets/localNoises/encryptedBranches and emits a "-" thought.
+   * Remove a subtree: deletes matching localSecrets/localNoises/encryptedBranches and emits a "-" memory.
    */
   removeSubtree(targetPath: SemanticPath): void;
 
@@ -195,7 +191,7 @@ export interface OperatorKernel {
   normalizeAndValidateUsername(input: string): string;
 
   /**
-   * Portable hash function used to populate Thought.hash
+   * Portable hash function used to populate Memory.hash
    */
   hashFn(input: string): string;
 
@@ -211,11 +207,11 @@ export interface OperatorKernel {
 
 /**
  * Operators in me.ts can yield:
- * - a Thought (most writes)
+ * - a Memory (most writes)
  * - undefined (kernel-only or removals)
  * - a returned value for root "=" thunk and root "?" query
  */
-export type OperatorResult = Thought | any | undefined;
+export type OperatorResult = Memory | any | undefined;
 
 // -----------------------------
 // Operator handler interface
@@ -236,8 +232,8 @@ export interface OperatorHandler {
    * Execute behavior.
    * This function may:
    * - mutate kernel config (define operator)
-   * - write thoughts / encrypt branches / update secrets/noises
-   * - return a value (root eval/query) or a Thought
+   * - write memories / encrypt branches / update secrets/noises
+   * - return a value (root eval/query) or a Memory
    */
   execute(match: Extract<OperatorMatch, { matched: true }>, call: OperatorCall, kernel: OperatorKernel): OperatorResult;
 }
@@ -326,8 +322,8 @@ export const OperatorInvariants = {
   secretScopesAreStealth: true,
 
   /**
-   * Secret/noise declarations must not leak their raw string in Thought.
-   * me.ts records expression/value as "***" for those operator thoughts.
+   * Secret/noise declarations must not leak their raw string in Memory.
+   * me.ts records expression/value as "***" for those operator memories.
    */
   scopeDeclarationRedaction: true,
 
@@ -356,7 +352,7 @@ export const OperatorInvariants = {
    * - localSecrets entries at/under subtree
    * - localNoises entries at/under subtree
    * - encryptedBranches blobs at/under subtree
-   * And emits a "-" thought.
+   * And emits a "-" memory.
    */
   removeIsDeep: true,
 
@@ -364,7 +360,7 @@ export const OperatorInvariants = {
    * Operator define ("+") is kernel-only:
    * - Only at root
    * - Updates operator registry
-   * - Emits NO thought
+   * - Emits NO memory
    */
   defineIsKernelOnly: true,
 } as const;

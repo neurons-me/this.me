@@ -1,4 +1,4 @@
-import type { SemanticPath, Thought } from "./types.js";
+import type { SemanticPath, Memory } from "./types.js";
 // Forward declarations to avoid circular type imports.
 // MEProxy is defined in me.ts; we only need it as `any` at runtime.
 export type MEProxy = any;
@@ -9,12 +9,12 @@ export interface HandleCallDeps {
   normalizeArgs(args: any[]): any;
   /** Read a semantic path (used by root GET bias). */
   readPath(path: SemanticPath): any;
-  /** Perform a semantic write/claim at a path. May return a thought, a value, or undefined. */
+  /** Perform a semantic write/claim at a path. May return a memory, a value, or undefined. */
   postulate(path: SemanticPath, expression: any): any;
-  /** Resolve operator kinds (used only to decide chaining path when a thought was produced). */
+  /** Resolve operator kinds (used only to decide chaining path when a memory was produced). */
   opKind(op: string): string | null;
   splitPath(path: SemanticPath): { scope: SemanticPath; leaf: string | null };
-  isThought(obj: any): obj is Thought;
+  isMemory(obj: any): obj is Memory;
 }
 
 function splitPathExpr(input: string): string[] {
@@ -102,10 +102,10 @@ export function handleCall(deps: HandleCallDeps, path: SemanticPath, args: any[]
   // Non-root call
   const expression = deps.normalizeArgs(args);
   const out = deps.postulate(path, expression);
-  // If a thought was produced, keep chaining along semantic path.
+  // If a memory was produced, keep chaining along semantic path.
   const { scope, leaf } = deps.splitPath(path);
   const leafKind = leaf ? deps.opKind(leaf) : null;
-  if (deps.isThought(out)) {
+  if (deps.isMemory(out)) {
     const chainPath = leafKind ? scope : path;
     return deps.createProxy(chainPath);
   }

@@ -190,7 +190,7 @@ Read behavior:
 - **Infinite Surface:** No schemas. If you think of a path `(me.a.b.c)`, it exists. You **define your universe as you speak.**
 - **Universal Query:** Any string is a query. No SQL, no complex APIs. Just paths and brackets `[]`.
 - **Fractal Privacy:** Security isn't a "plugin." It's woven into the tree. You can drop a `Secret ["_"]` anywhere, and that branch becomes a private universe.
-- **Deterministic Replay:** Every state change is a "Thought." You can export your entire identity and rebuild it exactly as it was, anywhere in the world.
+- **Deterministic Replay:** Every state change is a "Memory." You can export your entire identity and rebuild it exactly as it was, anywhere in the world.
 - **Zero Baggage:** No dependencies. No bloat. Pure logic that runs in 15ms on a browser or a server.
 
 ---

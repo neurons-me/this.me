@@ -4,7 +4,7 @@ import ME from "this.me";
 
 type MEProxy = any;
 
-type Thought = {
+type Memory = {
   path: string;
   operator: string | null;
   expression: any;
@@ -15,8 +15,8 @@ type Thought = {
   timestamp: number;
 };
 
-function getSTM(me: MEProxy): Thought[] {
-  const v = (me as any).shortTermMemory ?? (me as any)._shortTermMemory;
+function getSTM(me: MEProxy): Memory[] {
+  const v = (me as any).memories ?? (me as any)._memories;
   return Array.isArray(v) ? v : [];
 }
 
@@ -33,7 +33,7 @@ function hashFn(input: string): string {
 function runAxiom8() {
   const me = new (ME as any)() as MEProxy;
 
-  // Minimal setup to generate a few thoughts
+  // Minimal setup to generate a few memories
   me["@"]("jabellae");
   me.ledger.host("localhost:8161");
   me.ledger.protocol("http");
@@ -41,14 +41,14 @@ function runAxiom8() {
   me.wallet.balance(1000);
 
   const stm = getSTM(me);
-  assert.ok(stm.length >= 5, `expected >= 5 thoughts, got ${stm.length}`);
+  assert.ok(stm.length >= 5, `expected >= 5 memories, got ${stm.length}`);
 
   for (let i = 0; i < stm.length; i++) {
     const t = stm[i];
 
-    // prevHash must link to previous thought hash
+    // prevHash must link to previous memory hash
     const expectedPrev = i === 0 ? "" : stm[i - 1].hash;
-    assert.equal(t.prevHash ?? "", expectedPrev, `prevHash mismatch at thought #${i}`);
+    assert.equal(t.prevHash ?? "", expectedPrev, `prevHash mismatch at memory #${i}`);
 
     // recompute hash and compare
     const expectedHash = hashFn(
@@ -62,7 +62,7 @@ function runAxiom8() {
       })
     );
 
-    assert.equal(t.hash, expectedHash, `hash mismatch at thought #${i}`);
+    assert.equal(t.hash, expectedHash, `hash mismatch at memory #${i}`);
   }
 
   console.log("✅ A8 PASS (Hash-chain tamper evidence)");

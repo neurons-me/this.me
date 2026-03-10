@@ -170,9 +170,9 @@ runPhase(
     "Replay reconstructs equivalent semantic results",
   ],
   () => {
-    const exportedMemory = me.inspect().memory;
+    const exportedMemory = me.inspect().memories;
     const me2 = new ME();
-    me2.replayMemory(exportedMemory);
+    me2.replayMemories(exportedMemory);
 
     const originalCost = me("fleet.trucks[2].total_cost");
     const replayedCost = me2("fleet.trucks[2].total_cost");
@@ -195,7 +195,7 @@ runPhase(
     const me3 = new ME();
     me3.rehydrate(snapshot);
 
-    assert.deepEqual(me3.inspect().memory, me.inspect().memory, "Memory log mismatch after snapshot import");
+    assert.deepEqual(me3.inspect().memories, me.inspect().memories, "Memory log mismatch after snapshot import");
     assert.deepEqual(me3("fleet.trucks[2].total_cost"), me("fleet.trucks[2].total_cost"), "Snapshot lost derived value");
     assert.deepEqual(me3("finance.fuel_price"), me("finance.fuel_price"), "Snapshot lost secret leaf value");
 

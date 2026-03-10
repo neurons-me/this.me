@@ -47,7 +47,7 @@ Corta la herencia. Es un "reset" de seguridad.
 Crea un atajo. Si pides me.acceso.saldo, el sistema viaja a wallet.privado.saldo automáticamente.
 
 
-Física de la Observación. STM - El shortTermMemory es el registro genético de cómo llegaste ahí. Si borras el index, puedes reconstruir tu universo entero simplemente "volviendo a pensar" los pensamientos de la STM.
+Física de la Observación. STM - El memories es el registro genético de cómo llegaste ahí. Si borras el index, puedes reconstruir tu universo entero simplemente "volviendo a pensar" los pensamientos de la STM.
 
 
 A8 (Integridad de Cadena): Al incluir prevHash en el hashInput, has creado un vínculo criptográfico. Si alguien cambia el pasado, el presente "se desintegra" porque el hash ya no coincide. Es el fin de la mutabilidad silenciosa.

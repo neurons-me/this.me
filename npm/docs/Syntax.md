@@ -183,7 +183,7 @@ Expected output:
 
 ```ts
 me["@"]("Abella");
-me.inspect({ last: 1 }).memory[0].operator;
+me.inspect({ last: 1 }).memories[0].operator;
 ```
 
 Expected output:

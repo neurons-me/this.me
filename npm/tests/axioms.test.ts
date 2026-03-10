@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import ME from "this.me";
 
 type MEProxy = any;
-type Thought = {
+type Memory = {
   path: string;
   operator: string | null;
   expression: any;
@@ -24,8 +24,8 @@ type AxiomCase = {
   proofs?: (me: MEProxy) => Array<{ label: string; expected: any; actual: any }>;
 };
 
-function getSTM(me: MEProxy): Thought[] {
-  const v = (me as any).shortTermMemory ?? (me as any)._shortTermMemory;
+function getSTM(me: MEProxy): Memory[] {
+  const v = (me as any).memories ?? (me as any)._memories;
   return Array.isArray(v) ? v : [];
 }
 
@@ -52,7 +52,7 @@ function assertCallable(me: any) {
   assert.equal(typeof me, "function", "expected ME instance to be callable (Proxy function)");
 }
 
-function findLastThought(me: MEProxy, pred: (t: Thought) => boolean): Thought | undefined {
+function findLastMemory(me: MEProxy, pred: (t: Memory) => boolean): Memory | undefined {
   const stm = getSTM(me);
   for (let i = stm.length - 1; i >= 0; i--) {
     if (pred(stm[i])) return stm[i];
@@ -61,8 +61,8 @@ function findLastThought(me: MEProxy, pred: (t: Thought) => boolean): Thought | 
 }
 
 function assertHasRootClaim(me: MEProxy, expected: string) {
-  const claim = findLastThought(me, (t) => t.path === "" && t.operator === "@");
-  assert.ok(claim, "expected an @ claim thought at root");
+  const claim = findLastMemory(me, (t) => t.path === "" && t.operator === "@");
+  assert.ok(claim, "expected an @ claim memory at root");
   const v =
     (claim!.value && claim!.value.__id) ||
     (claim!.expression && claim!.expression.__id) ||
@@ -73,7 +73,7 @@ function assertHasRootClaim(me: MEProxy, expected: string) {
 function dumpIfVerbose(me: MEProxy, title: string) {
   if (process.env.AXIOMS_VERBOSE !== "1") return;
   console.log("\n--- " + title + " ---");
-  console.log("last thoughts:", getSTM(me).slice(-8));
+  console.log("last memories:", getSTM(me).slice(-8));
   console.log("index keys:", Object.keys(((me as any).index) || {}));
   console.log("encryptedBranches keys:", Object.keys(((me as any).encryptedBranches) || {}));
 }
@@ -167,12 +167,12 @@ const axioms: AxiomCase[] = [
     id: "A1",
     title: "'@' validates username semantics and records root claim",
     challenge: "Can identity claims be normalized and bounded so invalid labels never enter state?",
-    resolution: "Username grammar is validated and normalized before commit; valid claims append an explicit root '@' thought.",
+    resolution: "Username grammar is validated and normalized before commit; valid claims append an explicit root '@' memory.",
     checks: [
       "Valid username accepted",
       "Mixed-case username is normalized",
       "Invalid usernames throw",
-      "Root claim thought is recorded",
+      "Root claim memory is recorded",
     ],
     run(me) {
       const ok = "jabellae";
@@ -190,14 +190,14 @@ const axioms: AxiomCase[] = [
       }
     },
     proofs(me) {
-      const claim = findLastThought(me, (t) => t.path === "" && t.operator === "@");
+      const claim = findLastMemory(me, (t) => t.path === "" && t.operator === "@");
       const claimId =
         (claim?.value && claim.value.__id) ||
         (claim?.expression && claim.expression.__id) ||
         claim?.value;
       return [
         { label: "normalized claim __id", expected: "abella", actual: claimId },
-        { label: "last root claim operator", expected: "@", actual: findLastThought(me, (t) => t.path === "")?.operator },
+        { label: "last root claim operator", expected: "@", actual: findLastMemory(me, (t) => t.path === "")?.operator },
       ];
     },
   },
@@ -246,28 +246,28 @@ const axioms: AxiomCase[] = [
       me["@"]("jabellae");
       me.wallet["_"]("alpha");
       me.wallet.hidden.notes("alpha-note");
-      const alphaThought = findLastThought(me, (t) => t.path === "wallet.hidden.notes");
-      assert.ok(alphaThought, "expected alpha thought");
+      const alphaMemory = findLastMemory(me, (t) => t.path === "wallet.hidden.notes");
+      assert.ok(alphaMemory, "expected alpha memory");
 
       me.wallet["~"]("noise");
       me.wallet["_"]("beta");
       me.wallet.hidden.seed("beta-seed");
-      const betaThought = findLastThought(me, (t) => t.path === "wallet.hidden.seed");
-      assert.ok(betaThought, "expected beta thought");
+      const betaMemory = findLastMemory(me, (t) => t.path === "wallet.hidden.seed");
+      assert.ok(betaMemory, "expected beta memory");
       dumpIfVerbose(me, "A3");
 
-      assert.notEqual(alphaThought!.effectiveSecret, betaThought!.effectiveSecret);
+      assert.notEqual(alphaMemory!.effectiveSecret, betaMemory!.effectiveSecret);
       assertStealthRoot(me, "wallet");
       assert.equal(me("wallet.hidden.seed"), "beta-seed");
     },
     proofs(me) {
-      const alphaThought = findLastThought(me, (t) => t.path === "wallet.hidden.notes");
-      const betaThought = findLastThought(me, (t) => t.path === "wallet.hidden.seed");
+      const alphaMemory = findLastMemory(me, (t) => t.path === "wallet.hidden.notes");
+      const betaMemory = findLastMemory(me, (t) => t.path === "wallet.hidden.seed");
       return [
         {
           label: "effectiveSecret(alpha) !== effectiveSecret(beta)",
           expected: true,
-          actual: alphaThought?.effectiveSecret !== betaThought?.effectiveSecret,
+          actual: alphaMemory?.effectiveSecret !== betaMemory?.effectiveSecret,
         },
         { label: "me('wallet')", expected: undefined, actual: me("wallet") },
         { label: "me('wallet.hidden.seed')", expected: "beta-seed", actual: me("wallet.hidden.seed") },
@@ -308,12 +308,12 @@ const axioms: AxiomCase[] = [
   },
   {
     id: "A5",
-    title: "'?' collect records collect thought and keeps scope stealth",
+    title: "'?' collect records collect memory and keeps scope stealth",
     challenge: "Can query/collect be observable as a state event without leaking secret scope boundaries?",
-    resolution: "Collect emits a '?' thought at scope path while secret-root read semantics remain unchanged (undefined at root).",
+    resolution: "Collect emits a '?' memory at scope path while secret-root read semantics remain unchanged (undefined at root).",
     checks: [
       "Collect call returns a function",
-      "Collect thought is recorded at path with '?' operator",
+      "Collect memory is recorded at path with '?' operator",
       "Secret root remains stealth",
     ],
     run(me) {
@@ -325,13 +325,13 @@ const axioms: AxiomCase[] = [
       dumpIfVerbose(me, "A5");
 
       assert.equal(typeof pickedProfile, "function");
-      const collect = findLastThought(me, (t) => t.path === "profile" && t.operator === "?");
-      assert.ok(collect, "expected a '?' collect thought at path 'profile'");
+      const collect = findLastMemory(me, (t) => t.path === "profile" && t.operator === "?");
+      assert.ok(collect, "expected a '?' collect memory at path 'profile'");
       assertStealthRoot(me, "profile");
       assert.equal(me("profile.name"), "Abella");
     },
     proofs(me) {
-      const collect = findLastThought(me, (t) => t.path === "profile" && t.operator === "?");
+      const collect = findLastMemory(me, (t) => t.path === "profile" && t.operator === "?");
       return [
         { label: "last collect operator", expected: "?", actual: collect?.operator },
         { label: "me('profile')", expected: undefined, actual: me("profile") },
@@ -343,7 +343,7 @@ const axioms: AxiomCase[] = [
     id: "A6",
     title: "'-' remove tombstones a path",
     challenge: "Can deletion be logically irreversible at read-time while preserving auditability?",
-    resolution: "Remove writes a '-' operation thought and prunes branch visibility so prior cleartext no longer resolves.",
+    resolution: "Remove writes a '-' operation memory and prunes branch visibility so prior cleartext no longer resolves.",
     checks: [
       "Original value exists before remove",
       "After remove, read is no longer original cleartext",
@@ -412,11 +412,11 @@ const axioms: AxiomCase[] = [
     id: "A8",
     title: "Hash-chain tamper evidence",
     challenge: "Can history be tamper-evident without a central authority?",
-    resolution: "Each thought carries prevHash and hashes (path, operator, expression, value, effectiveSecret, prevHash).",
+    resolution: "Each memory carries prevHash and hashes (path, operator, expression, value, effectiveSecret, prevHash).",
     checks: [
-      "Genesis thought has prevHash=''",
-      "Every thought links prevHash to previous hash",
-      "Recomputed hash for every thought matches stored hash",
+      "Genesis memory has prevHash=''",
+      "Every memory links prevHash to previous hash",
+      "Recomputed hash for every memory matches stored hash",
     ],
     run(me) {
       me["@"]("jabellae");
@@ -427,12 +427,12 @@ const axioms: AxiomCase[] = [
       dumpIfVerbose(me, "A8");
 
       const stm = getSTM(me);
-      assert.ok(stm.length >= 5, "expected enough thoughts for hash-chain validation");
+      assert.ok(stm.length >= 5, "expected enough memories for hash-chain validation");
 
       for (let i = 0; i < stm.length; i++) {
         const t = stm[i];
         const expectedPrev = i === 0 ? "" : stm[i - 1].hash;
-        assert.equal(t.prevHash ?? "", expectedPrev, `prevHash mismatch at thought #${i}`);
+        assert.equal(t.prevHash ?? "", expectedPrev, `prevHash mismatch at memory #${i}`);
         const expectedHash = hashFn(
           JSON.stringify({
             path: t.path,
@@ -443,7 +443,7 @@ const axioms: AxiomCase[] = [
             prevHash: t.prevHash ?? "",
           })
         );
-        assert.equal(t.hash, expectedHash, `hash mismatch at thought #${i}`);
+        assert.equal(t.hash, expectedHash, `hash mismatch at memory #${i}`);
       }
     },
     proofs(me) {
@@ -501,7 +501,7 @@ const axioms: AxiomCase[] = [
       dumpIfVerbose(me, "A9");
 
       const stm = getSTM(me).filter((t) => t.path === "wallet.balance" && t.operator === null);
-      assert.ok(stm.length >= 4, "expected at least four wallet.balance thoughts");
+      assert.ok(stm.length >= 4, "expected at least four wallet.balance memories");
       const lastTwoTie = stm.slice(-2);
       assert.equal(lastTwoTie[0].timestamp, lastTwoTie[1].timestamp, "expected tie timestamp case");
 
