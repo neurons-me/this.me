@@ -1,5 +1,5 @@
 import { defineConfig } from "vitepress";
-const base = process.env.VITEPRESS_BASE || "/.me/docs/";
+const base = process.env.VITEPRESS_BASE || "/.me/npm/docs/";
 export default defineConfig({
   title: ".me",
   description: "Documentation for .me",
@@ -14,7 +14,7 @@ export default defineConfig({
     ["meta", { property: "og:type", content: "website" }],
     ["meta", { property: "og:title", content: ".me — Documentation" }],
     ["meta", { property: "og:description", content: "Documentation for .me" }],
-    ["meta", { property: "og:url", content: "https://neurons-me.github.io/.me/docs/" }],
+    ["meta", { property: "og:url", content: "https://neurons-me.github.io/.me/npm/docs/" }],
     ["meta", { property: "og:image", content: "https://res.cloudinary.com/dkwnxf6gm/image/upload/v1772172708/a0cada53852af28361f6203f0878f43b7ce1063b750f60d1c43eebfd263a8a0c_cxctzx.png" }],
     ["meta", { name: "twitter:card", content: "summary_large_image" }],
     ["meta", { name: "twitter:title", content: ".me — Documentation" }],

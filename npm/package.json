@@ -1,6 +1,6 @@
 {
   "name": "this.me",
-  "version": "3.4.4",
+  "version": "3.4.5",
   "type": "module",
   "main": "./dist/me.cjs",
   "module": "./dist/me.es.js",
@@ -27,7 +27,7 @@
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
-    "docs:publish": "npm run docs:build && rm -rf ../docs && mkdir -p ../docs && cp -R docs/.vitepress/dist/* ../docs/ && touch ../docs/.nojekyll"
+    "docs:publish": "npm run docs:build && touch docs/.vitepress/dist/.nojekyll"
   },
   "files": [
     "dist"
