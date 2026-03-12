@@ -300,7 +300,7 @@ export class ME {
     this.postulate(path, next.expression, next.operator ?? null);
   }
 
-  replayMemories(memories: unknown[]): void {
+  replayMemories(memories: Memory[]): void {
     this.localSecrets = {};
     this.localNoises = {};
     this.encryptedBranches = {};
