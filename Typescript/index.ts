@@ -44,6 +44,7 @@ import {
   parseMeUri,
   projectDnsHostToNamespace,
   tryParseMeUri,
+  validateKnownSpaces,
 } from "./src/me-uri.ts";
 import type { MEOptions } from "./src/types.ts";
 import type { ThisMeInput, ThisMeKernel } from "./src/factory.ts";
@@ -69,6 +70,7 @@ export type ThisMeFactory = typeof ME & {
   projectDnsHostToNamespace: typeof projectDnsHostToNamespace;
   normalizeCanonicalHandle: typeof normalizeCanonicalHandle;
   normalizeCanonicalSpace: typeof normalizeCanonicalSpace;
+  validateKnownSpaces: typeof validateKnownSpaces;
   DiskStore: typeof DiskStore;
   MemoryStore: typeof MemoryStore;
   createMe: typeof createMe;
@@ -97,6 +99,7 @@ MERuntime.canonicalizeHumanIdentity = canonicalizeHumanIdentity;
 MERuntime.projectDnsHostToNamespace = projectDnsHostToNamespace;
 MERuntime.normalizeCanonicalHandle = normalizeCanonicalHandle;
 MERuntime.normalizeCanonicalSpace = normalizeCanonicalSpace;
+MERuntime.validateKnownSpaces = validateKnownSpaces;
 MERuntime.DiskStore = DiskStore;
 MERuntime.MemoryStore = MemoryStore;
 MERuntime.createMe = createMe;
@@ -127,6 +130,7 @@ export {
   parseCanonicalMeUri,
   parseMeUri,
   projectDnsHostToNamespace,
+  validateKnownSpaces,
   signEd25519Proof,
   tryParseMeUri,
   verifyEd25519Signature,
@@ -183,6 +187,7 @@ export type {
   MeDnsProjectionResult,
   MeHumanIdentity,
   ParseCanonicalMeUriOptions,
+  ParseMeUriOptions,
 } from "./src/me-uri.ts";
 export type {
   DiskStoreOptions,
