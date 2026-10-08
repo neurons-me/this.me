@@ -38,11 +38,14 @@ import {
   canonicalizeLegacyAtOperator,
   canonicalizeHumanIdentity,
   formatCanonicalMeUri,
+  formatMeSpaceUri,
   normalizeCanonicalHandle,
   normalizeCanonicalSpace,
   parseCanonicalMeUri,
+  parseMeSpaceUri,
   parseMeUri,
   projectDnsHostToNamespace,
+  tryParseMeSpaceUri,
   tryParseMeUri,
   validateKnownSpaces,
 } from "./src/me-uri.ts";
@@ -71,6 +74,9 @@ export type ThisMeFactory = typeof ME & {
   normalizeCanonicalHandle: typeof normalizeCanonicalHandle;
   normalizeCanonicalSpace: typeof normalizeCanonicalSpace;
   validateKnownSpaces: typeof validateKnownSpaces;
+  parseMeSpaceUri: typeof parseMeSpaceUri;
+  tryParseMeSpaceUri: typeof tryParseMeSpaceUri;
+  formatMeSpaceUri: typeof formatMeSpaceUri;
   DiskStore: typeof DiskStore;
   MemoryStore: typeof MemoryStore;
   createMe: typeof createMe;
@@ -100,6 +106,9 @@ MERuntime.projectDnsHostToNamespace = projectDnsHostToNamespace;
 MERuntime.normalizeCanonicalHandle = normalizeCanonicalHandle;
 MERuntime.normalizeCanonicalSpace = normalizeCanonicalSpace;
 MERuntime.validateKnownSpaces = validateKnownSpaces;
+MERuntime.parseMeSpaceUri = parseMeSpaceUri;
+MERuntime.tryParseMeSpaceUri = tryParseMeSpaceUri;
+MERuntime.formatMeSpaceUri = formatMeSpaceUri;
 MERuntime.DiskStore = DiskStore;
 MERuntime.MemoryStore = MemoryStore;
 MERuntime.createMe = createMe;
@@ -131,6 +140,9 @@ export {
   parseMeUri,
   projectDnsHostToNamespace,
   validateKnownSpaces,
+  parseMeSpaceUri,
+  tryParseMeSpaceUri,
+  formatMeSpaceUri,
   signEd25519Proof,
   tryParseMeUri,
   verifyEd25519Signature,
@@ -178,6 +190,9 @@ export type {
   CanonicalizeLegacyAtOperatorOptions,
   CanonicalizeHumanIdentityOptions,
   FormatCanonicalMeUriInput,
+  FormatMeSpaceUriInput,
+  MeCanonicalSpaceUri,
+  ParseMeSpaceUriOptions,
   MeCanonicalNamespace,
   MeCanonicalPath,
   MeCanonicalSelector,

@@ -46,6 +46,32 @@ export interface CanonicalizeLegacyAtOperatorOptions {
   knownSpaces?: readonly string[];
 }
 
+/**
+ * `me://<space>`: the space itself, with no handle in front of it. Only a space the runtime declared can be
+ * addressed this way, so the reference always carries the context that made it a space.
+ */
+export interface MeCanonicalSpaceUri {
+  scheme: "me";
+  raw: string;
+  href: string;
+  space: string;
+  selector: MeCanonicalSelector | null;
+  path: string | null;
+  segments: string[];
+}
+
+export interface ParseMeSpaceUriOptions {
+  /** The spaces the runtime declares. Required: without them nothing says that a bare name is a space. */
+  knownSpaces: readonly string[];
+}
+
+export interface FormatMeSpaceUriInput {
+  space: string;
+  knownSpaces: readonly string[];
+  selector?: string | MeCanonicalSelector | null;
+  path?: string | null;
+}
+
 export interface FormatCanonicalMeUriInput {
   handle: string;
   space: string;
@@ -399,6 +425,96 @@ export function parseMeUri(rawInput: string, options: ParseMeUriOptions = {}): M
 export function tryParseMeUri(rawInput: string): MeCanonicalUri | null {
   try {
     return parseMeUri(rawInput);
+  } catch {
+    return null;
+  }
+}
+
+function assertDeclaredSpace(rawSpace: unknown, knownSpaces: readonly string[] | undefined, input: string): string {
+  const declared = normalizeKnownSpaces(knownSpaces);
+  if (declared.length === 0) {
+    throw new Error(`Cannot read "${input}" as a space: no declared spaces were given.`);
+  }
+  const space = normalizeConfiguredSpace(rawSpace);
+  if (!declared.includes(space)) {
+    const owner = declared.find((candidate) => space.endsWith(`.${candidate}`));
+    if (owner) {
+      throw new Error(`"${input}" names something inside "${owner}", not the space itself; parse it as a namespace.`);
+    }
+    throw new Error(`Unknown canonical space "${space}" in "${input}".`);
+  }
+  return space;
+}
+
+/**
+ * Formats `me://<space>[selector]/path`. The space must be one the runtime declared (any number of labels).
+ */
+export function formatMeSpaceUri(input: FormatMeSpaceUriInput): string {
+  const space = assertDeclaredSpace(input.space, input.knownSpaces, String(input.space ?? ""));
+  const selector = serializeSelector(input.selector);
+  const path = input.path == null || String(input.path).trim() === ""
+    ? ""
+    : `/${parseCanonicalPath(String(input.path)).value}`;
+  return `me://${space}${selector}${path}`;
+}
+
+/**
+ * Reads `me://<space>[selector]/path` as a reference to a declared space itself (`me://here`, `me://neurons.me`).
+ * `parseMeUri` is unchanged and still insists on a handle; this is the other half of the model: the root a
+ * runtime declares, addressed as itself. A name that is a handle inside a declared space (`me://ana.here`) is
+ * refused here, and an undeclared name is not a space.
+ */
+export function parseMeSpaceUri(rawInput: string, options: ParseMeSpaceUriOptions): MeCanonicalSpaceUri {
+  const raw = assertNonEmpty(rawInput, "me:// URI");
+  if (!raw.toLowerCase().startsWith("me://")) {
+    throw new Error(`Invalid me URI "${rawInput}": expected "me://" scheme.`);
+  }
+
+  const withoutScheme = raw.slice(5);
+  if (!withoutScheme.trim()) {
+    throw new Error(`Invalid me URI "${rawInput}": missing namespace.`);
+  }
+
+  const slashIndex = withoutScheme.indexOf("/");
+  const head = (slashIndex >= 0 ? withoutScheme.slice(0, slashIndex) : withoutScheme).trim();
+  const pathPart = slashIndex >= 0 ? withoutScheme.slice(slashIndex + 1) : "";
+
+  let spacePart = head;
+  let selectorPart: string | null = null;
+  const openIndex = head.indexOf("[");
+  if (openIndex >= 0) {
+    const closeIndex = head.lastIndexOf("]");
+    if (closeIndex < openIndex || closeIndex !== head.length - 1) {
+      throw new Error(`Invalid me URI "${rawInput}": malformed selector.`);
+    }
+    spacePart = head.slice(0, openIndex).trim();
+    selectorPart = head.slice(openIndex + 1, closeIndex).trim();
+  }
+
+  const space = assertDeclaredSpace(spacePart.toLowerCase(), options?.knownSpaces, rawInput);
+  const selector = parseCanonicalSelector(selectorPart);
+  const path = slashIndex >= 0 ? parseCanonicalPath(pathPart) : null;
+  const href = formatMeSpaceUri({
+    space,
+    knownSpaces: options.knownSpaces,
+    selector,
+    path: path?.value ?? null,
+  });
+
+  return {
+    scheme: "me",
+    raw,
+    href,
+    space,
+    selector,
+    path: path?.value ?? null,
+    segments: path?.segments ?? [],
+  };
+}
+
+export function tryParseMeSpaceUri(rawInput: string, options: ParseMeSpaceUriOptions): MeCanonicalSpaceUri | null {
+  try {
+    return parseMeSpaceUri(rawInput, options);
   } catch {
     return null;
   }

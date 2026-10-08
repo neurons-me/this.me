@@ -3,10 +3,13 @@ import {
   canonicalizeLegacyAtOperator,
   canonicalizeHumanIdentity,
   formatCanonicalMeUri,
+  formatMeSpaceUri,
   normalizeCanonicalSpace,
   parseCanonicalMeUri,
+  parseMeSpaceUri,
   parseMeUri,
   projectDnsHostToNamespace,
+  tryParseMeSpaceUri,
   tryParseMeUri,
   validateKnownSpaces,
 } from "../src/me-uri.ts";
@@ -169,5 +172,45 @@ assert.deepEqual(validateKnownSpaces(["localhost", "b.c", "c"]), ["b.c", "localh
 const badConfig = projectDnsHostToNamespace("jabellae.localhost", ["localhost", "bad_space!"]);
 assert.equal(badConfig.ok, false);
 if (!badConfig.ok) assert.equal(badConfig.reason, "INVALID_KNOWN_SPACES");
+
+
+// ── The space itself: me://<space> ─────────────────────────────────────────
+// `me://here` is the root a runtime declares, addressed as itself; `me://ana.here` is someone inside it.
+// The reference is only valid with the declaring context, and parseMeUri (handle required) is untouched.
+const rootRef = parseMeSpaceUri("me://here", { knownSpaces: ["here"] });
+assert.equal(rootRef.space, "here");
+assert.equal(rootRef.href, "me://here");
+assert.equal(rootRef.selector, null);
+assert.equal(rootRef.path, null);
+
+const rootPath = parseMeSpaceUri("me://localhost[macbook]/profile.name", { knownSpaces: ["localhost"] });
+assert.equal(rootPath.space, "localhost");
+assert.equal(rootPath.selector?.value, "surface:macbook");
+assert.equal(rootPath.path, "profile.name");
+assert.equal(rootPath.href, "me://localhost[surface:macbook]/profile.name");
+
+// A multi-label space is addressed the same way, and case is folded like everywhere else.
+assert.equal(parseMeSpaceUri("me://Neurons.ME", { knownSpaces: ["neurons.me"] }).space, "neurons.me");
+
+// A name inside a declared space is a namespace, not the space: refused here, still read by the other parser.
+assert.throws(() => parseMeSpaceUri("me://ana.here", { knownSpaces: ["here"] }), /not the space itself/i);
+assert.equal(parseCanonicalMeUri("me://ana.here", { knownSpaces: ["here"] }).namespace, "ana.here");
+// The longest declared space is the space; one more label in front is someone inside it.
+assert.equal(parseMeSpaceUri("me://system.here", { knownSpaces: ["here", "system.here"] }).space, "system.here");
+assert.throws(() => parseMeSpaceUri("me://x.system.here", { knownSpaces: ["here", "system.here"] }), /not the space itself/i);
+
+// Nothing is guessed: an undeclared name is not a space, and no context means no reading at all.
+assert.throws(() => parseMeSpaceUri("me://elsewhere", { knownSpaces: ["here"] }), /Unknown canonical space/i);
+assert.throws(() => parseMeSpaceUri("me://here", { knownSpaces: [] }), /no declared spaces/i);
+assert.equal(tryParseMeSpaceUri("me://elsewhere", { knownSpaces: ["here"] }), null);
+assert.throws(() => parseMeSpaceUri("https://here", { knownSpaces: ["here"] }), /me:\/\//i);
+
+// The handle form keeps demanding a handle, with or without a declared root.
+assert.throws(() => parseMeUri("me://here"), /handle\.space/i);
+assert.throws(() => parseCanonicalMeUri("me://here", { knownSpaces: ["here"] }), /handle\.space/i);
+
+assert.equal(formatMeSpaceUri({ space: "here", knownSpaces: ["here"] }), "me://here");
+assert.equal(formatMeSpaceUri({ space: "here", knownSpaces: ["here"], path: "profile.name" }), "me://here/profile.name");
+assert.throws(() => formatMeSpaceUri({ space: "elsewhere", knownSpaces: ["here"] }), /Unknown canonical space/i);
 
 console.log("✔ me:// canonical URI tests passed");
