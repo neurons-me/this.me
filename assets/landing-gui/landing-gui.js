@@ -4,8 +4,10 @@
 // (#static-landing[data-layout=docs-index]: kicker, h1 with the .me mark, language chips, cover-top cards, footer).
 // The page's own static markup (#static-landing) is the single source of text, links and images: this script
 // reads it, renders the same content through GUI.mount (registry Card/Box/Typography/Link/Chip + a page-local
-// topbar: me:// path, Docs, GitHub, theme picker, light/dark, gear with Inspector + Grid Layout), then removes
-// the static copy. Without JS or if the CDN fails, the static page stays as it is.
+// topbar: me:// path, search, [Docs], [GitHub], theme picker, light/dark, gear with Inspector + Grid Layout), then
+// removes the static copy. Without JS or if the CDN fails, the static page stays as it is.
+// Docs and GitHub are per page, from the static .topnav: a link there with [data-topbar=docs] / to github.com shows
+// them; without one they are left out (/.me/Demos/ has neither).
 (function () {
   const html = document.documentElement, SRC = document.getElementById("static-landing"), ROOT = document.getElementById("root");
   const G = window.GUI;
@@ -22,7 +24,6 @@
 
   // ── read the static page ──
   const path = [...SRC.querySelectorAll(".mepath > a, .mepath > .here")].map((e) => ({ text: txt(e), href: e.getAttribute("href"), title: e.getAttribute("title") || txt(e) }));
-  const DOCS = "https://neurons-me.github.io/.me/docs/";
   // an <a class="strong"> reads as part of the sentence, only stronger: theme text.primary, bold
   const inline = (el) => [...el.childNodes].map((n) => n.nodeType === 1 && n.tagName === "A" ? N("Link", { href: n.getAttribute("href"), title: n.getAttribute("title") || undefined, underline: "hover",
       sx: n.classList.contains("strong") ? { color: "text.primary", fontWeight: 700 } : { color: "primary.main" } }, [n.textContent])
@@ -51,7 +52,7 @@
   })() : demosIndex ? {
     path: [...[...SRC.querySelectorAll(".kicker a")].map((a) => ({ text: txt(a), href: a.getAttribute("href"), title: a.getAttribute("title") || txt(a) })),
       { text: [...SRC.querySelector(".kicker").childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join("").trim(), href: null }],
-    docs: DOCS, github: SRC.querySelector(".topnav a[href*='github.com']")?.getAttribute("href"),
+    docs: SRC.querySelector(".topnav a[data-topbar=docs]")?.getAttribute("href"), github: SRC.querySelector(".topnav a[href*='github.com']")?.getAttribute("href"),
     kicker: inline(SRC.querySelector(".kicker")), h1: txt(SRC.querySelector(".page-title")), subtitle: inline(SRC.querySelector(".page-subtitle")),
     cards: [...SRC.querySelectorAll(".grid > a.card")].map((a) => {
       const img = a.querySelector(".card-icon img"), emoji = a.querySelector(".card-emoji");
