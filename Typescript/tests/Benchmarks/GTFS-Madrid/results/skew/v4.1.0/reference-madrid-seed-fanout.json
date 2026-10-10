@@ -1,0 +1,28 @@
+{
+  "profile": "madrid-seed (original, pre-VIG)",
+  "source": "gtfs-bench generation/mysql_data/dump-gtfs-new.sql",
+  "tripsPerService": {
+    "parents": 5,
+    "children": 130,
+    "orphans": 0,
+    "zeroChildParents": 0,
+    "min": 2,
+    "median": 32.0,
+    "p95": 32.0,
+    "max": 32,
+    "mean": 26.0,
+    "topShare": 0.24615384615384617
+  },
+  "stopTimesPerTrip": {
+    "parents": 130,
+    "children": 2364,
+    "orphans": 0,
+    "zeroChildParents": 0,
+    "min": 2,
+    "median": 20.0,
+    "p95": 33.0,
+    "max": 33,
+    "mean": 18.184615384615384,
+    "topShare": 0.013959390862944163
+  }
+}

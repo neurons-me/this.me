@@ -10,7 +10,7 @@
  */
 import ME from "../../../dist/index.js";
 import { writeFileSync, mkdirSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   idxRouteCountPath,
@@ -81,7 +81,7 @@ function explainMeta(me: CallableMe, path: string): ExplainMeta {
   return trace?.meta ?? {};
 }
 
-function percentile(sortedAsc: number[], p: number): number | null {
+export function percentile(sortedAsc: number[], p: number): number | null {
   if (sortedAsc.length === 0) return null;
   if (sortedAsc.length === 1) return sortedAsc[0];
   const rank = (p / 100) * (sortedAsc.length - 1);
@@ -97,7 +97,7 @@ function mean(xs: number[]): number | null {
   return xs.reduce((a, b) => a + b, 0) / xs.length;
 }
 
-function dist(xs: number[]) {
+export function dist(xs: number[]) {
   const s = [...xs].sort((a, b) => a - b);
   return {
     mean: mean(s),
@@ -110,7 +110,7 @@ function dist(xs: number[]) {
   };
 }
 
-function measureOne(
+export function measureOne(
   me: CallableMe,
   mutation: Mutation,
   probePaths: string[],
@@ -172,7 +172,7 @@ const SERVICE_DAY_FIELDS = new Set([
   "sunday",
 ]);
 
-function buildMeasurablePlan(
+export function buildMeasurablePlan(
   base: GtfsSnapshot,
   seed: GtfsSnapshot,
   inventory: DeltaEntry[]
@@ -636,7 +636,10 @@ function fmt(x: number | null | undefined): string {
   return Number.isInteger(x) ? String(x) : x.toFixed(3);
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exitCode = 1;
-});
+// Run only when executed directly (skew/sweep-skew.ts imports the plan + measureOne).
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((err) => {
+    console.error(err);
+    process.exitCode = 1;
+  });
+}
