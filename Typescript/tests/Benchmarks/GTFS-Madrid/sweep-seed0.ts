@@ -10,6 +10,7 @@
  */
 import ME from "../../../dist/index.js";
 import { writeFileSync, mkdirSync } from "node:fs";
+import { runEnv, runEnvLine } from "./run-env.ts";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -543,9 +544,10 @@ async function main() {
 
   const summary = {
     version: `${tag}-CHANGE/base→seed0-sweep`,
+    env: runEnv(),
     claim: "dependency propagation (not RML materialization)",
     timingNote:
-      "loadMs is separate; per-mutation latency_ms = mutationApplyMs + recomputeMs only",
+      "loadMs is separate; per-mutation latency_ms = mutationApplyMs + recomputeMs only. The propagation wave runs inside mutationApplyMs (the write); recomputeMs is the read-back of the probe paths (the affected derived values) after it",
     createSemantics:
       "gtfs.idx membership slots (0 pre-seeded for seed-only ids, 1 for base) + parent sum aggregates (routeCount/serviceCount/tripCount/stopTimeCount); CREATE flips slot → aggregate wave",
     calendarSemantics:
@@ -582,6 +584,8 @@ async function main() {
     ``,
     `Claim: dependency propagation — NOT RML materialization.`,
     ``,
+    `Run: ${runEnvLine()}`,
+    ``,
     `CREATE semantics: \`gtfs.idx\` membership + parent \`*Count\` sum aggregates (slot 0→1).`,
     `Calendar: \`active\` derived from mon–sun + numeric start/end dates.`,
     ``,
@@ -595,8 +599,8 @@ async function main() {
     `| k CREATE mean/p50/max | ${fmt(aggregate.kByType.CREATE.k.mean)} / ${fmt(aggregate.kByType.CREATE.k.p50)} / ${fmt(aggregate.kByType.CREATE.k.max)} (n=${aggregate.kByType.CREATE.n}) |`,
     `| k UPDATE mean/p50/max | ${fmt(aggregate.kByType.UPDATE.k.mean)} / ${fmt(aggregate.kByType.UPDATE.k.p50)} / ${fmt(aggregate.kByType.UPDATE.k.max)} (n=${aggregate.kByType.UPDATE.n}) |`,
     `| k DELETE mean/p50/max | ${fmt(aggregate.kByType.DELETE.k.mean)} / ${fmt(aggregate.kByType.DELETE.k.p50)} / ${fmt(aggregate.kByType.DELETE.k.max)} (n=${aggregate.kByType.DELETE.n}) |`,
-    `| recomputeMs p50 / p95 / p99 | ${fmt(aggregate.latency_recompute_ms.p50)} / ${fmt(aggregate.latency_recompute_ms.p95)} / ${fmt(aggregate.latency_recompute_ms.p99)} |`,
-    `| applyMs p50 / p95 / p99 | ${fmt(aggregate.latency_apply_ms.p50)} / ${fmt(aggregate.latency_apply_ms.p95)} / ${fmt(aggregate.latency_apply_ms.p99)} |`,
+    `| recomputeMs (probe read-back after the write) p50 / p95 / p99 | ${fmt(aggregate.latency_recompute_ms.p50)} / ${fmt(aggregate.latency_recompute_ms.p95)} / ${fmt(aggregate.latency_recompute_ms.p99)} |`,
+    `| applyMs (the write, including its propagation wave) p50 / p95 / p99 | ${fmt(aggregate.latency_apply_ms.p50)} / ${fmt(aggregate.latency_apply_ms.p95)} / ${fmt(aggregate.latency_apply_ms.p99)} |`,
     `| total recomputed / changed / unchanged | ${totalRecomputed} / ${totalChanged} / ${totalUnchanged} |`,
     `| early-cutoff (unchanged/recomputed) | ${earlyCutoffRatio == null ? "n/a" : earlyCutoffRatio.toFixed(4)} |`,
     ``,

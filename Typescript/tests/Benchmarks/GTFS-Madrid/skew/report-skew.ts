@@ -13,7 +13,7 @@ const scale = Number(process.argv.find((a) => a.startsWith("--scale="))?.slice(8
 const ORDER = ["vig-original", "zipf-a0", "zipf-a0.5", "zipf-a1", "zipf-a1.5", "zipf-a2", "hub-1x50", "hub-3x75"];
 
 type Row = { phase: string; type: string; kind: string; k: number | null; changed: number; mutationApplyMs: number; recomputeMs: number; explainBytes: number; explainMs: number; explainInputs: number; probeCount: number; id: string; field?: string; sumWidth?: number };
-type Run = { variant: string; seed: string; loadMs: number; rebuildLoadMs: number; fullEvalMs: number; inventory: Record<string, number>; integrity: unknown; fanout: unknown; rows: Row[]; sizes: Record<string, number> };
+type Run = { variant: string; seed: string; loadMs: number; rebuildLoadMs: number; fullEvalMs: number; inventory: Record<string, number>; integrity: unknown; fanout: unknown; rows: Row[]; sizes: Record<string, number>; env?: any };
 
 const pct = (xs: number[], p: number) => {
   const s = [...xs].sort((a, b) => a - b);
@@ -89,7 +89,8 @@ const fan = existsSync(join(RES, `scale${scale}-fanout.json`)) ? JSON.parse(read
 const madrid = existsSync(join(RES, "reference-madrid-seed-fanout.json")) ? JSON.parse(readFileSync(join(RES, "reference-madrid-seed-fanout.json"), "utf8")) : null;
 const fh = (x: any) => `${x.min} / ${f(x.median)} / ${f(x.p95)} / ${x.max}`;
 const md: string[] = [
-  `# S1 fan-out skew: scale-${scale} results (this.me@4.1.0, kernel unchanged)`, ``,
+  `# S1 fan-out skew: scale-${scale} results (this.me@${runs[0]?.env?.thisMe ?? "4.1.0"}, kernel unchanged)`, ``,
+  ...(runs[0]?.env ? [`Run: this.me@${runs[0].env.thisMe} (dist/me.es.js sha256 ${String(runs[0].env.distSha256).slice(0, 12)}…), Node ${runs[0].env.node}, ${runs[0].env.cpu}, ${runs[0].env.memGiB} GiB, ${runs[0].env.os}; count aggregates: ${runs[0].env.aggregates}; first run ${runs[0].env.date}`, ``] : []),
   `Runs: ${runs.length} (variants × seeds). Rows per table are fixed (${JSON.stringify(runs[0]?.sizes)}). Only \`trips.service_id\` and \`stop_times.trip_id\` were reassigned.`, ``,
   `## 1. Fan-out per variant (base snapshot; identical for every seed, only the parent identities change)`, ``,
   `| variant | trips/service min / median / p95 / max | services with 0 trips | stop_times/trip min / median / p95 / max | trips with 0 stop_times | top trip share |`,

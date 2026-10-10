@@ -1,6 +1,6 @@
 /**
  * S1 sweep: same base→seed0 mutation workload as sweep-seed0.ts, run on the
- * skewed dumps written by generate-skew.ts, against this.me@4.1.0 loaded from
+ * skewed dumps written by generate-skew.ts, against the this.me build loaded from
  * Typescript/dist exactly like the existing benchmark. Kernel untouched.
  *
  * Per run (one child process per variant × seed, --expose-gc):
@@ -19,6 +19,7 @@
 import ME from "../../../../dist/index.js";
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { runEnv } from "../run-env.ts";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { idxRouteCountPath, idxServiceCountPath, idxTripStopTimeCountPath, idxRouteTripCountPath, setIdxStopTimeMember, stopTimeId } from "../adapter.ts";
@@ -121,7 +122,7 @@ function runOne(variant: string, seed: string, scale: number) {
     const m: Mutation = { type: "CREATE", label: `idx slot 0→1 ${trip}`, apply: (x) => setIdxStopTimeMember(x, tid, stId, 1) };
     rows.push({ ...measure(me, "census-slot", m, [idxTripStopTimeCountPath(tid)], { id: trip, kind: "stopTimeSlot" }), sumWidth: sts.length });
   }
-  // C3) DELETE the 10 widest trips + 40 seeded-random trips (each me["-"] costs O(store) in 4.1.0, so not all 1300)
+  // C3) DELETE the 10 widest trips + 40 seeded-random trips (each me["-"] scans the store, O(store), so not all 1300)
   const baseTripIds = new Set(base.trips.map((t) => t.trip_id));
   const pool = bySize.filter(([t]) => baseTripIds.has(t));
   const rest = pool.slice(10);
@@ -149,7 +150,7 @@ function main() {
   if (one) {
     const [variant, seed] = one.split("/");
     const res = runOne(variant, seed, scale);
-    writeFileSync(join(outRuns, `scale${scale}-${variant}-s${seed}.json`), JSON.stringify(res));
+    writeFileSync(join(outRuns, `scale${scale}-${variant}-s${seed}.json`), JSON.stringify({ ...res, env: runEnv() }));
     console.log(`${variant} s${seed}: rows=${res.rows.length} loadMs=${res.loadMs.toFixed(0)} rebuild=${res.rebuildLoadMs.toFixed(0)}+${res.fullEvalMs.toFixed(0)}`);
     return;
   }

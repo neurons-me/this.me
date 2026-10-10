@@ -13,6 +13,48 @@ Uses a change-aware extension of **GTFS-Madrid-Bench** (Chaves-Fraga et al., 202
 - Resources: https://zenodo.org/records/14038823  
 - GTFS-Madrid-Bench: https://github.com/oeg-upm/gtfs-bench
 
+## Results at a glance (this.me 4.2.0, measured 2026-10-10)
+
+Run line (also recorded inside every results file): `this.me@4.2.0` (published npm build, `dist/me.es.js` sha256 `8cc94d52…`), Node v22.23.3, shared KVM VM (Intel Xeon, 8 vCPU, 16 GiB), Linux 6.12 x64. The 4.1.0 rows were re-run on the same machine the same day; the 2026-10-07 skew results and the scale-100 sweep are 4.1.0 history (sections below).
+
+**k vs n (base→seed0, VIG scales).** k = `explain(probe).meta.k`, the number of derived values recomputed by one write. Write time = `mutationApplyMs` (the write, including its eager propagation wave). Times in ms.
+
+| scale | stop_times | writes | k p50 / p95 / max | write p50 / p95 4.2.0 | write p50 / p95 4.1.0 | DELETE p50 4.2.0 / 4.1.0 | CREATE p50 4.2.0 / 4.1.0 | load 4.2.0 / 4.1.0 |
+|---|---:|---:|---|---|---|---|---|---|
+| 1 | 2,364 | 151 | 1 / 18.5 / 27 | 0.30 / 9.5 | 0.27 / 9.5 | 9.2 / 9.3 | 0.24 / 0.22 | 476 / 457 |
+| 10 | 23,640 | 1,304 | 1 / 18 / 27 | 0.23 / 165 | 0.22 / 181 | 144 / 171 | 0.21 / 0.20 | 4,730 / 4,414 |
+| 100 | 236,400 | 13,401 | 1 / 18 / 27 | not re-run | 4.1.0 only (`scale1-vs-scale10-vs-scale100-summary.md`) | | | |
+
+k is identical on 4.1.0 and 4.2.0 for every write; times are within run-to-run noise except DELETE, which is still a store scan (below).
+
+**Fan-out skew (S1, scale 10, 22 runs).** Same k as 4.1.0 for every variant (the generator and workload did not change). Highlights from `results/skew/v4.2.0/explicit/scale10-skew-sweep.md`:
+
+- UPDATE (service flip) apply ≈ 0.05 ms + 52 µs·k (r = 0.98, n = 1,100). The largest wave, a service with 801 trips (k = 801), took 52 ms at worst, about 100× less than the ~5 s rebuild. **That ~100× is the worst case measured**, not the typical ratio. For the ordinary seed0 UPDATEs, rebuild ÷ apply p50 is 6,800–25,000× (4.1.0: 47 ms, ~110×, and 7,600–31,000×).
+- CREATE (idx slot 0→1, k = 1) costs the width of the parent's sum: 0.10 ms p50 at ≤ 30 members, 151 ms at 14,378 (4.1.0: 183 ms).
+- **DELETE worst case:** every `me["-"]` scans the store, about 130–146 ms p50 at scale 10 whatever k is (9 ms at scale 1), plus ~67 µs per k. The worst DELETE measured on 4.2.0 is 1.2 s (the 14,378-stop_time hub trip, k = 14,378), still under the ~5 s rebuild. On 4.1.0 (2026-10-07) the worst was a 16.3 s GC-related stall on a k = 18 DELETE (not reproduced, see caveats); no multi-second stall occurred in the 4.2.0 run.
+- `explain()` size ≈ 1.9 KB + 56 B·k for service flips; 1.6 MB for the hub delete.
+
+**4.2.0 collection aggregate `[]` (variant `GTFS_AGG=bracket`).** The `*Count` aggregates written as `gtfs.idx.trips.<t>.stopTimeMember[].on` (slots become `<slot>.on`) give the same k for every write, but each CREATE re-scans: 3.5 ms p50 at scale 1 and 50 ms at scale 10 (explicit sums: 0.21 ms), and loading scale 10 takes 71 s instead of 4.7 s. Results in `results/v4.2.0/bracket/`. The skew sweep was not run in this mode (it would take hours at that cost). Note: inside a formula, the `[]` reference had to be the absolute path; a path relative to the derived node's scope resolved as `missing-input`.
+
+## Files
+
+| file | what |
+|---|---|
+| `adapter.ts` | GTFS rows → `.me` paths and derived expressions; `gtfs.idx` membership slots and `*Count` aggregates (`GTFS_AGG=bracket` for the 4.2 `[]` form) |
+| `load-real.ts` | loads `data/scale{N}/{base,seed0}` CSVs (GTFS ids → stable path-safe ids) |
+| `workload.ts`, `benchmark.ts` | synthetic workload and the original benchmark entry (`--sweep-only` runs the scale-1 sweep) |
+| `sweep-seed0.ts` | base→seed0 sweep; exports `buildMeasurablePlan`, `measureOne`, `dist`, `percentile` |
+| `run-env.ts` | the run line (kernel version via `ME_VERSION`, dist sha256, Node, CPU, memory, OS, aggregate style) |
+| `skew/generate-skew.ts`, `skew/sweep-skew.ts`, `skew/report-skew.ts` | S1 fan-out skew: generator, sweep, report |
+| `results/scale1-*`, `results/scale1-vs-scale10*-summary.*` | 4.1.0 history (earlier runs; scale 100 only exists here) |
+| `results/v4.2.0/{explicit,bracket}/scale{1,10}-base-seed0-sweep.*` | 4.2.0 sweeps, 2026-10-10 |
+| `results/v4.1.0-same-machine/scale{1,10}-base-seed0-sweep.*` | 4.1.0 re-run on the same machine, 2026-10-10 |
+| `results/skew/scale10-fanout.json`, `results/skew/reference-madrid-seed-fanout.json` | fan-out of the generated variants and of the original Madrid seed (kernel-independent) |
+| `results/skew/v4.2.0/explicit/scale10-skew-sweep.{md,json,tsv}` | S1 on 4.2.0, 2026-10-10 |
+| `results/skew/v4.1.0/` | S1 on 4.1.0, 2026-10-07 (history), with `diagnostics/` (the `--trace-gc` rerun) |
+
+Per-run JSON (`results/skew/runs/`, ~14 MB per sweep) is gitignored; the `.tsv` next to each report has one line per measured write.
+
 ## Cross-branch dependencies (what worked)
 
 `.me` resolves each formula identifier **relative to the derived node’s scope first, then from the root** (`refCandidatePaths` / `tryResolveEvalTokenValue`).
@@ -89,7 +131,7 @@ Diffs `data/scale{N}/base` vs `seed0`, measures mutations that map to derived ed
 day/date → `service.active` → `trip.live`, `trip.routeId` → `stopTime.routeId`,
 route/trip `me["-"]` → ABSENCE, and CREATE via `gtfs.idx` membership + `*Count` aggregates
 (pre-seeded 0 for seed-only ids; CREATE flips 0→1 — real wave; see CREATE honesty above).
-Writes `results/scale{N}-base-seed0-sweep.{json,md,tsv}`. Timing: `loadMs` | `mutationApplyMs` | `recomputeMs`.
+Writes `results/scale{N}-base-seed0-sweep.{json,md,tsv}`. Set `ME_VERSION=<x.y.z>` so the run line names the kernel. Timing: `loadMs` (separate) | `mutationApplyMs` (the write, including its eager propagation wave) | `recomputeMs` (despite the name: the read-back of the probe paths after the write, not the recompute itself).
 
 ## S1: controlled fan-out skew (fixed row count)
 
@@ -106,7 +148,7 @@ Writes `results/scale{N}-base-seed0-sweep.{json,md,tsv}`. Timing: `loadMs` | `mu
 - **Same workload.** seed0 gets the same mapping, keyed by `trip_id` and by the stop_time row key, so base→seed0 yields the same 1,304 mutations as the unmodified dump.
 - **Cross-check.** The standalone Python version prepared for GTFS-Madrid-Bench `utils/` produces byte-identical output for all 21 variant/seed combinations.
 
-**Sweep** (`skew/sweep-skew.ts`). Uses `this.me@4.1.0` from `Typescript/dist` exactly as `sweep-seed0.ts` does; the kernel is unchanged. `sweep-seed0.ts` now exports `buildMeasurablePlan`, `measureOne`, `dist` and `percentile` and runs `main()` only when executed directly; its behaviour is otherwise unchanged (the scale-1 run reproduces the committed k values). Each variant × seed runs in its own process:
+**Sweep** (`skew/sweep-skew.ts`). Uses the `this.me` build in `Typescript/dist` exactly as `sweep-seed0.ts` does (4.1.0 on 2026-10-07, 4.2.0 on 2026-10-10); the kernel is unchanged. `sweep-seed0.ts` now exports `buildMeasurablePlan`, `measureOne`, `dist` and `percentile` and runs `main()` only when executed directly; its behaviour is otherwise unchanged (the scale-1 run reproduces the committed k values). Each variant × seed runs in its own process:
 
 1. **seed0 workload.** Fresh load, then the plan from `buildMeasurablePlan`, measured with `measureOne`: k = `explain(probe[0]).meta.k`, apply time = `mutationApplyMs`. The recompute is eager, so the wave runs inside the write.
 2. **Rebuild baseline.** A second fresh `new ME()` plus load and wiring of the aggregates, then one read of every derived value (27,720 paths).
@@ -120,19 +162,22 @@ Writes `results/scale{N}-base-seed0-sweep.{json,md,tsv}`. Timing: `loadMs` | `mu
 ### How to run
 
 ```bash
-# from Typescript/. Needs Node ≥ 22.6 (type stripping for .ts) and Typescript/dist (this.me 4.1.0).
+# from Typescript/. Needs Node ≥ 22.6 (type stripping for .ts) and Typescript/dist (the published build: npm pack this.me@4.2.0, copy package/dist).
+# Prefix the sweep with ME_VERSION=4.2.0 so the run line names the kernel.
 # Data: Zenodo GTFS-Scale-10-CHANGE → data/scale10/{base,seed0}/{routes,trips,stop_times,calendar,calendar_dates}.txt
 node tests/Benchmarks/GTFS-Madrid/skew/generate-skew.ts --scale=10            # ~10 s, writes data/skew/scale10/<variant>/s<seed>/
 node --expose-gc tests/Benchmarks/GTFS-Madrid/skew/sweep-skew.ts --scale=10   # ~25 min, writes results/skew/runs/*.json
-node tests/Benchmarks/GTFS-Madrid/skew/report-skew.ts --scale=10              # writes results/skew/scale10-skew-sweep.{md,json,tsv}
+node tests/Benchmarks/GTFS-Madrid/skew/report-skew.ts --scale=10              # writes results/skew/scale10-skew-sweep.{md,json,tsv} (moved to results/skew/v<version>/ when committed)
 # options: generate --alphas=0,1 --hubs=1:0.5 --seeds=0 ; sweep --variants=zipf-a1,hub-1x50 --seeds=0 ; one run: sweep --run=zipf-a1/0
 ```
 
 `Typescript/dist` for these runs was the published npm package `this.me@4.1.0` (its `dist/` copied into `Typescript/dist`, which is gitignored), not a local build.
 
-### Results (scale 10, measured 2026-10-07)
+### Results on this.me 4.1.0 (history: scale 10, measured 2026-10-07)
 
-Full tables are in `results/skew/v4.1.0/scale10-skew-sweep.md`; `scale10-skew-sweep.tsv` there has one line per measured write (the per-run `runs/*.json`, ~14 MB, are not committed) (one line per measured write).
+The 4.2.0 numbers are summarized under "Results at a glance" and in `results/skew/v4.2.0/explicit/`. k is identical; times below are 4.1.0.
+
+Full tables are in `results/skew/v4.1.0/scale10-skew-sweep.md`; `scale10-skew-sweep.tsv` there has one line per measured write (the per-run `runs/*.json`, ~14 MB, are not committed).
 
 **Fan-out of the base snapshot.** It is the same for every seed. Percentiles are linearly interpolated.
 
@@ -191,8 +236,8 @@ The original Madrid seed is only mildly skewed: its largest trip has 1.8× the m
 | | width 1001–3000 | 18.4 (27.1) |
 | | width > 10000 | 169 (182) |
 
-- **UPDATE propagation is linear in k.** Pooled fit: apply ≈ 0.03 ms + 58 µs·k (r = 0.95, n = 1,100); per-variant slopes are 51–71 µs per recomputed node. The largest wave measured (k = 801) took 47 ms, about 110× less than a rebuild. For the seed0 UPDATEs, rebuild ÷ apply p50 is 7,600–31,000×.
-- **DELETE has a fixed cost of about 150–190 ms whatever k is.** In 4.1.0, `removeSubtree` scans every key of `refSubscribers` and the derivation table, so each `me["-"]` costs O(store). On top of that it adds roughly 0.1 ms per k (pooled fit 167 ms + 144 µs·k, r = 0.62). A typical DELETE is about 30× cheaper than a rebuild. Deleting the 11,820-stop_time hub trip took 0.97–1.08 s in 3 of 4 measurements, still below the ~5.8 s rebuild; the fourth took 8.3 s (see stalls below).
+- **UPDATE propagation is linear in k.** Pooled fit: apply ≈ 0.03 ms + 58 µs·k (r = 0.95, n = 1,100); per-variant slopes are 51–71 µs per recomputed node. The largest wave measured (k = 801) took 47 ms, about 110× less than a rebuild; that is the worst case (the widest service), not the typical ratio. For the seed0 UPDATEs, rebuild ÷ apply p50 is 7,600–31,000×.
+- **DELETE has a fixed cost of about 150–190 ms whatever k is.** In 4.1.0, `removeSubtree` scans every key of `refSubscribers` and the derivation table, so each `me["-"]` costs O(store). On top of that it adds roughly 0.1 ms per k (pooled fit 167 ms + 144 µs·k, r = 0.62). A typical DELETE is about 30× cheaper than a rebuild. Deleting the 11,820-stop_time hub trip took 0.97–1.08 s in 3 of 4 measurements, still below the ~5.8 s rebuild; the fourth took 8.3 s (see stalls below). Worst DELETE in this run: 16.3 s, a stall on a k = 18 DELETE (see caveats). 4.2.0 keeps the store scan (130–146 ms p50); its worst DELETE was 1.2 s.
 - **k is not work.** A CREATE-equivalent slot flip is always k = 1, but the parent `stopTimeCount` is an explicit sum with one term per stop_time. Its cost grows with the sum width: 0.11 ms at width ≤ 30, 138–161 ms at width 11,820 and 178–183 ms at width 14,378. k alone underestimates the cost of wide aggregates.
 
 **`explain()` size.** JSON bytes of `explain(probe[0])` right after the write:
@@ -207,7 +252,7 @@ The original Madrid seed is only mildly skewed: its largest trip has 1.8× the m
 - **Measured:**
   - k = `explain().meta.k`, the number of derived nodes evaluated in the wave, counted transitively; `changed` is also recorded;
   - wall-clock `mutationApplyMs` (eager wave included);
-  - probe read time (`recomputeMs`, raw data only);
+  - probe read-back after the write (`recomputeMs`; the name is historical, the wave itself runs inside `mutationApplyMs`), raw data only;
   - rebuild = second load in the process + one read of all derived values;
   - `explain()` JSON size and latency.
 - **Not measured:**
@@ -222,15 +267,15 @@ The original Madrid seed is only mildly skewed: its largest trip has 1.8× the m
 
 ### Hardware and timing caveats
 
-- **Machine:** shared KVM VM ("Intel Xeon Processor", 8 vCPU, 15 GiB RAM, Linux 6.12), Node v22.23.3, one process per run with `--expose-gc --max-old-space-size=6144`. Other workloads were running on the host, and no CPU pinning or repetition beyond the 3 seeds was done.
+- **Machine (4.1.0 run, 2026-10-07; the 4.2.0 run used the same VM):** shared KVM VM ("Intel Xeon Processor", 8 vCPU, 15 GiB RAM, Linux 6.12), Node v22.23.3, one process per run with `--expose-gc --max-old-space-size=6144`. Other workloads were running on the host, and no CPU pinning or repetition beyond the 3 seeds was done.
 - **The cold first load** varied from 4.7 s to 32 s for the same data. That is why the baseline is the second load in the process.
 - **Stalls.** A few writes show multi-second stalls that have nothing to do with k:
   - a k = 18 DELETE took 16.3 s and a k = 17 DELETE took 10.9 s (other DELETEs with the same k took about 160 ms);
   - a k = 1 slot flip took 6.0 s;
   - the 8.3 s hub delete mentioned above.
 
-  Re-running zipf-a0 / seed 1 with `--trace-gc` did not reproduce the 16 s stall: max DELETE was 637 ms and the largest GC pause 426 ms. The rerun is in `results/skew/diagnostics/`. Treat max columns as noisy and p50 and the bucket medians as the robust numbers.
-- **Size of the outputs.** `results/skew/runs/` is about 14 MB in total, which is large for git; decide before committing. `data/` stays gitignored.
+  Re-running zipf-a0 / seed 1 with `--trace-gc` did not reproduce the 16 s stall: max DELETE was 637 ms and the largest GC pause 426 ms. The rerun is in `results/skew/v4.1.0/diagnostics/`. Treat max columns as noisy and p50 and the bucket medians as the robust numbers.
+- **Size of the outputs.** `results/skew/runs/` (about 14 MB per sweep) and `data/` are gitignored.
 
 ## Run (synthetic, no data)
 
