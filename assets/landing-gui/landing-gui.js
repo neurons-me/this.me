@@ -1,4 +1,4 @@
-// .GUI (this.gui@4.1.0) for hand-written .me landings. Copy of neurons-me.github.io docs/assets/landing-gui.js
+// .GUI (this.gui@4.2.0) for hand-written .me landings. Copy of neurons-me.github.io docs/assets/landing-gui.js
 // (the /robots/ and /smart-cities/ landings), kept here so .me pages don't depend on the site repo's paths, plus
 // the /.me/Demos/ index layout (kicker, h1, one line, image-left demo cards) and the /.me/docs/ index layout
 // (#static-landing[data-layout=docs-index]: kicker, h1 with the .me mark, language chips, cover-top cards, footer).
@@ -23,7 +23,9 @@
   // ── read the static page ──
   const path = [...SRC.querySelectorAll(".mepath > a, .mepath > .here")].map((e) => ({ text: txt(e), href: e.getAttribute("href"), title: e.getAttribute("title") || txt(e) }));
   const DOCS = "https://neurons-me.github.io/.me/docs/";
-  const inline = (el) => [...el.childNodes].map((n) => n.nodeType === 1 && n.tagName === "A" ? N("Link", { href: n.getAttribute("href"), title: n.getAttribute("title") || undefined, underline: "hover", sx: { color: "primary.main" } }, [n.textContent])
+  // an <a class="strong"> reads as part of the sentence, only stronger: theme text.primary, bold
+  const inline = (el) => [...el.childNodes].map((n) => n.nodeType === 1 && n.tagName === "A" ? N("Link", { href: n.getAttribute("href"), title: n.getAttribute("title") || undefined, underline: "hover",
+      sx: n.classList.contains("strong") ? { color: "text.primary", fontWeight: 700 } : { color: "primary.main" } }, [n.textContent])
     : n.nodeType === 1 && n.tagName === "CODE" ? N("Box", { component: "code", sx: { fontFamily: MONO, fontSize: ".85em", px: .5, py: .125, borderRadius: "4px", bgcolor: "action.hover", color: "text.primary" } }, [n.textContent])
     : n.textContent);
   const attrs = (img, names) => Object.fromEntries(names.map((k) => [k, img.getAttribute(k)]).filter(([, v]) => v != null));

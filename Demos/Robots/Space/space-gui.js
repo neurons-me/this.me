@@ -1,4 +1,4 @@
-// Autonomous Robotics in Space: .GUI page (this.gui@4.1.0, SRI-pinned in index.html, sha256-checked below)
+// Autonomous Robotics in Space: .GUI page (this.gui@4.2.0, SRI-pinned in index.html, sha256-checked below)
 // over the real, unmodified this.me@4.2.0 kernel from npm (jsDelivr, unpkg fallback; sha256-checked below before import).
 //
 // Who owns what:
@@ -13,8 +13,8 @@ import * as M from "./space-model.js";
 
 const KERNEL = { version: "4.2.0", label: "this.me@4.2.0", build: "from npm (unmodified)", sha256: "8cc94d5273b05728713e7c06bcba6ab0d88c85d2a748dc885e7bca745605a61a",
   urls: ["https://cdn.jsdelivr.net/npm/this.me@4.2.0/dist/me.es.js", "https://unpkg.com/this.me@4.2.0/dist/me.es.js"] };
-const GUI_PIN = { label: "this.gui@4.1.0", repo: "https://github.com/neurons-me/GUI", npm: "https://www.npmjs.com/package/this.gui/v/4.1.0",
-  url: "https://cdn.jsdelivr.net/npm/this.gui@4.1.0/dist/this.gui.umd.js", sha256: "d50e32f6a4f7603804228c074fc59df1cfdea73a4f3d5ad93ba9475227b2a577" };
+const GUI_PIN = { label: "this.gui@4.2.0", repo: "https://github.com/neurons-me/GUI", npm: "https://www.npmjs.com/package/this.gui/v/4.2.0",
+  url: "https://cdn.jsdelivr.net/npm/this.gui@4.2.0/dist/this.gui.umd.js", sha256: "2c53b0daf531337073e681d3d47accba35658f77ea2923bad55c9a4b970b4f7a" };
 const SRC = "https://github.com/neurons-me/.me/blob/main/Demos/Robots/Space/";
 const BUILD_NOTES = "https://github.com/neurons-me/.me/tree/main/Demos/Robots/Space";
 

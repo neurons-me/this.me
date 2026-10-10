@@ -21,7 +21,7 @@
   <meta name="twitter:image" content="https://neurons-me.github.io/.me/Demos/assets/demos-og.png" />
   <link rel="canonical" href="https://neurons-me.github.io/.me/Demos/" />
   <link rel="icon" type="image/png" href="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1760629064/neurons.me_b50f6a.png?v=brain">
-  <!-- .GUI (this.gui@4.1.0) renders this page from the static markup below (/.me/assets/landing-gui/landing-gui.js); the static page stays as the no-JS / CDN-failure fallback.
+  <!-- .GUI (this.gui@4.2.0) renders this page from the static markup below (/.me/assets/landing-gui/landing-gui.js); the static page stays as the no-JS / CDN-failure fallback.
        Page-scoped theme keys, neurons.me, dark by default. -->
   <script>
     window.__thisGuiThemeScope = { scopeId: "me-demos", themeModeKey: "me-demos.themeMode", themeIdKey: "me-demos.themeId", defaultMode: "dark" };
@@ -36,7 +36,7 @@
   <!-- Pinned dependencies (jsDelivr, exact versions, Subresource Integrity), same as the Robots / Smart Cities landings and ContextLab. -->
   <script src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/this.gui@4.1.0/dist/this.gui.umd.js" integrity="sha384-umBxi9YB2FkfPkyuR4Ej4TvKyweGkUbZnvIQh/ZzaF0YGstAGl5I6xJ9fnLC+76O" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/this.gui@4.2.0/dist/this.gui.umd.js" integrity="sha384-tAyskhiyJweQ9xXPVOSEJ0OQDE+lFsqRJvGRb8LVoqLbdNxYmJEhW21+fxcAYG0d" crossorigin="anonymous"></script>
   <!-- Static page styles, off once .GUI has rendered (html.gui-on). -->
   <style>
     html:not(.gui-on) *, html:not(.gui-on) *::before, html:not(.gui-on) *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -51,6 +51,8 @@
     html:not(.gui-on) .kicker { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: #51606d; margin-bottom: 12px; }
     html:not(.gui-on) .page-title { font-size: 2.75rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 12px; }
     html:not(.gui-on) .page-subtitle { font-size: 1.05rem; color: #51606d; margin-bottom: 48px; max-width: 560px; }
+    html:not(.gui-on) .page-subtitle a.strong { color: #0d1117; font-weight: 700; }
+    @media (prefers-color-scheme: dark) { html:not(.gui-on) .page-subtitle a.strong { color: #e6edf3; } }
     html:not(.gui-on) .grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
     @media (min-width: 720px) { html:not(.gui-on) .grid { grid-template-columns: 1fr 1fr; } }
     html:not(.gui-on) .card { display: flex; flex-direction: row; padding: 0; gap: 0; min-height: 140px; overflow: hidden; align-items: stretch; border-radius: 12px; border: 1px solid rgba(15,23,32,0.10); background: #fff; text-decoration: none; color: inherit; transition: box-shadow 140ms, border-color 140ms, transform 140ms; }
@@ -87,7 +89,7 @@
   <div class="page">
     <p class="kicker"><a href="https://neurons-me.github.io/.me/" title=".me">me://</a>Demos</p>
     <h1 class="page-title">Demos</h1>
-    <p class="page-subtitle">Live examples of the <a href="https://neurons-me.github.io/.me/">.me</a> kernel in the world.</p>
+    <p class="page-subtitle">Live examples of the <a class="strong" href="https://neurons-me.github.io/.me/">.me kernel</a> in the world.</p>
 
     <div class="grid">
       <a class="card" href="https://neurons-me.github.io/smart-cities/">
@@ -174,6 +176,6 @@
   </div>
 </div>
 <div id="root"></div>
-<script src="/.me/assets/landing-gui/landing-gui.js?v=2" onerror="document.documentElement.classList.remove('gui-boot')"></script>
+<script src="/.me/assets/landing-gui/landing-gui.js?v=5" onerror="document.documentElement.classList.remove('gui-boot')"></script>
 </body>
 </html>
