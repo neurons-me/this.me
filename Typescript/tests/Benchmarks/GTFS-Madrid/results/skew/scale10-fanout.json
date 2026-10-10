@@ -1,0 +1,639 @@
+[
+  {
+    "profile": "vig-original",
+    "seed": null,
+    "tripsPerService": {
+      "parents": 50,
+      "children": 1300,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 26,
+      "median": 26,
+      "p95": 26,
+      "max": 26,
+      "mean": 26,
+      "topShare": 0.02
+    },
+    "stopTimesPerTrip": {
+      "parents": 1300,
+      "children": 23640,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 18,
+      "median": 18,
+      "p95": 19,
+      "max": 19,
+      "mean": 18.184615384615384,
+      "topShare": 0.0008037225042301185
+    }
+  },
+  {
+    "profile": "zipf-a0",
+    "seed": 0,
+    "tripsPerService": {
+      "parents": 50,
+      "children": 1300,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 26,
+      "median": 26,
+      "p95": 26,
+      "max": 26,
+      "mean": 26,
+      "topShare": 0.02
+    },
+    "stopTimesPerTrip": {
+      "parents": 1300,
+      "children": 23640,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 18,
+      "median": 18,
+      "p95": 19,
+      "max": 19,
+      "mean": 18.184615384615384,
+      "topShare": 0.0008037225042301185
+    },
+    "seedOnlyStopTimesResequenced": 0
+  },
+  {
+    "profile": "zipf-a0",
+    "seed": 1,
+    "tripsPerService": {
+      "parents": 50,
+      "children": 1300,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 26,
+      "median": 26,
+      "p95": 26,
+      "max": 26,
+      "mean": 26,
+      "topShare": 0.02
+    },
+    "stopTimesPerTrip": {
+      "parents": 1300,
+      "children": 23640,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 18,
+      "median": 18,
+      "p95": 19,
+      "max": 19,
+      "mean": 18.184615384615384,
+      "topShare": 0.0008037225042301185
+    },
+    "seedOnlyStopTimesResequenced": 0
+  },
+  {
+    "profile": "zipf-a0",
+    "seed": 2,
+    "tripsPerService": {
+      "parents": 50,
+      "children": 1300,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 26,
+      "median": 26,
+      "p95": 26,
+      "max": 26,
+      "mean": 26,
+      "topShare": 0.02
+    },
+    "stopTimesPerTrip": {
+      "parents": 1300,
+      "children": 23640,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 18,
+      "median": 18,
+      "p95": 19,
+      "max": 19,
+      "mean": 18.184615384615384,
+      "topShare": 0.0008037225042301185
+    },
+    "seedOnlyStopTimesResequenced": 0
+  },
+  {
+    "profile": "zipf-a0.5",
+    "seed": 0,
+    "tripsPerService": {
+      "parents": 50,
+      "children": 1300,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 14,
+      "median": 20,
+      "p95": 55.39999999999998,
+      "max": 102,
+      "mean": 26,
+      "topShare": 0.07846153846153846
+    },
+    "stopTimesPerTrip": {
+      "parents": 1300,
+      "children": 23640,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 9,
+      "median": 13,
+      "p95": 41,
+      "max": 335,
+      "mean": 18.184615384615384,
+      "topShare": 0.014170896785109983
+    },
+    "seedOnlyStopTimesResequenced": 0
+  },
+  {
+    "profile": "zipf-a0.5",
+    "seed": 1,
+    "tripsPerService": {
+      "parents": 50,
+      "children": 1300,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 14,
+      "median": 20,
+      "p95": 55.39999999999998,
+      "max": 102,
+      "mean": 26,
+      "topShare": 0.07846153846153846
+    },
+    "stopTimesPerTrip": {
+      "parents": 1300,
+      "children": 23640,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 9,
+      "median": 13,
+      "p95": 41,
+      "max": 335,
+      "mean": 18.184615384615384,
+      "topShare": 0.014170896785109983
+    },
+    "seedOnlyStopTimesResequenced": 0
+  },
+  {
+    "profile": "zipf-a0.5",
+    "seed": 2,
+    "tripsPerService": {
+      "parents": 50,
+      "children": 1300,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 14,
+      "median": 20,
+      "p95": 55.39999999999998,
+      "max": 102,
+      "mean": 26,
+      "topShare": 0.07846153846153846
+    },
+    "stopTimesPerTrip": {
+      "parents": 1300,
+      "children": 23640,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 9,
+      "median": 13,
+      "p95": 41,
+      "max": 335,
+      "mean": 18.184615384615384,
+      "topShare": 0.014170896785109983
+    },
+    "seedOnlyStopTimesResequenced": 0
+  },
+  {
+    "profile": "zipf-a1",
+    "seed": 0,
+    "tripsPerService": {
+      "parents": 50,
+      "children": 1300,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 6,
+      "median": 11.5,
+      "p95": 85.19999999999993,
+      "max": 289,
+      "mean": 26,
+      "topShare": 0.22230769230769232
+    },
+    "stopTimesPerTrip": {
+      "parents": 1300,
+      "children": 23640,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 2,
+      "median": 5,
+      "p95": 46.049999999999955,
+      "max": 3051,
+      "mean": 18.184615384615384,
+      "topShare": 0.12906091370558376
+    },
+    "seedOnlyStopTimesResequenced": 0
+  },
+  {
+    "profile": "zipf-a1",
+    "seed": 1,
+    "tripsPerService": {
+      "parents": 50,
+      "children": 1300,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 6,
+      "median": 11.5,
+      "p95": 85.19999999999993,
+      "max": 289,
+      "mean": 26,
+      "topShare": 0.22230769230769232
+    },
+    "stopTimesPerTrip": {
+      "parents": 1300,
+      "children": 23640,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 2,
+      "median": 5,
+      "p95": 46.049999999999955,
+      "max": 3051,
+      "mean": 18.184615384615384,
+      "topShare": 0.12906091370558376
+    },
+    "seedOnlyStopTimesResequenced": 0
+  },
+  {
+    "profile": "zipf-a1",
+    "seed": 2,
+    "tripsPerService": {
+      "parents": 50,
+      "children": 1300,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 6,
+      "median": 11.5,
+      "p95": 85.19999999999993,
+      "max": 289,
+      "mean": 26,
+      "topShare": 0.22230769230769232
+    },
+    "stopTimesPerTrip": {
+      "parents": 1300,
+      "children": 23640,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 2,
+      "median": 5,
+      "p95": 46.049999999999955,
+      "max": 3051,
+      "mean": 18.184615384615384,
+      "topShare": 0.12906091370558376
+    },
+    "seedOnlyStopTimesResequenced": 0
+  },
+  {
+    "profile": "zipf-a1.5",
+    "seed": 0,
+    "tripsPerService": {
+      "parents": 50,
+      "children": 1300,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 1,
+      "median": 4,
+      "p95": 90.3499999999999,
+      "max": 558,
+      "mean": 26,
+      "topShare": 0.42923076923076925
+    },
+    "stopTimesPerTrip": {
+      "parents": 1300,
+      "children": 23640,
+      "orphans": 0,
+      "zeroChildParents": 516,
+      "min": 0,
+      "median": 1,
+      "p95": 17.049999999999955,
+      "max": 9246,
+      "mean": 18.184615384615384,
+      "topShare": 0.39111675126903556
+    },
+    "seedOnlyStopTimesResequenced": 0
+  },
+  {
+    "profile": "zipf-a1.5",
+    "seed": 1,
+    "tripsPerService": {
+      "parents": 50,
+      "children": 1300,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 1,
+      "median": 4,
+      "p95": 90.3499999999999,
+      "max": 558,
+      "mean": 26,
+      "topShare": 0.42923076923076925
+    },
+    "stopTimesPerTrip": {
+      "parents": 1300,
+      "children": 23640,
+      "orphans": 0,
+      "zeroChildParents": 516,
+      "min": 0,
+      "median": 1,
+      "p95": 17.049999999999955,
+      "max": 9246,
+      "mean": 18.184615384615384,
+      "topShare": 0.39111675126903556
+    },
+    "seedOnlyStopTimesResequenced": 0
+  },
+  {
+    "profile": "zipf-a1.5",
+    "seed": 2,
+    "tripsPerService": {
+      "parents": 50,
+      "children": 1300,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 1,
+      "median": 4,
+      "p95": 90.3499999999999,
+      "max": 558,
+      "mean": 26,
+      "topShare": 0.42923076923076925
+    },
+    "stopTimesPerTrip": {
+      "parents": 1300,
+      "children": 23640,
+      "orphans": 0,
+      "zeroChildParents": 516,
+      "min": 0,
+      "median": 1,
+      "p95": 17.049999999999955,
+      "max": 9246,
+      "mean": 18.184615384615384,
+      "topShare": 0.39111675126903556
+    },
+    "seedOnlyStopTimesResequenced": 0
+  },
+  {
+    "profile": "zipf-a2",
+    "seed": 0,
+    "tripsPerService": {
+      "parents": 50,
+      "children": 1300,
+      "orphans": 0,
+      "zeroChildParents": 10,
+      "min": 0,
+      "median": 1,
+      "p95": 71.44999999999989,
+      "max": 800,
+      "mean": 26,
+      "topShare": 0.6153846153846154
+    },
+    "stopTimesPerTrip": {
+      "parents": 1300,
+      "children": 23640,
+      "orphans": 0,
+      "zeroChildParents": 1091,
+      "min": 0,
+      "median": 0,
+      "p95": 3.0499999999999545,
+      "max": 14378,
+      "mean": 18.184615384615384,
+      "topShare": 0.6082064297800338
+    },
+    "seedOnlyStopTimesResequenced": 0
+  },
+  {
+    "profile": "zipf-a2",
+    "seed": 1,
+    "tripsPerService": {
+      "parents": 50,
+      "children": 1300,
+      "orphans": 0,
+      "zeroChildParents": 10,
+      "min": 0,
+      "median": 1,
+      "p95": 71.44999999999989,
+      "max": 800,
+      "mean": 26,
+      "topShare": 0.6153846153846154
+    },
+    "stopTimesPerTrip": {
+      "parents": 1300,
+      "children": 23640,
+      "orphans": 0,
+      "zeroChildParents": 1091,
+      "min": 0,
+      "median": 0,
+      "p95": 3.0499999999999545,
+      "max": 14378,
+      "mean": 18.184615384615384,
+      "topShare": 0.6082064297800338
+    },
+    "seedOnlyStopTimesResequenced": 0
+  },
+  {
+    "profile": "zipf-a2",
+    "seed": 2,
+    "tripsPerService": {
+      "parents": 50,
+      "children": 1300,
+      "orphans": 0,
+      "zeroChildParents": 10,
+      "min": 0,
+      "median": 1,
+      "p95": 71.44999999999989,
+      "max": 800,
+      "mean": 26,
+      "topShare": 0.6153846153846154
+    },
+    "stopTimesPerTrip": {
+      "parents": 1300,
+      "children": 23640,
+      "orphans": 0,
+      "zeroChildParents": 1091,
+      "min": 0,
+      "median": 0,
+      "p95": 3.0499999999999545,
+      "max": 14378,
+      "mean": 18.184615384615384,
+      "topShare": 0.6082064297800338
+    },
+    "seedOnlyStopTimesResequenced": 0
+  },
+  {
+    "profile": "hub-1x50",
+    "seed": 0,
+    "tripsPerService": {
+      "parents": 50,
+      "children": 1300,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 13,
+      "median": 13,
+      "p95": 14,
+      "max": 650,
+      "mean": 26,
+      "topShare": 0.5
+    },
+    "stopTimesPerTrip": {
+      "parents": 1300,
+      "children": 23640,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 9,
+      "median": 9,
+      "p95": 10,
+      "max": 11820,
+      "mean": 18.184615384615384,
+      "topShare": 0.5
+    },
+    "seedOnlyStopTimesResequenced": 0
+  },
+  {
+    "profile": "hub-1x50",
+    "seed": 1,
+    "tripsPerService": {
+      "parents": 50,
+      "children": 1300,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 13,
+      "median": 13,
+      "p95": 14,
+      "max": 650,
+      "mean": 26,
+      "topShare": 0.5
+    },
+    "stopTimesPerTrip": {
+      "parents": 1300,
+      "children": 23640,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 9,
+      "median": 9,
+      "p95": 10,
+      "max": 11820,
+      "mean": 18.184615384615384,
+      "topShare": 0.5
+    },
+    "seedOnlyStopTimesResequenced": 0
+  },
+  {
+    "profile": "hub-1x50",
+    "seed": 2,
+    "tripsPerService": {
+      "parents": 50,
+      "children": 1300,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 13,
+      "median": 13,
+      "p95": 14,
+      "max": 650,
+      "mean": 26,
+      "topShare": 0.5
+    },
+    "stopTimesPerTrip": {
+      "parents": 1300,
+      "children": 23640,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 9,
+      "median": 9,
+      "p95": 10,
+      "max": 11820,
+      "mean": 18.184615384615384,
+      "topShare": 0.5
+    },
+    "seedOnlyStopTimesResequenced": 0
+  },
+  {
+    "profile": "hub-3x75",
+    "seed": 0,
+    "tripsPerService": {
+      "parents": 50,
+      "children": 1300,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 6,
+      "median": 7,
+      "p95": 181.89999999999912,
+      "max": 325,
+      "mean": 26,
+      "topShare": 0.25
+    },
+    "stopTimesPerTrip": {
+      "parents": 1300,
+      "children": 23640,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 4,
+      "median": 5,
+      "p95": 5,
+      "max": 5910,
+      "mean": 18.184615384615384,
+      "topShare": 0.25
+    },
+    "seedOnlyStopTimesResequenced": 0
+  },
+  {
+    "profile": "hub-3x75",
+    "seed": 1,
+    "tripsPerService": {
+      "parents": 50,
+      "children": 1300,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 6,
+      "median": 7,
+      "p95": 181.89999999999912,
+      "max": 325,
+      "mean": 26,
+      "topShare": 0.25
+    },
+    "stopTimesPerTrip": {
+      "parents": 1300,
+      "children": 23640,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 4,
+      "median": 5,
+      "p95": 5,
+      "max": 5910,
+      "mean": 18.184615384615384,
+      "topShare": 0.25
+    },
+    "seedOnlyStopTimesResequenced": 0
+  },
+  {
+    "profile": "hub-3x75",
+    "seed": 2,
+    "tripsPerService": {
+      "parents": 50,
+      "children": 1300,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 6,
+      "median": 7,
+      "p95": 181.89999999999912,
+      "max": 325,
+      "mean": 26,
+      "topShare": 0.25
+    },
+    "stopTimesPerTrip": {
+      "parents": 1300,
+      "children": 23640,
+      "orphans": 0,
+      "zeroChildParents": 0,
+      "min": 4,
+      "median": 5,
+      "p95": 5,
+      "max": 5910,
+      "mean": 18.184615384615384,
+      "topShare": 0.25
+    },
+    "seedOnlyStopTimesResequenced": 0
+  }
+]

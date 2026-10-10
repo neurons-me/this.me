@@ -1,5 +1,7 @@
 # scale-1 vs scale-10 vs scale-100 side-by-side (base→seed0 sweep)
 
+> **History: this.me 4.1.0.** Kept as measured. The 4.2.0 re-run (scale 1 and 10, 2026-10-10: identical k, DELETE still a store scan) is in `../README.md` → "Results at a glance" and `v4.2.0/`. `recomputeMs` below is the probe read-back after the write; the propagation wave runs inside the write (`mutationApplyMs`).
+
 Claim: dependency propagation — NOT RML materialization.
 
 CREATE honesty: CREATE has no prior dependency edge; benchmark models creation via explicit `gtfs.idx` membership/index slots → measurable wave when a member enters the set. **Not** natural GTFS CREATE k=1.

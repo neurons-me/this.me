@@ -3,3 +3,7 @@ data/
 *.csv
 *.zip
 *.gz
+
+# skew per-run JSON (~14 MB per sweep); aggregates are committed
+results/skew/runs/
+results/skew/*/runs/

@@ -20,6 +20,8 @@
  * so day/date UPDATEs invalidate active → trips.*.live.
  */
 
+import { AGG_STYLE } from "./run-env.ts";
+
 export type GtfsEntityKind = "route" | "trip" | "stopTime" | "service";
 
 /** Numeric route codes (string GTFS ids are not valid `=` results). */
@@ -200,6 +202,13 @@ export function deleteEntity(
 
 // ─── CREATE aggregates (gtfs.idx membership + sum) ───────────────────────────
 
+// GTFS_AGG=bracket: membership slots are objects (<slot>.on = 0|1) and each *Count is the 4.2 collection
+// aggregate `<abs path>[].on` (one aggregate input instead of one term per member). Default: 4.1-style sums.
+const slot = (node: any) => (AGG_STYLE === "bracket" ? node.on : node);
+function countExpr(absCollection: string, terms: string[]): string {
+  return AGG_STYLE === "bracket" ? `${absCollection}[].on` : sumExpr(terms);
+}
+
 function sumExpr(terms: string[]): string {
   if (terms.length === 0) return "0";
   return terms.join(" + ");
@@ -229,7 +238,7 @@ export function setIdxTripMember(
   tripId: string,
   bit: 0 | 1
 ): void {
-  (me as any).gtfs.idx.routes[routeId].tripMember[tripId](bit);
+  slot((me as any).gtfs.idx.routes[routeId].tripMember[tripId])(bit);
 }
 
 export function setIdxStopTimeMember(
@@ -238,7 +247,7 @@ export function setIdxStopTimeMember(
   stId: string,
   bit: 0 | 1
 ): void {
-  (me as any).gtfs.idx.trips[tripId].stopTimeMember[stId](bit);
+  slot((me as any).gtfs.idx.trips[tripId].stopTimeMember[stId])(bit);
 }
 
 export function setIdxRouteMember(
@@ -246,7 +255,7 @@ export function setIdxRouteMember(
   routeId: string,
   bit: 0 | 1
 ): void {
-  (me as any).gtfs.idx.routeMember[routeId](bit);
+  slot((me as any).gtfs.idx.routeMember[routeId])(bit);
 }
 
 export function setIdxServiceMember(
@@ -254,7 +263,7 @@ export function setIdxServiceMember(
   serviceId: string,
   bit: 0 | 1
 ): void {
-  (me as any).gtfs.idx.serviceMember[serviceId](bit);
+  slot((me as any).gtfs.idx.serviceMember[serviceId])(bit);
 }
 
 /**
@@ -269,7 +278,7 @@ export function wireRouteTripCount(
   for (const m of members) {
     setIdxTripMember(me, routeId, m.tripId, m.present);
   }
-  const expr = sumExpr(members.map((m) => `tripMember.${m.tripId}`));
+  const expr = countExpr(`gtfs.idx.routes.${routeId}.tripMember`, members.map((m) => `tripMember.${m.tripId}`));
   (me as any).gtfs.idx.routes[routeId]["="]("tripCount", expr);
 }
 
@@ -281,7 +290,7 @@ export function wireTripStopTimeCount(
   for (const m of members) {
     setIdxStopTimeMember(me, tripId, m.stId, m.present);
   }
-  const expr = sumExpr(members.map((m) => `stopTimeMember.${m.stId}`));
+  const expr = countExpr(`gtfs.idx.trips.${tripId}.stopTimeMember`, members.map((m) => `stopTimeMember.${m.stId}`));
   (me as any).gtfs.idx.trips[tripId]["="]("stopTimeCount", expr);
 }
 
@@ -292,7 +301,7 @@ export function wireMetaRouteCount(
   for (const m of members) {
     setIdxRouteMember(me, m.routeId, m.present);
   }
-  const expr = sumExpr(members.map((m) => `routeMember.${m.routeId}`));
+  const expr = countExpr("gtfs.idx.routeMember", members.map((m) => `routeMember.${m.routeId}`));
   (me as any).gtfs.idx["="]("routeCount", expr);
 }
 
@@ -303,6 +312,6 @@ export function wireMetaServiceCount(
   for (const m of members) {
     setIdxServiceMember(me, m.serviceId, m.present);
   }
-  const expr = sumExpr(members.map((m) => `serviceMember.${m.serviceId}`));
+  const expr = countExpr("gtfs.idx.serviceMember", members.map((m) => `serviceMember.${m.serviceId}`));
   (me as any).gtfs.idx["="]("serviceCount", expr);
 }

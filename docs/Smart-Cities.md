@@ -42,7 +42,7 @@ Security stays private while still participating in logic.
 
 Every change propagates automatically.
 
-[View the source demo](https://github.com/neurons-me/.me/blob/main/npm/tests/Demos/Smart_City.ts)
+[View the source demo](https://github.com/neurons-me/.me/blob/main/Typescript/tests/Demos/Smart_City.ts)
 
 ---
 
