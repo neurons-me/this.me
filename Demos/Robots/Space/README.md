@@ -24,7 +24,7 @@ by all three, and mean something different in each kernel.
 |---|---|---|
 | `this.me@4.2.0/dist/me.es.js` | `8cc94d5273b05728713e7c06bcba6ab0d88c85d2a748dc885e7bca745605a61a` | fetched, hashed in the browser, imported only if it matches (unpkg fallback). SRI form: `sha384-mE9tYKOMpHpBjwb8N4EORuiVt5pS3hcfXirKkcrzSYdzub3Vvj2yqbwGdpqeeYFD` |
 | `this.me@4.1.0/dist/me.es.js` | `47cc8f9a9b5ee2921a59023d400e694d6c9b9f80a0782db850b06156cbb46afa` | `verify.mjs` only (4.1 comparison) |
-| `this.gui@4.1.0/dist/this.gui.umd.js` | `d50e32f6a4f7603804228c074fc59df1cfdea73a4f3d5ad93ba9475227b2a577` | `<script>` SRI `sha384-umBxi9YB2FkfPkyuR4Ej4TvKyweGkUbZnvIQh/ZzaF0YGstAGl5I6xJ9fnLC+76O` + sha256 re-check |
+| `this.gui@4.2.0/dist/this.gui.umd.js` | `2c53b0daf531337073e681d3d47accba35658f77ea2923bad55c9a4b970b4f7a` | `<script>` SRI `sha384-tAyskhiyJweQ9xXPVOSEJ0OQDE+lFsqRJvGRb8LVoqLbdNxYmJEhW21+fxcAYG0d` + sha256 re-check |
 | `react@18.3.1` / `react-dom@18.3.1` UMD | | SRI (same pins as the Veracruz .GUI page) |
 
 ## Files

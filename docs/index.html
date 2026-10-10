@@ -17,7 +17,7 @@
   <meta name="twitter:description" content="Documentation for .me: a semantic identity runtime for owning your knowledge graph." />
   <meta name="twitter:image" content="https://neurons-me.github.io/docs/assets/img/me.png" />
   <meta name="twitter:image:alt" content=".me social graph" />
-  <!-- .GUI (this.gui@4.1.0) renders this page from the static markup below (/.me/assets/landing-gui/landing-gui.js); the static page stays as the no-JS / CDN-failure fallback.
+  <!-- .GUI (this.gui@4.2.0) renders this page from the static markup below (/.me/assets/landing-gui/landing-gui.js); the static page stays as the no-JS / CDN-failure fallback.
        Page-scoped theme keys, neurons.me, dark by default. -->
   <script>
     window.__thisGuiThemeScope = { scopeId: "me-docs", themeModeKey: "me-docs.themeMode", themeIdKey: "me-docs.themeId", defaultMode: "dark" };
@@ -32,7 +32,7 @@
   <!-- Pinned dependencies (jsDelivr, exact versions, Subresource Integrity), same as /.me/Demos/, the Robots / Smart Cities landings and ContextLab. -->
   <script src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/this.gui@4.1.0/dist/this.gui.umd.js" integrity="sha384-umBxi9YB2FkfPkyuR4Ej4TvKyweGkUbZnvIQh/ZzaF0YGstAGl5I6xJ9fnLC+76O" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/this.gui@4.2.0/dist/this.gui.umd.js" integrity="sha384-tAyskhiyJweQ9xXPVOSEJ0OQDE+lFsqRJvGRb8LVoqLbdNxYmJEhW21+fxcAYG0d" crossorigin="anonymous"></script>
   <!-- Static page styles, off once .GUI has rendered (html.gui-on). -->
   <style>
     html:not(.gui-on) *, html:not(.gui-on) *::before, html:not(.gui-on) *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -395,7 +395,7 @@
   </footer>
 </div>
 <div id="root"></div>
-<script src="/.me/assets/landing-gui/landing-gui.js?v=4" onerror="document.documentElement.classList.remove('gui-boot')"></script>
+<script src="/.me/assets/landing-gui/landing-gui.js?v=5" onerror="document.documentElement.classList.remove('gui-boot')"></script>
 <!-- Static fallback only: the standalone SearchBar bundle, loaded when .GUI did not render the page. -->
 <script>
   if (!document.documentElement.classList.contains("gui-on")) {
