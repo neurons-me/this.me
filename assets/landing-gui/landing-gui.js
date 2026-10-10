@@ -8,6 +8,9 @@
 // removes the static copy. Without JS or if the CDN fails, the static page stays as it is.
 // Docs and GitHub are per page, from the static .topnav: a link there with [data-topbar=docs] / to github.com shows
 // them; without one they are left out (/.me/Demos/ has neither).
+// Doc pages written in Markdown (_layouts/gui-doc.html: #static-landing[data-layout=doc]) render through the same
+// topbar; their rendered Markdown (headings, paragraphs, lists, tables, quotes, code, .doc-cards) becomes registry
+// nodes, and code blocks go through the .me highlighter (window.MeSyntax, assets/me-syntax) with theme colours.
 (function () {
   const html = document.documentElement, SRC = document.getElementById("static-landing"), ROOT = document.getElementById("root");
   const G = window.GUI;
@@ -30,10 +33,10 @@
     : n.nodeType === 1 && n.tagName === "CODE" ? N("Box", { component: "code", sx: { fontFamily: MONO, fontSize: ".85em", px: .5, py: .125, borderRadius: "4px", bgcolor: "action.hover", color: "text.primary" } }, [n.textContent])
     : n.textContent);
   const attrs = (img, names) => Object.fromEntries(names.map((k) => [k, img.getAttribute(k)]).filter(([, v]) => v != null));
-  const docsIndex = SRC.dataset.layout === "docs-index";
-  const demosIndex = !docsIndex && !!SRC.querySelector(".page .grid .card");
+  const docsIndex = SRC.dataset.layout === "docs-index", docPage = SRC.dataset.layout === "doc";
+  const demosIndex = !docsIndex && !docPage && !!SRC.querySelector(".page .grid .card");
   const header = SRC.querySelector("header");
-  const page = docsIndex ? (() => {
+  const page = docPage ? { path, docs: null, github: null, body: SRC.querySelector("main.doc") } : docsIndex ? (() => {
     const t = SRC.querySelector(".page-title"), mark = t.querySelector("img"), foot = SRC.querySelector("footer a");
     return {
       path, docs: null, github: SRC.querySelector(".topnav a[href*='github.com']")?.getAttribute("href"),
@@ -300,7 +303,75 @@
         N("Box", { component: "img", src: page.footer.img.src, alt: page.footer.img.alt, width: 36, height: 36, sx: { width: 36, height: 36, objectFit: "contain", opacity: .5, transition: "opacity .14s", "&:hover": { opacity: 1 } } })]),
     ]),
   ].filter(Boolean));
-  const spec = docsIndex ? docsSpec() : demosIndex ? indexSpec() : N("Box", { sx: { minHeight: "100vh", bgcolor: "background.default", color: "text.primary", lineHeight: 1.6 } }, [
+  // ── Markdown doc page (layout gui-doc): the rendered Markdown, element by element, as registry nodes ──
+  const SYN = window.MeSyntax;
+  function MeCodeBlock({ code, lang, "data-gui-node-id": id }) {
+    const me = SYN && /^(ts|js|javascript|typescript|me)$/.test(lang || "");
+    return h(Box, { component: "pre", "data-gui-node-id": id, className: me ? "me-code" : undefined, sx: (t) => ({ m: 0, mb: 2.5, px: 2, py: 1.5, borderRadius: "10px", overflowX: "auto", fontFamily: MONO, fontSize: { xs: 12, sm: 13 }, lineHeight: 1.6,
+        bgcolor: `color-mix(in srgb, ${t.palette.text.primary} 4%, ${t.palette.background.paper})`, border: 1, borderColor: "divider", color: "text.primary" }) },
+      h("code", { style: { fontFamily: "inherit", whiteSpace: "pre" } }, ...(me ? SYN.render(h, code) : [code])));
+  }
+  function DocCardCover({ src, alt, "data-gui-node-id": id }) {
+    return h("img", { src, alt: alt || "", loading: "lazy", "data-gui-node-id": id, style: { display: "block", width: "100%", height: 140, objectFit: "cover" } });
+  }
+  const tagOf = (el) => el.tagName.toLowerCase();
+  const inl = (el) => [...el.childNodes].map((n) => {
+    if (n.nodeType === 3) return n.textContent;
+    if (n.nodeType !== 1) return null;
+    const t = tagOf(n);
+    if (t === "a") return N("Link", { href: n.getAttribute("href"), underline: "hover", sx: { color: "primary.main", fontWeight: "inherit" } }, inl(n));
+    if (t === "code") return N("Box", { component: "code", sx: { fontFamily: MONO, fontSize: ".86em", px: .5, py: .125, borderRadius: "4px", bgcolor: "action.hover", color: "text.primary", overflowWrap: "anywhere" } }, [n.textContent]);
+    if (t === "strong" || t === "b") return N("Box", { component: "strong", sx: { fontWeight: 700, color: "text.primary" } }, inl(n));
+    if (t === "em" || t === "i") return N("Box", { component: "em" }, inl(n));
+    if (t === "br") return N("Box", { component: "br" });
+    return N("Box", { component: "span" }, inl(n));
+  }).filter((x) => x != null && x !== "");
+  const cellSx = { textAlign: "left", verticalAlign: "top", px: 1.25, py: .75, borderBottom: 1, borderColor: "divider", fontSize: ".9rem", lineHeight: 1.5 };
+  const tableNode = (el) => N("Box", { sx: { overflowX: "auto", mb: 2.5, border: 1, borderColor: "divider", borderRadius: "10px" } }, [
+    N("Box", { component: "table", sx: { width: "100%", borderCollapse: "collapse", "& tr:last-of-type > td": { borderBottom: 0 } } },
+      [...el.children].map((sec) => N("Box", { component: tagOf(sec) }, [...sec.children].map((tr) => N("Box", { component: "tr" }, [...tr.children].map((c) => {
+        const al = c.getAttribute("style") && /right/.test(c.getAttribute("style")) ? "right" : "left";
+        return N("Box", { component: tagOf(c), sx: { ...cellSx, textAlign: al, ...(tagOf(c) === "th" ? { fontWeight: 700, color: "text.secondary", fontSize: ".78rem", textTransform: "uppercase", letterSpacing: ".04em", whiteSpace: "nowrap", bgcolor: "action.hover" } : {}) } }, inl(c));
+      })))))),
+  ]);
+  const docCards = (el) => N("Box", { sx: { display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "16px", mb: 3, "@media (max-width:860px)": { gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }, "@media (max-width:520px)": { gridTemplateColumns: "minmax(0, 1fr)" } } },
+    [...el.querySelectorAll("a.card")].map((a) => {
+      const img = a.querySelector("img"), kind = a.querySelector(".card-kind");
+      return N("Card", { component: "a", href: a.getAttribute("href"), variant: "outlined", sx: { ...cardSx, display: "flex", flexDirection: "column", overflow: "hidden", borderRadius: "12px",
+          transition: "border-color .14s, box-shadow .14s, transform .14s", "&:hover": { borderColor: "primary.main", boxShadow: 3, transform: "translateY(-1px)", textDecoration: "none" } } }, [
+        img && N("DocCardCover", { src: img.getAttribute("src"), alt: img.getAttribute("alt") }),
+        N("Box", { sx: { display: "flex", flexDirection: "column", gap: .75, p: 2 } }, [
+          kind && T(txt(kind), { fontSize: ".7rem", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "primary.main" }),
+          T(txt(a.querySelector(".card-title")), { fontSize: "1rem", fontWeight: 700, lineHeight: 1.3, color: "text.primary" }),
+          a.querySelector(".card-desc") && T(inl(a.querySelector(".card-desc")), { fontSize: ".86rem", color: "text.secondary", lineHeight: 1.5 }),
+        ].filter(Boolean)),
+      ].filter(Boolean));
+    }));
+  const H = { h1: { fontSize: "clamp(2.2rem, 6vw, 3rem)", fontWeight: 800, letterSpacing: "-.02em", lineHeight: 1.1, mt: 0, mb: 2 },
+    h2: { fontSize: "clamp(1.4rem, 3.6vw, 1.75rem)", fontWeight: 800, letterSpacing: "-.01em", lineHeight: 1.2, mt: 5, mb: 1.5 },
+    h3: { fontSize: "1.15rem", fontWeight: 700, lineHeight: 1.3, mt: 3.5, mb: 1 }, h4: { fontSize: "1rem", fontWeight: 700, mt: 3, mb: 1 } };
+  const blocks = (el) => [...el.children].map((b) => {
+    const t = tagOf(b);
+    if (H[t]) return T(inl(b), { ...H[t], scrollMarginTop: "64px" }, { component: t, id: b.id || undefined });
+    if (t === "p") return T(inl(b), { fontSize: "1rem", lineHeight: 1.7, color: "text.primary", mb: 2 }, { component: "p" });
+    if (t === "blockquote") return N("Box", { component: "blockquote", sx: { m: 0, mb: 2.5, pl: 2, py: .25, borderLeft: 3, borderColor: "primary.main", color: "text.secondary", "& p": { mb: 0, color: "text.secondary" } } }, blocks(b));
+    if (t === "ul" || t === "ol") return N("Box", { component: t, sx: { pl: 3, mt: 0, mb: 2.5, "& > li": { mb: .75, lineHeight: 1.65 }, "& > li p": { mb: .5 } } },
+      [...b.children].map((li) => N("Box", { component: "li" }, li.querySelector(":scope > p, :scope > ul, :scope > ol, :scope > div") ? blocks(li) : inl(li))));
+    if (t === "table") return tableNode(b);
+    if (t === "hr") return N("Box", { component: "hr", sx: { border: 0, borderTop: 1, borderColor: "divider", my: 4 } });
+    if (t === "pre" || b.classList.contains("highlighter-rouge")) {
+      const lang = ((b.className.match(/language-(\w+)/) || [])[1]) || "", code = (b.querySelector("code") || b).textContent.replace(/\n$/, "");
+      return N("MeCodeBlock", { code, lang });
+    }
+    if (b.classList.contains("doc-cards")) return docCards(b);
+    if (t === "div" || t === "section") return N("Box", { component: t }, blocks(b));
+    return N("Box", { component: t, sx: { mb: 2 } }, inl(b));
+  });
+  const docSpec = () => N("Box", { sx: { minHeight: "100vh", bgcolor: "background.default", color: "text.primary" } }, [
+    N("LandingTopBar", {}),
+    N("Box", { component: "main", sx: { width: "min(860px, calc(100% - 40px))", mx: "auto", pt: 5, pb: 10, "@media (max-width:480px)": { pt: 3.5, width: "calc(100% - 32px)" } } }, blocks(page.body)),
+  ]);
+  const spec = docPage ? docSpec() : docsIndex ? docsSpec() : demosIndex ? indexSpec() : N("Box", { sx: { minHeight: "100vh", bgcolor: "background.default", color: "text.primary", lineHeight: 1.6 } }, [
     N("LandingTopBar", {}),
     N("Box", { component: "main", sx: { width: "min(760px, calc(100% - 40px))", mx: "auto", pt: 1.5 } }, [
       N("Box", { component: "header", sx: { pt: 3.5, pb: 5 } }, [
@@ -319,10 +390,12 @@
   const INSPECTOR_ON = params.get("inspector") === "1";
   if (G.getInspectorEnabled() !== INSPECTOR_ON) G.setInspectorEnabled(INSPECTOR_ON);
   G.mount(spec, ROOT, {
-    gui: { ...G, Theme: PageTheme, registry: { ...(G.Registry || G.registry), LandingTopBar, DocsCover, MeOrbMark } },
+    gui: { ...G, Theme: PageTheme, registry: { ...(G.Registry || G.registry), LandingTopBar, DocsCover, MeOrbMark, MeCodeBlock, DocCardCover } },
     devtools: { enabled: true, inspector: INSPECTOR_ON, adminView: false, inspectorToggleVisible: false },
   });
   html.classList.add("gui-on");
+  document.querySelectorAll("link[data-static-only]").forEach((l) => { l.disabled = true; });
+  if (docPage && SYN && SYN.watchTheme) SYN.watchTheme(); // re-measures the code colours whenever .GUI writes a new theme / mode
   SRC.remove();
   }
 })();

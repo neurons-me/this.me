@@ -1,6 +1,8 @@
 # .me FIRETEST — Full Run Output
 
-Run with: `node tests/fire.test.ts`
+Run with: `node tests/fire.test.ts` (from `Typescript/`)
+
+Recorded 2026-06-08 with `this.me@3.9.1`; this output has not been re-recorded since. Current release: 4.2.0.
 
 ---
 

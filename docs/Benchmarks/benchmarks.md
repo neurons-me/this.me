@@ -1,3 +1,9 @@
+---
+layout: readme
+title: ".me — Kernel benchmarks"
+description: "Reactive recompute benchmarks for the .me kernel: growth with k, fan-out, ratios. Re-measured 2026-09-26 after the reference-resolution fix."
+---
+
 # .me Kernel — Benchmark Results
 
 Run with: `node tests/fire.test.ts` (benchmarks section)

@@ -255,7 +255,7 @@
       not the whole universe <strong>n</strong>.
     </p>
     <p class="rule" style="margin-bottom:6px">
-      On the full benchmark, <strong>n</strong> grew ~100× (stop times 2.3k → 236k) while <strong>k</strong> p95/max stayed flat (~18 / 27).
+      On the full benchmark, <strong>n</strong> grew ~100× (stop times 2.4k → 236k) while <strong>k</strong> p95/max stayed flat (~18 / 27).
       This page is the interactive subset: <strong>click a node</strong> → <code>me.explain(path)</code>; mutate to watch the wave.
     </p>
 
@@ -357,9 +357,18 @@
       Mutate → recomputed wave in red. Gold ring = selected.
     </p>
     <p class="rule">
-      <strong>n</strong> = universe size · <strong>k</strong> = what one change touches.
+      <strong>n</strong> = universe size · <strong>k</strong> = the number of derived values the kernel recomputed after one write
+      (<code>me.explain(path).meta.k</code>). In this graph those values are reached through the feed’s foreign keys (PK-FK):
+      a calendar day of a service → that service’s <code>active</code> and the <code>live</code> of every trip whose
+      <code>service_id</code> points to it; deleting a trip → the <code>routeId</code> of each of its stop_times; a new stop_time → its trip’s <code>stopTimeCount</code>.
       They are different variables: growing the world does not have to grow every mutation’s wave.
       That is what the scale-1 → 10 → 100 result on the real GTFS adapter showed.
+    </p>
+    <p class="rule">
+      Those snapshots come from VIG, the GTFS-Madrid-Bench generator, which grows the data uniformly (every trip keeps
+      about 18 stop_times). A separate skew run (Zipf and hub fan-out) builds giant parents: then k, and the cost of a
+      write, track the size of the parent it touches. Numbers, weaknesses and how to reproduce:
+      <a href="https://neurons-me.github.io/.me/docs/Extreme-Fan-Out.html">Extreme Fan-Out</a>.
     </p>
     <p class="note">
       Honesty (same as the blog / benchmark README):
