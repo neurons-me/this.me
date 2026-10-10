@@ -178,6 +178,41 @@
 
   // /.me/docs/ card cover: <picture> with the page's own <source>s (AVIF first) and the <img> with its width/height,
   // exactly as the static card (registry Box drops srcSet/width/height).
+  // The h1 mark of /.me/docs/: the real .GUI identity orb (GUI.Widgets.Monad, Storybook All.This/monad.ai/monad.ai →
+  // Identity: variant "identity", kind "me", seed "jabellae") tuned as on the neurons.me index .me card: full opacity,
+  // faint halo, gentle float, ring at 80% of the orb and morphing with it, dot at 22% of the ring. It keeps the old
+  // image's 5em box and margin; the orb is 44% of the box (its ring ≈ the drawn ring of assets/me.png) and is drawn at
+  // its real pixel size (no CSS scaling), so it stays crisp. Without the widget the image stays.
+  function MeOrbMark({ src, alt }) {
+    const Monad = (G.Widgets && G.Widgets.Monad) || G.Monad;
+    const ref = React.useRef(null), [px, setPx] = React.useState(0);
+    React.useEffect(() => {
+      const el = ref.current; if (!el) return undefined;
+      const set = () => setPx(Math.round(el.getBoundingClientRect().width)); set();
+      const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(set) : null; if (ro) ro.observe(el);
+      return () => ro && ro.disconnect();
+    }, []);
+    const boxSx = { display: "inline-flex", alignItems: "center", justifyContent: "center", width: "5em", height: "5em", verticalAlign: "middle", mr: "-1.5em" };
+    if (!Monad) return h(Box, { component: "img", src, alt, sx: { ...boxSx, display: "inline-block", width: "auto" } });
+    const orb = Math.max(24, Math.round(px * 0.44)), f = orb / 48;   // f: scale against the index's 48px orb
+    const blob = { "0%,100%": "50%", "25%": "55% 45% 60% 40% / 60% 55% 45% 40%", "50%": "50% 60% 40% 55% / 55% 40% 60% 45%", "75%": "45% 55% 40% 60% / 40% 60% 55% 50%" };
+    const lift = { "0%,100%": [0, 1], "25%": [-2, 1.02], "50%": [-3, 1.04], "75%": [-2, 1.02] };
+    const px1 = (v) => `${Math.round(v * f * 10) / 10}px`;
+    return h(Box, { ref, "data-me-orb": "", role: "img", "aria-label": alt, sx: (t) => {
+        const dark = t.palette.mode === "dark", halo = dark ? "255,255,255" : "0,90,122";
+        return { ...boxSx, position: "relative", zIndex: 0, isolation: "isolate",
+          "@keyframes meOrbFloat": Object.fromEntries(Object.keys(blob).map((k) => [k, { transform: `translateY(${px1(lift[k][0])}) scale(${lift[k][1]})`, borderRadius: blob[k] }])),
+          "@keyframes meOrbHalo": { "0%,100%": { boxShadow: `0 0 ${px1(2)} rgba(${halo},0.10)` }, "50%": { boxShadow: `0 0 ${px1(4)} rgba(${halo},0.16)` } },
+          "& > div": { width: `${orb}px`, height: `${orb}px`, flex: "none", display: "flex" },
+          "& .monad-tooltip": { display: "none" }, "& div": { opacity: "1 !important" },
+          "& div:has(> div[aria-hidden=true])": { animation: "meOrbFloat 6s ease-in-out infinite, meOrbHalo 4.5s ease-in-out infinite !important", "&:hover": { transform: "none" } },
+          "& div[aria-hidden=true]": { width: "80% !important", height: "80% !important", borderRadius: "inherit" },
+          "& div[aria-hidden=true] > div:first-of-type": { borderRadius: "inherit !important", borderWidth: `${px1(2.5)} !important`,
+            boxShadow: dark ? `0 0 ${px1(3)} rgba(180,230,230,0.22) !important` : `0 0 ${px1(3)} rgba(0,90,122,0.18) !important` },
+          "& div[aria-hidden=true] > div:last-of-type": { width: "22% !important", height: "22% !important", boxShadow: dark ? `0 0 ${px1(3)} rgba(234,252,250,0.35) !important` : `0 0 ${px1(3)} rgba(0,90,122,0.3) !important` } };
+      } },
+      px ? h(Box, null, h(Monad, { variant: "identity", kind: "me", seed: "jabellae", mode: "contained", size: Math.round(orb * 34 / 60) })) : null);
+  }
   function DocsCover(p) {
     const c = page.cards[p.card], im = c.img;
     return h(Box, { component: "picture", "data-gui-node-id": p["data-gui-node-id"], sx: { display: "block", flexShrink: 0, lineHeight: 0 } },
@@ -250,7 +285,7 @@
     N("LandingTopBar", {}),
     N("Box", { component: "main", sx: { maxWidth: 960, mx: "auto", px: 4, pt: 6, pb: 4, "@media (max-width:480px)": { px: 2.5, pt: 4 } } }, [
       T(page.kicker, { fontSize: ".75rem", fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: "text.secondary", mb: 1.5 }, { component: "p" }),
-      T([page.mark && N("Box", { component: "img", src: page.mark.src, alt: page.mark.alt, sx: { height: "5em", width: "auto", display: "inline-block", verticalAlign: "middle", mr: "-1.5em" } }), " " + page.h1].filter(Boolean),
+      T([page.mark && N("MeOrbMark", { src: page.mark.src, alt: page.mark.alt }), " " + page.h1].filter(Boolean),
         { fontSize: "2.75rem", fontWeight: 800, letterSpacing: "-.02em", lineHeight: 1.1, mb: 1.5, "@media (max-width:480px)": { fontSize: "2.2rem" } }, { component: "h1" }),
       T(page.subtitle, { fontSize: "1.05rem", color: "text.secondary", mb: 6, maxWidth: 560 }, { component: "p" }),
       page.langs.length && N("Box", { component: "nav", "aria-label": "Languages", sx: { display: "flex", flexWrap: "wrap", gap: 1, mb: 5 } }, page.langs.map((l) => N("Chip", { label: l.text, component: "a", href: l.href, clickable: true, variant: "outlined",
@@ -281,7 +316,7 @@
   const INSPECTOR_ON = params.get("inspector") === "1";
   if (G.getInspectorEnabled() !== INSPECTOR_ON) G.setInspectorEnabled(INSPECTOR_ON);
   G.mount(spec, ROOT, {
-    gui: { ...G, Theme: PageTheme, registry: { ...(G.Registry || G.registry), LandingTopBar, DocsCover } },
+    gui: { ...G, Theme: PageTheme, registry: { ...(G.Registry || G.registry), LandingTopBar, DocsCover, MeOrbMark } },
     devtools: { enabled: true, inspector: INSPECTOR_ON, adminView: false, inspectorToggleVisible: false },
   });
   html.classList.add("gui-on");
