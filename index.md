@@ -2,7 +2,7 @@
 layout: readme
 title: .me
 description: A Cryptographic Identity.
-image: https://neurons-me.github.io/docs/assets/img/me.png
+image: https://suign.github.io/assets/imgs/me.png
 ---
 
 {% include interactive-hero.html %}
