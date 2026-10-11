@@ -229,6 +229,11 @@ export function computeEffectiveSecret(self: MEKernelLike, path: SemanticPath): 
 }
 
 export function resolveBranchScope(self: MEKernelLike, path: SemanticPath): SemanticPath | null {
+  // No secret scope declared anywhere: no path has a scope. Same answer as the walk below, without the cache churn
+  // (the 256-entry LRU thrashes when a wave touches thousands of public paths).
+  let anySecret = false;
+  for (const _key in self.localSecrets) { anySecret = true; break; }
+  if (!anySecret) return null;
   const pathKey = path.join(".");
   const hit = self.scopeCache.get(pathKey);
   if (hit && hit.epoch === self.secretEpoch) {
