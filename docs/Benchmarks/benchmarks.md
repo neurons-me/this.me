@@ -2,7 +2,7 @@
 layout: gui-doc
 title: ".me — Kernel benchmarks"
 image: https://suign.github.io/assets/imgs/me.png
-description: "Reactive recompute benchmarks for the .me kernel: growth with k, fan-out, ratios. Re-run on this.me 4.2.0 on 2026-10-10 against the earlier builds on the same machine."
+description: "Reactive recompute benchmarks for the .me kernel: growth with k, fan-out, ratios. Re-run on this.me 4.2.0 on 2026-10-10 against the earlier builds on the same machine; timeline through 4.2.1."
 mepath:
   - text: Benchmarks
     url: https://neurons-me.github.io/.me/docs/Benchmarks/
@@ -15,13 +15,19 @@ scripts:
 
 ## Cost across kernel versions
 
-Each line is one benchmark, measured on every kernel build from 3.9.1 to 4.2.1, on the same machine in interleaved rounds. **Relative** puts each line's first comparable build at 1.0, so a line going up means that version made the same work slower; **ms** shows the medians themselves. Hover or tap a version for its milliseconds and commit; the numbered markers explain the steps.
+Each line is one benchmark, measured on every kernel build from 3.9.1 to 4.2.1, on the same machine in interleaved rounds. **Relative** puts each line's first comparable build at 1.0, so a line going up means that version made the same work slower; **ms** shows the medians themselves. Hover or tap a version for its milliseconds and commit; the numbered markers explain the steps. 4.2.1 is on npm as `latest` (`npm i this.me@4.2.1`).
 
 <div class="kernel-timeline" data-src="{{ '/docs/Benchmarks/data/kernel-timeline.json' | relative_url }}" markdown="1">
 
 The interactive chart needs JavaScript. The same numbers, per build and benchmark, with the commit behind each step: [kernel-timeline.json]({{ '/docs/Benchmarks/data/kernel-timeline.json' | relative_url }}); how they were measured and how to add a version: [timeline/README.md](https://github.com/neurons-me/.me/tree/main/Typescript/tests/Benchmarks/timeline).
 
 </div>
+
+### Known limits
+
+- **Sustained writes drift as the log grows.** Recompute is O(k): each write recomputes only its dependents. But every recompute appends a memory, and the cost per write rises with the history: in Benchmark 5 (4,000 dependents per write, k constant) the windowed p95 drift on 4.2.0 is +38% (+35% on the pre-4.1.0 build), and p50 rises +36% from the first to the last window (+32%). 4.2.1 changes formula evaluation, not the log, so it does not fix this; that needs log compaction or snapshotting.
+- **Mixed machines.** The published 5–11 numbers below were measured on an Apple M2 (Node 24.13.1); the timeline above and the 4.2.0 re-run on a shared Linux VM (Intel Xeon 8 vCPU, Node 22.23.3), about 2× slower. Compare builds only within the timeline, or within one table, never milliseconds across machines.
+- **p95 on a shared VM is noisy.** Single rounds can sit far from the median (on the timeline, one round of the 2,000-dependent write on 4.2.1 took 52.5 ms against a 40.3 ms median), so read medians and p50 first.
 
 Run with: `node tests/fire.test.ts` (benchmarks section)
 
@@ -66,7 +72,7 @@ All of 1–11 and the fire test were re-run on 4.2.0, and the builds behind the 
 
 Ratios on 4.2.0 (same machine, pre-4.1.0 in brackets): #5 windowed p95 drift +38% (+35%), first-to-last window p50 +36% (+32%); #8 `explain()` p95 overhead −7% (+15%), within noise; #9 secret p95 ≈ 13.7× public (12.4×); #11 secret/public read p95 6.9× / 13.7× / 22.7× at 100 / 300 / 600 nodes (9.6× / 11.0× / 34.7×).
 
-**Regressions:** eager writes are 4–24% slower than on the pre-4.1.0 build (most rows 8–18%). The single writes in 1–4 are 1.08–2.7× slower than on 3.9.1 (+0.03 to +0.23 ms for the sub-millisecond ones); for #1, #3 and #4 financial the 5-round ranges do not overlap. The largest gaps are the first write after building a large dataset (#3 at 10,000 nodes, #4 at 5,000), so part of the cost may grow with N; that needs a bisect between 4.1.0 and 4.2.0. **Improvements:** eager first reads are ~30% faster (#10), and secret reads at 600 nodes ~10% faster (#11); #9 is unchanged.
+**Regressions:** eager writes are 4–24% slower than on the pre-4.1.0 build (most rows 8–18%). The single writes in 1–4 are 1.08–2.7× slower than on 3.9.1 (+0.03 to +0.23 ms for the sub-millisecond ones); for #1, #3 and #4 financial the 5-round ranges do not overlap. Bisected across the 14 builds of the timeline above: the largest gaps, the first write after building a large dataset (#3 at 10,000 nodes, #4 at 5,000), are warm-up, not dataset size. The first write costs about the same at 2,000, 10,000 and 40,000 nodes (0.36–0.38 ms on 4.0.2 + the reference fix, 0.52–0.73 ms on 4.1.0), and on a second fresh kernel in the same process it drops to 0.15–0.25 ms on every build. What remains is a fixed per-write cost of about 20–25 µs (#1 at N = 5,000: 0.133 ms on 4.0.2 + the reference fix, 0.158 ms on 4.1.0, 0.163 ms on 4.2.0), from the topological recompute (8976ad3) and the `[]` path parser (c573192, 8c9d725). 4.2.1 cuts the steady single write by about 32% (0.073 → 0.049 ms on the timeline) and every eager line by 29–30%. **Improvements:** eager first reads are ~30% faster (#10), and secret reads at 600 nodes ~10% faster (#11); #9 is unchanged.
 
 The sections below are the previously published numbers: 1–4 from 3.9.x (2026-06-08), 5–11 from the pre-4.1.0 build (2026-09-26, Apple M2). The full fire-test output is on the [Fire test](../Tests/fire.test.html) page; the GTFS runs are under [GTFS-Madrid](GTFS/Madrid/).
 

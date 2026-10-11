@@ -9,7 +9,7 @@
   "to": "2026-10-10T23:32:03-06:00",
   "method": "run-timeline.sh: every round runs each build once in a fresh node process, in a shuffled order; value = median over rounds (min/max kept).",
   "harness": "Typescript/tests/Benchmarks/timeline/timeline.mjs",
-  "note": "2026-10-10, 14 builds x 6 rounds. The 4.2.1 point was measured as branch build b43cb05, whose dist/ is byte-identical to the 4.2.1 release commit 8ccc710. The 4.2.0 and 4.2.1 numbers are local, not yet approved for publishing."
+  "note": "2026-10-10, 14 builds x 6 rounds. The 4.2.1 point was measured as branch build b43cb05, whose dist/ is byte-identical to the 4.2.1 release commit 8ccc710; 4.2.1 is on npm (latest)."
  },
  "baseline": "Relative values divide by the first comparable build of each series: 3.9.1 for single writes (1-4 shapes), 4.0.2 + ref fix (2a173b7) for fan-out and secret series (5-11 shapes), because 3.9.1 skips that recompute.",
  "series": [
