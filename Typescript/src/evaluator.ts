@@ -35,6 +35,15 @@ export function tryResolveEvalTokenValue(
   return { ok: true, value };
 }
 
+// Tokenizer tables, built once (they depend on nothing but the grammar).
+const SEG = String.raw`[A-Za-z_][A-Za-z0-9_]*(?:\[(?:"[^"]*"|'[^']*'|[^\]]+)\])*`;
+const TOKEN_RE = new RegExp(String.raw`^(?:__ptr(?:\.${SEG})*|${SEG}(?:\.${SEG})*)`);
+// Collection aggregate reference (contract v3 §3): `<path>[]` or `<path>[].<field>`. Tried before identifiers.
+const AGGREGATE_RE = new RegExp(String.raw`^(?:${AGGREGATE_TOKEN_SOURCE(SEG)})`);
+const RESERVED_VALUES: Record<string, any> = { true: true, false: false, null: null, undefined: undefined, NaN: NaN, Infinity: Infinity };
+const TWO_CHAR_OPS = new Set([">=", "<=", "==", "!=", "&&", "||"]);
+const ONE_CHAR_OPS = new Set(["+", "-", "*", "/", "%", "<", ">", "!"]);
+
 export function tokenizeEvalExpression(
   raw: string,
 ):
@@ -56,21 +65,6 @@ export function tokenizeEvalExpression(
     | { kind: "rparen" }
   > = [];
 
-  const seg = String.raw`[A-Za-z_][A-Za-z0-9_]*(?:\[(?:"[^"]*"|'[^']*'|[^\]]+)\])*`;
-  const tokenRe = new RegExp(String.raw`^(?:__ptr(?:\.${seg})*|${seg}(?:\.${seg})*)`);
-  // Collection aggregate reference (contract v3 §3): `<path>[]` or `<path>[].<field>`. Tried before identifiers.
-  const aggregateRe = new RegExp(String.raw`^(?:${AGGREGATE_TOKEN_SOURCE(seg)})`);
-  const reservedValues: Record<string, any> = {
-    true: true,
-    false: false,
-    null: null,
-    undefined: undefined,
-    NaN: NaN,
-    Infinity: Infinity,
-  };
-  const twoCharOps = new Set([">=", "<=", "==", "!=", "&&", "||"]);
-  const oneCharOps = new Set(["+", "-", "*", "/", "%", "<", ">", "!"]);
-
   let i = 0;
   while (i < raw.length) {
     const ch = raw[i];
@@ -91,13 +85,13 @@ export function tokenizeEvalExpression(
     }
 
     const two = raw.slice(i, i + 2);
-    if (twoCharOps.has(two)) {
+    if (TWO_CHAR_OPS.has(two)) {
       tokens.push({ kind: "op", value: two });
       i += 2;
       continue;
     }
 
-    if (oneCharOps.has(ch)) {
+    if (ONE_CHAR_OPS.has(ch)) {
       tokens.push({ kind: "op", value: ch });
       i++;
       continue;
@@ -128,7 +122,7 @@ export function tokenizeEvalExpression(
       continue;
     }
 
-    const am = raw.slice(i).match(aggregateRe);
+    const am = raw.slice(i).match(AGGREGATE_RE);
     if (am && am[0]) {
       const parsed = classifyPathExpression(am[0]);
       if (parsed.kind !== "aggregate") return null;   // rejected form, e.g. x[a > 1][]
@@ -137,12 +131,12 @@ export function tokenizeEvalExpression(
       continue;
     }
 
-    const m = raw.slice(i).match(tokenRe);
+    const m = raw.slice(i).match(TOKEN_RE);
     if (m && m[0]) {
       if (hasWhitespaceSelector(m[0])) return null;   // z[ ].w is rejected, not read as z.w
       const token = m[0];
-      if (Object.prototype.hasOwnProperty.call(reservedValues, token)) {
-        tokens.push({ kind: "literal", value: reservedValues[token] });
+      if (Object.prototype.hasOwnProperty.call(RESERVED_VALUES, token)) {
+        tokens.push({ kind: "literal", value: RESERVED_VALUES[token] });
       } else {
         tokens.push({ kind: "identifier", value: token });
       }
@@ -190,21 +184,29 @@ export function isTokenizableExpression(expr: string): boolean {
   return depth === 0 && (prev === "value" || prev === "rparen");
 }
 
-export function tryEvaluateAssignExpression(
-  self: MEKernelLike,
-  evalScopePath: SemanticPath,
-  expr: string,
-  /** Values of the aggregate references, by reference text, already resolved by the caller (derivation.ts). */
-  aggregateValues?: Map<string, number>,
-): { ok: true; value: number | boolean } | { ok: false } {
-  const raw = String(expr ?? "").trim();
-  if (!raw) return { ok: false };
+type CompiledToken =
+  | { kind: "literal"; value: any }
+  | { kind: "identifier"; value: string }
+  | { kind: "aggregate"; value: string; ref: AggregateRef }
+  | { kind: "op"; value: string };
 
-  if (!/^[A-Za-z0-9_\s+\-*/%().<>=!&|\[\]"']+$/.test(raw)) return { ok: false };
-  if (self.unsafeEval) return { ok: false };
+// Compiled (postfix) form of formula text. It depends only on the text, never on values, scope or caller, so it is
+// cached by the exact text; evaluation still reads every input at evaluation time. Bounded: cleared when full.
+const COMPILED = new Map<string, ReadonlyArray<CompiledToken> | null>();
+const COMPILED_MAX = 4096;
 
+function compileEvalExpression(raw: string): ReadonlyArray<CompiledToken> | null {
+  const hit = COMPILED.get(raw);
+  if (hit !== undefined || COMPILED.has(raw)) return hit ?? null;
+  const compiled = compileUncached(raw);
+  if (COMPILED.size >= COMPILED_MAX) COMPILED.clear();
+  COMPILED.set(raw, compiled);
+  return compiled;
+}
+
+function compileUncached(raw: string): ReadonlyArray<CompiledToken> | null {
   const tokens = tokenizeEvalExpression(raw);
-  if (!tokens || tokens.length === 0) return { ok: false };
+  if (!tokens || tokens.length === 0) return null;
 
   const precedence: Record<string, number> = {
     "u-": 7,
@@ -258,7 +260,7 @@ export function tryEvaluateAssignExpression(
         }
         out.push(top);
       }
-      if (!found) return { ok: false };
+      if (!found) return null;
       prev = "rparen";
       continue;
     }
@@ -267,9 +269,9 @@ export function tryEvaluateAssignExpression(
     if (op === "-" && (prev === "start" || prev === "op" || prev === "lparen")) {
       op = "u-";
     } else if (op === "!" && (prev === "value" || prev === "rparen")) {
-      return { ok: false };
+      return null;
     } else if (op !== "!" && (prev === "start" || prev === "op" || prev === "lparen")) {
-      return { ok: false };
+      return null;
     }
 
     while (ops.length > 0) {
@@ -277,7 +279,7 @@ export function tryEvaluateAssignExpression(
       if (top.kind !== "op") break;
       const pTop = precedence[top.value] ?? -1;
       const pCur = precedence[op] ?? -1;
-      if (pCur < 0) return { ok: false };
+      if (pCur < 0) return null;
       const shouldPop = rightAssoc.has(op) ? pCur < pTop : pCur <= pTop;
       if (!shouldPop) break;
       out.push(ops.pop() as { kind: "op"; value: string });
@@ -286,13 +288,32 @@ export function tryEvaluateAssignExpression(
     prev = "op";
   }
 
-  if (prev === "op" || prev === "lparen" || prev === "start") return { ok: false };
+  if (prev === "op" || prev === "lparen" || prev === "start") return null;
 
   while (ops.length > 0) {
     const top = ops.pop()!;
-    if (top.kind === "lparen") return { ok: false };
+    if (top.kind === "lparen") return null;
     out.push(top);
   }
+
+  return out;
+}
+
+export function tryEvaluateAssignExpression(
+  self: MEKernelLike,
+  evalScopePath: SemanticPath,
+  expr: string,
+  /** Values of the aggregate references, by reference text, already resolved by the caller (derivation.ts). */
+  aggregateValues?: Map<string, number>,
+): { ok: true; value: number | boolean } | { ok: false } {
+  const raw = String(expr ?? "").trim();
+  if (!raw) return { ok: false };
+
+  if (!/^[A-Za-z0-9_\s+\-*/%().<>=!&|\[\]"']+$/.test(raw)) return { ok: false };
+  if (self.unsafeEval) return { ok: false };
+
+  const out = compileEvalExpression(raw);
+  if (!out) return { ok: false };
 
   const toFiniteNumber = (v: any): number | null => {
     if (typeof v === "number" && Number.isFinite(v)) return v;
