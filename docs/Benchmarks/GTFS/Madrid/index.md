@@ -21,7 +21,7 @@ Machine: shared Linux VM (Intel Xeon, 8 vCPU, 16 GiB), Node 22.23.3, the publish
 
 All commands run from `Typescript/`, after the VIG data is in place (see the setup in the [GTFS-Madrid README](https://github.com/neurons-me/.me/blob/main/Typescript/tests/Benchmarks/GTFS-Madrid/README.md)).
 
-## 1. How many values a write touches as the data grows
+## 1. How many values a write touches as the data grows {#k-vs-n}
 
 Each write is replayed and we count k, the derived values it recomputes. At VIG scale 1 (151 writes) and scale 10 (1,304 writes), k barely moves: p50 1, p95 18.5 then 18, max 27. Ten times the data, the same work per write. Identical to 4.1.0 for every write.
 
@@ -33,7 +33,7 @@ ME_VERSION=4.2.0 node tests/Benchmarks/GTFS-Madrid/sweep-seed0.ts --scale=1
 ME_VERSION=4.2.0 node tests/Benchmarks/GTFS-Madrid/sweep-seed0.ts --scale=10
 ```
 
-## 2. What a write costs when one parent is huge
+## 2. What a write costs when one parent is huge {#skew}
 
 Real feeds are uneven: a few routes have most of the trips. We generate skewed versions of the scale-10 data (Zipf and single-hub profiles, 22 runs) and time updates. An update costs about 0.05 ms plus 52 µs per affected value. The biggest wave (k = 801) is still about 100× faster than rebuilding.
 
@@ -46,14 +46,14 @@ ME_VERSION=4.2.0 node --expose-gc tests/Benchmarks/GTFS-Madrid/skew/sweep-skew.t
 node tests/Benchmarks/GTFS-Madrid/skew/report-skew.ts --scale=10
 ```
 
-## 3. What a delete costs (known weakness)
+## 3. What a delete costs (known weakness) {#delete}
 
 Deletes are a phase of the same skew run, no separate command. Each `me["-"]` scans the whole store: about 130–146 ms at scale 10, whatever k is. Not fixed in 4.2.0.
 
 - Scripts and command: the same as run 2
 - Results: [results/skew/v4.2.0/](https://github.com/neurons-me/.me/tree/main/Typescript/tests/Benchmarks/GTFS-Madrid/results/skew/v4.2.0)
 
-## 4. The 4.2 `[]` aggregate as the count
+## 4. The 4.2 `[]` aggregate as the count {#bracket-aggregate}
 
 4.2.0 adds collection aggregates (`stopTimeMember[].on`). Used for the counts, k is the same, but every CREATE re-scans the collection: 50 ms at scale 10 instead of 0.21 ms with explicit sums. So the benchmark keeps explicit sums.
 

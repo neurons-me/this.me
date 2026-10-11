@@ -19,6 +19,10 @@ Each dataset below is loaded into `.me` as paths, with derived values (counts, t
 
 ## Datasets
 
+{% comment %}
+To add a city: create docs/Benchmarks/GTFS/<City>/index.md (copy Madrid/index.md: layout gui-doc, mepath Docs / Benchmarks / GTFS with links, crumb <City>, one "## n. ... {#anchor}" section per run with its script, command and results folder, plus the machine line), then add one <a class="card"> for it inside the doc-cards div below, add its URL to the site search index (neurons-me.github.io docs/index.json) and regenerate sitemap.xml.
+{% endcomment %}
+
 <div class="doc-cards" markdown="0">
 <a class="card" href="Madrid/"><img src="https://suign.github.io/assets/imgs/MADRID-GRAPH-ME.jpg" alt="Madrid GTFS"><span class="card-kind">Dataset · 4.2.0</span><span class="card-title">Madrid</span><span class="card-desc">GTFS-Madrid-Bench (Madrid metro, scaled with VIG): affected set k as the data grows, fan-out skew, DELETE cost, the 4.2 [] aggregate.</span></a>
 </div>
