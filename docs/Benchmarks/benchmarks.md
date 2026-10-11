@@ -6,7 +6,9 @@ description: "Reactive recompute benchmarks for the .me kernel: growth with k, f
 mepath:
   - text: Docs
     url: https://neurons-me.github.io/.me/docs/
-crumb: Benchmarks
+  - text: Benchmarks
+    url: https://neurons-me.github.io/.me/docs/Benchmarks/
+crumb: Kernel
 ---
 
 # .me Kernel — Benchmark Results
@@ -22,7 +24,7 @@ Benchmarks 5–11 and the regression gate previously measured writes that recomp
 
 Methodology for the re-measured benchmarks: 5 rounds on the same machine, alternating the pre-fix and post-fix builds within each round; each value is the median across the 5 rounds. Machine: Apple M2, 8 GB RAM, macOS (Darwin 25.5), Node v24.13.1.
 
-> **Kernel versions.** Benchmarks 1–4 come from a this.me 3.9.x run (2026-06-08, machine not recorded). Benchmarks 5–11 were measured on 2026-09-26 with the build carrying the reference fix, before its 4.1.0 release. None of them has been re-run on 4.2.0; the 4.2.0 runs are GTFS-Madrid, see [Extreme Fan-Out](https://neurons-me.github.io/.me/docs/Extreme-Fan-Out.html) and the [Benchmarks index](./).
+> **Kernel versions.** Benchmarks 1–4 come from a this.me 3.9.x run (2026-06-08, machine not recorded). Benchmarks 5–11 were measured on 2026-09-26 with the build carrying the reference fix, before its 4.1.0 release. None of them has been re-run on 4.2.0; a 4.2.0 re-run is in progress. The 4.2.0 runs so far are [GTFS-Madrid](GTFS/Madrid/). The full fire-test output is on the [Fire test](../Tests/fire.test.html) page.
 
 ---
 
