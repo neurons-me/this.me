@@ -84,7 +84,9 @@
         var key = bg + "|" + fg; if (key === colKey) return false; colKey = key;
         var c = rgbOf(bg), dark = (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) < 128, f = rgbOf(fg);
         // the original's palette (teal #0A7C6B, gold #E8B22E, coral #FF6B4A, guide ink at 0.06), lifted on dark backgrounds
-        col = { dark: dark, teal: dark ? [38, 170, 148] : [10, 124, 107], gold: dark ? "#f0c04a" : "#e8b22e", coral: dark ? "#ff7b5c" : "#ff6b4a",
+        col = { dark: dark, teal: dark ? [38, 170, 148] : [4, 108, 92], gold: dark ? "#f0c04a" : "#e09f00",
+          // light backgrounds wash thin lines out: deeper teal, more line density, firmer and slightly larger dots
+          gain: dark ? .75 : 2.1, dotA: dark ? .55 : .85, dotR: dark ? 1.1 : 1.35, goldR: dark ? 2.2 : 2.6, coral: dark ? "#ff7b5c" : "#ff6b4a",
           guide: "rgba(" + f.join(",") + "," + (dark ? .1 : .06) + ")" };
         return true;
       }
@@ -109,9 +111,9 @@
       function colorize() {
         if (!depth) return;
         var W = depthW; off.width = off.height = W;
-        // gain: the original's lines are composited in 8 bits at display scale and read a little darker than the exact
-        // sum; 1.35 matches it side by side on light. Dark backgrounds glow, so less there.
-        var img = offCtx.createImageData(W, W), px = img.data, tl = col.teal, gain = col.dark ? .75 : 1.35;
+        // gain (col.gain): the line density. 1.35 matched the original side by side on light, but read too faint on the
+        // page's own background once unboxed, so light uses 2.1; dark backgrounds glow, so less there.
+        var img = offCtx.createImageData(W, W), px = img.data, tl = col.teal, gain = col.gain;
         for (var j = 0, n = W * W; j < n; j++) { var dd = depth[j]; if (dd <= 0) continue; var q = j * 4; px[q] = tl[0]; px[q + 1] = tl[1]; px[q + 2] = tl[2]; px[q + 3] = 255 * (1 - Math.exp(-dd * gain)); }
         offCtx.putImageData(img, 0, 0);
       }
@@ -139,7 +141,7 @@
         ctx.setTransform(1, 0, 0, 1, c, c);
         // the ~500 dots in two batched paths (teal, gold), one fill each
         for (var pass = 0; pass < 2; pass++) {
-          var r = (pass ? 2.2 : 1.1) * u; ctx.beginPath(); ctx.fillStyle = pass ? col.gold : "rgba(" + col.teal.join(",") + ",.55)";
+          var r = (pass ? col.goldR : col.dotR) * u; ctx.beginPath(); ctx.fillStyle = pass ? col.gold : "rgba(" + col.teal.join(",") + "," + col.dotA + ")";
           for (var i = 0; i < N; i += dotEvery) {
             if ((i % goldEvery === 0) !== (pass === 1)) continue;
             var l = len[i] * f * g; if (l < f * .3) continue;
