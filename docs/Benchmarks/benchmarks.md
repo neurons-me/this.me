@@ -8,14 +8,14 @@ mepath:
     url: https://neurons-me.github.io/.me/docs/Benchmarks/
 crumb: Kernel
 scripts:
-  - /assets/kernel-timeline/kernel-timeline.js
+  - /assets/kernel-timeline/kernel-timeline.js?v=2
 ---
 
 # .me Kernel — Benchmark Results
 
 ## Cost across kernel versions
 
-Each line is one benchmark, measured on every kernel build from 3.9.1 to 4.2.0, plus an unreleased fix, on the same machine in interleaved rounds. **Relative** puts each line's first comparable build at 1.0, so a line going up means that version made the same work slower; **ms** shows the medians themselves. Hover or tap a version for its milliseconds and commit; the numbered markers explain the steps.
+Each line is one benchmark, measured on every kernel build from 3.9.1 to 4.2.1, on the same machine in interleaved rounds. **Relative** puts each line's first comparable build at 1.0, so a line going up means that version made the same work slower; **ms** shows the medians themselves. Hover or tap a version for its milliseconds and commit; the numbered markers explain the steps.
 
 <div class="kernel-timeline" data-src="{{ '/docs/Benchmarks/data/kernel-timeline.json' | relative_url }}" markdown="1">
 

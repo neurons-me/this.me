@@ -11,7 +11,7 @@
   { "at": "723bac4", "commits": ["723bac4", "2b4b1fe", "9bac96a"],
     "title": "Small drift through the 4.2 S3 commits",
     "text": "The [] reference evaluator, the public-only lazy refresh and the withScope deprecation add +6 to +8% each to the steady single write (each step inside the run-to-run range); the fan-out lines stay flat. 4.2.0 itself only adds docs, so its −6% is noise." },
-  { "at": "b43cb05", "commits": ["b43cb05"],
-    "title": "Unreleased fix: compile each formula once",
-    "text": "Branch perf/eval-compile-cache (not merged, not on npm): a per-kernel memo of the compiled formula, cleared when the secret epoch changes, plus a fast path in resolveBranchScope when no secret scope exists. Every eager line drops 29 to 30% (2,000 deps: 57 → 40 ms), below the 4.1.0 level, and the steady single write drops 32%. Secret reads move only −5%, and the first write after a build is unchanged: that cost is warm-up, not evaluation." }
+  { "at": "b43cb05", "commits": ["51a3fea", "46d844e", "6856789", "8ccc710"],
+    "title": "4.2.1: compile each formula once",
+    "text": "Released as 4.2.1 (8ccc710; measured as branch build b43cb05, byte-identical dist/): a per-kernel memo of the compiled formula, cleared when the secret epoch changes, plus a fast path in resolveBranchScope when no secret scope exists. Every eager line drops 29 to 30% (2,000 deps: 57 → 40 ms), below the 4.1.0 level, and the steady single write drops 32%. Secret reads move only −5%, and the first write after a build is unchanged: that cost is warm-up, not evaluation. No behavior change." }
 ] }

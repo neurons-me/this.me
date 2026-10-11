@@ -14,6 +14,6 @@
     { "id": "2b4b1fe", "sha": "2b4b1fe", "version": "4.1.0+", "label": "2b4b1fe", "kind": "commit", "date": "2026-10-09", "subject": "4.2 S3 close: public-only lazy refresh, invisible aggregate formulas" },
     { "id": "9bac96a", "sha": "9bac96a", "version": "4.1.0+", "label": "9bac96a", "kind": "commit", "date": "2026-10-09", "subject": "deprecate(ME): withScope, migrate to as(); keep export" },
     { "id": "2659ff7", "sha": "2659ff7", "version": "4.2.0", "label": "4.2.0", "kind": "release", "date": "2026-10-09", "npm": "4.2.0", "subject": "release: this.me 4.2.0 ([] aggregates, #4 pointer fix, root-scope _ stealth fix)" },
-    { "id": "b43cb05", "sha": "b43cb05", "version": "unreleased", "label": "eval cache (unreleased)", "kind": "unreleased", "date": "2026-10-10", "branch": "perf/eval-compile-cache", "subject": "perf: compile each formula text once (per-kernel memo, cleared on secret epoch) + no-scope fast path in resolveBranchScope; not merged, not on npm" }
+    { "id": "b43cb05", "sha": "8ccc710", "version": "4.2.1", "label": "4.2.1", "kind": "release", "date": "2026-10-11", "npm": "4.2.1", "measured": "b43cb05 (branch perf/eval-compile-cache, 2026-10-10); its dist/me.es.js and me.cjs are byte-identical to the 4.2.1 release commit 8ccc710 (sha256 0bd2cc60…, d9ce2fdd…)", "subject": "release: this.me 4.2.1 (per-kernel compiled-formula cache + exact-equivalent no-scope fast path; no behavior change)" }
   ]
 }
