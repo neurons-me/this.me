@@ -4,8 +4,6 @@ title: ".me — GTFS-Madrid benchmark"
 description: "GTFS-Madrid-Bench on this.me 4.2.0: affected set k as VIG grows the data, fan-out skew, DELETE cost and the 4.2 [] aggregate, each with its script, command and results."
 image: https://suign.github.io/assets/imgs/MADRID-GRAPH-ME.jpg
 mepath:
-  - text: Docs
-    url: https://neurons-me.github.io/.me/docs/
   - text: Benchmarks
     url: https://neurons-me.github.io/.me/docs/Benchmarks/
   - text: GTFS

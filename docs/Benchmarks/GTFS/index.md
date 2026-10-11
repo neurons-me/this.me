@@ -4,8 +4,6 @@ title: ".me — GTFS benchmarks"
 description: "The .me kernel on GTFS public-transport feeds: what GTFS is and which datasets are measured."
 image: https://suign.github.io/assets/imgs/MADRID-GTFS-DATA-me.jpg
 mepath:
-  - text: Docs
-    url: https://neurons-me.github.io/.me/docs/
   - text: Benchmarks
     url: https://neurons-me.github.io/.me/docs/Benchmarks/
 crumb: GTFS
@@ -20,7 +18,7 @@ Each dataset below is loaded into `.me` as paths, with derived values (counts, t
 ## Datasets
 
 {% comment %}
-To add a city: create docs/Benchmarks/GTFS/<City>/index.md (copy Madrid/index.md: layout gui-doc, mepath Docs / Benchmarks / GTFS with links, crumb <City>, one "## n. ... {#anchor}" section per run with its script, command and results folder, plus the machine line), then add one <a class="card"> for it inside the doc-cards div below, add its URL to the site search index (neurons-me.github.io docs/index.json) and regenerate sitemap.xml.
+To add a city: create docs/Benchmarks/GTFS/<City>/index.md (copy Madrid/index.md: layout gui-doc, mepath Benchmarks / GTFS with links, crumb <City>, one "## n. ... {#anchor}" section per run with its script, command and results folder, plus the machine line), then add one <a class="card"> for it inside the doc-cards div below, add its URL to the site search index (neurons-me.github.io docs/index.json) and regenerate sitemap.xml.
 {% endcomment %}
 
 <div class="doc-cards" markdown="0">

@@ -4,8 +4,6 @@ title: ".me — Kernel benchmarks"
 image: https://suign.github.io/assets/imgs/me.png
 description: "Reactive recompute benchmarks for the .me kernel: growth with k, fan-out, ratios. Re-measured 2026-09-26 after the reference-resolution fix."
 mepath:
-  - text: Docs
-    url: https://neurons-me.github.io/.me/docs/
   - text: Benchmarks
     url: https://neurons-me.github.io/.me/docs/Benchmarks/
 crumb: Kernel

@@ -3,9 +3,7 @@ layout: gui-doc
 title: ".me — Benchmarks"
 description: "Benchmarks of the .me kernel: generic kernel benchmarks (1–11 and the fire test) and real-data benchmarks on GTFS transit feeds."
 image: https://suign.github.io/assets/imgs/me.png
-mepath:
-  - text: Docs
-    url: https://neurons-me.github.io/.me/docs/
+mepath: []
 crumb: Benchmarks
 ---
 
