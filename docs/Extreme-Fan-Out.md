@@ -72,9 +72,10 @@ ME_VERSION=4.2.0 node --expose-gc tests/Benchmarks/GTFS-Madrid/skew/sweep-skew.t
 node tests/Benchmarks/GTFS-Madrid/skew/report-skew.ts --scale=10
 ```
 
-Measured 2026-10-10 on `this.me@4.2.0` (the published npm build, `dist/me.es.js` sha256 `8cc94d52…`), Node 22.23.3, Linux x64, Intel Xeon 8 vCPU, 16 GiB. Every results file records its own run line. The 4.1.0 runs are kept in the README as history.
+Measured 2026-10-10 on `this.me@4.2.0` (the published npm build, `dist/me.es.js` sha256 `8cc94d52…`), Node 22.23.3, Linux x64, Intel Xeon 8 vCPU, 16 GiB. Every results file records its own run line. The 4.1.0 runs are kept in the README as history. Each run with its script, command and results folder: [GTFS-Madrid benchmark](Benchmarks/GTFS/Madrid/).
 
 <div class="doc-cards" markdown="0">
+<a class="card" href="https://neurons-me.github.io/.me/docs/Benchmarks/GTFS/Madrid/"><img src="https://suign.github.io/assets/imgs/MADRID-GRAPH-ME.jpg" alt="GTFS-Madrid benchmark page"><span class="card-kind">Benchmark · 4.2.0</span><span class="card-title">GTFS-Madrid benchmark</span><span class="card-desc">The four 4.2.0 runs, each with its script, command and results folder.</span></a>
 <a class="card" href="https://github.com/neurons-me/.me/blob/main/Typescript/tests/Benchmarks/GTFS-Madrid/README.md"><img src="https://suign.github.io/assets/imgs/EXTREME-FAN-OUT.jpg" alt="GTFS-Madrid benchmark"><span class="card-kind">Benchmark</span><span class="card-title">GTFS-Madrid README</span><span class="card-desc">Adapter, workload, every table and raw result file, 4.2.0 and 4.1.0.</span></a>
 <a class="card" href="https://neurons-me.github.io/mlearning.studio/GTFS/"><img src="https://neurons-me.github.io/mlearning.studio/GTFS/og.jpg" alt="GTFS on mlearning.studio"><span class="card-kind">Dataset</span><span class="card-title">GTFS on mlearning.studio</span><span class="card-desc">The feed format, the Madrid entry, GTFS-Madrid-Bench links.</span></a>
 <a class="card" href="https://neurons-me.github.io/mlearning.studio/datasets/madrid-gtfs/"><img src="https://suign.github.io/assets/imgs/MADRID-GRAPH-ME.jpg" alt="Madrid GTFS dataset"><span class="card-kind">Dataset</span><span class="card-title">Madrid GTFS</span><span class="card-desc">Zenodo CHANGE archives and sizes, what to extract, citations.</span></a>
