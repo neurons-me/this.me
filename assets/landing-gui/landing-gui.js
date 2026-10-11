@@ -13,6 +13,7 @@
 // nodes, and code blocks go through the .me highlighter (window.MeSyntax, assets/me-syntax) with theme colours.
 // A <div class="kernel-timeline" data-src="…json"> becomes the KernelTimeline chart when the page loads
 // assets/kernel-timeline/kernel-timeline.js (front matter `scripts`); without it the div's own Markdown stays.
+// Same for <div class="fanout-viz" data-n="100000" data-caption="…"> with assets/fanout-viz/fanout-viz.js (FanoutViz).
 (function () {
   const html = document.documentElement, SRC = document.getElementById("static-landing"), ROOT = document.getElementById("root");
   const G = window.GUI;
@@ -367,6 +368,7 @@
     }
     if (b.classList.contains("doc-cards")) return docCards(b);
     if (b.classList.contains("kernel-timeline") && window.KernelTimeline) return N("KernelTimeline", { src: b.getAttribute("data-src") });
+    if (b.classList.contains("fanout-viz") && window.FanoutViz) return N("FanoutViz", { n: b.getAttribute("data-n"), caption: b.getAttribute("data-caption") });
     if (t === "div" || t === "section") return N("Box", { component: t }, blocks(b));
     return N("Box", { component: t, sx: { mb: 2 } }, inl(b));
   });
@@ -393,7 +395,7 @@
   const INSPECTOR_ON = params.get("inspector") === "1";
   if (G.getInspectorEnabled() !== INSPECTOR_ON) G.setInspectorEnabled(INSPECTOR_ON);
   G.mount(spec, ROOT, {
-    gui: { ...G, Theme: PageTheme, registry: { ...(G.Registry || G.registry), LandingTopBar, DocsCover, MeOrbMark, MeCodeBlock, DocCardCover, ...(window.KernelTimeline ? { KernelTimeline: window.KernelTimeline } : {}) } },
+    gui: { ...G, Theme: PageTheme, registry: { ...(G.Registry || G.registry), LandingTopBar, DocsCover, MeOrbMark, MeCodeBlock, DocCardCover, ...(window.KernelTimeline ? { KernelTimeline: window.KernelTimeline } : {}), ...(window.FanoutViz ? { FanoutViz: window.FanoutViz } : {}) } },
     devtools: { enabled: true, inspector: INSPECTOR_ON, adminView: false, inspectorToggleVisible: false },
   });
   html.classList.add("gui-on");
