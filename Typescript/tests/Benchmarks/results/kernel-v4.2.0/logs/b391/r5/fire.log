@@ -1,0 +1,620 @@
+
+========================================================
+.me FIRETEST
+========================================================
+
+Running phases, v3 suites, benchmarks 1-11, and contracts summary.
+
+
+========================================================
+FIRETEST :: phases
+========================================================
+
+
+========================================================
+.me KERNEL FIRE TEST (PHASES 0-8)
+========================================================
+
+
+--- Phase 0 - Identity + Secret Scope ---
+   • Root identity claim (@) is accepted
+   • Secret scope root stays stealth (undefined)
+   • Secret leaf data remains readable by path
+✅ Phase 0 - Identity + Secret Scope
+
+--- Phase 1 - Structural [] Selectors ---
+   • Bracket selector writes create indexed nodes
+   • Bracket selector reads resolve exact indexed leaves
+✅ Phase 1 - Structural [] Selectors
+
+--- Phase 2 - [i] Broadcast with '=' ---
+   • One rule is broadcast to all collection members
+   • Each member gets an evaluated contextual result
+✅ Phase 2 - [i] Broadcast with '='
+
+--- Phase 3 - Logical Filters ---
+   • Single and compound filters return only matching nodes
+   • Filter evaluation works on derived fields
+✅ Phase 3 - Logical Filters
+
+--- Phase 3.1 - Filtered Broadcast ---
+   • Broadcast assignment runs only on nodes matching filter
+   • Non-matching nodes remain unchanged
+✅ Phase 3.1 - Filtered Broadcast
+
+--- Phase 4 - Range + Multi-Select ---
+   • Range selectors [a..b] slice contiguous subsets
+   • Multi-select selectors [[a,b,c]] slice sparse subsets
+✅ Phase 4 - Range + Multi-Select
+
+--- Phase 5 - Transform Projection ---
+   • Read-only projection computes transformed values
+   • Projection output is numeric per selected member
+✅ Phase 5 - Transform Projection
+
+--- Phase 6 - Contract Integrity ---
+   • Cross-scope formula (public + secret leaf) computes deterministically
+   • Final invariant equals expected numeric result
+✅ Phase 6 - Contract Integrity
+
+--- Phase 7A - Temporal Rehydration (Replay) ---
+   • Memory log can be exported from the current runtime
+   • A new empty instance can replay that memory
+   • Replay reconstructs equivalent semantic results
+✅ Phase 7A - Temporal Rehydration (Replay)
+
+--- Phase 7B - Atomic Snapshot Rehydration ---
+   • Snapshot exports full kernel state (memory + secrets + noises + encrypted branches)
+   • A fresh runtime can import snapshot atomically
+   • Imported runtime preserves exact encrypted structures and semantic outputs
+✅ Phase 7B - Atomic Snapshot Rehydration
+
+--- Phase 8 - Incremental Recompute + Explain ---
+   • Derivation dependencies are tracked from '=' expressions
+   • Changing a referenced leaf triggers targeted recompute
+   • explain(path) exposes expression inputs with public/stealth origin
+   • Stealth inputs are masked in explain() while still auditable
+   • Invalid code tokens are rejected and remain declarative strings
+   ⏳ Phase 8 loading dataset and derivations...
+   ⏱️ setup completed in 176ms
+   ⏱️ global dependency recompute in 36ms
+   ⏱️ local dependency recompute in 0ms
+   ✅ Phase 8 total runtime: 214ms
+✅ Phase 8 - Incremental Recompute + Explain
+
+========================================================
+FIRE TEST SUMMARY: 11/11 phases passed
+STATUS: ALL PHASES PASSED
+========================================================
+
+
+✅ FIRETEST :: phases completed in 285.94ms
+
+========================================================
+FIRETEST :: reconstruction
+========================================================
+
+
+════════════════════════════════════════════
+ SECTION 1 — Basic Determinism
+ Same seed → same identity. Always.
+════════════════════════════════════════════
+
+════════════════════════════════════════════
+ SECTION 2 — Isolation
+ Different seeds → different identities.
+════════════════════════════════════════════
+
+════════════════════════════════════════════
+ SECTION 3 — Reconstruction
+ Wipe. Reconstruct. Prove identical.
+════════════════════════════════════════════
+
+════════════════════════════════════════════
+ SECTION 4 — Seed Privacy
+ Seed never appears in memory, snapshot, or paths.
+════════════════════════════════════════════
+
+════════════════════════════════════════════
+ SECTION 5 — Symbol Access
+ Kernel internals accessible only via Symbols.
+════════════════════════════════════════════
+
+════════════════════════════════════════════
+ SECTION 6 — Cross-Instance Mathematical Proof
+ identity = f(seed). Nothing else matters.
+════════════════════════════════════════════
+
+════════════════════════════════════════════
+ RECONSTRUCTION TEST SUMMARY
+════════════════════════════════════════════
+
+  ✅ simple string seed produces stable identity
+  ✅ 12-word phrase seed produces stable identity
+  ✅ hex string seed produces stable identity
+  ✅ sentence as seed produces stable identity
+  ✅ unicode seed produces stable identity
+  ✅ single character seed produces stable identity
+  ✅ very long seed produces stable identity
+  ✅ 256-bit random seed produces stable identity
+  ✅ 'luna' and 'luna2' produce different identities
+  ✅ 'jose' and 'JOSE' produce different identities
+  ✅ 'abc' and 'abc ' (trailing space) produce different identities
+  ✅ ten different seeds all produce distinct identities
+  ✅ anagram seeds produce different identities
+  ✅ reconstruction from seed produces identical identity hash
+  ✅ reconstruction produces same namespace key material
+  ✅ reconstruction works after writing secret scope data
+  ✅ three independent reconstructions all produce same hash
+  ✅ seed does not appear in memory log
+  ✅ seed does not appear in snapshot export
+  ✅ seed not readable through proxy path
+  ✅ seed not enumerable on proxy surface
+  ✅ me[Symbol.for('me.seed')] returns the seed
+  ✅ me[Symbol.for('me.identity')] returns hash and expression
+  ✅ identity hash is a valid hex string
+  ✅ identity hash has fixed 64-hex length
+  ✅ me[Symbol.for('me.expression')] returns null before @ is called
+  ✅ root @ sets active expression and escape plane mirrors it
+  ✅ scoped @ keeps claim behavior without replacing the kernel active expression
+  ✅ identity hash is independent of write history
+  ✅ identity hash is independent of creation time
+  ✅ identity hash is independent of process state
+  ✅ web3 analogy — same mnemonic always derives same address
+
+32/32 tests passed
+
+✅ RECONSTRUCTION PROOF COMPLETE
+   same seed → same identity
+   always. deterministically. on any device.
+   the seed is the self.
+
+✅ FIRETEST :: reconstruction completed in 167.59ms
+
+========================================================
+FIRETEST :: secret-material-v3
+========================================================
+
+
+### Secret Material V3
+✅ same input yields the same chain and the same 32-byte material
+✅ branch and value diverge for the same secret path
+✅ sibling leaves share branch material but diverge at value level
+✅ changing the active noise boundary changes derived material
+✅ changing a relevant nested secret changes derived material
+✅ branch mode rejects the root secret scope
+✅ legacy effective secret behavior remains unchanged
+✅ Secret material v3 suite passed
+
+✅ FIRETEST :: secret-material-v3 completed in 137.04ms
+
+========================================================
+FIRETEST :: secret-blob-v3.read
+========================================================
+
+
+### Secret Blob V3 Read
+✅ v3 branch blob reads through normal secret path
+✅ v3 value-level blob reads through normal path
+✅ value-level cache does not leak mutable object references
+✅ value-level cache invalidates when secret epoch changes
+✅ branch write preloads v3 keys cache for immediate cold read
+✅ branch cache priming is scoped to the written chunk
+✅ branch cache priming invalidates when secret epoch changes
+✅ tampered branch blob bypasses primed cache and fails closed
+✅ v2 and legacy blobs remain readable
+✅ tampered v3 branch blob fails closed
+✅ wrong secret for v3 branch blob fails closed
+✅ wrong path for v3 value-level blob fails closed
+✅ wrong noise for v3 branch blob fails closed
+✅ Secret blob v3 read suite passed
+
+✅ FIRETEST :: secret-blob-v3.read completed in 145.29ms
+
+========================================================
+FIRETEST :: secret-blob-v3.write
+========================================================
+
+
+### Secret Blob V3 Write
+✅ default write now emits v3 branch blobs
+✅ default write now emits v3 value-level blobs
+✅ forcing v2 still emits v2 branch blobs and remains readable
+✅ forcing v2 still emits v2 value-level blobs and remains readable
+✅ migrateEncryptedBranchesToV3 migrates v2 chunks and preserves history
+✅ migrateEncryptedBranchesToV3 skips already-v3 chunks
+✅ tampering after migration still fails closed
+✅ Secret blob v3 write suite passed
+
+✅ FIRETEST :: secret-blob-v3.write completed in 133.29ms
+
+========================================================
+FIRETEST :: benchmark.1
+========================================================
+
+
+========================================================
+.me ALGORITHMIC SCALING BENCHMARK (Hardware Agnostic)
+========================================================
+
+Testing how the kernel behaves as the dataset grows...
+Goal: O(k) efficiency (work stays flat regardless of N)
+
+> N = 10     | Time: 0.2547  ms | Wave k: 2  | Result: 100 | overThreshold: true
+> N = 100    | Time: 0.1759  ms | Wave k: 2  | Result: 100 | overThreshold: true
+> N = 1000   | Time: 0.0992  ms | Wave k: 2  | Result: 100 | overThreshold: true
+> N = 5000   | Time: 0.1148  ms | Wave k: 2  | Result: 100 | overThreshold: true
+
+--- Comparison Table ---
+┌─────────┬───────┬──────────┬───┬────────┬───────────────┐
+│ (index) │ nodes │ duration │ k │ result │ overThreshold │
+├─────────┼───────┼──────────┼───┼────────┼───────────────┤
+│ 0       │ 10    │ '0.2547' │ 2 │ 100    │ true          │
+│ 1       │ 100   │ '0.1759' │ 2 │ 100    │ true          │
+│ 2       │ 1000  │ '0.0992' │ 2 │ 100    │ true          │
+│ 3       │ 5000  │ '0.1148' │ 2 │ 100    │ true          │
+└─────────┴───────┴──────────┴───┴────────┴───────────────┘
+
+[ANALYSIS]
+✅ SUPERIORITY PROVEN: Response time stayed under 20ms even with 5000 nodes.
+✅ ALGORITHMIC CONSTANCY: The actual recompute wave stayed at k=2.
+Traditional systems would rescan with N; this benchmark keeps the mutation on one local lineage.
+========================================================
+
+
+✅ FIRETEST :: benchmark.1 completed in 601.69ms
+
+========================================================
+FIRETEST :: benchmark.2
+========================================================
+
+n,time_ms,wave_k,result,over_threshold
+10,0.2787,2,100,true
+100,0.1141,2,100,true
+500,0.1212,2,100,true
+1000,0.0994,2,100,true
+2500,0.1226,2,100,true
+5000,0.1177,2,100,true
+7500,0.1044,2,100,true
+10000,0.1091,2,100,true
+
+✅ FIRETEST :: benchmark.2 completed in 2084.09ms
+
+========================================================
+FIRETEST :: benchmark.3
+========================================================
+
+n,time_ms,wave_k,result,over_threshold,status
+> Procesando N=10... Hecho.
+10,0.2707,2,100,true,OK
+> Procesando N=100... Hecho.
+100,0.1126,2,100,true,OK
+> Procesando N=1000... Hecho.
+1000,0.1040,2,100,true,OK
+> Procesando N=5000... Hecho.
+5000,0.1049,2,100,true,OK
+> Procesando N=10000... Hecho.
+10000,0.1326,2,100,true,OK
+
+--- Benchmark Finalizado ---
+
+✅ FIRETEST :: benchmark.3 completed in 1327.41ms
+
+========================================================
+FIRETEST :: benchmark.4
+========================================================
+
+========================================================
+ .me KERNEL: MULTI-DATASET STRESS LAB
+ Author: suiGn | jose abella eggleton
+========================================================
+
+
+[DEEP_NESTING (500 levels)]
+> Latency: 28.6798ms
+> Wave k: 2
+> Mutation path: root.n0.n1.n2.n3.n4.n5.n6.n7.n8.n9.n10.n11.n12.n13.n14.n15.n16.n17.n18.n19.n20.n21.n22.n23.n24.n25.n26.n27.n28.n29.n30.n31.n32.n33.n34.n35.n36.n37.n38.n39.n40.n41.n42.n43.n44.n45.n46.n47.n48.n49.n50.n51.n52.n53.n54.n55.n56.n57.n58.n59.n60.n61.n62.n63.n64.n65.n66.n67.n68.n69.n70.n71.n72.n73.n74.n75.n76.n77.n78.n79.n80.n81.n82.n83.n84.n85.n86.n87.n88.n89.n90.n91.n92.n93.n94.n95.n96.n97.n98.n99.n100.n101.n102.n103.n104.n105.n106.n107.n108.n109.n110.n111.n112.n113.n114.n115.n116.n117.n118.n119.n120.n121.n122.n123.n124.n125.n126.n127.n128.n129.n130.n131.n132.n133.n134.n135.n136.n137.n138.n139.n140.n141.n142.n143.n144.n145.n146.n147.n148.n149.n150.n151.n152.n153.n154.n155.n156.n157.n158.n159.n160.n161.n162.n163.n164.n165.n166.n167.n168.n169.n170.n171.n172.n173.n174.n175.n176.n177.n178.n179.n180.n181.n182.n183.n184.n185.n186.n187.n188.n189.n190.n191.n192.n193.n194.n195.n196.n197.n198.n199.n200.n201.n202.n203.n204.n205.n206.n207.n208.n209.n210.n211.n212.n213.n214.n215.n216.n217.n218.n219.n220.n221.n222.n223.n224.n225.n226.n227.n228.n229.n230.n231.n232.n233.n234.n235.n236.n237.n238.n239.n240.n241.n242.n243.n244.n245.n246.n247.n248.n249.n250.n251.n252.n253.n254.n255.n256.n257.n258.n259.n260.n261.n262.n263.n264.n265.n266.n267.n268.n269.n270.n271.n272.n273.n274.n275.n276.n277.n278.n279.n280.n281.n282.n283.n284.n285.n286.n287.n288.n289.n290.n291.n292.n293.n294.n295.n296.n297.n298.n299.n300.n301.n302.n303.n304.n305.n306.n307.n308.n309.n310.n311.n312.n313.n314.n315.n316.n317.n318.n319.n320.n321.n322.n323.n324.n325.n326.n327.n328.n329.n330.n331.n332.n333.n334.n335.n336.n337.n338.n339.n340.n341.n342.n343.n344.n345.n346.n347.n348.n349.n350.n351.n352.n353.n354.n355.n356.n357.n358.n359.n360.n361.n362.n363.n364.n365.n366.n367.n368.n369.n370.n371.n372.n373.n374.n375.n376.n377.n378.n379.n380.n381.n382.n383.n384.n385.n386.n387.n388.n389.n390.n391.n392.n393.n394.n395.n396.n397.n398.n399.n400.n401.n402.n403.n404.n405.n406.n407.n408.n409.n410.n411.n412.n413.n414.n415.n416.n417.n418.n419.n420.n421.n422.n423.n424.n425.n426.n427.n428.n429.n430.n431.n432.n433.n434.n435.n436.n437.n438.n439.n440.n441.n442.n443.n444.n445.n446.n447.n448.n449.n450.n451.n452.n453.n454.n455.n456.n457.n458.n459.n460.n461.n462.n463.n464.n465.n466.n467.n468.n469.n470.n471.n472.n473.n474.n475.n476.n477.n478.n479.n480.n481.n482.n483.n484.n485.n486.n487.n488.n489.n490.n491.n492.n493.n494.n495.n496.n497.n498.n499.factor
+> Result before/after: 50 -> 100
+> overThreshold before/after: false -> true
+> recomputed: ["root.n0.n1.n2.n3.n4.n5.n6.n7.n8.n9.n10.n11.n12.n13.n14.n15.n16.n17.n18.n19.n20.n21.n22.n23.n24.n25.n26.n27.n28.n29.n30.n31.n32.n33.n34.n35.n36.n37.n38.n39.n40.n41.n42.n43.n44.n45.n46.n47.n48.n49.n50.n51.n52.n53.n54.n55.n56.n57.n58.n59.n60.n61.n62.n63.n64.n65.n66.n67.n68.n69.n70.n71.n72.n73.n74.n75.n76.n77.n78.n79.n80.n81.n82.n83.n84.n85.n86.n87.n88.n89.n90.n91.n92.n93.n94.n95.n96.n97.n98.n99.n100.n101.n102.n103.n104.n105.n106.n107.n108.n109.n110.n111.n112.n113.n114.n115.n116.n117.n118.n119.n120.n121.n122.n123.n124.n125.n126.n127.n128.n129.n130.n131.n132.n133.n134.n135.n136.n137.n138.n139.n140.n141.n142.n143.n144.n145.n146.n147.n148.n149.n150.n151.n152.n153.n154.n155.n156.n157.n158.n159.n160.n161.n162.n163.n164.n165.n166.n167.n168.n169.n170.n171.n172.n173.n174.n175.n176.n177.n178.n179.n180.n181.n182.n183.n184.n185.n186.n187.n188.n189.n190.n191.n192.n193.n194.n195.n196.n197.n198.n199.n200.n201.n202.n203.n204.n205.n206.n207.n208.n209.n210.n211.n212.n213.n214.n215.n216.n217.n218.n219.n220.n221.n222.n223.n224.n225.n226.n227.n228.n229.n230.n231.n232.n233.n234.n235.n236.n237.n238.n239.n240.n241.n242.n243.n244.n245.n246.n247.n248.n249.n250.n251.n252.n253.n254.n255.n256.n257.n258.n259.n260.n261.n262.n263.n264.n265.n266.n267.n268.n269.n270.n271.n272.n273.n274.n275.n276.n277.n278.n279.n280.n281.n282.n283.n284.n285.n286.n287.n288.n289.n290.n291.n292.n293.n294.n295.n296.n297.n298.n299.n300.n301.n302.n303.n304.n305.n306.n307.n308.n309.n310.n311.n312.n313.n314.n315.n316.n317.n318.n319.n320.n321.n322.n323.n324.n325.n326.n327.n328.n329.n330.n331.n332.n333.n334.n335.n336.n337.n338.n339.n340.n341.n342.n343.n344.n345.n346.n347.n348.n349.n350.n351.n352.n353.n354.n355.n356.n357.n358.n359.n360.n361.n362.n363.n364.n365.n366.n367.n368.n369.n370.n371.n372.n373.n374.n375.n376.n377.n378.n379.n380.n381.n382.n383.n384.n385.n386.n387.n388.n389.n390.n391.n392.n393.n394.n395.n396.n397.n398.n399.n400.n401.n402.n403.n404.n405.n406.n407.n408.n409.n410.n411.n412.n413.n414.n415.n416.n417.n418.n419.n420.n421.n422.n423.n424.n425.n426.n427.n428.n429.n430.n431.n432.n433.n434.n435.n436.n437.n438.n439.n440.n441.n442.n443.n444.n445.n446.n447.n448.n449.n450.n451.n452.n453.n454.n455.n456.n457.n458.n459.n460.n461.n462.n463.n464.n465.n466.n467.n468.n469.n470.n471.n472.n473.n474.n475.n476.n477.n478.n479.n480.n481.n482.n483.n484.n485.n486.n487.n488.n489.n490.n491.n492.n493.n494.n495.n496.n497.n498.n499.result","root.n0.n1.n2.n3.n4.n5.n6.n7.n8.n9.n10.n11.n12.n13.n14.n15.n16.n17.n18.n19.n20.n21.n22.n23.n24.n25.n26.n27.n28.n29.n30.n31.n32.n33.n34.n35.n36.n37.n38.n39.n40.n41.n42.n43.n44.n45.n46.n47.n48.n49.n50.n51.n52.n53.n54.n55.n56.n57.n58.n59.n60.n61.n62.n63.n64.n65.n66.n67.n68.n69.n70.n71.n72.n73.n74.n75.n76.n77.n78.n79.n80.n81.n82.n83.n84.n85.n86.n87.n88.n89.n90.n91.n92.n93.n94.n95.n96.n97.n98.n99.n100.n101.n102.n103.n104.n105.n106.n107.n108.n109.n110.n111.n112.n113.n114.n115.n116.n117.n118.n119.n120.n121.n122.n123.n124.n125.n126.n127.n128.n129.n130.n131.n132.n133.n134.n135.n136.n137.n138.n139.n140.n141.n142.n143.n144.n145.n146.n147.n148.n149.n150.n151.n152.n153.n154.n155.n156.n157.n158.n159.n160.n161.n162.n163.n164.n165.n166.n167.n168.n169.n170.n171.n172.n173.n174.n175.n176.n177.n178.n179.n180.n181.n182.n183.n184.n185.n186.n187.n188.n189.n190.n191.n192.n193.n194.n195.n196.n197.n198.n199.n200.n201.n202.n203.n204.n205.n206.n207.n208.n209.n210.n211.n212.n213.n214.n215.n216.n217.n218.n219.n220.n221.n222.n223.n224.n225.n226.n227.n228.n229.n230.n231.n232.n233.n234.n235.n236.n237.n238.n239.n240.n241.n242.n243.n244.n245.n246.n247.n248.n249.n250.n251.n252.n253.n254.n255.n256.n257.n258.n259.n260.n261.n262.n263.n264.n265.n266.n267.n268.n269.n270.n271.n272.n273.n274.n275.n276.n277.n278.n279.n280.n281.n282.n283.n284.n285.n286.n287.n288.n289.n290.n291.n292.n293.n294.n295.n296.n297.n298.n299.n300.n301.n302.n303.n304.n305.n306.n307.n308.n309.n310.n311.n312.n313.n314.n315.n316.n317.n318.n319.n320.n321.n322.n323.n324.n325.n326.n327.n328.n329.n330.n331.n332.n333.n334.n335.n336.n337.n338.n339.n340.n341.n342.n343.n344.n345.n346.n347.n348.n349.n350.n351.n352.n353.n354.n355.n356.n357.n358.n359.n360.n361.n362.n363.n364.n365.n366.n367.n368.n369.n370.n371.n372.n373.n374.n375.n376.n377.n378.n379.n380.n381.n382.n383.n384.n385.n386.n387.n388.n389.n390.n391.n392.n393.n394.n395.n396.n397.n398.n399.n400.n401.n402.n403.n404.n405.n406.n407.n408.n409.n410.n411.n412.n413.n414.n415.n416.n417.n418.n419.n420.n421.n422.n423.n424.n425.n426.n427.n428.n429.n430.n431.n432.n433.n434.n435.n436.n437.n438.n439.n440.n441.n442.n443.n444.n445.n446.n447.n448.n449.n450.n451.n452.n453.n454.n455.n456.n457.n458.n459.n460.n461.n462.n463.n464.n465.n466.n467.n468.n469.n470.n471.n472.n473.n474.n475.n476.n477.n478.n479.n480.n481.n482.n483.n484.n485.n486.n487.n488.n489.n490.n491.n492.n493.n494.n495.n496.n497.n498.n499.overThreshold"]
+> Status: ✅ Reactive
+
+[WIDE_BROADCAST (1,000 nodes)]
+> Latency: 0.2765ms
+> Wave k: 2
+> Mutation path: sensors.999.factor
+> Result before/after: 50 -> 100
+> overThreshold before/after: false -> true
+> recomputed: ["sensors.999.result","sensors.999.overThreshold"]
+> Status: ✅ Reactive
+
+[FINANCIAL_DATASET (5,000 tx)]
+> Latency: 0.2593ms
+> Wave k: 2
+> Mutation path: tx.4999.taxRate
+> Result before/after: 116 -> 200
+> overThreshold before/after: false -> true
+> recomputed: ["tx.4999.total","tx.4999.overThreshold"]
+> Status: ✅ Reactive
+
+========================================================
+
+✅ FIRETEST :: benchmark.4 completed in 1030.28ms
+
+========================================================
+FIRETEST :: benchmark.5
+========================================================
+
+
+========================================================
+.me BENCHMARK #5: THROUGHPUT UNDER SUSTAINED MUTATION
+========================================================
+
+Summary:
+┌─────────┬──────────────────────┬──────────────────────┬─────────────────────┬────────────────────┐
+│ (index) │ p50                  │ p95                  │ p99                 │ max                │
+├─────────┼──────────────────────┼──────────────────────┼─────────────────────┼────────────────────┤
+│ 0       │ 0.017068000000051597 │ 0.023523000000011507 │ 0.05152699999996457 │ 0.9129469999999742 │
+└─────────┴──────────────────────┴──────────────────────┴─────────────────────┴────────────────────┘
+Windowed p95 drift check:
+┌─────────┬─────────────┬──────────┬──────────┬──────────┐
+│ (index) │ window      │ p50_ms   │ p95_ms   │ p99_ms   │
+├─────────┼─────────────┼──────────┼──────────┼──────────┤
+│ 0       │ '1-200'     │ '0.0215' │ '0.0355' │ '0.0807' │
+│ 1       │ '201-400'   │ '0.0208' │ '0.0250' │ '0.0565' │
+│ 2       │ '401-600'   │ '0.0194' │ '0.0233' │ '0.0501' │
+│ 3       │ '601-800'   │ '0.0176' │ '0.0205' │ '0.0395' │
+│ 4       │ '801-1000'  │ '0.0170' │ '0.0222' │ '0.0477' │
+│ 5       │ '1001-1200' │ '0.0166' │ '0.0186' │ '0.0333' │
+│ 6       │ '1201-1400' │ '0.0159' │ '0.0176' │ '0.0331' │
+│ 7       │ '1401-1600' │ '0.0161' │ '0.0202' │ '0.0488' │
+│ 8       │ '1601-1800' │ '0.0161' │ '0.0183' │ '0.0409' │
+│ 9       │ '1801-2000' │ '0.0156' │ '0.0174' │ '0.0332' │
+└─────────┴─────────────┴──────────┴──────────┴──────────┘
+p95 drift: -50.80%
+
+✅ FIRETEST :: benchmark.5 completed in 501.65ms
+
+========================================================
+FIRETEST :: benchmark.6
+========================================================
+
+
+========================================================
+.me BENCHMARK #6: FAN-OUT SENSITIVITY CURVES
+========================================================
+
+> Running fanout=10... done.
+> Running fanout=100... done.
+> Running fanout=500... done.
+> Running fanout=1000... done.
+> Running fanout=2500... done.
+> Running fanout=5000... done.
+┌─────────┬────────┬───┬──────────┬──────────┬──────────┬──────────┐
+│ (index) │ fanout │ k │ p50_ms   │ p95_ms   │ p99_ms   │ max_ms   │
+├─────────┼────────┼───┼──────────┼──────────┼──────────┼──────────┤
+│ 0       │ 10     │ 2 │ '0.0205' │ '0.0737' │ '0.4188' │ '0.6252' │
+│ 1       │ 100    │ 2 │ '0.0154' │ '0.0224' │ '0.1088' │ '0.2727' │
+│ 2       │ 500    │ 2 │ '0.0170' │ '0.0250' │ '0.0560' │ '0.1126' │
+│ 3       │ 1000   │ 2 │ '0.0104' │ '0.0123' │ '0.0282' │ '0.0527' │
+│ 4       │ 2500   │ 2 │ '0.0089' │ '0.0109' │ '0.0254' │ '0.0283' │
+│ 5       │ 5000   │ 2 │ '0.0142' │ '0.0201' │ '0.0497' │ '1.2789' │
+└─────────┴────────┴───┴──────────┴──────────┴──────────┴──────────┘
+
+✅ FIRETEST :: benchmark.6 completed in 525.57ms
+
+========================================================
+FIRETEST :: benchmark.7
+========================================================
+
+
+========================================================
+.me BENCHMARK #7: COLD VS WARM RUNTIME PROFILES
+========================================================
+
+┌─────────┬───────┬──────────┬──────────┬───────────────┬───────────────┬───────────────┐
+│ (index) │ nodes │ cold_ms  │ warm_ms  │ steady_avg_ms │ steady_min_ms │ steady_max_ms │
+├─────────┼───────┼──────────┼──────────┼───────────────┼───────────────┼───────────────┤
+│ 0       │ 100   │ '0.3271' │ '0.1523' │ '0.0300'      │ '0.0167'      │ '0.4041'      │
+│ 1       │ 1000  │ '0.0213' │ '0.0235' │ '0.0126'      │ '0.0109'      │ '0.0321'      │
+│ 2       │ 5000  │ '0.0430' │ '0.0205' │ '0.0119'      │ '0.0090'      │ '0.0510'      │
+└─────────┴───────┴──────────┴──────────┴───────────────┴───────────────┴───────────────┘
+
+✅ FIRETEST :: benchmark.7 completed in 402.60ms
+
+========================================================
+FIRETEST :: benchmark.8
+========================================================
+
+
+========================================================
+.me BENCHMARK #8: EXPLAIN OVERHEAD BUDGET
+========================================================
+
+┌─────────┬────────────────┬──────────┬──────────┬──────────┐
+│ (index) │ mode           │ p50_ms   │ p95_ms   │ p99_ms   │
+├─────────┼────────────────┼──────────┼──────────┼──────────┤
+│ 0       │ 'baseline'     │ '0.0137' │ '0.0292' │ '0.0583' │
+│ 1       │ 'with_explain' │ '0.0196' │ '0.0332' │ '0.0453' │
+└─────────┴────────────────┴──────────┴──────────┴──────────┘
+p95 overhead: 13.82%
+
+✅ FIRETEST :: benchmark.8 completed in 395.82ms
+
+========================================================
+FIRETEST :: benchmark.9
+========================================================
+
+
+========================================================
+.me BENCHMARK #9: SECRET-SCOPE PERFORMANCE IMPACT
+========================================================
+
+mode=lazy | nodeCount=600 | iterations=120
+> setup public... done.
+> run public loop... done.
+> setup secret... done.
+> run secret loop... done.
+┌─────────┬──────────┬──────────┬──────────┬──────────┐
+│ (index) │ scope    │ p50_ms   │ p95_ms   │ p99_ms   │
+├─────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0       │ 'public' │ '0.0148' │ '0.0480' │ '0.2095' │
+│ 1       │ 'secret' │ '0.8482' │ '1.3221' │ '1.8037' │
+└─────────┴──────────┴──────────┴──────────┴──────────┘
+secret-scope p95 slowdown: 2655.72%
+
+✅ FIRETEST :: benchmark.9 completed in 1200.29ms
+
+========================================================
+FIRETEST :: benchmark.10
+========================================================
+
+
+========================================================
+.me BENCHMARK #10: PUSH (WRITE) VS PULL (FIRST READ)
+========================================================
+
+
+Mode: EAGER
+> dual analysis mode=eager fanout=10... done.
+> dual analysis mode=eager fanout=100... done.
+> dual analysis mode=eager fanout=500... done.
+> dual analysis mode=eager fanout=1000... done.
+> dual analysis mode=eager fanout=2500... done.
+> dual analysis mode=eager fanout=5000... done.
+
+Mode: LAZY
+> dual analysis mode=lazy fanout=10... done.
+> dual analysis mode=lazy fanout=100... done.
+> dual analysis mode=lazy fanout=500... done.
+> dual analysis mode=lazy fanout=1000... done.
+> dual analysis mode=lazy fanout=2500... done.
+> dual analysis mode=lazy fanout=5000... done.
+┌─────────┬─────────┬────────┬───┬─────────────────┬─────────────────┬─────────────────┬─────────────┬─────────────┬─────────────┐
+│ (index) │ mode    │ fanout │ k │ mutation_p50_ms │ mutation_p95_ms │ mutation_p99_ms │ read_p50_ms │ read_p95_ms │ read_p99_ms │
+├─────────┼─────────┼────────┼───┼─────────────────┼─────────────────┼─────────────────┼─────────────┼─────────────┼─────────────┤
+│ 0       │ 'eager' │ 10     │ 2 │ '0.0095'        │ '0.0182'        │ '0.2132'        │ '0.0080'    │ '0.0159'    │ '0.1051'    │
+│ 1       │ 'eager' │ 100    │ 2 │ '0.0070'        │ '0.0082'        │ '0.0143'        │ '0.0082'    │ '0.0137'    │ '0.0506'    │
+│ 2       │ 'eager' │ 500    │ 2 │ '0.0075'        │ '0.0105'        │ '0.0620'        │ '0.0055'    │ '0.0090'    │ '0.0175'    │
+│ 3       │ 'eager' │ 1000   │ 2 │ '0.0052'        │ '0.0093'        │ '0.0395'        │ '0.0047'    │ '0.0081'    │ '0.0215'    │
+│ 4       │ 'eager' │ 2500   │ 2 │ '0.0041'        │ '0.0055'        │ '0.0247'        │ '0.0045'    │ '0.0055'    │ '0.0097'    │
+│ 5       │ 'eager' │ 5000   │ 2 │ '0.0045'        │ '0.0083'        │ '0.0278'        │ '0.0051'    │ '0.0072'    │ '0.0106'    │
+│ 6       │ 'lazy'  │ 10     │ 2 │ '0.0038'        │ '0.0059'        │ '0.0086'        │ '0.0062'    │ '0.0104'    │ '0.0302'    │
+│ 7       │ 'lazy'  │ 100    │ 2 │ '0.0051'        │ '0.0079'        │ '0.0140'        │ '0.0062'    │ '0.0113'    │ '0.0141'    │
+│ 8       │ 'lazy'  │ 500    │ 2 │ '0.0045'        │ '0.0062'        │ '0.0121'        │ '0.0061'    │ '0.0074'    │ '0.0125'    │
+│ 9       │ 'lazy'  │ 1000   │ 2 │ '0.0047'        │ '0.0077'        │ '0.0144'        │ '0.0059'    │ '0.0106'    │ '0.0118'    │
+│ 10      │ 'lazy'  │ 2500   │ 2 │ '0.0045'        │ '0.0058'        │ '0.0173'        │ '0.0063'    │ '0.0072'    │ '0.0113'    │
+│ 11      │ 'lazy'  │ 5000   │ 2 │ '0.0042'        │ '0.0062'        │ '0.0163'        │ '0.0057'    │ '0.0071'    │ '0.0183'    │
+└─────────┴─────────┴────────┴───┴─────────────────┴─────────────────┴─────────────────┴─────────────┴─────────────┴─────────────┘
+
+✅ FIRETEST :: benchmark.10 completed in 861.36ms
+
+========================================================
+FIRETEST :: benchmark.11
+========================================================
+
+
+========================================================
+.me BENCHMARK #11: SECRET PUSH VS PULL
+========================================================
+
+mode=lazy | nodeCounts=100,300,600 | iterations=120
+> run plane=public n=100... done.
+> run plane=secret n=100... done.
+> run plane=public n=300... done.
+> run plane=secret n=300... done.
+> run plane=public n=600... done.
+> run plane=secret n=600... done.
+┌─────────┬────────┬──────────┬───────┬─────────────────┬─────────────────┬─────────────────┬─────────────┬─────────────┬─────────────┐
+│ (index) │ mode   │ plane    │ nodes │ mutation_p50_ms │ mutation_p95_ms │ mutation_p99_ms │ read_p50_ms │ read_p95_ms │ read_p99_ms │
+├─────────┼────────┼──────────┼───────┼─────────────────┼─────────────────┼─────────────────┼─────────────┼─────────────┼─────────────┤
+│ 0       │ 'lazy' │ 'public' │ 100   │ '0.0099'        │ '0.0171'        │ '0.0393'        │ '0.0137'    │ '0.0216'    │ '0.1389'    │
+│ 1       │ 'lazy' │ 'secret' │ 100   │ '0.0543'        │ '0.1230'        │ '0.2404'        │ '0.4919'    │ '0.8452'    │ '0.9718'    │
+│ 2       │ 'lazy' │ 'public' │ 300   │ '0.0087'        │ '0.0108'        │ '0.0222'        │ '0.0097'    │ '0.0120'    │ '0.0258'    │
+│ 3       │ 'lazy' │ 'secret' │ 300   │ '0.0474'        │ '0.0781'        │ '0.2474'        │ '0.4246'    │ '0.8143'    │ '1.0560'    │
+│ 4       │ 'lazy' │ 'public' │ 600   │ '0.0066'        │ '0.0097'        │ '0.0183'        │ '0.0083'    │ '0.0096'    │ '0.0103'    │
+│ 5       │ 'lazy' │ 'secret' │ 600   │ '0.0462'        │ '0.0643'        │ '0.1683'        │ '0.7687'    │ '0.9350'    │ '2.2493'    │
+└─────────┴────────┴──────────┴───────┴─────────────────┴─────────────────┴─────────────────┴─────────────┴─────────────┴─────────────┘
+
+Secret/Public p95 slowdown ratios:
+┌─────────┬───────┬─────────────────────────┬─────────────────────┐
+│ (index) │ nodes │ mutation_p95_slowdown_x │ read_p95_slowdown_x │
+├─────────┼───────┼─────────────────────────┼─────────────────────┤
+│ 0       │ 100   │ '7.19'                  │ '39.13'             │
+│ 1       │ 300   │ '7.23'                  │ '67.86'             │
+│ 2       │ 600   │ '6.63'                  │ '97.40'             │
+└─────────┴───────┴─────────────────────────┴─────────────────────┘
+
+✅ FIRETEST :: benchmark.11 completed in 1728.36ms
+
+========================================================
+FIRETEST :: contracts-summary
+========================================================
+
+
+> this.me@3.9.1 test:contracts
+> node tests/contracts/run-contracts.mjs
+
+
+### DSL Contract Tests (Phase 6)
+✅ boot + basic set/get
+✅ constructor bootstrap preserves callable proxy after hydrate
+✅ execute dispatch keeps kernel and keyspace routes stable
+✅ mutation helpers preserve learn + replay semantics
+✅ public memory surfaces redact effectiveSecret and stay replayable
+✅ snapshot import accepts both public and legacy memory payloads
+✅ phase1 selector [] fixed id
+✅ phase2 iterator broadcast [i] with '='
+✅ phase3 filter read + phase3.1 logical filters
+✅ phase3.1 filtered broadcast for '='
+✅ phase4 multi-select and range
+✅ phase5 transform projection
+✅ runtime escape plane exposes reflective kernel helpers
+✅ explicit guest scope does not collapse back to owner scope
+✅ explain() masks stealth inputs while keeping public inputs visible
+✅ explain() exposes expr plus recompute wave metadata for the selected target
+✅ secret branch blobs are non-deterministic across identical writes
+✅ tampered v2 secret blobs fail closed
+✅ legacy xor secret snapshots still decrypt after v2 hardening
+✅ secret caches stay bounded under broad secret traversal
+✅ Phase 6 contract suite passed
+
+### Secret Blob Hardening Contracts (4B.0)
+✅ legacy secret snapshot still decrypts correctly
+✅ v2 secret branch snapshot still decrypts correctly
+✅ mixed public+secret snapshot rehydrates without leaking
+✅ secret root stays stealth after rehydrate
+✅ pointer into secret branch still resolves correctly
+✅ tampered branch blob fails closed
+✅ tampered value-level encrypted leaf fails closed
+✅ wrong secret key fails closed
+✅ wrong noise boundary fails closed
+✅ blob copied to sibling scope path does not decrypt
+✅ replay from public memories preserves secret semantics
+✅ Secret blob hardening contract suite passed
+
+✅ FIRETEST :: contracts-summary completed in 260.84ms
+
+========================================================
+.me FIRETEST SUMMARY
+========================================================
+
+✅ phases                 285.94ms
+✅ reconstruction         167.59ms
+✅ secret-material-v3     137.04ms
+✅ secret-blob-v3.read    145.29ms
+✅ secret-blob-v3.write   133.29ms
+✅ benchmark.1            601.69ms
+✅ benchmark.2            2084.09ms
+✅ benchmark.3            1327.41ms
+✅ benchmark.4            1030.28ms
+✅ benchmark.5            501.65ms
+✅ benchmark.6            525.57ms
+✅ benchmark.7            402.60ms
+✅ benchmark.8            395.82ms
+✅ benchmark.9            1200.29ms
+✅ benchmark.10           861.36ms
+✅ benchmark.11           1728.36ms
+✅ contracts-summary      260.84ms
+
+STATUS: ALL FIRETEST TASKS PASSED
