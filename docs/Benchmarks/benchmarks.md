@@ -7,9 +7,21 @@ mepath:
   - text: Benchmarks
     url: https://neurons-me.github.io/.me/docs/Benchmarks/
 crumb: Kernel
+scripts:
+  - /assets/kernel-timeline/kernel-timeline.js
 ---
 
 # .me Kernel — Benchmark Results
+
+## Cost across kernel versions
+
+Each line is one benchmark, measured on every kernel build from 3.9.1 to 4.2.0, plus an unreleased fix, on the same machine in interleaved rounds. **Relative** puts each line's first comparable build at 1.0, so a line going up means that version made the same work slower; **ms** shows the medians themselves. Hover or tap a version for its milliseconds and commit; the numbered markers explain the steps.
+
+<div class="kernel-timeline" data-src="{{ '/docs/Benchmarks/data/kernel-timeline.json' | relative_url }}" markdown="1">
+
+The interactive chart needs JavaScript. The same numbers, per build and benchmark, with the commit behind each step: [kernel-timeline.json]({{ '/docs/Benchmarks/data/kernel-timeline.json' | relative_url }}); how they were measured and how to add a version: [timeline/README.md](https://github.com/neurons-me/.me/tree/main/Typescript/tests/Benchmarks/timeline).
+
+</div>
 
 Run with: `node tests/fire.test.ts` (benchmarks section)
 

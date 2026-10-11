@@ -5,7 +5,8 @@
   CDN-failure fallback. With JS, /.me/assets/landing-gui/landing-gui.js (#static-landing[data-layout=doc]) renders the
   same content through GUI.mount: the shared topbar (brain, me:// path, search, theme, light/dark, gear with Inspector +
   Grid Layout), headings, tables, cards, and the code blocks through the .me highlighter (assets/me-syntax).
-  Front matter: title, description, image, mepath (list of {text, url} after me://), crumb (the last, current segment).
+  Front matter: title, description, image, mepath (list of {text, url} after me://), crumb (the last, current segment),
+  scripts (optional list of site paths loaded before landing-gui.js, e.g. /assets/kernel-timeline/kernel-timeline.js).
 {% endcomment %}
 <html lang="{{ page.lang | default: site.lang | default: 'en' }}">
 <head>
@@ -81,6 +82,7 @@
     {{ content }}
   </main>
 </div>
-<script src="{{ '/assets/landing-gui/landing-gui.js' | relative_url }}?v=8" onerror="document.documentElement.classList.remove('gui-boot')"></script>
+{% for s in page.scripts %}<script src="{{ s | relative_url }}"></script>
+{% endfor %}<script src="{{ '/assets/landing-gui/landing-gui.js' | relative_url }}?v=9" onerror="document.documentElement.classList.remove('gui-boot')"></script>
 </body>
 </html>

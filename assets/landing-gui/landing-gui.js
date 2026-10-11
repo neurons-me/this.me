@@ -11,6 +11,8 @@
 // Doc pages written in Markdown (_layouts/gui-doc.html: #static-landing[data-layout=doc]) render through the same
 // topbar; their rendered Markdown (headings, paragraphs, lists, tables, quotes, code, .doc-cards) becomes registry
 // nodes, and code blocks go through the .me highlighter (window.MeSyntax, assets/me-syntax) with theme colours.
+// A <div class="kernel-timeline" data-src="…json"> becomes the KernelTimeline chart when the page loads
+// assets/kernel-timeline/kernel-timeline.js (front matter `scripts`); without it the div's own Markdown stays.
 (function () {
   const html = document.documentElement, SRC = document.getElementById("static-landing"), ROOT = document.getElementById("root");
   const G = window.GUI;
@@ -364,6 +366,7 @@
       return N("MeCodeBlock", { code, lang });
     }
     if (b.classList.contains("doc-cards")) return docCards(b);
+    if (b.classList.contains("kernel-timeline") && window.KernelTimeline) return N("KernelTimeline", { src: b.getAttribute("data-src") });
     if (t === "div" || t === "section") return N("Box", { component: t }, blocks(b));
     return N("Box", { component: t, sx: { mb: 2 } }, inl(b));
   });
@@ -390,7 +393,7 @@
   const INSPECTOR_ON = params.get("inspector") === "1";
   if (G.getInspectorEnabled() !== INSPECTOR_ON) G.setInspectorEnabled(INSPECTOR_ON);
   G.mount(spec, ROOT, {
-    gui: { ...G, Theme: PageTheme, registry: { ...(G.Registry || G.registry), LandingTopBar, DocsCover, MeOrbMark, MeCodeBlock, DocCardCover } },
+    gui: { ...G, Theme: PageTheme, registry: { ...(G.Registry || G.registry), LandingTopBar, DocsCover, MeOrbMark, MeCodeBlock, DocCardCover, ...(window.KernelTimeline ? { KernelTimeline: window.KernelTimeline } : {}) } },
     devtools: { enabled: true, inspector: INSPECTOR_ON, adminView: false, inspectorToggleVisible: false },
   });
   html.classList.add("gui-on");
