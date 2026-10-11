@@ -1,0 +1,187 @@
+{
+ "ws.a": 6,
+ "ws.b": 6,
+ "ws.c": 6,
+ "ws.d": 6,
+ "ws.e": 14,
+ "ws.f": 11,
+ "ws.g": 1,
+ "ws.h": true,
+ "ws.i": false,
+ "ws.j": 1003,
+ "ws.k": 2,
+ "q": [
+  8,
+  8,
+  9
+ ],
+ "q2": [
+  71,
+  71
+ ],
+ "bad.b1": [
+  "<undef>",
+  "<undef>",
+  "{\"expr\":\"q +\",\"in\":[[\"t.q\",\"public\",false,3,\"resolved\"]],\"u\":{\"reason\":\"evaluation-failed\"}}",
+  "{\"expr\":\"q +\",\"in\":[[\"t.q\",\"public\",false,3,\"resolved\"]],\"u\":{\"reason\":\"evaluation-failed\"}}"
+ ],
+ "bad.b2": [
+  "<undef>",
+  "<undef>",
+  "{\"expr\":\"q ** 2\",\"in\":[[\"t.q\",\"public\",false,3,\"resolved\"]],\"u\":{\"reason\":\"evaluation-failed\"}}",
+  "{\"expr\":\"q ** 2\",\"in\":[[\"t.q\",\"public\",false,3,\"resolved\"]],\"u\":{\"reason\":\"evaluation-failed\"}}"
+ ],
+ "bad.b3": [
+  "<undef>",
+  "<undef>",
+  "{\"expr\":\"alert(1)\",\"in\":[[\"alert\",\"public\",false,null,\"missing\"]],\"u\":{\"reason\":\"missing-input\",\"inputs\":[\"t.alert\"]}}",
+  "{\"expr\":\"alert(1)\",\"in\":[[\"alert\",\"public\",false,null,\"missing\"]],\"u\":{\"reason\":\"missing-input\",\"inputs\":[\"t.alert\"]}}"
+ ],
+ "bad.b4": [
+  "<undef>",
+  "<undef>",
+  "{\"expr\":\"q q\",\"in\":[[\"t.q\",\"public\",false,3,\"resolved\"]],\"u\":{\"reason\":\"evaluation-failed\"}}",
+  "{\"expr\":\"q q\",\"in\":[[\"t.q\",\"public\",false,3,\"resolved\"]],\"u\":{\"reason\":\"evaluation-failed\"}}"
+ ],
+ "bad.b5": [
+  "<undef>",
+  "<undef>",
+  "{\"expr\":\"(q\",\"in\":[[\"t.q\",\"public\",false,3,\"resolved\"]],\"u\":{\"reason\":\"evaluation-failed\"}}",
+  "{\"expr\":\"(q\",\"in\":[[\"t.q\",\"public\",false,3,\"resolved\"]],\"u\":{\"reason\":\"evaluation-failed\"}}"
+ ],
+ "bad.b6": [
+  "<undef>",
+  "<undef>",
+  "{\"expr\":\"x[a > 1][]\",\"in\":[],\"u\":{\"reason\":\"evaluation-failed\",\"detail\":\"rejected-path-form\"}}",
+  "{\"expr\":\"x[a > 1][]\",\"in\":[],\"u\":{\"reason\":\"evaluation-failed\",\"detail\":\"rejected-path-form\"}}"
+ ],
+ "bad.b7": [
+  "<undef>",
+  "<undef>",
+  "{\"expr\":\"z[ ].w\",\"in\":[[\"[\\\"z[ ]\\\"].w\",\"public\",false,null,\"missing\"]],\"u\":{\"reason\":\"evaluation-failed\",\"detail\":\"rejected-path-form\"}}",
+  "{\"expr\":\"z[ ].w\",\"in\":[[\"[\\\"z[ ]\\\"].w\",\"public\",false,null,\"missing\"]],\"u\":{\"reason\":\"evaluation-failed\",\"detail\":\"rejected-path-form\"}}"
+ ],
+ "bad.b8": [
+  "<undef>",
+  "<undef>",
+  "{\"expr\":\"z.[\\\"[]\\\"].w\",\"in\":[[\"z\",\"public\",false,null,\"missing\"],[\"w\",\"public\",false,null,\"missing\"]],\"u\":{\"reason\":\"evaluation-failed\",\"detail\":\"rejected-path-form\"}}",
+  "{\"expr\":\"z.[\\\"[]\\\"].w\",\"in\":[[\"z\",\"public\",false,null,\"missing\"],[\"w\",\"public\",false,null,\"missing\"]],\"u\":{\"reason\":\"evaluation-failed\",\"detail\":\"rejected-path-form\"}}"
+ ],
+ "bad.b9": [
+  "<undef>",
+  "<undef>",
+  "{\"expr\":\"1e\",\"in\":[[\"e\",\"public\",false,null,\"missing\"]],\"u\":{\"reason\":\"missing-input\",\"inputs\":[\"t.e\"]}}",
+  "{\"expr\":\"1e\",\"in\":[[\"e\",\"public\",false,null,\"missing\"]],\"u\":{\"reason\":\"missing-input\",\"inputs\":[\"t.e\"]}}"
+ ],
+ "bad.b10": [
+  "<undef>",
+  "<undef>",
+  "{\"expr\":\"missing + 1\",\"in\":[[\"missing\",\"public\",false,null,\"missing\"]],\"u\":{\"reason\":\"missing-input\",\"inputs\":[\"t.missing\"]}}",
+  "{\"expr\":\"missing + 1\",\"in\":[[\"missing\",\"public\",false,null,\"missing\"]],\"u\":{\"reason\":\"missing-input\",\"inputs\":[\"t.missing\"]}}"
+ ],
+ "twoKernels": [
+  15,
+  200
+ ],
+ "flip0": [
+  6,
+  6
+ ],
+ "flip1": [
+  "<undef>",
+  2,
+  "<undef>",
+  6,
+  6,
+  "{\"v\":6,\"expr\":\"q * fin.price\",\"in\":[[\"p.q\",\"public\",false,3,\"resolved\"],[\"fin.price\",\"stealth\",true,\"●●●●\",\"masked\"]]}"
+ ],
+ "flip2": [
+  9,
+  "{\"v\":9,\"expr\":\"q * fin.price\",\"in\":[[\"p.q\",\"public\",false,3,\"resolved\"],[\"fin.price\",\"stealth\",true,\"●●●●\",\"masked\"]]}"
+ ],
+ "snap": [
+  "<undef>",
+  "<undef>",
+  9,
+  "<undef>",
+  6
+ ],
+ "replay": [
+  "<undef>",
+  "<undef>",
+  9,
+  "<undef>",
+  6
+ ],
+ "removed": [
+  "<undef>",
+  "<undef>",
+  6,
+  "{\"expr\":\"q * fin.price\",\"in\":[[\"p.q\",\"public\",false,3,\"resolved\"],[\"fin.price\",\"public\",false,null,\"missing\"]],\"u\":{\"reason\":\"missing-input\",\"inputs\":[\"p.fin.price\"]}}"
+ ],
+ "root0": [
+  1,
+  2
+ ],
+ "root1": [
+  1,
+  2,
+  5,
+  10,
+  "<undef>",
+  "<undef>",
+  "<undef>",
+  "{\"v\":10,\"expr\":\"c * 2\",\"in\":[[\"c\",\"public\",false,5,\"resolved\"]]}"
+ ],
+ "root2": [
+  null,
+  10,
+  "<undef>"
+ ],
+ "nested": [
+  "<undef>",
+  6,
+  "<undef>",
+  "<undef>",
+  "{\"expr\":\"root.child.leaf + 1\",\"in\":[[\"root.child.leaf\",\"stealth\",true,\"●●●●\",\"masked\"]],\"u\":{\"reason\":\"missing-input\",\"inputs\":[\"pub.root.child.leaf\"]}}"
+ ],
+ "ptr": [
+  20,
+  22
+ ],
+ "agg": [
+  10,
+  20,
+  10,
+  "{\"v\":10,\"expr\":\"items[].n\",\"in\":[[\"items[].n\",\"public\",false,10,\"resolved\"]]}",
+  28,
+  56,
+  100
+ ],
+ "bc": [
+  9.900990099009901,
+  19.607843137254903,
+  29.12621359223301,
+  0.049019607843137254
+ ],
+ "inh.toString": [
+  7,
+  "<undef>"
+ ],
+ "inh.valueOf": [
+  7,
+  "<undef>"
+ ],
+ "inh.constructor": [
+  7,
+  "<undef>"
+ ],
+ "evict": [
+  0,
+  3,
+  6000,
+  12285,
+  12288,
+  12597
+ ]
+}

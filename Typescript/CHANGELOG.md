@@ -1,5 +1,63 @@
 # TypeScript .me Changelog
 
+## 4.2.1
+
+Performance release. **No behavior change**: every value, `explain()` result, memory, hash and snapshot is the
+same as 4.2.0 (differential run of 40+ probes, byte-identical output; all axioms, phases and suites green).
+Audit against every axiom and phase: [tests/audits/4.2.1/README.md](tests/audits/4.2.1/README.md).
+
+### Changed: each formula text is compiled once, per kernel
+
+Before, every recompute re-tokenized the formula text (and since 4.2.0 also tried the `[]` aggregate grammar on
+every name) and rebuilt its postfix form, so every recomputed dependent paid it. Now:
+
+- The tokenizer tables are built once, and the compiled postfix form of a formula is memoized by its exact text
+  (after the same trim and grammar check as before, and after the `unsafeEval` check). The memo holds only what
+  comes from the text: no values, no scope, no reader. Every input is still read at evaluation time.
+- The memo is **per kernel** (one `ME` instance), its entries are frozen, and it is cleared whenever the secret
+  epoch changes (a scope declared or removed, an identity transition, `hydrate`, lock). So one kernel cannot see,
+  even by timing, which formulas another kernel or a previous identity compiled. Bounded at 4,096 texts per kernel
+  (cleared when full; eviction only costs a recompile).
+
+### Changed: no-scope fast path in `resolveBranchScope`
+
+With no secret scope declared, the scope lookup no longer goes through the 256-entry scope LRU (which thrashed when a
+wave touched thousands of public paths). It does the same prefix lookups as before, so the answer is the same for
+every path; with any scope declared, the old cached walk runs unchanged.
+
+### Measured
+
+Kernel timeline (`docs/Benchmarks/data/kernel-timeline.json`, 2026-10-10, 6 interleaved rounds, Xeon 8 vCPU,
+Node 22.23.3; medians, 4.2.0 → 4.2.1, same `dist/` as published):
+
+| | 4.2.0 | 4.2.1 | |
+|---|---|---|---|
+| Eager fan-out, 2,000 deps (one write) | 57.1 ms | 40.3 ms | −29% |
+| #6 fan-out 1,000 / 5,000 | 27.5 / 155.2 ms | 19.1 / 110.8 ms | −30% / −29% |
+| #7 steady, 1,000 nodes | 33.3 ms | 23.8 ms | −29% |
+| #10 eager write, 1,000 | 28.0 ms | 19.7 ms | −30% |
+| Steady single write, 2,000 nodes | 0.073 ms | 0.049 ms | −32% |
+| #9 public read, 600 | 0.034 ms | 0.026 ms | −23% |
+| #9 / #11 secret read, 600 | 0.97 / 0.94 ms | 0.93 / 0.88 ms | −5% / −6% |
+| First write after a build (1–4 style) | 0.68 ms | 0.65 ms | warm-up, unchanged |
+
+Eager fan-out is back below the 4.1.0 level. With a secret scope present the 2,000-dependent write still drops by
+about 25%; in the worst case (a new `_` scope before every write, so the memo is cleared each time) it is never
+slower than 4.2.0.
+
+### Known, unchanged
+
+- Object.prototype names used as the first path segment (`toString`, `valueOf`, `constructor`, …) count as a
+  secret scope in the scope walk, because the scope map is a plain object (e.g. a replayed write at `toString.x`
+  is owner-only). This is 4.2.0 behavior, kept exactly as it is in 4.2.1; it will be fixed separately because the
+  fix changes behavior.
+- The four KNOWN FAIL cases (#5 numeric segment after a dot ×2, #6 path identity ×2) are unchanged.
+
+### Tests
+
+- `tests/eval-compile-cache.test.ts` (unit, 11) and `tests/perf-fix-kernel.test.ts` (kernel, 10; with
+  `PERF_FIX_BASELINE=1` its 9 behavior tests also pass on 4.2.0), run by `npm run test:perf-fix` and `npm test`.
+
 ## 4.2.0
 
 Adds the collection aggregate `[]` (`me("x[]")` = count, `me("x[].f")` = exact

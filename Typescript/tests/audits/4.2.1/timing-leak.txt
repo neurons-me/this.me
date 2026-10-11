@@ -1,0 +1,13 @@
+2659ff7 {"medianRatioSeenOverFresh":0.973,"min":0.729,"max":1.05}
+global-memo {"medianRatioSeenOverFresh":0.803,"min":0.569,"max":0.977}
+per-kernel {"medianRatioSeenOverFresh":0.964,"min":0.631,"max":1.051}
+2659ff7 {"medianRatioSeenOverFresh":0.997,"min":0.873,"max":1.04}
+global-memo {"medianRatioSeenOverFresh":0.807,"min":0.539,"max":1.208}
+per-kernel {"medianRatioSeenOverFresh":0.985,"min":0.814,"max":1.55}
+2659ff7 {"medianRatioSeenOverFresh":1.002,"min":0.744,"max":1.655}
+global-memo {"medianRatioSeenOverFresh":0.795,"min":0.605,"max":0.959}
+per-kernel {"medianRatioSeenOverFresh":0.966,"min":0.86,"max":1.054}
+2659ff7 {"medianRatioSeenOverFresh":0.978,"min":0.847,"max":1.077}
+branch {"medianRatioSeenOverFresh":0.966,"min":0.601,"max":1.508}
+2659ff7 {"medianRatioSeenOverFresh":0.966,"min":0.715,"max":1.2}
+branch {"medianRatioSeenOverFresh":1.01,"min":0.595,"max":1.042}
