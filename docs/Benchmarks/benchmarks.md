@@ -2,7 +2,7 @@
 layout: gui-doc
 title: ".me — Kernel benchmarks"
 image: https://suign.github.io/assets/imgs/me.png
-description: "Reactive recompute benchmarks for the .me kernel: growth with k, fan-out, ratios. Re-measured 2026-09-26 after the reference-resolution fix."
+description: "Reactive recompute benchmarks for the .me kernel: growth with k, fan-out, ratios. Re-run on this.me 4.2.0 on 2026-10-10 against the earlier builds on the same machine."
 mepath:
   - text: Benchmarks
     url: https://neurons-me.github.io/.me/docs/Benchmarks/
@@ -16,13 +16,53 @@ Run with: `node tests/fire.test.ts` (benchmarks section)
 All benchmarks measure the kernel's reactive recompute engine under realistic conditions.
 Hardware-agnostic: times will vary per machine — what matters is the **shape** (growth with `k`, ratios).
 
-### Measurement correction (2026-09-26)
+## Re-run on this.me 4.2.0 (2026-10-10)
+
+All of 1–11 and the fire test were re-run on 4.2.0, and the builds behind the published numbers were re-run next to it on the same machine: 3.9.1 for 1–4, the pre-4.1.0 build with the reference fix for 5–11. 5 rounds alternating the builds, medians. Machine: shared Linux VM, Intel Xeon 8 vCPU, 16 GiB, Node 22.23.3. It is about 2× slower than the M2 behind the published 5–11 numbers, so compare the last column, not the milliseconds. Logs, script and medians: [results/kernel-v4.2.0/](https://github.com/neurons-me/.me/tree/main/Typescript/tests/Benchmarks/results/kernel-v4.2.0).
+
+**What did not change:** every k is identical (k = 2 in 1–4, k = fan-out in 6 and 10 eager, k = 1 lazy), latency still grows linearly with k, and all 17 fire-test tasks pass. 4.2.0 also runs 7 new pointer contract tests and the stricter secret-replay contracts.
+
+**Benchmarks 1–4: 4.2.0 against 3.9.1** (one write each, ms)
+
+| benchmark | published (3.9.x) | 3.9.1, this machine | 4.2.0, this machine | 4.2.0 / 3.9.1 |
+|---|---:|---:|---:|---:|
+| #1 write, N = 5,000 (k = 2) | 0.054 | 0.115 | 0.170 | 1.48× |
+| #2 write, n = 10,000 (k = 2) | 0.052 | 0.109 | 0.138 | 1.26× |
+| #3 write, n = 10,000 (k = 2) | 0.079 | 0.133 | 0.362 | 2.73× |
+| #4 deep nesting, 500 levels (k = 2) | 13.2 | 19.3 | 20.9 | 1.08× |
+| #4 wide broadcast, 1,000 (k = 2) | 0.086 | 0.204 | 0.275 | 1.35× |
+| #4 financial, 5,000 tx (k = 2) | 0.079 | 0.167 | 0.358 | 2.14× |
+
+**Benchmarks 5–11: 4.2.0 against the pre-4.1.0 build** (ms)
+
+| benchmark | published (M2) | pre-4.1.0, this machine | 4.2.0, this machine | 4.2.0 / pre-4.1.0 |
+|---|---:|---:|---:|---:|
+| #5 sustained writes, p50 (k = 4,000) | 65.7 | 134 | 139 | 1.04× |
+| #5 sustained writes, p95 | 103 | 180 | 200 | 1.11× |
+| #6 fan-out 100, p50 | 1.19 | 2.09 | 2.26 | 1.08× |
+| #6 fan-out 1,000, p50 | 12.0 | 22.2 | 25.3 | 1.14× |
+| #6 fan-out 5,000, p50 | 69.9 | 141 | 154 | 1.09× |
+| #7 warm write, 5,000 | 104 | 146 | 181 | 1.24× |
+| #7 steady write, 5,000 | 103 | 172 | 177 | 1.03× |
+| #8 write + read, 3,000 deps, p50 | 42.9 | 79.6 | 91.5 | 1.15× |
+| #9 secret branch, p95 | 0.604 | 1.62 | 1.64 | 1.02× |
+| #10 eager write, fan-out 5,000 | 69.8 | 138 | 163 | 1.18× |
+| #10 eager first read, 5,000 | 0.020 | 0.057 | 0.039 | 0.68× |
+| #10 lazy write, 5,000 | 0.003 | 0.004 | 0.005 | 1.05× |
+| #10 lazy first read, 5,000 | 0.017 | 0.025 | 0.026 | 1.04× |
+| #11 secret read p95, 600 | 0.550 | 1.49 | 1.34 | 0.90× |
+
+Ratios on 4.2.0 (same machine, pre-4.1.0 in brackets): #5 windowed p95 drift +38% (+35%), first-to-last window p50 +36% (+32%); #8 `explain()` p95 overhead −7% (+15%), within noise; #9 secret p95 ≈ 13.7× public (12.4×); #11 secret/public read p95 6.9× / 13.7× / 22.7× at 100 / 300 / 600 nodes (9.6× / 11.0× / 34.7×).
+
+**Regressions:** eager writes are 4–24% slower than on the pre-4.1.0 build (most rows 8–18%). The single writes in 1–4 are 1.08–2.7× slower than on 3.9.1 (+0.03 to +0.23 ms for the sub-millisecond ones); for #1, #3 and #4 financial the 5-round ranges do not overlap. The largest gaps are the first write after building a large dataset (#3 at 10,000 nodes, #4 at 5,000), so part of the cost may grow with N; that needs a bisect between 4.1.0 and 4.2.0. **Improvements:** eager first reads are ~30% faster (#10), and secret reads at 600 nodes ~10% faster (#11); #9 is unchanged.
+
+The sections below are the previously published numbers: 1–4 from 3.9.x (2026-06-08), 5–11 from the pre-4.1.0 build (2026-09-26, Apple M2). The full fire-test output is on the [Fire test](../Tests/fire.test.html) page; the GTFS runs are under [GTFS-Madrid](GTFS/Madrid/).
+
+## Measurement correction (2026-09-26)
 
 Benchmarks 5–11 and the regression gate previously measured writes that recomputed nothing. Their formulas read a root-level name without a dot (`"value * master"`, `"value * factor"`, `"base * rate"`), and a reference-resolution bug subscribed those derivations to the wrong path, so writing the input never triggered a recompute. Latency therefore did not grow with fan-out, and several tables showed it *falling* as fan-out grew. The bug is fixed (see `Typescript/CHANGELOG.md`) and the numbers below for 5–11 are re-measured. Benchmarks 1–4 write each node's own relative `value`, were not affected, and are unchanged.
 
 Methodology for the re-measured benchmarks: 5 rounds on the same machine, alternating the pre-fix and post-fix builds within each round; each value is the median across the 5 rounds. Machine: Apple M2, 8 GB RAM, macOS (Darwin 25.5), Node v24.13.1.
-
-> **Kernel versions.** Benchmarks 1–4 come from a this.me 3.9.x run (2026-06-08, machine not recorded). Benchmarks 5–11 were measured on 2026-09-26 with the build carrying the reference fix, before its 4.1.0 release. None of them has been re-run on 4.2.0; a 4.2.0 re-run is in progress. The 4.2.0 runs so far are [GTFS-Madrid](GTFS/Madrid/). The full fire-test output is on the [Fire test](../Tests/fire.test.html) page.
 
 ---
 
