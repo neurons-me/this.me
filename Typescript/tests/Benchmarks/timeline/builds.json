@@ -1,0 +1,19 @@
+{
+  "_doc": "Builds on the kernel timeline, in release order. id = the label used in raw.jsonl. kind: release (published on npm), commit (between releases), unreleased (a branch, drawn dashed). npm = the npm version whose dist/me.es.js is byte-identical to this build, when one is.",
+  "builds": [
+    { "id": "1bc5227", "sha": "1bc5227", "version": "3.9.1", "label": "3.9.1", "kind": "release", "date": "2026-06-08", "npm": "3.9.1", "subject": "Tests (3.9.1, the build behind the published 1-4 numbers)" },
+    { "id": "2a173b7", "sha": "2a173b7", "version": "4.0.2+", "label": "4.0.2 + ref fix", "kind": "commit", "date": "2026-09-26", "subject": "bench: re-measure 5-11 after the ref fix (the build behind the published 5-11 numbers)" },
+    { "id": "8976ad3", "sha": "8976ad3", "version": "4.0.2+", "label": "8976ad3", "kind": "commit", "date": "2026-09-26", "subject": "fix(derivation): topological recompute, early cutoff, removals, cycles" },
+    { "id": "0f35790", "sha": "0f35790", "version": "4.1.0", "label": "4.1.0", "kind": "release", "date": "2026-09-27", "npm": "4.1.0 (and 4.1.5, same dist)", "subject": "test(derivation): cache invalidation, near-flat, known-failing; 4.1.0" },
+    { "id": "1c10006", "sha": "1c10006", "version": "4.1.0+", "label": "1c10006", "kind": "commit", "date": "2026-10-09", "subject": "Derivations follow pointer targets (fix known issue #4)" },
+    { "id": "c573192", "sha": "c573192", "version": "4.1.0+", "label": "c573192", "kind": "commit", "date": "2026-10-09", "subject": "4.2 S2: path parser for the collection aggregate []" },
+    { "id": "8c9d725", "sha": "8c9d725", "version": "4.1.0+", "label": "8c9d725", "kind": "commit", "date": "2026-10-09", "subject": "4.2 S2 review: grammar-driven routing, invalid []-forms never write, historical _ scope" },
+    { "id": "7a5a6f2", "sha": "7a5a6f2", "version": "4.1.0+", "label": "7a5a6f2", "kind": "commit", "date": "2026-10-09", "subject": "fix(secrets): stealth-block root-scope me[\"_\"] for guests" },
+    { "id": "18c9a41", "sha": "18c9a41", "version": "4.1.0+", "label": "18c9a41", "kind": "commit", "date": "2026-10-09", "subject": "4.2 S2 close: reject z.[\"[]\"].w, per-input causes with fixed precedence" },
+    { "id": "723bac4", "sha": "723bac4", "version": "4.1.0+", "label": "723bac4", "kind": "commit", "date": "2026-10-09", "subject": "4.2 S3: reference evaluator for [] (public view, exact sum rounded once)" },
+    { "id": "2b4b1fe", "sha": "2b4b1fe", "version": "4.1.0+", "label": "2b4b1fe", "kind": "commit", "date": "2026-10-09", "subject": "4.2 S3 close: public-only lazy refresh, invisible aggregate formulas" },
+    { "id": "9bac96a", "sha": "9bac96a", "version": "4.1.0+", "label": "9bac96a", "kind": "commit", "date": "2026-10-09", "subject": "deprecate(ME): withScope, migrate to as(); keep export" },
+    { "id": "2659ff7", "sha": "2659ff7", "version": "4.2.0", "label": "4.2.0", "kind": "release", "date": "2026-10-09", "npm": "4.2.0", "subject": "release: this.me 4.2.0 ([] aggregates, #4 pointer fix, root-scope _ stealth fix)" },
+    { "id": "b43cb05", "sha": "b43cb05", "version": "unreleased", "label": "eval cache (unreleased)", "kind": "unreleased", "date": "2026-10-10", "branch": "perf/eval-compile-cache", "subject": "perf: compile each formula text once (per-kernel memo, cleared on secret epoch) + no-scope fast path in resolveBranchScope; not merged, not on npm" }
+  ]
+}

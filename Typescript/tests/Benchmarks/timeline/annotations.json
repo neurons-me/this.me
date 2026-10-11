@@ -1,0 +1,17 @@
+{ "annotations": [
+  { "at": "2a173b7", "commits": ["1bc5227..2a173b7"],
+    "title": "Fan-out and secret lines start here (reference fix)",
+    "text": "3.9.1 resolves references wrongly in the fan-out and secret shapes and recomputes nothing there, so its near-zero times are skipped work, not speed; those lines start at this build. On the shapes 3.9.1 does run, cost already rose over the 220 commits to 4.0.2 + the fix (not bisected): steady single write +15%, plain write +35%." },
+  { "at": "8976ad3", "commits": ["8976ad3"],
+    "title": "Topological recompute + early cutoff",
+    "text": "Every write now does the ordering and cutoff bookkeeping, a fixed cost per write and per formula: plain writes +41%, the first write after a build +34%, write + read on a fan-out +5 to +10% (#6, #7). Write-only fan-out (#10, 2,000 deps) stays within noise. The steady single write does not move here." },
+  { "at": "c573192", "commits": ["c573192", "8c9d725"],
+    "title": "Path parser for the [] aggregate",
+    "text": "The new [] grammar tokenizes the path again each time a formula is evaluated, so every recomputed dependent pays it: +7 to +10% on every fan-out line and +17% on the steady single write, the clearest step between 4.1.0 and 4.2.0. 8c9d725 (grammar-driven routing) takes back about 2%." },
+  { "at": "723bac4", "commits": ["723bac4", "2b4b1fe", "9bac96a"],
+    "title": "Small drift through the 4.2 S3 commits",
+    "text": "The [] reference evaluator, the public-only lazy refresh and the withScope deprecation add +6 to +8% each to the steady single write (each step inside the run-to-run range); the fan-out lines stay flat. 4.2.0 itself only adds docs, so its −6% is noise." },
+  { "at": "b43cb05", "commits": ["b43cb05"],
+    "title": "Unreleased fix: compile each formula once",
+    "text": "Branch perf/eval-compile-cache (not merged, not on npm): a per-kernel memo of the compiled formula, cleared when the secret epoch changes, plus a fast path in resolveBranchScope when no secret scope exists. Every eager line drops 29 to 30% (2,000 deps: 57 → 40 ms), below the 4.1.0 level, and the steady single write drops 32%. Secret reads move only −5%, and the first write after a build is unchanged: that cost is warm-up, not evaluation." }
+] }
