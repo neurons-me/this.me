@@ -159,6 +159,7 @@ function collectLineageSegments(
 export function bumpSecretEpoch(self: MEKernelLike): void {
   self.secretEpoch++;
   self.scopeCache.clear();
+  self.compiledEvalMemo?.clear();
   self.effectiveSecretCache.clear();
   self.decryptedBranchCache.clear();
   self.writeBranchCache.clear();
@@ -229,11 +230,21 @@ export function computeEffectiveSecret(self: MEKernelLike, path: SemanticPath): 
 }
 
 export function resolveBranchScope(self: MEKernelLike, path: SemanticPath): SemanticPath | null {
-  // No secret scope declared anywhere: no path has a scope. Same answer as the walk below, without the cache churn
-  // (the 256-entry LRU thrashes when a wave touches thousands of public paths).
+  // No enumerable secret scope: answer with the same lookups as the walk below (inherited keys of the map included, so
+  // the result is identical for every path), without the scope cache. The 256-entry LRU only memoizes this function
+  // and thrashes when a wave touches thousands of public paths. As soon as one scope exists, the cached walk runs.
   let anySecret = false;
   for (const _key in self.localSecrets) { anySecret = true; break; }
-  if (!anySecret) return null;
+  if (!anySecret) {
+    let best: SemanticPath | null = self.localSecrets[""] ? [] : null;
+    let k = "";
+    for (let i = 0; i < path.length; i++) {
+      const seg = path[i] == null ? "" : String(path[i]);   // Array.prototype.join's rendering of each element
+      k = i === 0 ? seg : k + "." + seg;
+      if (self.localSecrets[k]) best = path.slice(0, i + 1);
+    }
+    return best;
+  }
   const pathKey = path.join(".");
   const hit = self.scopeCache.get(pathKey);
   if (hit && hit.epoch === self.secretEpoch) {

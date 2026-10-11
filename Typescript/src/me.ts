@@ -303,6 +303,7 @@ export class ME {
   private activeRecomputeWave!: MERecomputeWave | null;
   private secretEpoch!: number;
   private scopeCache!: Map<string, MEBranchScopeCacheEntry>;
+  private compiledEvalMemo!: Map<string, unknown>;
   private effectiveSecretCache!: Map<string, MEEffectiveSecretCacheEntry>;
   private decryptedBranchCache!: Map<string, MEDecryptedBranchCacheEntry>;
   private writeBranchCache!: Map<string, MEDecryptedBranchCacheEntry>;

@@ -73,6 +73,8 @@ export type SecretState = {
   recipientKeyring: Record<string, CryptoKey>;
   secretEpoch: number;
   scopeCache: Map<string, MEBranchScopeCacheEntry>;
+  /** Compiled formula text of this kernel (evaluator.ts). Text-only; cleared with the other caches on every secret epoch. */
+  compiledEvalMemo: Map<string, unknown>;
   effectiveSecretCache: Map<string, MEEffectiveSecretCacheEntry>;
   decryptedBranchCache: Map<string, MEDecryptedBranchCacheEntry>;
   writeBranchCache: Map<string, MEDecryptedBranchCacheEntry>;
@@ -144,6 +146,7 @@ export function createInitialKernelState(options: MEOptions = {}): KernelState {
       recipientKeyring: {},
       secretEpoch: 0,
       scopeCache: new Map(),
+      compiledEvalMemo: new Map(),
       effectiveSecretCache: new Map(),
       decryptedBranchCache: new Map(),
       writeBranchCache: new Map(),

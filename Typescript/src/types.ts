@@ -861,6 +861,7 @@ export interface MEKernelLike extends Record<string, any> {
   activeRecomputeWave: MERecomputeWave | null;
   secretEpoch: number;
   scopeCache: Map<string, MEBranchScopeCacheEntry>;
+  compiledEvalMemo?: Map<string, unknown>;
   effectiveSecretCache: Map<string, MEEffectiveSecretCacheEntry>;
   decryptedBranchCache: Map<string, MEDecryptedBranchCacheEntry>;
   writeBranchCache: Map<string, MEDecryptedBranchCacheEntry>;

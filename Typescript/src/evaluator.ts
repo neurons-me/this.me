@@ -190,17 +190,38 @@ type CompiledToken =
   | { kind: "aggregate"; value: string; ref: AggregateRef }
   | { kind: "op"; value: string };
 
-// Compiled (postfix) form of formula text. It depends only on the text, never on values, scope or caller, so it is
-// cached by the exact text; evaluation still reads every input at evaluation time. Bounded: cleared when full.
-const COMPILED = new Map<string, ReadonlyArray<CompiledToken> | null>();
-const COMPILED_MAX = 4096;
+// Compiled (postfix) form of formula text. It depends only on the text (after the same trim and grammar check as
+// before), never on values, scope, caller or identity, so it is memoized by the exact text; evaluation still reads
+// every input at evaluation time. The memo is PER KERNEL (kernel state `compiledEvalMemo`, shared by the kernel and
+// its proxy), so one kernel can never observe, through results or timing, which formulas another kernel compiled;
+// it is cleared with the other caches on every secret epoch (scope changes, identity transitions, hydrate, lock).
+// Entries are frozen. Bounded: cleared when full (eviction only costs a recompile).
+export const COMPILED_EVAL_MAX = 4096;
+type CompiledMemo = Map<string, ReadonlyArray<CompiledToken> | null>;
+// Callers that are not full kernels (no `compiledEvalMemo`) get a memo of their own, weakly held.
+const FALLBACK_MEMOS = new WeakMap<object, CompiledMemo>();
 
-function compileEvalExpression(raw: string): ReadonlyArray<CompiledToken> | null {
-  const hit = COMPILED.get(raw);
-  if (hit !== undefined || COMPILED.has(raw)) return hit ?? null;
+function memoOf(self: object, create: boolean): CompiledMemo | undefined {
+  const own = (self as { compiledEvalMemo?: unknown }).compiledEvalMemo;
+  if (own instanceof Map) return own as CompiledMemo;
+  let memo = FALLBACK_MEMOS.get(self);
+  if (!memo && create) FALLBACK_MEMOS.set(self, (memo = new Map()));
+  return memo;
+}
+
+/** @internal Test hook: the compile memo of one kernel (undefined until it compiled something). */
+export function _compiledEvalMemo(self: object): ReadonlyMap<string, ReadonlyArray<CompiledToken> | null> | undefined {
+  return memoOf(self, false);
+}
+
+function compileEvalExpression(self: object, raw: string): ReadonlyArray<CompiledToken> | null {
+  const memo = memoOf(self, true)!;
+  const hit = memo.get(raw);
+  if (hit !== undefined) return hit;
+  if (memo.has(raw)) return null;
   const compiled = compileUncached(raw);
-  if (COMPILED.size >= COMPILED_MAX) COMPILED.clear();
-  COMPILED.set(raw, compiled);
+  if (memo.size >= COMPILED_EVAL_MAX) memo.clear();
+  memo.set(raw, compiled);
   return compiled;
 }
 
@@ -296,7 +317,8 @@ function compileUncached(raw: string): ReadonlyArray<CompiledToken> | null {
     out.push(top);
   }
 
-  return out;
+  for (const t of out) Object.freeze(t);
+  return Object.freeze(out);
 }
 
 export function tryEvaluateAssignExpression(
@@ -312,7 +334,7 @@ export function tryEvaluateAssignExpression(
   if (!/^[A-Za-z0-9_\s+\-*/%().<>=!&|\[\]"']+$/.test(raw)) return { ok: false };
   if (self.unsafeEval) return { ok: false };
 
-  const out = compileEvalExpression(raw);
+  const out = compileEvalExpression(self, raw);
   if (!out) return { ok: false };
 
   const toFiniteNumber = (v: any): number | null => {
