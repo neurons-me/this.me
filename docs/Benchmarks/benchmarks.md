@@ -1,8 +1,8 @@
 ---
 layout: gui-doc
 title: ".me — Kernel benchmarks"
-image: https://suign.github.io/assets/imgs/me.png
-description: "Reactive recompute benchmarks for the .me kernel: growth with k, fan-out, ratios. Re-run on this.me 4.2.0 on 2026-10-10 against the earlier builds on the same machine; timeline through 4.2.1."
+image: https://neurons-me.github.io/.me/docs/assets/kernel-timeline-og.jpg
+description: "How the cost of each .me kernel benchmark moved across versions, 3.9.1 through 4.2.1 (latest on npm), measured on one machine."
 mepath:
   - text: Benchmarks
     url: https://neurons-me.github.io/.me/docs/Benchmarks/
