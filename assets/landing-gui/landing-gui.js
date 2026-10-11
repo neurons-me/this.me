@@ -394,8 +394,13 @@
   const PageTheme = ({ children }) => h(G.Theme, { initialThemeId: "neurons.me", initialMode: mode }, children);
   const INSPECTOR_ON = params.get("inspector") === "1";
   if (G.getInspectorEnabled() !== INSPECTOR_ON) G.setInspectorEnabled(INSPECTOR_ON);
+  // Pages with the fan-out viz attach its live kernel facade (window.FanoutKernel: explain() only, answered by a
+  // this.me in a Web Worker) so the Inspector's Explain reads real kernel truth for its slices. render/RunMe are left
+  // out there so mount() does not wrap that facade in a full runtime (these pages never had one).
+  const FK = docPage && window.FanoutKernel && document.querySelector(".fanout-viz") ? window.FanoutKernel : null;
   G.mount(spec, ROOT, {
-    gui: { ...G, Theme: PageTheme, registry: { ...(G.Registry || G.registry), LandingTopBar, DocsCover, MeOrbMark, MeCodeBlock, DocCardCover, ...(window.KernelTimeline ? { KernelTimeline: window.KernelTimeline } : {}), ...(window.FanoutViz ? { FanoutViz: window.FanoutViz } : {}) } },
+    ...(FK ? { me: FK } : {}),
+    gui: { ...G, ...(FK ? { render: undefined, RunMe: undefined } : {}), Theme: PageTheme, registry: { ...(G.Registry || G.registry), LandingTopBar, DocsCover, MeOrbMark, MeCodeBlock, DocCardCover, ...(window.KernelTimeline ? { KernelTimeline: window.KernelTimeline } : {}), ...(window.FanoutViz ? { FanoutViz: window.FanoutViz } : {}) } },
     devtools: { enabled: true, inspector: INSPECTOR_ON, adminView: false, inspectorToggleVisible: false },
   });
   html.classList.add("gui-on");

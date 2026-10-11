@@ -8,12 +8,12 @@ mepath:
     url: https://neurons-me.github.io/.me/docs/
 crumb: Fan-Out
 scripts:
-  - /assets/fanout-viz/fanout-viz.js?v=1.2.0
+  - /assets/fanout-viz/fanout-viz.js?v=2.0.0
 ---
 
 # Extreme Fan-Out
 
-> One write. 100,000 dependents. All of them update — because they all actually depend on what changed.
+> One write. 100,000 dependents recompute — and nothing else does.
 
 <div class="fanout-viz" data-n="100000" data-caption="1 write → 100,000 dependents" markdown="1">
 **1 write → 100,000 dependents.** One value at the centre, one line per derived value that reads it.

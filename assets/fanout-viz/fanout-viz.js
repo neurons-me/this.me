@@ -1,4 +1,4 @@
-/*! fanout-viz 1.2.0 · .me extreme fan-out, one write → N dependents · MIT · neurons.me
+/*! fanout-viz 2.0.0 · .me extreme fan-out, one write → N dependents · MIT · neurons.me
  * A radial canvas illustration ported from the "Fan-Out Extreme" section of
  * https://neurons-me.github.io/Inverted-Dependency-Indexing-Beautiful-Viz.html, with the same rendering parameters:
  * lines from the centre at angle i/N·2π ± 0.0075 rad, length 55–100% of a radius of 42% of the canvas, 0.5 px wide
@@ -20,7 +20,18 @@
  *   page's theme attributes change (only the colour pass is redone); teal/gold/orange are lifted on dark backgrounds.
  * - Size: square, as wide as its container up to 520 px (works at 390 px); device-pixel ratio capped at 2.
  * landing-gui.js renders <div class="fanout-viz" data-n="100000" data-caption="…"> as this component (FanoutViz).
- * It is an illustration of the shape of the work (k = N), not a measurement.
+ * The canvas is an illustration of the shape of the work (k = N), not a measurement.
+ * 2.0 adds, around the same picture:
+ * - .GUI parts: the figure is the FanoutViz node; its centre (master.factor) and 128 angular slices are registered as
+ *   .GUI parts (FanoutViz.Center / FanoutViz.Slice), drawn as an SVG hit layer over the canvas that turns and zooms with
+ *   it, so the Grid Layout outlines them and the Inspector selects them; each slice points (provenance.semanticPath) at
+ *   one real dependent of the live kernel, dep.<i>.out. Selection goes both ways (Inspector → canvas highlight).
+ * - Live mode: a real this.me 4.2.1 kernel in a Web Worker (CDN, SRI-checked) with N derived values
+ *   dep.<i>.out = dep.<i>.value * master.factor (10,000 by default, 100,000 on request). "Write" does a real
+ *   master.factor write there; k comes from explain().meta.k and the time from the worker's clock. Explain requests
+ *   (also the Inspector's, through window.FanoutKernel) are answered in the worker and shortened there: the k-long
+ *   recomputed / changed lists never cross to the page, only their counts and first three paths.
+ * - Pause / play (remembered in localStorage; reduced motion starts paused with the full static picture).
  */
 (function (root) {
   var React = root.React; if (!React) return;
@@ -31,7 +42,31 @@
     ".fov-disc{position:relative}.fov canvas{display:block;position:absolute;left:0;top:0;background:transparent;will-change:transform;transform-origin:50% 50%}" +
     ".fov-k{margin-top:2px;text-align:center;font-variant-numeric:tabular-nums;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;letter-spacing:.02em;color:var(--mui-palette-text-secondary, #8b949e)}" +
     ".fov-cap{margin-top:4px;text-align:center;font-size:13px;color:var(--mui-palette-text-secondary, #8b949e);line-height:1.5}" +
-    ".fov-cap b{color:var(--mui-palette-text-primary, currentColor)}";
+    ".fov-cap b{color:var(--mui-palette-text-primary, currentColor)}" +
+    // hit layer (the .GUI parts): invisible until hovered, selected, or the Grid Layout is on
+    ".fov svg.fov-hit{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;will-change:transform;transform-origin:50% 50%}" +
+    // an outline on an SVG <g> is drawn in viewBox units (here 1 unit ≈ half the disc), so the Grid / Inspector outlines
+    // are replaced by strokes on the shapes themselves
+    ".fov-hit [data-gui-node-id]{outline:none!important;box-shadow:none!important}" +
+    ".fov-hit path,.fov-hit circle{fill:transparent;stroke:none;pointer-events:all;cursor:pointer}" +
+    ".fov-hit path:hover,.fov-hit circle:hover{fill:color-mix(in srgb, var(--gui-inspector-accent, var(--mui-palette-primary-main, #2aa)) 12%, transparent)}" +
+    ".fov-hit .on>path,.fov-hit .on>circle{fill:color-mix(in srgb, var(--gui-inspector-accent, var(--mui-palette-primary-main, #2aa)) 16%, transparent);stroke:var(--gui-inspector-accent, var(--mui-palette-primary-main, #2aa));stroke-width:1.5px}" +
+    ".gui-grid-overlay-active .fov-hit path,.gui-grid-overlay-active .fov-hit circle{stroke:color-mix(in srgb, var(--gui-inspector-accent, #3b82f6) 55%, transparent);stroke-width:1px}" +
+    // controls + live panel
+    ".fov-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin-top:10px}" +
+    ".fov-btn{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:4px 12px;border-radius:8px;border:1px solid var(--mui-palette-divider, rgba(128,128,128,.4));background:transparent;color:var(--mui-palette-text-primary, inherit);font:inherit;font-size:13px;line-height:1.2;cursor:pointer}" +
+    ".fov-btn:hover:not(:disabled){background:color-mix(in srgb, currentColor 8%, transparent)}" +
+    ".fov-btn:focus-visible{outline:2px solid var(--mui-palette-primary-main, #2aa);outline-offset:2px}" +
+    ".fov-btn:disabled{opacity:.5;cursor:default}.fov-btn[aria-pressed=true].fov-seg{background:color-mix(in srgb, var(--mui-palette-primary-main, #2aa) 16%, transparent);border-color:var(--mui-palette-primary-main, #2aa)}" +
+    ".fov-btn svg{width:14px;height:14px;flex:none}.fov-btn small{color:var(--mui-palette-text-secondary, #8b949e);font-size:11.5px}" +
+    ".fov-seg-g{display:inline-flex;gap:0}.fov-seg-g .fov-btn:first-child{border-radius:8px 0 0 8px}.fov-seg-g .fov-btn:last-child{border-radius:0 8px 8px 0;margin-left:-1px}" +
+    ".fov-live{margin:14px auto 0;max-width:620px;padding-top:12px;border-top:1px solid var(--mui-palette-divider, rgba(128,128,128,.3));text-align:center;font-size:13px;line-height:1.55;color:var(--mui-palette-text-secondary, #8b949e)}" +
+    ".fov-tag{display:inline-block;margin:0 6px;line-height:1.5;padding:0 7px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;border:1px solid currentColor}" +
+    ".fov-nw{white-space:nowrap}.fov-tag.live{margin-left:0;color:var(--mui-palette-success-main, #2e9d6e)}.fov-k .fov-tag{color:var(--mui-palette-text-secondary, #8b949e);font-family:inherit}" +
+    ".fov-num{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;color:var(--mui-palette-text-primary, inherit)}" +
+    ".fov-out{margin-top:6px;min-height:1.55em}.fov-sel{margin-top:6px;font-size:12.5px;word-break:break-word}" +
+    ".fov-busy{display:inline-block;width:10px;height:10px;margin-right:6px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;vertical-align:-1px;animation:fovspin .8s linear infinite}" +
+    "@keyframes fovspin{to{transform:rotate(360deg)}}@media (prefers-reduced-motion: reduce){.fov-busy{animation:none;border-right-color:currentColor;opacity:.6}}";
   function injectCss() { if (document.getElementById("fov-css")) return; var s = document.createElement("style"); s.id = "fov-css"; s.textContent = CSS; document.head.appendChild(s); }
   function rng(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; var t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
   var fmt = function (n) { return Math.round(n).toLocaleString("en-US"); };
@@ -49,11 +84,194 @@
     }
     return depth;
   }
-  var ORIG_N = 9000;   // the original's line count; densities, bright/wide lines and dots are kept at its numbers
+  var ORIG_N = 9000;
+  var SLICES = 128;   // .GUI parts: one per angular slice (plus the centre)
+  var ME_URL = "https://cdn.jsdelivr.net/npm/this.me@4.2.1/dist/me.umd.js", ME_SRI = "sha384-ElnWCZOb324gqFJ2M/Fxy4CZ6Si131WIbR54iYomzEbTloUDLfBzZ05qi1nZ7+4G";
+
+  // ── live kernel: a real this.me in a Web Worker (all kernel work stays off the main thread) ──
+  // Self-contained: it is the worker's source. Messages {id, op, …} → {id, ok, …}; progress {op:"progress"}.
+  function KERNEL_WORKER() {
+    var me = null, N = 0, factor = 1, ready = null;
+    function load(url, sri) {
+      if (!ready) ready = fetch(url, { integrity: sri, mode: "cors", credentials: "omit" }).then(function (r) { if (!r.ok) throw new Error("this.me: HTTP " + r.status); return r.text(); })
+        .then(function (txt) { var u = URL.createObjectURL(new Blob([txt], { type: "text/javascript" })); importScripts(u); URL.revokeObjectURL(u); if (!self.Me || !self.Me.ME) throw new Error("this.me did not load"); });
+      return ready;
+    }
+    var first = function (a) { return Array.isArray(a) ? a.slice(0, 3) : undefined; };
+    // the explain() payload, shortened here: the k-long recomputed / changed lists stay in the worker
+    function shortExplain(path) {
+      var t = performance.now(), ex = me.explain(path) || {}, ms = performance.now() - t, m = ex.meta || {}, d = ex.derivation;
+      return { path: ex.path || path, value: ex.value, expr: ex.expr,
+        derivation: d ? { expression: d.expression, inputs: (d.inputs || []).slice(0, 8) } : undefined,
+        meta: { dependsOn: m.dependsOn, k: m.k, sourcePath: m.sourcePath, lastComputedAt: m.lastComputedAt, recomputedAt: m.recomputedAt,
+          recomputedCount: Array.isArray(m.recomputed) ? m.recomputed.length : undefined, recomputedFirst: first(m.recomputed),
+          changedCount: Array.isArray(m.changed) ? m.changed.length : undefined, changedFirst: first(m.changed),
+          kernel: "this.me 4.2.1 · Web Worker · N = " + N, explainMs: +ms.toFixed(2),
+          shortened: "recomputed / changed (k paths each) are summarised in the worker as counts + first 3; the full lists are not sent to the page" } };
+    }
+    onmessage = function (e) {
+      var q = e.data, reply = function (o) { o.id = q.id; o.ok = true; postMessage(o); }, fail = function (err) { postMessage({ id: q.id, ok: false, error: String(err && err.message || err) }); };
+      load(q.url, q.sri).then(function () {
+        if (q.op === "build") {
+          var t = performance.now(), n = q.n | 0, step = Math.max(1000, Math.round(n / 20));
+          me = null; me = new self.Me.ME(); N = 0; factor = 1; me.master.factor(1);
+          for (var i = 1; i <= n; i++) { me.dep[i].value(i); me.dep[i]["="]("out", "value * master.factor"); if (i % step === 0) postMessage({ op: "progress", id: q.id, done: i, n: n }); }
+          N = n; return reply({ n: n, buildMs: performance.now() - t });
+        }
+        if (!me) throw new Error("no kernel yet");
+        if (q.op === "write") {
+          factor = factor >= 9 ? 2 : factor + 1;
+          var t0 = performance.now(); me.master.factor(factor); var writeMs = performance.now() - t0;
+          var probe = "dep." + N + ".out", t1 = performance.now(), ex = me.explain(probe), explainMs = performance.now() - t1, m = (ex && ex.meta) || {};
+          return reply({ n: N, factor: factor, writeMs: writeMs, explainMs: explainMs, k: m.k, recomputedCount: Array.isArray(m.recomputed) ? m.recomputed.length : undefined, probe: probe, probeValue: ex && ex.value });
+        }
+        if (q.op === "explain") return reply({ payload: shortExplain(q.path) });
+        throw new Error("unknown op " + q.op);
+      }).catch(fail);
+    };
+  }
+  // One kernel per page, shared by the figure and the Inspector (window.FanoutKernel.explain).
+  var live = (function () {
+    var w = null, seq = 0, pending = {}, subs = [], st = { phase: "idle", n: 0, buildMs: null, last: null, error: null, progress: 0, target: 10000 }, building = null;
+    var emit = function () { subs.forEach(function (f) { f(st); }); };
+    var set = function (o) { for (var k in o) st[k] = o[k]; emit(); };
+    function worker() {
+      if (w) return w;
+      var url = URL.createObjectURL(new Blob(["(" + KERNEL_WORKER + ")();"], { type: "text/javascript" })); w = new Worker(url); URL.revokeObjectURL(url);
+      w.onmessage = function (e) { var d = e.data, p = pending[d.id]; if (d.op === "progress") { if (p && p.onProgress) p.onProgress(d); return; } if (!p) return; delete pending[d.id]; d.ok ? p.res(d) : p.rej(new Error(d.error)); };
+      w.onerror = function (e) { set({ phase: "error", error: (e && e.message) || "worker error" }); };
+      return w;
+    }
+    function call(op, args, onProgress) {
+      return new Promise(function (res, rej) { var id = ++seq; pending[id] = { res: res, rej: rej, onProgress: onProgress }; var m = { id: id, op: op, url: ME_URL, sri: ME_SRI }; for (var k in args) m[k] = args[k]; worker().postMessage(m); });
+    }
+    function build(n) {
+      if (building && st.target === n) return building;
+      set({ phase: "building", target: n, progress: 0, error: null, last: null });
+      var b = building = call("build", { n: n }, function (d) { if (building === b) set({ progress: d.done / d.n }); })
+        .then(function (r) { if (building === b) set({ phase: "ready", n: r.n, buildMs: r.buildMs, progress: 1 }); return r; },
+              function (err) { if (building === b) { set({ phase: "error", error: err.message }); building = null; } throw err; });
+      return b;
+    }
+    function ensure() { return st.phase === "ready" || st.phase === "writing" ? Promise.resolve() : (building || build(st.target)); }
+    return {
+      state: function () { return st; },
+      subscribe: function (f) { subs.push(f); return function () { subs = subs.filter(function (g) { return g !== f; }); }; },
+      build: build,
+      write: function () {
+        return ensure().then(function () { set({ phase: "writing" }); var t = performance.now();
+          return call("write", {}).then(function (r) { r.roundTripMs = performance.now() - t; set({ phase: "ready", last: r }); return r; },
+            function (err) { set({ phase: "error", error: err.message }); throw err; }); });
+      },
+      explain: function (path) {
+        path = String(path || "");
+        if (!/^(master\.factor|dep\.\d+\.(out|value))$/.test(path)) return Promise.resolve({ path: path, value: undefined, meta: { note: "not a path of the live fan-out kernel (master.factor, dep.<i>.value, dep.<i>.out)" } });
+        return ensure().then(function () { return call("explain", { path: path }); }).then(function (r) { return r.payload; });
+      },
+    };
+  })();
+  // What the Inspector talks to (landing-gui.js mounts with { me: window.FanoutKernel } on pages with the viz):
+  // explain() only, answered by the worker kernel. No inspect/execute, so nothing else is asked of it.
+  root.FanoutKernel = { explain: live.explain, __live: live };
+  var ICON = {
+    pause: h("svg", { viewBox: "0 0 16 16", "aria-hidden": "true" }, h("rect", { x: 3.5, y: 2.5, width: 3, height: 11, rx: 1, fill: "currentColor" }), h("rect", { x: 9.5, y: 2.5, width: 3, height: 11, rx: 1, fill: "currentColor" })),
+    play: h("svg", { viewBox: "0 0 16 16", "aria-hidden": "true" }, h("path", { d: "M4.5 2.6v10.8a.6.6 0 0 0 .9.5l8.6-5.4a.6.6 0 0 0 0-1L5.4 2.1a.6.6 0 0 0-.9.5z", fill: "currentColor" })),
+    write: h("svg", { viewBox: "0 0 16 16", "aria-hidden": "true" }, h("circle", { cx: 8, cy: 8, r: 2.6, fill: "currentColor" }), h("path", { d: "M8 1v3M8 12v3M1 8h3M12 8h3M3 3l2 2M11 11l2 2M13 3l-2 2M5 11l-2 2", stroke: "currentColor", strokeWidth: 1.4, strokeLinecap: "round" })),
+  };
+  var PAUSE_KEY = "fanout-viz.paused";
+  var ms = function (x) { return x == null ? "–" : x >= 100 ? fmt(x) + " ms" : x.toFixed(1) + " ms"; };
+  // the wedge of slice s (angles s/S·2π … (s+1)/S·2π, like line i at i/N·2π), in a viewBox where the disc radius is 1
+  // and the lines reach 0.84 (42% of the canvas); from 0.25 out (no dots inside 30% of the radius anyway)
+  function wedge(s) {
+    var a0 = s / SLICES * Math.PI * 2, a1 = (s + 1) / SLICES * Math.PI * 2, r0 = .25, r1 = .86, P = function (r, a) { return (r * Math.cos(a)).toFixed(4) + " " + (r * Math.sin(a)).toFixed(4); };
+    return "M" + P(r0, a0) + "L" + P(r1, a0) + "A" + r1 + " " + r1 + " 0 0 1 " + P(r1, a1) + "L" + P(r0, a1) + "A" + r0 + " " + r0 + " 0 0 0 " + P(r0, a0) + "Z";
+  }
+  var WEDGES = null;
+  function nodeStore() { return root["GUI-NODES-STORE"] || null; }
+   // the original's line count; densities, bright/wide lines and dots are kept at its numbers
 
   function FanoutViz(props) {
     var N = Math.max(1, Math.min(200000, +props.n || 100000));
-    var wrapRef = useRef(null), canvasRef = useRef(null), kRef = useRef(null), discRef = useRef(null), linesRef = useRef(null);
+    var rootId = props["data-gui-node-id"] || "fanout-viz";
+    var wrapRef = useRef(null), canvasRef = useRef(null), kRef = useRef(null), discRef = useRef(null), linesRef = useRef(null), hitRef = useRef(null);
+    var reduceNow = !!(root.matchMedia && root.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    var useState = React.useState;
+    var pausedInit = function () { if (reduceNow) return true; try { return root.localStorage.getItem(PAUSE_KEY) === "1"; } catch (e) { return false; } };
+    var ps = useState(pausedInit), paused = ps[0], setPaused = ps[1];
+    var ls = useState(live.state()), lst = ls[0], setLst = ls[1];
+    var ss = useState(-1), sel = ss[0], setSel = ss[1];
+    var xs = useState(null), selEx = xs[0], setSelEx = xs[1];
+    // the animation reads these (refs, so toggling never re-runs the canvas effect)
+    var ctl = useRef({ paused: paused, optIn: false, sel: -1, redraw: null });
+    ctl.current.paused = paused; ctl.current.sel = sel;
+    if (!WEDGES) { WEDGES = []; for (var w0 = 0; w0 < SLICES; w0++) WEDGES.push(wedge(w0)); }
+    var kernelN = lst.n || lst.target || 10000;
+    // slice s → the live kernel's dependent at the same angular position, and the drawn line there
+    var depOf = function (s, n) { return Math.min(n, Math.floor((s + .5) / SLICES * n) + 1); };
+    var lineOf = function (s) { return Math.min(N - 1, Math.round((s + .5) / SLICES * N)); };
+    var sliceId = function (s) { return rootId + "/slice-" + String(s).padStart(3, "0"); };
+
+    // live kernel state → React (rare: build / write / progress)
+    useEffect(function () { var off = live.subscribe(function (s) { setLst(Object.assign({}, s)); }); return off; }, []);
+
+    // .GUI parts: the centre and the 128 slices, registered under the figure's own node (provenance → real paths).
+    // A kernel-size change re-registers in place (registerNode merges by id); they are removed only on unmount.
+    var partIds = useRef(null);
+    useEffect(function () { return function () { var store = nodeStore(); if (store && partIds.current) partIds.current.forEach(function (id) { store.actions.unregisterNode(id); }); partIds.current = null; }; }, [rootId]);
+    useEffect(function () {
+      var store = nodeStore(); if (!store || !store.actions) return;
+      var rec = function (seg, type, prov, rp) { var id = rootId + "/" + seg;
+        return { id: id, path: rootId + "." + seg, type: type, part: seg, parentId: rootId, provenance: prov, spec: { type: type, props: rp, provenance: prov }, resolvedProps: rp }; };
+      var recs = [rec("center", "FanoutViz.Center", { semanticPath: "master.factor", source: "live kernel (this.me 4.2.1, Web Worker)", note: "The value written. Every dependent reads it." }, { role: "the write", path: "master.factor" })];
+      for (var s = 0; s < SLICES; s++) {
+        var a0 = s / SLICES * 360, dep = depOf(s, kernelN), l0 = Math.round(s / SLICES * N), l1 = Math.round((s + 1) / SLICES * N) - 1;
+        recs.push(rec("slice-" + String(s).padStart(3, "0"), "FanoutViz.Slice", { semanticPath: "dep." + dep + ".out", source: "live kernel (this.me 4.2.1, Web Worker)",
+          note: "Slice " + (s + 1) + " of " + SLICES + ": lines " + fmt(l0) + "–" + fmt(l1) + " of the " + fmt(N) + " drawn (illustration); sampled dependent dep." + dep + ".out of the live kernel (N = " + fmt(kernelN) + ")." },
+          { slice: s + 1, of: SLICES, angle: a0.toFixed(1) + "°–" + (a0 + 360 / SLICES).toFixed(1) + "°", linesDrawn: fmt(l0) + "–" + fmt(l1), sampledPath: "dep." + dep + ".out", kernelN: kernelN }));
+      }
+      var first = !partIds.current, i = 0, raf = 0;
+      partIds.current = recs.map(function (r) { return r.id; });
+      if (first) { recs.forEach(function (r) { store.actions.registerNode(r); }); return; }
+      // a kernel-size change while the pulse runs: update 16 parts per frame (each update copies the store and
+      // notifies .GUI), so no single frame pays for all 129
+      var step = function () { raf = 0; for (var j = 0; j < 16 && i < recs.length; j++, i++) store.actions.registerNode(recs[i]); if (i < recs.length) raf = requestAnimationFrame(step); };
+      step();
+      return function () { if (raf) { cancelAnimationFrame(raf); for (; i < recs.length; i++) store.actions.registerNode(recs[i]); } };
+    }, [rootId, kernelN, N]);
+
+    // selection both ways: store → canvas highlight + live readout; a click on a slice (Inspector off) → store
+    useEffect(function () {
+      var store = nodeStore(); if (!store) return;
+      var last = null, pre = rootId + "/slice-";
+      var sync = function () {
+        var id = store.getState().selectedNodeId; if (id === last) return; last = id;
+        setSel(id && id.indexOf(pre) === 0 ? +id.slice(pre.length) : id === rootId + "/center" ? -2 : -1);
+      };
+      sync(); return store.subscribe(sync);
+    }, [rootId]);
+    useEffect(function () {
+      if (ctl.current.redraw) ctl.current.redraw();
+      if (sel === -1) { setSelEx(null); return; }
+      var path = sel === -2 ? "master.factor" : "dep." + depOf(sel, kernelN) + ".out", alive = true;
+      setSelEx({ path: path, loading: true });
+      live.explain(path).then(function (p) { if (alive) setSelEx({ path: path, p: p }); }, function (e) { if (alive) setSelEx({ path: path, error: e.message }); });
+      return function () { alive = false; };
+    }, [sel, kernelN, lst.last]);
+    var onHit = function (e) {
+      var g = e.target && e.target.closest && e.target.closest("[data-gui-node-id]"); if (!g) return;
+      var store = nodeStore(), id = g.getAttribute("data-gui-node-id");
+      if (store) store.actions.selectNode(store.getState().selectedNodeId === id ? null : id);
+    };
+
+    // build the default 10k kernel once the figure is on screen (in the worker; the page never waits on it)
+    useEffect(function () {
+      var el = wrapRef.current; if (!el) return;
+      var go = function () { if (live.state().phase === "idle") live.build(10000).catch(function () {}); };
+      if (!root.IntersectionObserver) { go(); return; }
+      var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { go(); io.disconnect(); } }, { rootMargin: "200px" }); io.observe(el);
+      return function () { io.disconnect(); };
+    }, []);
+
     useEffect(function () {
       injectCss();
       var wrap = wrapRef.current, cv = canvasRef.current, ctx = cv && cv.getContext("2d");
@@ -130,14 +348,19 @@
         if (q < 2 * GROW + HOLD_FULL) return 1 - ease((q - GROW - HOLD_FULL) / GROW);
         return 0;
       }
+      // still = reduced motion and the reader has not pressed play: the full picture, no turn, no zoom.
+      // Paused freezes T, so the frozen frame (and the hit layer, which shares its transform) stays put.
+      var C = ctl.current, hit = hitRef.current;
+      var isStill = function () { return reduce.matches && !C.optIn; };
       function frame() {
-        var still = reduce.matches, g = still ? 1 : pulse(T), z = still ? 1 : .92 + .08 * g, rot = still ? 0 : T / TURN * Math.PI * 2;
+        var still = isStill(), g = still ? 1 : pulse(T), z = still ? 1 : .92 + .08 * g, rot = still ? 0 : T / TURN * Math.PI * 2;
         var W = cv.width, c = W / 2, f = W * .42, u = W / 800;
         ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, W, W);
         off.style.transform = still ? "" : "rotate(" + rot.toFixed(4) + "rad) scale(" + (g * z).toFixed(4) + ")";
         off.style.visibility = depth && depthW === W && g > 0 ? "visible" : "hidden";
         ctx.beginPath(); ctx.strokeStyle = col.guide; ctx.lineWidth = u; ctx.arc(c, c, f / z, 0, Math.PI * 2); ctx.stroke();   // stays put under the zoom
         cv.style.transform = still ? "" : "rotate(" + rot.toFixed(4) + "rad) scale(" + z.toFixed(4) + ")";
+        if (hit) hit.style.transform = cv.style.transform;
         ctx.setTransform(1, 0, 0, 1, c, c);
         // the ~500 dots in two batched paths (teal, gold), one fill each
         for (var pass = 0; pass < 2; pass++) {
@@ -149,13 +372,19 @@
           }
           ctx.fill();
         }
-        var p = still ? 1 : 1 + Math.sin(T * 3.6) * .18;
+        // the selected slice: its sampled dependent's line and dot, emphasised (the hit layer outlines the wedge)
+        if (C.sel >= 0) {
+          var li = Math.min(N - 1, Math.round((C.sel + .5) / SLICES * N)), ll = len[li] * f * g;
+          ctx.beginPath(); ctx.strokeStyle = col.coral; ctx.globalAlpha = .9; ctx.lineWidth = 1.5 * u; ctx.moveTo(0, 0); ctx.lineTo(cosA[li] * ll, sinA[li] * ll); ctx.stroke();
+          ctx.beginPath(); ctx.fillStyle = col.coral; ctx.arc(cosA[li] * ll, sinA[li] * ll, 4 * u, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+        }
+        var p = still || C.paused ? 1 : 1 + Math.sin(T * 3.6) * .18;
         ctx.beginPath(); ctx.fillStyle = col.coral; ctx.arc(0, 0, 9 * u, 0, Math.PI * 2); ctx.fill();
         ctx.beginPath(); ctx.strokeStyle = col.coral; ctx.globalAlpha = .28; ctx.lineWidth = 2.5 * u; ctx.arc(0, 0, 20 * u * p, 0, Math.PI * 2); ctx.stroke();
         ctx.beginPath(); ctx.fillStyle = "#fff"; ctx.globalAlpha = .7; ctx.arc(-2 * u, -2 * u, 2.2 * u, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         var k = Math.round(N * g);
-        if (k !== lastK && kRef.current) { lastK = k; kRef.current.textContent = "k = " + fmt(k) + " / " + fmt(N); }
+        if (k !== lastK && kRef.current) { lastK = k; kRef.current.firstChild.textContent = "k = " + fmt(k) + " / " + fmt(N); }
       }
       function layout() {
         var w = Math.floor(Math.min(520, wrap.clientWidth - 2)); if (w < 120) return false;
@@ -166,14 +395,15 @@
       }
       var nFrames = 0;
       function loop(ts) {
-        raf = 0; if (!visible || document.hidden || reduce.matches) { lastTs = 0; return; }
+        raf = 0; if (!visible || document.hidden || isStill() || C.paused) { lastTs = 0; return; }
         T += lastTs ? Math.min(.05, (ts - lastTs) / 1000) : 0; lastTs = ts;   // time-based; a paused tab resumes where it was
         if (++nFrames % 45 === 0 && readColors()) colorize();
         frame(); raf = requestAnimationFrame(loop);
       }
-      function start() { if (reduce.matches) { frame(); return; } if (!raf) raf = requestAnimationFrame(loop); }
+      function start() { if (isStill() || C.paused) { frame(); return; } if (!raf) raf = requestAnimationFrame(loop); }
+      C.redraw = function () { if (raf) return; start(); };
       var rto = 0;
-      function redraw() { clearTimeout(rto); rto = setTimeout(function () { if (layout() || reduce.matches || !raf) frame(); }, 120); }
+      function redraw() { clearTimeout(rto); rto = setTimeout(function () { if (layout() || isStill() || !raf) frame(); }, 120); }
       layout(); frame(); start();
       var ro = root.ResizeObserver ? new ResizeObserver(redraw) : null; if (ro) ro.observe(wrap);
       var io = root.IntersectionObserver ? new IntersectionObserver(function (es) { visible = es[0].isIntersecting; if (visible) start(); }, { threshold: .1 }) : null; if (io) io.observe(wrap);
@@ -181,15 +411,59 @@
       [document.documentElement, document.body].forEach(function (n) { mo.observe(n, { attributes: true }); });
       var onVis = function () { if (!document.hidden) start(); };
       document.addEventListener("visibilitychange", onVis);
-      var onRm = function () { if (reduce.matches) { if (raf) cancelAnimationFrame(raf); raf = 0; lastTs = 0; frame(); } else start(); };
+      var onRm = function () { if (isStill()) { if (raf) cancelAnimationFrame(raf); raf = 0; lastTs = 0; frame(); } else start(); };
       if (reduce.addEventListener) reduce.addEventListener("change", onRm);
-      return function () { job++; if (worker) worker.terminate(); clearTimeout(rto); if (raf) cancelAnimationFrame(raf); if (ro) ro.disconnect(); if (io) io.disconnect(); mo.disconnect(); document.removeEventListener("visibilitychange", onVis); if (reduce.removeEventListener) reduce.removeEventListener("change", onRm); };
+      return function () { C.redraw = null; job++; if (worker) worker.terminate(); clearTimeout(rto); if (raf) cancelAnimationFrame(raf); if (ro) ro.disconnect(); if (io) io.disconnect(); mo.disconnect(); document.removeEventListener("visibilitychange", onVis); if (reduce.removeEventListener) reduce.removeEventListener("change", onRm); };
     }, [N]);
-    var label = "Illustration: one write at the centre spreads to " + fmt(N) + " dependents, one thin line each.";
+    var togglePause = function () {
+      var next = !paused; ctl.current.paused = next; if (!next) ctl.current.optIn = true;   // play under reduced motion = the reader's opt-in
+      try { root.localStorage.setItem(PAUSE_KEY, next ? "1" : "0"); } catch (e) {}
+      setPaused(next); if (ctl.current.redraw) ctl.current.redraw();
+    };
+    var busy = lst.phase === "building" || lst.phase === "writing";
+    var pick = function (n) { if (busy || (lst.phase === "ready" && lst.n === n)) return; live.build(n).catch(function () {}); };
+    var L = lst.last, label = "Illustration: one write at the centre spreads to " + fmt(N) + " dependents, one thin line each.";
+    var status = lst.phase === "building" ? h("span", null, h("span", { className: "fov-busy", "aria-hidden": "true" }), "Building ", h("span", { className: "fov-num" }, fmt(lst.target)), " derived values in the worker… ", h("span", { className: "fov-num" }, Math.round(lst.progress * 100) + "%"))
+      : lst.phase === "writing" ? h("span", null, h("span", { className: "fov-busy", "aria-hidden": "true" }), "Writing master.factor; ", h("span", { className: "fov-num" }, fmt(lst.n)), " dependents recomputing in the worker…")
+      : lst.phase === "error" ? h("span", null, "Live kernel unavailable: " + lst.error)
+      : lst.phase === "idle" ? h("span", null, "Starting the live kernel…")
+      : L ? h("span", null, "master.factor = ", h("span", { className: "fov-num" }, L.factor), " → k = ", h("span", { className: "fov-num", "data-fov": "k" }, L.k == null ? "?" : fmt(L.k)), " (explain().meta.k) in ",
+          h("span", { className: "fov-num", "data-fov": "write-ms" }, ms(L.writeMs)), " · explain ", h("span", { className: "fov-num" }, ms(L.explainMs)), " · built ", h("span", { className: "fov-num" }, fmt(lst.n)), " in ", h("span", { className: "fov-num", "data-fov": "build-ms" }, ms(lst.buildMs)))
+      : h("span", null, "Ready: ", h("span", { className: "fov-num" }, fmt(lst.n)), " derived values built in ", h("span", { className: "fov-num", "data-fov": "build-ms" }, ms(lst.buildMs)), ". Press Write.");
+    var selLine = null;
+    if (selEx) {
+      var P = selEx.p, m = P && P.meta || {}, ins = P && P.derivation && P.derivation.inputs || [];
+      selLine = h("div", { className: "fov-sel", "aria-live": "polite" }, h("b", null, sel === -2 ? "Centre" : "Slice " + (sel + 1) + "/" + SLICES), " → ", h("span", { className: "fov-num" }, selEx.path),
+        selEx.loading ? " …" : selEx.error ? " · " + selEx.error : [" = ", h("span", { key: "v", className: "fov-num" }, String(P.value)),
+          ins.length ? " · reads " + ins.map(function (x) { return x.path + " = " + x.value; }).join(", ") : "",
+          m.k != null ? " · last wave k = " + fmt(m.k) : "", " · open the Inspector for its explain()"]);
+    }
+    // the hit layer only re-renders when the selection changes (not on build progress / results)
+    var hitLayer = React.useMemo(function () {
+      return h("svg", { className: "fov-hit", ref: hitRef, viewBox: "-1 -1 2 2", "aria-hidden": "true", onClick: onHit },
+        WEDGES.map(function (d, s) { return h("g", { key: s, "data-gui-node-id": sliceId(s), "data-gui-component": "FanoutViz.Slice", className: s === sel ? "on" : undefined },
+          h("path", { d: d, vectorEffect: "non-scaling-stroke" })); }),
+        h("g", { "data-gui-node-id": rootId + "/center", "data-gui-component": "FanoutViz.Center", className: sel === -2 ? "on" : undefined }, h("circle", { cx: 0, cy: 0, r: .07, vectorEffect: "non-scaling-stroke" })));
+    }, [sel, rootId]);
     return h("figure", { className: "fov", ref: wrapRef, "data-gui-node-id": props["data-gui-node-id"], style: { margin: "0 0 28px" } },
-      h("div", { className: "fov-disc", ref: discRef }, h("canvas", { ref: linesRef, "aria-hidden": "true" }), h("canvas", { ref: canvasRef, role: "img", "aria-label": label })),
-      h("div", { className: "fov-k", ref: kRef, "aria-hidden": "true" }, "k = 0 / " + fmt(N)),
-      h("figcaption", { className: "fov-cap" }, h("b", null, props.caption || "1 write → " + fmt(N) + " dependents"), " · every line is one derived value that reads the value written; all of them recompute, and nothing else does."));
+      h("div", { className: "fov-disc", ref: discRef },
+        h("canvas", { ref: linesRef, "aria-hidden": "true" }), h("canvas", { ref: canvasRef, role: "img", "aria-label": label }), hitLayer),
+      h("div", { className: "fov-k", ref: kRef, "aria-hidden": "true" }, h("span", null, "k = 0 / " + fmt(N)), " ", h("span", { className: "fov-tag" }, "illustration")),
+      h("figcaption", { className: "fov-cap" }, h("b", null, props.caption || "1 write → " + fmt(N) + " dependents"), " · the drawing shows the shape of the work, one line per derived value that reads the value written: all of them recompute, and nothing else does."),
+      // data-gui-inspector-control: the Inspector's click-to-select lets these controls work while it is open
+      h("div", { className: "fov-bar", "data-gui-inspector-control": "true" },
+        h("button", { type: "button", className: "fov-btn", "aria-label": paused ? "Play the animation" : "Pause the animation", "data-fov": "pause", onClick: togglePause },
+          paused ? ICON.play : ICON.pause, paused ? "Play" : "Pause")),
+      h("div", { className: "fov-live", "aria-busy": busy ? "true" : "false", "data-gui-inspector-control": "true" },
+        h("div", null, h("span", { className: "fov-tag live" }, "live"), "Measured on this device: a real this.me 4.2.1 kernel in a Web Worker, ",
+          h("span", { className: "fov-num fov-nw" }, "dep.<i>.out = dep.<i>.value × master.factor"), " for N dependents."),
+        h("div", { className: "fov-bar" },
+          h("button", { type: "button", className: "fov-btn", disabled: busy || lst.phase === "error", "data-fov": "write", onClick: function () { live.write().catch(function () {}); } }, ICON.write, "Write master.factor"),
+          h("span", { className: "fov-seg-g", role: "group", "aria-label": "Live kernel size" },
+            h("button", { type: "button", className: "fov-btn fov-seg", "aria-pressed": lst.target === 10000 ? "true" : "false", disabled: busy, "data-fov": "n10k", onClick: function () { pick(10000); } }, "10k"),
+            h("button", { type: "button", className: "fov-btn fov-seg", "aria-pressed": lst.target === 100000 ? "true" : "false", disabled: busy, "data-fov": "n100k", title: "Builds 100,000 derived values: takes a few seconds to build and a few to run, all in the background worker", onClick: function () { pick(100000); } }, "100k", h("small", null, "takes a few seconds")))),
+        h("div", { className: "fov-out", role: "status", "aria-live": "polite", "data-fov": "status" }, status),
+        selLine));
   }
   root.FanoutViz = FanoutViz;
 })(typeof window !== "undefined" ? window : this);
