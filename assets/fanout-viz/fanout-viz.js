@@ -1,10 +1,12 @@
-/*! fanout-viz 1.1.0 · .me extreme fan-out, one write → N dependents · MIT · neurons.me
+/*! fanout-viz 1.2.0 · .me extreme fan-out, one write → N dependents · MIT · neurons.me
  * A radial canvas illustration ported from the "Fan-Out Extreme" section of
  * https://neurons-me.github.io/Inverted-Dependency-Indexing-Beautiful-Viz.html, with the same rendering parameters:
  * lines from the centre at angle i/N·2π ± 0.0075 rad, length 55–100% of a radius of 42% of the canvas, 0.5 px wide
  * (some 1 px), teal at 0.06 alpha (some brighter); a dot on the tip of one line in 18 (gold for one in 90), none inside
- * 30% of the radius; an orange centre with a pulsing halo; a faint guide circle; the lines grow outward 0 → 100% and
- * hold (+1.2% per frame, restart at 135%).
+ * 30% of the radius; an orange centre with a pulsing halo; a faint guide circle.
+ * Animation (1.2): a ping-pong pulse, the wave grows 0 → N and shrinks back N → 0 (eased, 2.6 s each way), with the
+ * k counter following it and a gentle zoom (92% → 100%) synced to it, while the starburst turns slowly (90 s a turn).
+ * Unboxed: transparent canvas on the page's own background, the k counter and caption under it.
  * The original draws 9,000 lines. Here every one of the N lines is drawn (default 100,000) and the picture keeps the
  * original's density: each line gets the alpha that makes N lines add up to the original's 9,000 at 0.06
  * (1 − 0.94^(9000/N) per line), and the same number of bright lines, wide lines and dots as the original.
@@ -13,7 +15,7 @@
  *   frame scales that image to the wave (a radial line grown to s·L is the full picture scaled by s about the centre)
  *   and draws the ~500 dots and the centre, so a frame costs the same at any N. It animates only while on screen and
  *   the tab is visible.
- * - prefers-reduced-motion: no animation; the finished picture is drawn once.
+ * - prefers-reduced-motion: no animation, rotation or zoom; the finished picture is drawn once.
  * - Theme: background, text and divider come from the active .GUI theme (--mui-palette-*) and are re-read when the
  *   page's theme attributes change (only the colour pass is redone); teal/gold/orange are lifted on dark backgrounds.
  * - Size: square, as wide as its container up to 520 px (works at 390 px); device-pixel ratio capped at 2.
@@ -23,11 +25,12 @@
 (function (root) {
   var React = root.React; if (!React) return;
   var h = React.createElement, useEffect = React.useEffect, useRef = React.useRef;
-  var CSS = ".fov{margin:0 0 28px}.fov-box{position:relative;border:1px solid var(--mui-palette-divider, rgba(127,127,127,.25));border-radius:14px;overflow:hidden;background:var(--mui-palette-background-paper, transparent)}" +
-    ".fov-head{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--mui-palette-divider, rgba(127,127,127,.25));font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mui-palette-text-secondary, #8b949e)}" +
-    ".fov-k{font-variant-numeric:tabular-nums;letter-spacing:.04em;text-transform:none;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;color:var(--mui-palette-text-primary, currentColor)}" +
-    ".fov canvas{display:block;margin:0 auto;max-width:100%}" +
-    ".fov-cap{margin-top:8px;text-align:center;font-size:13px;color:var(--mui-palette-text-secondary, #8b949e);line-height:1.5}" +
+  // Unboxed: the canvas is transparent and sits on the page's own background; only the k counter and the caption.
+  var CSS = ".fov{margin:0 0 28px}" +
+    ".fov-disc{margin:0 auto;max-width:100%;border-radius:50%;overflow:hidden;contain:paint}" +
+    ".fov-disc{position:relative}.fov canvas{display:block;position:absolute;left:0;top:0;background:transparent;will-change:transform;transform-origin:50% 50%}" +
+    ".fov-k{margin-top:2px;text-align:center;font-variant-numeric:tabular-nums;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;letter-spacing:.02em;color:var(--mui-palette-text-secondary, #8b949e)}" +
+    ".fov-cap{margin-top:4px;text-align:center;font-size:13px;color:var(--mui-palette-text-secondary, #8b949e);line-height:1.5}" +
     ".fov-cap b{color:var(--mui-palette-text-primary, currentColor)}";
   function injectCss() { if (document.getElementById("fov-css")) return; var s = document.createElement("style"); s.id = "fov-css"; s.textContent = CSS; document.head.appendChild(s); }
   function rng(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; var t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
@@ -50,7 +53,7 @@
 
   function FanoutViz(props) {
     var N = Math.max(1, Math.min(200000, +props.n || 100000));
-    var wrapRef = useRef(null), canvasRef = useRef(null), kRef = useRef(null);
+    var wrapRef = useRef(null), canvasRef = useRef(null), kRef = useRef(null), discRef = useRef(null), linesRef = useRef(null);
     useEffect(function () {
       injectCss();
       var wrap = wrapRef.current, cv = canvasRef.current, ctx = cv && cv.getContext("2d");
@@ -58,20 +61,26 @@
       var reduce = root.matchMedia ? root.matchMedia("(prefers-reduced-motion: reduce)") : { matches: false };
       var R = rng(20261011), ang = new Float64Array(N), len = new Float64Array(N);   // same sequence as RASTER
       for (var i = 0; i < N; i++) { ang[i] = i / N * Math.PI * 2 + (R() - .5) * .015; len[i] = .55 + R() * .45; }
+      var cosA = new Float64Array(N), sinA = new Float64Array(N);
+      for (var i2 = 0; i2 < N; i2++) { cosA[i2] = Math.cos(ang[i2]); sinA[i2] = Math.sin(ang[i2]); }
       var ratio = N / ORIG_N;
       var brightEvery = Math.max(1, Math.round(7 * ratio)), wideEvery = Math.max(1, Math.round(13 * ratio));
       var dotEvery = Math.max(1, Math.round(18 * ratio)), goldEvery = dotEvery * 5;
       // optical depth per line (−ln(1 − alpha)) × width: base lines carry the original's 0.06 spread over N lines
       var baseA = 1 - Math.pow(1 - .06, 1 / ratio);
       var dBase = -Math.log(1 - baseA), dBright = -Math.log(1 - .2) - (-Math.log(1 - .06));
-      var off = document.createElement("canvas"), offCtx = off.getContext("2d");
-      var depth = null, depthW = 0, size = 0, dpr = 1, col = null, colKey = "", raf = 0, visible = true, s = 0, tick = 0, lastK = -1;
+      // Two stacked layers in a circular mask: `off` holds the 100,000 lines (painted once per size / theme), `cv` the dots,
+      // centre and guide circle (repainted each frame, ~500 arcs). The wave, zoom and turn are compositor transforms:
+      // lines layer rotate·scale(g·z) (a radial line grown to g·L is the bitmap scaled by g), dots layer rotate·scale(z).
+      var off = linesRef.current, offCtx = off && off.getContext("2d"); if (!offCtx) return;
+      var depth = null, depthW = 0, size = 0, dpr = 1, col = null, colKey = "", raf = 0, visible = true, T = 0, lastTs = 0, lastK = -1;
       var probe = document.createElement("canvas").getContext("2d");
       var norm = function (c, fb) { probe.fillStyle = fb; try { probe.fillStyle = c || fb; } catch (e) {} return probe.fillStyle; };
       var rgbOf = function (c) { var m = /^#([0-9a-f]{6})$/i.exec(c); if (m) { var v = parseInt(m[1], 16); return [v >> 16 & 255, v >> 8 & 255, v & 255]; } var r = /rgba?\(([^)]+)\)/.exec(c); return r ? r[1].split(",").slice(0, 3).map(Number) : [0, 0, 0]; };
       function readColors() {
         var cs = getComputedStyle(wrap);
-        var bg = norm(cs.getPropertyValue("--mui-palette-background-paper").trim(), "#111"), fg = norm(cs.getPropertyValue("--mui-palette-text-primary").trim(), "#eee");
+        // the page's own background (the viz is unboxed), for the dark/light palette choice
+        var bodyBg = getComputedStyle(document.body).backgroundColor, bg = norm(/rgba?\([^)]*,\s*0\)$|transparent/.test(bodyBg) ? cs.getPropertyValue("--mui-palette-background-default").trim() : bodyBg, "#111"), fg = norm(cs.getPropertyValue("--mui-palette-text-primary").trim(), "#eee");
         var key = bg + "|" + fg; if (key === colKey) return false; colKey = key;
         var c = rgbOf(bg), dark = (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) < 128, f = rgbOf(fg);
         // the original's palette (teal #0A7C6B, gold #E8B22E, coral #FF6B4A, guide ink at 0.06), lifted on dark backgrounds
@@ -86,7 +95,7 @@
       var job = 0, worker = null;
       function rasterize() {
         var W = Math.round(size * dpr), id = ++job, args = [W, N, wideEvery, brightEvery, dBase, dBright];
-        var done = function (buf) { if (id !== job) return; depth = buf; depthW = W; colorize(); frame(reduce.matches ? 1 : s);
+        var done = function (buf) { if (id !== job) return; depth = buf; depthW = W; colorize(); frame();
           if (performance.measure) try { performance.measure("fanout-viz render", { start: t0 }); } catch (e) {} };
         var t0 = performance.now();
         if (!worker && root.Worker && root.Blob && root.URL) try {
@@ -106,20 +115,43 @@
         for (var j = 0, n = W * W; j < n; j++) { var dd = depth[j]; if (dd <= 0) continue; var q = j * 4; px[q] = tl[0]; px[q + 1] = tl[1]; px[q + 2] = tl[2]; px[q + 3] = 255 * (1 - Math.exp(-dd * gain)); }
         offCtx.putImageData(img, 0, 0);
       }
-      function frame(s) {
-        var W = cv.width, c = W / 2, f = W * .42, u = W / 800, g = Math.min(1, s);
+      // The loop (seconds of animation time T): the wave grows 0 → N, holds, shrinks N → 0, holds (ping-pong), eased;
+      // the zoom follows the same pulse (92% → 100%); the whole starburst turns slowly (one turn in 90 s). All of it is a
+      // transform of the precomputed bitmap (see frame); dots and centre ride along. The picture is a disc of radius 42%
+      // of the canvas inside a circular mask of radius 50%, so the turn never clips it nor shows the square's corners.
+      var GROW = 2.6, HOLD_FULL = .8, HOLD_EMPTY = .5, PERIOD = 2 * GROW + HOLD_FULL + HOLD_EMPTY, TURN = 90;
+      var ease = function (x) { return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+      function pulse(t) {
+        var q = t % PERIOD;
+        if (q < GROW) return ease(q / GROW);
+        if (q < GROW + HOLD_FULL) return 1;
+        if (q < 2 * GROW + HOLD_FULL) return 1 - ease((q - GROW - HOLD_FULL) / GROW);
+        return 0;
+      }
+      function frame() {
+        var still = reduce.matches, g = still ? 1 : pulse(T), z = still ? 1 : .92 + .08 * g, rot = still ? 0 : T / TURN * Math.PI * 2;
+        var W = cv.width, c = W / 2, f = W * .42, u = W / 800;
         ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, W, W);
-        ctx.beginPath(); ctx.strokeStyle = col.guide; ctx.lineWidth = u; ctx.arc(c, c, f, 0, Math.PI * 2); ctx.stroke();
-        if (g > 0 && depth && depthW === W) ctx.drawImage(off, c - c * g, c - c * g, W * g, W * g);   // lines grown to g of their length
-        for (var i = 0; i < N; i += dotEvery) {
-          var l = len[i] * f * g; if (l < f * .3) continue;
-          var gold = i % goldEvery === 0, a = ang[i];
-          ctx.beginPath(); ctx.fillStyle = gold ? col.gold : "rgba(" + col.teal.join(",") + ",.55)"; ctx.arc(c + Math.cos(a) * l, c + Math.sin(a) * l, (gold ? 2.2 : 1.1) * u, 0, Math.PI * 2); ctx.fill();
+        off.style.transform = still ? "" : "rotate(" + rot.toFixed(4) + "rad) scale(" + (g * z).toFixed(4) + ")";
+        off.style.visibility = depth && depthW === W && g > 0 ? "visible" : "hidden";
+        ctx.beginPath(); ctx.strokeStyle = col.guide; ctx.lineWidth = u; ctx.arc(c, c, f / z, 0, Math.PI * 2); ctx.stroke();   // stays put under the zoom
+        cv.style.transform = still ? "" : "rotate(" + rot.toFixed(4) + "rad) scale(" + z.toFixed(4) + ")";
+        ctx.setTransform(1, 0, 0, 1, c, c);
+        // the ~500 dots in two batched paths (teal, gold), one fill each
+        for (var pass = 0; pass < 2; pass++) {
+          var r = (pass ? 2.2 : 1.1) * u; ctx.beginPath(); ctx.fillStyle = pass ? col.gold : "rgba(" + col.teal.join(",") + ",.55)";
+          for (var i = 0; i < N; i += dotEvery) {
+            if ((i % goldEvery === 0) !== (pass === 1)) continue;
+            var l = len[i] * f * g; if (l < f * .3) continue;
+            var x = cosA[i] * l, y = sinA[i] * l; ctx.moveTo(x + r, y); ctx.arc(x, y, r, 0, Math.PI * 2);
+          }
+          ctx.fill();
         }
-        var p = reduce.matches ? 1 : 1 + Math.sin(tick * .06) * .18;
-        ctx.beginPath(); ctx.fillStyle = col.coral; ctx.arc(c, c, 9 * u, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.strokeStyle = col.coral; ctx.globalAlpha = .28; ctx.lineWidth = 2.5 * u; ctx.arc(c, c, 20 * u * p, 0, Math.PI * 2); ctx.stroke();
-        ctx.beginPath(); ctx.fillStyle = "#fff"; ctx.globalAlpha = .7; ctx.arc(c - 2 * u, c - 2 * u, 2.2 * u, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+        var p = still ? 1 : 1 + Math.sin(T * 3.6) * .18;
+        ctx.beginPath(); ctx.fillStyle = col.coral; ctx.arc(0, 0, 9 * u, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.strokeStyle = col.coral; ctx.globalAlpha = .28; ctx.lineWidth = 2.5 * u; ctx.arc(0, 0, 20 * u * p, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.fillStyle = "#fff"; ctx.globalAlpha = .7; ctx.arc(-2 * u, -2 * u, 2.2 * u, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
         var k = Math.round(N * g);
         if (k !== lastK && kRef.current) { lastK = k; kRef.current.textContent = "k = " + fmt(k) + " / " + fmt(N); }
       }
@@ -127,34 +159,34 @@
         var w = Math.floor(Math.min(520, wrap.clientWidth - 2)); if (w < 120) return false;
         var d = Math.min(2, root.devicePixelRatio || 1), changed = readColors();
         if (w === size && d === dpr) { if (changed) colorize(); return changed; }
-        size = w; dpr = d; cv.width = cv.height = Math.round(w * d); cv.style.width = cv.style.height = w + "px";
+        size = w; dpr = d; cv.width = cv.height = Math.round(w * d); cv.style.width = cv.style.height = w + "px"; off.style.width = off.style.height = w + "px"; if (discRef.current) discRef.current.style.width = discRef.current.style.height = w + "px";
         rasterize(); return true;
       }
-      function loop() {
-        raf = 0; if (!visible || document.hidden || reduce.matches) return;
-        tick++; s += .012; if (s > 1.35) s = 0;   // the original's wave: grow to 100%, hold, restart
-        if (tick % 45 === 0 && readColors()) colorize();
-        frame(s); raf = requestAnimationFrame(loop);
+      var nFrames = 0;
+      function loop(ts) {
+        raf = 0; if (!visible || document.hidden || reduce.matches) { lastTs = 0; return; }
+        T += lastTs ? Math.min(.05, (ts - lastTs) / 1000) : 0; lastTs = ts;   // time-based; a paused tab resumes where it was
+        if (++nFrames % 45 === 0 && readColors()) colorize();
+        frame(); raf = requestAnimationFrame(loop);
       }
-      function start() { if (reduce.matches) { s = 1; frame(1); return; } if (!raf) raf = requestAnimationFrame(loop); }
+      function start() { if (reduce.matches) { frame(); return; } if (!raf) raf = requestAnimationFrame(loop); }
       var rto = 0;
-      function redraw() { clearTimeout(rto); rto = setTimeout(function () { if (layout() || reduce.matches || !raf) frame(reduce.matches ? 1 : s); }, 120); }
-      layout(); s = reduce.matches ? 1 : 0; frame(s); start();
+      function redraw() { clearTimeout(rto); rto = setTimeout(function () { if (layout() || reduce.matches || !raf) frame(); }, 120); }
+      layout(); frame(); start();
       var ro = root.ResizeObserver ? new ResizeObserver(redraw) : null; if (ro) ro.observe(wrap);
       var io = root.IntersectionObserver ? new IntersectionObserver(function (es) { visible = es[0].isIntersecting; if (visible) start(); }, { threshold: .1 }) : null; if (io) io.observe(wrap);
-      var mo = new MutationObserver(function () { if (readColors()) { colorize(); frame(reduce.matches ? 1 : s); } });
+      var mo = new MutationObserver(function () { if (readColors()) { colorize(); frame(); } });
       [document.documentElement, document.body].forEach(function (n) { mo.observe(n, { attributes: true }); });
       var onVis = function () { if (!document.hidden) start(); };
       document.addEventListener("visibilitychange", onVis);
-      var onRm = function () { if (reduce.matches) { if (raf) cancelAnimationFrame(raf); raf = 0; s = 1; frame(1); } else start(); };
+      var onRm = function () { if (reduce.matches) { if (raf) cancelAnimationFrame(raf); raf = 0; lastTs = 0; frame(); } else start(); };
       if (reduce.addEventListener) reduce.addEventListener("change", onRm);
       return function () { job++; if (worker) worker.terminate(); clearTimeout(rto); if (raf) cancelAnimationFrame(raf); if (ro) ro.disconnect(); if (io) io.disconnect(); mo.disconnect(); document.removeEventListener("visibilitychange", onVis); if (reduce.removeEventListener) reduce.removeEventListener("change", onRm); };
     }, [N]);
     var label = "Illustration: one write at the centre spreads to " + fmt(N) + " dependents, one thin line each.";
     return h("figure", { className: "fov", ref: wrapRef, "data-gui-node-id": props["data-gui-node-id"], style: { margin: "0 0 28px" } },
-      h("div", { className: "fov-box" },
-        h("div", { className: "fov-head" }, h("span", null, "Extreme fan-out · 1 write"), h("span", { className: "fov-k", ref: kRef, "aria-hidden": "true" }, "k = 0 / " + fmt(N))),
-        h("canvas", { ref: canvasRef, role: "img", "aria-label": label })),
+      h("div", { className: "fov-disc", ref: discRef }, h("canvas", { ref: linesRef, "aria-hidden": "true" }), h("canvas", { ref: canvasRef, role: "img", "aria-label": label })),
+      h("div", { className: "fov-k", ref: kRef, "aria-hidden": "true" }, "k = 0 / " + fmt(N)),
       h("figcaption", { className: "fov-cap" }, h("b", null, props.caption || "1 write → " + fmt(N) + " dependents"), " · every line is one derived value that reads the value written; all of them recompute, and nothing else does."));
   }
   root.FanoutViz = FanoutViz;
