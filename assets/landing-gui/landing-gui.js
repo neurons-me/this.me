@@ -307,7 +307,7 @@
   const SYN = window.MeSyntax;
   function MeCodeBlock({ code, lang, "data-gui-node-id": id }) {
     const me = SYN && /^(ts|js|javascript|typescript|me)$/.test(lang || "");
-    return h(Box, { component: "pre", "data-gui-node-id": id, className: me ? "me-code" : undefined, sx: (t) => ({ m: 0, mb: 2.5, px: 2, py: 1.5, borderRadius: "10px", overflowX: "auto", fontFamily: MONO, fontSize: { xs: 12, sm: 13 }, lineHeight: 1.6,
+    return h(Box, { component: "pre", "data-gui-node-id": id, className: me ? "me-code" : undefined, sx: (t) => ({ m: 0, mb: 2.5, px: 2, py: 1.5, borderRadius: "10px", overflowX: "auto", fontFamily: MONO, fontSize: { xs: 12, sm: 13 }, lineHeight: me ? 1.6 : 1.25,
         bgcolor: `color-mix(in srgb, ${t.palette.text.primary} 4%, ${t.palette.background.paper})`, border: 1, borderColor: "divider", color: "text.primary" }) },
       h("code", { style: { fontFamily: "inherit", whiteSpace: "pre" } }, ...(me ? SYN.render(h, code) : [code])));
   }

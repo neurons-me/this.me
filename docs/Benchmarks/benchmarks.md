@@ -1,7 +1,12 @@
 ---
-layout: readme
+layout: gui-doc
 title: ".me — Kernel benchmarks"
+image: https://suign.github.io/assets/imgs/me.png
 description: "Reactive recompute benchmarks for the .me kernel: growth with k, fan-out, ratios. Re-measured 2026-09-26 after the reference-resolution fix."
+mepath:
+  - text: Docs
+    url: https://neurons-me.github.io/.me/docs/
+crumb: Benchmarks
 ---
 
 # .me Kernel — Benchmark Results
@@ -16,6 +21,8 @@ Hardware-agnostic: times will vary per machine — what matters is the **shape**
 Benchmarks 5–11 and the regression gate previously measured writes that recomputed nothing. Their formulas read a root-level name without a dot (`"value * master"`, `"value * factor"`, `"base * rate"`), and a reference-resolution bug subscribed those derivations to the wrong path, so writing the input never triggered a recompute. Latency therefore did not grow with fan-out, and several tables showed it *falling* as fan-out grew. The bug is fixed (see `Typescript/CHANGELOG.md`) and the numbers below for 5–11 are re-measured. Benchmarks 1–4 write each node's own relative `value`, were not affected, and are unchanged.
 
 Methodology for the re-measured benchmarks: 5 rounds on the same machine, alternating the pre-fix and post-fix builds within each round; each value is the median across the 5 rounds. Machine: Apple M2, 8 GB RAM, macOS (Darwin 25.5), Node v24.13.1.
+
+> **Kernel versions.** Benchmarks 1–4 come from a this.me 3.9.x run (2026-06-08, machine not recorded). Benchmarks 5–11 were measured on 2026-09-26 with the build carrying the reference fix, before its 4.1.0 release. None of them has been re-run on 4.2.0; the 4.2.0 runs are GTFS-Madrid, see [Extreme Fan-Out](https://neurons-me.github.io/.me/docs/Extreme-Fan-Out.html) and the [Benchmarks index](./).
 
 ---
 
