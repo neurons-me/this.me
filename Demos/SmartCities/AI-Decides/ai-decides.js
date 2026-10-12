@@ -1,4 +1,4 @@
-/*! AI-Decides 1.0.1 · "AI decides, .me computes" on GTFS-Madrid-Bench data · MIT · neurons.me
+/*! AI-Decides 1.0.2 · "AI decides, .me computes" on GTFS-Madrid-Bench data · MIT · neurons.me
  * A versioned policy function (policy:fair-headway@1, ai-model.js) proposes a headway decision with its reason; the
  * decision is stored in a real this.me 4.2.1 kernel as facts (decisions.<n>.by/at/scenario/reason/…/inputsHash) and ONE
  * write (policy.factor, or services.<s>.enabled for a suspension) starts the wave. The kernel runs in a Web Worker
@@ -134,7 +134,7 @@
 
   var CSS = [
     ".aid{container-type:inline-size}.aid-dash{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:start}",
-    "@container (min-width: 820px){.aid-dash{grid-template-columns:minmax(0,1fr) 360px}.aid-panel{position:sticky;top:60px;max-height:calc(100vh - 72px);overflow:auto;overscroll-behavior:contain}}",
+    "@container (min-width: 820px){.aid-dash{grid-template-columns:minmax(0,1fr) 360px}.aid-dash .aid-panel{position:sticky;top:60px;max-height:calc(100vh - 72px);max-height:calc(100dvh - 72px);overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}}",
     ".aid-disc{position:relative;margin:0 auto;max-width:100%;outline:none;touch-action:manipulation}.aid-disc:focus-visible{box-shadow:0 0 0 2px var(--mui-palette-primary-main,#2aa);border-radius:50%}",
     ".aid-disc canvas{position:absolute;left:0;top:0;display:block}",
     ".aid-lit{transition:opacity .9s ease}@media (prefers-reduced-motion: reduce){.aid-lit{transition:none}}",

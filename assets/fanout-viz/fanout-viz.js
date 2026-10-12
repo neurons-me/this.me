@@ -1,4 +1,4 @@
-/*! fanout-viz 3.1.1 · .me extreme fan-out, driven by a real this.me kernel · MIT · neurons.me
+/*! fanout-viz 3.1.2 · .me extreme fan-out, driven by a real this.me kernel · MIT · neurons.me
  * Every line is one real dependent of a live this.me 4.2.1 kernel running in a Web Worker (CDN, SRI-checked), at angle
  * i/N; nothing on the canvas is decorative.
  * - Model (in the worker), per dependent i = 1…N (10,000 by default, 100,000 on request):
@@ -55,7 +55,7 @@
     ".fov-out{margin-top:6px}.fov-out>div{min-height:1.6em}.fov-sel{margin-top:6px;font-size:12.5px;word-break:break-word}.fov-nw{white-space:nowrap}" +
     ".fov-warn{color:var(--mui-palette-warning-main, #b7791f)}" +
     ".fov{container-type:inline-size}.fov-dash{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;align-items:start}" +
-    "@container (min-width: 760px){.fov-dash{grid-template-columns:minmax(0,1fr) 320px}.fov-panel{position:sticky;top:72px;max-height:calc(100vh - 88px);overflow:auto;overscroll-behavior:contain}}" +
+    "@container (min-width: 760px){.fov-dash{grid-template-columns:minmax(0,1fr) 320px}.fov-dash .fov-panel{position:sticky;top:72px;max-height:calc(100vh - 88px);max-height:calc(100dvh - 88px);overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}}" +
     ".fov-vcol{min-width:0}.fov-short{margin:6px auto 0;text-align:center;font-size:13px;line-height:1.5;color:var(--mui-palette-text-secondary, #8b949e)}" +
     ".fov-legend{display:inline-flex;flex-wrap:wrap;gap:4px 12px;justify-content:center;align-items:center}.fov-legend .fov-dot{margin:0 5px 0 0}" +
     ".fov-info{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;margin-left:4px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--mui-palette-text-secondary, #8b949e);cursor:help;vertical-align:-4px}" +
