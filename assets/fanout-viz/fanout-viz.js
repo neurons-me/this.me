@@ -1,4 +1,4 @@
-/*! fanout-viz 3.0.1 · .me extreme fan-out, driven by a real this.me kernel · MIT · neurons.me
+/*! fanout-viz 3.1.0 · .me extreme fan-out, driven by a real this.me kernel · MIT · neurons.me
  * Every line is one real dependent of a live this.me 4.2.1 kernel running in a Web Worker (CDN, SRI-checked), at angle
  * i/N; nothing on the canvas is decorative.
  * - Model (in the worker), per dependent i = 1…N (10,000 by default, 100,000 on request):
@@ -54,6 +54,27 @@
     ".fov-num{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;color:var(--mui-palette-text-primary, inherit)}" +
     ".fov-out{margin-top:6px}.fov-out>div{min-height:1.6em}.fov-sel{margin-top:6px;font-size:12.5px;word-break:break-word}.fov-nw{white-space:nowrap}" +
     ".fov-warn{color:var(--mui-palette-warning-main, #b7791f)}" +
+    ".fov{container-type:inline-size}.fov-dash{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;align-items:start}" +
+    "@container (min-width: 760px){.fov-dash{grid-template-columns:minmax(0,1fr) 320px}.fov-panel{position:sticky;top:72px;max-height:calc(100vh - 88px);overflow:auto;overscroll-behavior:contain}}" +
+    ".fov-vcol{min-width:0}.fov-short{margin:6px auto 0;text-align:center;font-size:13px;line-height:1.5;color:var(--mui-palette-text-secondary, #8b949e)}" +
+    ".fov-legend{display:inline-flex;flex-wrap:wrap;gap:4px 12px;justify-content:center;align-items:center}.fov-legend .fov-dot{margin:0 5px 0 0}" +
+    ".fov-info{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;margin-left:4px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--mui-palette-text-secondary, #8b949e);cursor:help;vertical-align:-4px}" +
+    ".fov-info:hover,.fov-info:focus-visible{color:var(--mui-palette-primary-main, #2aa);outline:none;background:color-mix(in srgb, currentColor 12%, transparent)}.fov-info svg{width:14px;height:14px}" +
+    ".fov-panel{border:1px solid var(--mui-palette-divider, rgba(128,128,128,.3));border-radius:12px;background:var(--mui-palette-background-paper, transparent);font-size:13px;color:var(--mui-palette-text-primary, inherit);overflow:hidden}" +
+    "@container (max-width: 759px){.fov-panel{border-radius:16px 16px 12px 12px;box-shadow:0 -6px 18px rgba(0,0,0,.08)}.fov-phead::before{content:'';position:absolute;left:50%;top:5px;width:36px;height:4px;margin-left:-18px;border-radius:2px;background:var(--mui-palette-divider, rgba(128,128,128,.4))}.fov-phead{padding-top:14px}}" +
+    ".fov-phead{position:relative;display:flex;align-items:center;gap:6px;padding:8px 8px 8px 12px}.fov-ptitle{flex:1;min-width:0;display:flex;align-items:center;gap:6px;font-weight:600;white-space:nowrap;overflow:hidden}" +
+    ".fov-pmini{font-weight:400;color:var(--mui-palette-text-secondary, #8b949e);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px;overflow:hidden;text-overflow:ellipsis}" +
+    ".fov-ibtn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;padding:0;border-radius:8px;border:1px solid transparent;background:transparent;color:inherit;cursor:pointer}" +
+    ".fov-ibtn:hover:not(:disabled){background:color-mix(in srgb, currentColor 10%, transparent)}.fov-ibtn:focus-visible{outline:2px solid var(--mui-palette-primary-main, #2aa);outline-offset:1px}.fov-ibtn:disabled{opacity:.45;cursor:default}.fov-ibtn svg{width:15px;height:15px}" +
+    ".fov-chev{transition:transform .15s}.fov-chev.up{transform:rotate(180deg)}@media (prefers-reduced-motion: reduce){.fov-chev{transition:none}}" +
+    ".fov-sec{border-top:1px solid var(--mui-palette-divider, rgba(128,128,128,.25))}.fov-shead{display:flex;width:100%;align-items:center;gap:6px;padding:7px 12px;border:0;background:transparent;color:inherit;font:inherit;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;text-align:left}" +
+    ".fov-shead:hover{background:color-mix(in srgb, currentColor 5%, transparent)}.fov-shead:focus-visible{outline:2px solid var(--mui-palette-primary-main, #2aa);outline-offset:-2px}.fov-shead span{flex:1}.fov-shead small{font-weight:400;text-transform:none;letter-spacing:0;color:var(--mui-palette-text-secondary, #8b949e);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}" +
+    ".fov-sbody{padding:2px 12px 10px}.fov-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:2px 6px;margin:0 -6px;border-radius:6px;line-height:1.55}.fov-row>span:first-child{color:var(--mui-palette-text-secondary, #8b949e);min-width:0}" +
+    ".fov-row.hl{cursor:default}.fov-row.hl:hover,.fov-row.hl:focus-visible{background:color-mix(in srgb, var(--mui-palette-primary-main, #2aa) 12%, transparent);outline:none}" +
+    ".fov-row .fov-num{text-align:right;white-space:nowrap}.fov-ctl{display:flex;flex-wrap:wrap;gap:6px}.fov-ctl .fov-btn{min-height:30px;padding:3px 10px}.fov-note{margin-top:4px;color:var(--mui-palette-text-secondary, #8b949e);font-size:12px;line-height:1.45}" +
+    ".fov-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.fov-chip{padding:1px 8px;border-radius:999px;border:1px solid var(--mui-palette-divider, rgba(128,128,128,.4));background:transparent;color:inherit;font:inherit;font-size:11.5px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;cursor:pointer}.fov-chip:hover,.fov-chip:focus-visible{border-color:var(--mui-palette-primary-main, #2aa);outline:none}" +
+    ".fov-go{display:flex;gap:6px;align-items:center;margin-top:6px}.fov-go input{width:96px;min-height:28px;padding:2px 8px;border-radius:8px;border:1px solid var(--mui-palette-divider, rgba(128,128,128,.4));background:transparent;color:inherit;font:inherit;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}" +
+    ".fov-formula{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.7}" +
     ".fov-busy{display:inline-block;width:10px;height:10px;margin-right:6px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;vertical-align:-1px;animation:fovspin .8s linear infinite}" +
     "@keyframes fovspin{to{transform:rotate(360deg)}}@media (prefers-reduced-motion: reduce){.fov-busy{animation:none;border-right-color:currentColor;opacity:.6}}";
   function injectCss() { if (document.getElementById("fov-css")) return; var s = document.createElement("style"); s.id = "fov-css"; s.textContent = CSS; document.head.appendChild(s); }
@@ -126,7 +147,7 @@
       entries += chg.length + 1; nWrites++; writes.push(writeMs); if (writes.length > 20) writes.shift(); if (firstTen.length < 10) firstTen.push(writeMs);
       var hp = heap(), p50 = pct(writes, .5), drift = firstTen.length === 10 && nWrites >= 20 ? pct(writes.slice(-10), .5) / pct(firstTen, .5) - 1 : null;
       return { n: N, from: from, factor: f, writeMs: writeMs, analysisMs: analysisMs, k: m.k, E: rec.length, changed: chg.length, levels: levels, hots: hots, mono: mono,
-        m: hc.length / 2, alarms: al.length / 2, hotCh: new Uint32Array(hc), alarmRec: new Uint32Array(al),
+        m: hc.length / 2, alarms: al.length / 2, firstHot: (function () { var o = []; for (var q = 1; q < hc.length && o.length < 8; q += 2) o.push(hc[q]); return o; })(), hotCh: new Uint32Array(hc), alarmRec: new Uint32Array(al),
         stats: { nWrites: nWrites, p50: p50, p95: pct(writes, .95), window: writes.length, drift: drift, heapMB: hp.total / 1048576, logMB: hp.log / 1048576, guard: hp.over, rule: hp.rule, resets: resets } };
     }
     function post(r, extra) { for (var k in extra) r[k] = extra[k]; postMessage(Object.assign({ op: "wave" }, r), [r.hotCh.buffer, r.alarmRec.buffer]); }
@@ -265,6 +286,11 @@
     write: h("svg", { viewBox: "0 0 16 16", "aria-hidden": "true" }, h("circle", { cx: 8, cy: 8, r: 2.6, fill: "currentColor" }), h("path", { d: "M8 1v3M8 12v3M1 8h3M12 8h3M3 3l2 2M11 11l2 2M13 3l-2 2M5 11l-2 2", stroke: "currentColor", strokeWidth: 1.4, strokeLinecap: "round" })),
     stress: h("svg", { viewBox: "0 0 16 16", "aria-hidden": "true" }, h("path", { d: "M1 8h3l2-5 3 10 2-5h4", fill: "none", stroke: "currentColor", strokeWidth: 1.5, strokeLinecap: "round", strokeLinejoin: "round" })),
     stop: h("svg", { viewBox: "0 0 16 16", "aria-hidden": "true" }, h("rect", { x: 3.5, y: 3.5, width: 9, height: 9, rx: 1.5, fill: "currentColor" })),
+    info: h("svg", { viewBox: "0 0 16 16", "aria-hidden": "true" }, h("circle", { cx: 8, cy: 8, r: 6.6, fill: "none", stroke: "currentColor", strokeWidth: 1.3 }), h("rect", { x: 7.3, y: 7, width: 1.4, height: 4.6, rx: .7, fill: "currentColor" }), h("circle", { cx: 8, cy: 4.9, r: .9, fill: "currentColor" })),
+    chev: h("svg", { viewBox: "0 0 16 16", "aria-hidden": "true" }, h("path", { d: "M4 6l4 4 4-4", fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round", strokeLinejoin: "round" })),
+    panel: h("svg", { viewBox: "0 0 16 16", "aria-hidden": "true" }, h("rect", { x: 1.8, y: 2.8, width: 12.4, height: 10.4, rx: 1.6, fill: "none", stroke: "currentColor", strokeWidth: 1.3 }), h("path", { d: "M10 3v10", stroke: "currentColor", strokeWidth: 1.3 })),
+    prev: h("svg", { viewBox: "0 0 16 16", "aria-hidden": "true" }, h("path", { d: "M10 3.5L5.5 8 10 12.5", fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round", strokeLinejoin: "round" })),
+    next: h("svg", { viewBox: "0 0 16 16", "aria-hidden": "true" }, h("path", { d: "M6 3.5L10.5 8 6 12.5", fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round", strokeLinejoin: "round" })),
   };
   var PAUSE_KEY = "fanout-viz.paused";
   // the wedge of slice s (angles s/S·2π … (s+1)/S·2π, like dependent i at i/N·2π), in a viewBox where the disc radius
@@ -276,11 +302,25 @@
   var WEDGES = null;
   function nodeStore() { return root["GUI-NODES-STORE"] || null; }
   var depOf = function (s, n) { return Math.min(n, Math.floor((s + .5) / SLICES * n) + 1); };
-  var F = .84;   // line reach in disc-radius units (42% of the canvas / 50%)
+  var F = .84;
+  // [key, title, kernel path the section reads (for Explain), open by default]
+  var PANEL_SECTIONS = [["controls", "Controls", null, true], ["write", "This write", "master.factor", true], ["timing", "Timing", null, true],
+    ["stress", "Stress", null, false], ["model", "Model", null, false], ["selected", "Selected dependent", null, true]];
+  var PANEL_KEY = "fanout-viz.panel";
+  function loadPanel() { var d = { open: !(root.matchMedia && root.matchMedia(SMALL_Q).matches), sec: {} }; PANEL_SECTIONS.forEach(function (x) { d.sec[x[0]] = x[3]; });
+    try { var v = JSON.parse(root.localStorage.getItem(PANEL_KEY) || "null"); if (v && typeof v === "object") { if (typeof v.open === "boolean") d.open = v.open; for (var k in v.sec) if (k in d.sec) d.sec[k] = !!v.sec[k]; } } catch (e) {}
+    return d; }
+  function savePanel(v) { try { root.localStorage.setItem(PANEL_KEY, JSON.stringify(v)); } catch (e) {} }   // line reach in disc-radius units (42% of the canvas / 50%)
 
+  // info popover: the .GUI Tooltip (MUI) on a small button; memoized, so a wave's re-render skips it
+  var InfoTip = React.memo(function InfoTip(p) {
+    var GA = (root.GUI && root.GUI.Atoms) || {};
+    var btn = h("button", { type: "button", className: "fov-info", "aria-label": p.label || "More information", "data-gui-inspector-control": "true" }, ICON.info);
+    return GA.Tooltip ? h(GA.Tooltip, { title: p.tip, arrow: true, size: "sm", enterTouchDelay: 0, leaveTouchDelay: 6000, describeChild: true, placement: "top" }, btn) : h("span", { title: p.tip }, btn);
+  });
   function FanoutViz(props) {
     var rootId = props["data-gui-node-id"] || "fanout-viz", depId = rootId + "/dependent";
-    var wrapRef = useRef(null), discRef = useRef(null), rotRef = useRef(null), baseRef = useRef(null), waveRef = useRef(null), dotsRef = useRef(null), overRef = useRef(null), hitRef = useRef(null), markRef = useRef(null), markGRef = useRef(null), kRef = useRef(null);
+    var wrapRef = useRef(null), vizColRef = useRef(null), hlRef = useRef(null), discRef = useRef(null), rotRef = useRef(null), baseRef = useRef(null), waveRef = useRef(null), dotsRef = useRef(null), overRef = useRef(null), hitRef = useRef(null), markRef = useRef(null), markGRef = useRef(null), kRef = useRef(null);
     var reduceNow = !!(root.matchMedia && root.matchMedia("(prefers-reduced-motion: reduce)").matches);
     var pausedInit = function () { if (reduceNow) return true; try { return root.localStorage.getItem(PAUSE_KEY) === "1"; } catch (e) { return false; } };
     var ps = useState(pausedInit), paused = ps[0], setPaused = ps[1];
@@ -321,6 +361,10 @@
           { slice: s + 1, of: SLICES, angle: a0.toFixed(1) + "°–" + (a0 + 360 / SLICES).toFixed(1) + "°", dependents: fmt(i0) + "–" + fmt(i1), sampledPath: "dep." + dep + ".hot", kernelN: N }));
       }
       recs.push(depRecord(1, N));
+      // the dashboard panel and its sections are .GUI parts too (Grid and Inspector see them)
+      var pr = rec("panel", "FanoutViz.Panel", { semanticPath: "master.factor", source: SRC, note: "Control panel: reads the same worker kernel as the figure." }, { sections: PANEL_SECTIONS.map(function (x) { return x[0]; }) });
+      recs.push(pr);
+      PANEL_SECTIONS.forEach(function (x) { var r = rec("panel-" + x[0], "FanoutViz.Panel.Section", x[2] ? { semanticPath: x[2], source: SRC, note: x[1] } : { source: SRC, note: x[1] }, { section: x[1] }); r.parentId = pr.id; recs.push(r); });
       var first = !partIds.current, i = 0, raf = 0;
       partIds.current = recs.map(function (r) { return r.id; });
       if (first) { recs.forEach(function (r) { store.actions.registerNode(r); }); return; }
@@ -370,9 +414,9 @@
     // reaches them), over (guide, centre, selection). All in one rotating layer, with the hit SVG, in a circular mask.
     useEffect(function () {
       injectCss();
-      var wrap = wrapRef.current, base = baseRef.current, wave = waveRef.current, dots = dotsRef.current, over = overRef.current, rot = rotRef.current;
-      var bctx = base && base.getContext("2d"), wctx = wave && wave.getContext("2d"), dctx = dots && dots.getContext("2d"), ctx = over && over.getContext("2d");
-      if (!wrap || !bctx || !wctx || !dctx || !ctx) return;
+      var wrap = wrapRef.current, hl = hlRef.current, base = baseRef.current, wave = waveRef.current, dots = dotsRef.current, over = overRef.current, rot = rotRef.current;
+      var hctx = hl && hl.getContext("2d"), bctx = base && base.getContext("2d"), wctx = wave && wave.getContext("2d"), dctx = dots && dots.getContext("2d"), ctx = over && over.getContext("2d");
+      if (!wrap || !bctx || !wctx || !dctx || !ctx || !hctx) return;
       var C = ctl.current, reduce = root.matchMedia ? root.matchMedia("(prefers-reduced-motion: reduce)") : { matches: false };
       var isStill = function () { return reduce.matches && !C.optIn; };
       var R = rng(20261011), ang = new Float64Array(N), len = new Float64Array(N);   // same sequence as RASTER
@@ -406,7 +450,7 @@
       var job = 0, worker = null;
       function rasterize() {
         var Wd = Math.round(size * dpr), id = ++job, args = [Wd, N, wideEvery, brightEvery, dBase, dBright];
-        var done = function (buf) { if (id !== job) return; depth = buf; depthW = Wd; colorize(); redrawDots(); frame(); };
+        var done = function (buf) { if (id !== job) return; depth = buf; depthW = Wd; colorize(); redrawDots(); drawHl(); frame(); };
         if (!worker && root.Worker && root.Blob && root.URL) try {
           var src = "var R=" + rng + ";var raster=" + RASTER + ";onmessage=function(e){var d=raster.apply(null,[R].concat(e.data.a));postMessage({id:e.data.id,d:d},[d.buffer]);};";
           var url = URL.createObjectURL(new Blob([src], { type: "text/javascript" })); worker = new Worker(url); URL.revokeObjectURL(url);
@@ -429,8 +473,22 @@
         if (d.n !== N) return;
         wv = d; P = 0; rp = 0; hd = 0; ad = 0; setFlags(d); dctx.setTransform(1, 0, 0, 1, 0, 0); dctx.clearRect(0, 0, dots.width, dots.height);
         if (isStill() || C.paused || !visible || document.hidden) P = d.E;   // no motion: the final state at once
-        drawNewDots(); frame(); start();
+        drawNewDots(); drawHl(); frame(); start();
       });
+      // hover highlight from the panel: one set of the last wave drawn once on its own layer, the rest dimmed
+      function drawHl() {
+        var kind = C.hlKind, Wd = hl.width; hctx.setTransform(1, 0, 0, 1, 0, 0); hctx.clearRect(0, 0, Wd, Wd);
+        var on = !!(kind && wv && col); dots.style.opacity = on && kind !== "changed" ? ".15" : ""; wave.style.opacity = on && kind !== "lines" && kind !== "changed" ? ".45" : "";
+        if (!on || kind === "lines" || kind === "changed") { if (on && kind === "changed") { drawSet(wv.hotCh, col.gold, 0); drawSet(wv.alarmRec, col.pink, 5.5); } return; }
+        if (kind === "hot") drawSet(wv.hotCh, col.gold, 0); else if (kind === "alarm") drawSet(wv.alarmRec, col.pink, 5.5);
+        function drawSet(arr, color, out) {
+          var c = Wd / 2, f = Wd * .42, u = Wd / 800, r = col.dotR * 2.1 * u; hctx.setTransform(1, 0, 0, 1, c, c);
+          hctx.beginPath(); hctx.fillStyle = color;
+          for (var k = 1; k < arr.length; k += 2) { var i = arr[k] - 1, l = len[i] * f + out * u, x = cosA[i] * l, y = sinA[i] * l; hctx.moveTo(x + r, y); hctx.arc(x, y, r, 0, Math.PI * 2); }
+          hctx.fill(); hctx.setTransform(1, 0, 0, 1, 0, 0);
+        }
+      }
+      C.highlight = function (kind) { if (C.hlKind === kind) return; C.hlKind = kind; drawHl(); };
       function drawNewDots() {
         if (!wv || !col) return; var Wd = dots.width, c = Wd / 2, f = Wd * .42, u = Wd / 800;
         dctx.setTransform(1, 0, 0, 1, c, c);
@@ -468,12 +526,12 @@
         if (kk !== lastK && kNum) { lastK = kk; kNum.textContent = wv ? "k = " + fmt(kk) + " / " + fmt(wv.E) : "k = –"; }
       }
       function layout() {
-        var w = Math.floor(Math.min(520, wrap.clientWidth - 2)); if (w < 120) return false;
+        var host = vizColRef.current || wrap, w = Math.floor(Math.min(520, host.clientWidth - 2)); if (w < 120) return false;
         var d = Math.min(2, root.devicePixelRatio || 1), changed = readColors();
-        if (w === size && d === dpr) { if (changed) { colorize(); redrawDots(); } return changed; }
+        if (w === size && d === dpr) { if (changed) { colorize(); redrawDots(); drawHl(); } return changed; }
         size = w; dpr = d; var px = Math.round(w * d);
-        [dots, over].forEach(function (cv) { cv.width = cv.height = px; });
-        [base, wave, dots, over].forEach(function (cv) { cv.style.width = cv.style.height = w + "px"; });
+        [dots, hl, over].forEach(function (cv) { cv.width = cv.height = px; });
+        [base, wave, dots, hl, over].forEach(function (cv) { cv.style.width = cv.style.height = w + "px"; });
         if (discRef.current) discRef.current.style.width = discRef.current.style.height = w + "px";
         if (rot) rot.style.width = rot.style.height = w + "px";
         rasterize(); return true;
@@ -489,9 +547,9 @@
       var nF = 0, rto = 0;
       function redraw() { clearTimeout(rto); rto = setTimeout(function () { if (layout() || isStill() || !raf) frame(); }, 120); }
       layout(); frame(); start();
-      var ro = root.ResizeObserver ? new ResizeObserver(redraw) : null; if (ro) ro.observe(wrap);
+      var ro = root.ResizeObserver ? new ResizeObserver(redraw) : null; if (ro) { ro.observe(wrap); if (vizColRef.current) ro.observe(vizColRef.current); }
       var io = root.IntersectionObserver ? new IntersectionObserver(function (es) { visible = es[0].isIntersecting; if (visible) start(); }, { threshold: .1 }) : null; if (io) io.observe(wrap);
-      var mo = new MutationObserver(function () { if (readColors()) { colorize(); redrawDots(); frame(); } });
+      var mo = new MutationObserver(function () { if (readColors()) { colorize(); redrawDots(); drawHl(); frame(); } });
       [document.documentElement, document.body].forEach(function (n) { mo.observe(n, { attributes: true }); });
       var onVis = function () { if (!document.hidden) start(); }; document.addEventListener("visibilitychange", onVis);
       var onRm = function () { if (isStill()) { if (raf) cancelAnimationFrame(raf); raf = 0; lastTs = 0; start(); } else start(); };
@@ -513,48 +571,140 @@
       var onDown = function (e) { var i = place(e); if (i) selectDep(i, e.pointerType !== "mouse"); };
       disc.addEventListener("pointermove", onMove);
       disc.addEventListener("pointerdown", onDown);
-      return function () { disc.removeEventListener("pointerdown", onDown); disc.removeEventListener("pointermove", onMove); offWave(); C.redraw = null; job++; if (worker) worker.terminate(); clearTimeout(rto); if (raf) cancelAnimationFrame(raf); if (ro) ro.disconnect(); if (io) io.disconnect(); mo.disconnect(); document.removeEventListener("visibilitychange", onVis); if (reduce.removeEventListener) reduce.removeEventListener("change", onRm); };
+      return function () { disc.removeEventListener("pointerdown", onDown); disc.removeEventListener("pointermove", onMove); offWave(); C.redraw = null; C.highlight = null; job++; if (worker) worker.terminate(); clearTimeout(rto); if (raf) cancelAnimationFrame(raf); if (ro) ro.disconnect(); if (io) io.disconnect(); mo.disconnect(); document.removeEventListener("visibilitychange", onVis); if (reduce.removeEventListener) reduce.removeEventListener("change", onRm); };
     }, [N]);
+    var C = ctl.current, GA = (root.GUI && root.GUI.Atoms) || {};
     var togglePause = function () {
-      var next = !paused; ctl.current.paused = next; if (!next) ctl.current.optIn = true;   // play under reduced motion = the reader's opt-in
+      var next = !paused; C.paused = next; if (!next) C.optIn = true;   // play under reduced motion = the reader's opt-in
       try { root.localStorage.setItem(PAUSE_KEY, next ? "1" : "0"); } catch (e) {}
-      setPaused(next); if (ctl.current.redraw) ctl.current.redraw();
+      setPaused(next); if (C.redraw) C.redraw();
     };
     var onHit = function (e) {
       var g = e.target && e.target.closest && e.target.closest("[data-gui-node-id]"); if (!g || !hitRef.current || !hitRef.current.contains(g)) return;
       var store = nodeStore(), id = g.getAttribute("data-gui-node-id");
       if (store) store.actions.selectNode(id === depId || store.getState().selectedNodeId !== id ? id : null);
     };
+    var moveMarker = function (i) { var m = markRef.current; if (m && C.geo) { var p = C.geo.point(i); m.setAttribute("cx", p[0].toFixed(4)); m.setAttribute("cy", p[1].toFixed(4)); m.removeAttribute("data-armed"); } };
+    var goDep = function (i) { i = ((i - 1) % N + N) % N + 1; selectDep(i, true); moveMarker(i); };
     var onKey = function (e) {
       var step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1, PageDown: 100, PageUp: -100 }[e.key];
-      if (e.key === "Home") { e.preventDefault(); selectDep(1, true); return; }
-      if (e.key === "End") { e.preventDefault(); selectDep(N, true); return; }
-      if (!step) return; e.preventDefault();
-      var cur = selDep || 1; selectDep(cur + step * (e.shiftKey ? 10 : 1), true);
-      var m = markRef.current, g = markGRef.current; if (m && ctl.current.geo) { var p = ctl.current.geo.point(((cur + step * (e.shiftKey ? 10 : 1) - 1) % N + N) % N + 1); m.setAttribute("cx", p[0].toFixed(4)); m.setAttribute("cy", p[1].toFixed(4)); m.removeAttribute("data-armed"); }
+      if (e.key === "Home") { e.preventDefault(); goDep(1); return; }
+      if (e.key === "End") { e.preventDefault(); goDep(N); return; }
+      if (!step) return; e.preventDefault(); goDep((selDep || 1) + step * (e.shiftKey ? 10 : 1));
+    };
+    // the panel's state (open, sections) survives reloads
+    var pv = useState(loadPanel), panel = pv[0], setPanel = pv[1];
+    var updPanel = function (fn) { setPanel(function (p) { var n = { open: p.open, sec: Object.assign({}, p.sec) }; fn(n); savePanel(n); return n; }); };
+    var uid = useRef("fov" + Math.random().toString(36).slice(2, 7)).current;
+    var hl = function (kind, extra) {   // hovering / focusing a stat highlights its set on the figure
+      var on = function () { if (C.highlight) C.highlight(kind); }, off = function () { if (C.highlight) C.highlight(null); };
+      return Object.assign({ className: "fov-row hl", tabIndex: 0, onMouseEnter: on, onMouseLeave: off, onFocus: on, onBlur: off, "data-fov-hl": kind }, extra || {});
+    };
+    useEffect(function () { return function () { if (C.highlight) C.highlight(null); }; }, []);
+    var explainDep = function () {   // open the .GUI Inspector on the selected dependent and run its Explain
+      var store = nodeStore(), i = selDep; if (!store || !i) return;
+      store.actions.registerNode(depRecord(i, N)); store.actions.setInspectorEnabled(true); store.actions.selectNode(depId);
+      var tries = 0, t = setInterval(function () {
+        var aside = document.querySelector('aside[data-gui-inspector-control="true"]'), b = aside && [].find.call(aside.querySelectorAll("button"), function (x) { return /^explain$/i.test(x.textContent.trim()); });
+        if (b) { clearInterval(t); b.click(); } else if (++tries > 30) clearInterval(t);
+      }, 100);
     };
     var busy = lst.phase === "building" || lst.phase === "writing", stressing = lst.phase === "stressing";
     var pick = function (n) { if (busy || stressing || (lst.n === n && lst.phase !== "error")) return; live.build(n).then(function () { return live.write(); }).catch(function () {}); };
-    var Wv = lst.wave, S = Wv && Wv.stats, num = function (x, k) { return h("span", { className: "fov-num", key: k }, x); };
-    var line1 = lst.phase === "building" ? h("span", null, h("span", { className: "fov-busy", "aria-hidden": "true" }), "Building ", num(fmt(lst.target)), " dependents (3 derived values each) in the worker… ", num(Math.round(lst.progress * 100) + "%"))
-      : lst.phase === "error" ? h("span", { className: "fov-warn" }, "Live kernel unavailable: " + lst.error)
-      : lst.phase === "idle" ? h("span", null, "Starting the live kernel…")
-      : !Wv ? h("span", null, lst.phase === "writing" ? [h("span", { key: 0, className: "fov-busy", "aria-hidden": "true" }), "First write…"] : "Ready.")
-      : h("span", null, "write #", num(fmt(S.nWrites), 1), ": master.factor ", num(Wv.from, 2), " → ", num(Wv.factor, 3), " · k = ", num(fmt(Wv.k), 4), " recomputed (", num(fmt(Wv.levels), 5), " level + ", num(fmt(Wv.hots), 6), " hot + ", num(fmt(Wv.alarms), 7),
-          " alarm) · ", num(fmt(Wv.changed), 8), " changed · m = ", num(fmt(Wv.m), 9), " hot flipped · ", num(fmt(Wv.levels - Wv.alarms), 10), " alarms skipped (early cutoff)");
-    var line2 = !Wv ? null : h("span", null, num(ms(Wv.writeMs), 1), " this write · p50 ", num(ms(S.p50), 2), " · p95 ", num(ms(S.p95), 3), " (last ", S.window, ") · heap ≈ ", num(fmt(S.heapMB) + " MB", 4), " (estimate) · built ", num(fmt(lst.n), 5), " in ", num(ms(lst.buildMs), 6));
-    var st = lst.stress, line3 = stressing || (st && st.writes) ? h("span", null, stressing ? h("span", { className: "fov-busy", "aria-hidden": "true" }) : null, "stress: ", num(fmt(st ? st.writes : 0), 1), " writes · ", num((st ? st.wps : 0).toFixed(2), 2), " writes/s",
-        S && S.drift != null ? [" · drift ", num((S.drift >= 0 ? "+" : "") + Math.round(S.drift * 100) + "%", 3), " (p50 last 10 vs first 10 since build)"] : null,
-        lst.resets ? [" · ", h("b", { key: "r" }, "kernel reset (log size)"), " ×", num(lst.resets, 4)] : null,
-        " · sustained writes slow down as the log grows; the reset starts a fresh kernel") : null;
-    var info = null;
-    if (selInfo) {
-      var P = selInfo.p, fl = selInfo.flags && selInfo.flags[selInfo.i] || 0, hx = P && P.hotExplain && P.hotExplain.meta || {};
-      info = h("div", { className: "fov-sel", "aria-live": "polite", "data-fov": "sel" }, h("b", null, "dep." + selInfo.i), selInfo.loading ? " …" : selInfo.error ? " · " + selInfo.error : [
-        ": value ", num(P.value, 1), " × master.factor ", num(P.factor, 2), " = level ", num(typeof P.level === "number" ? String(+P.level.toFixed(4)) : String(P.level), 3), " · limit ", num(P.limit, 4), " → hot ", num(String(P.hot), 5), " · alarm ", num(String(P.alarm), 6),
-        Wv ? [" · last write: hot ", fl & 1 ? h("b", { key: "a" }, "flipped") : "unchanged", ", alarm ", fl & 2 ? h("b", { key: "b" }, "recomputed") : "skipped (early cutoff)"] : null,
-        hx.k != null ? " · wave k = " + fmt(hx.k) : "", " · ←/→ neighbours, Inspector: Explain"]);
-    }
+    var Wv = lst.wave, S = Wv && Wv.stats, st = lst.stress;
+    var num = function (x, k) { return h("span", { className: "fov-num", key: k }, x); };
+    var Info = function (tip, label, k) { return h(InfoTip, { key: k, tip: tip, label: label }); };
+    var Btn = function (o, icon, text) {   // .GUI Button (MUI) when available; same look as the native fallback
+      var active = !!o.active, p = Object.assign({ type: "button", "data-gui-inspector-control": "true" }, o); delete p.active; o = { active: active };
+      if (GA.Button) return h(GA.Button, Object.assign(p, { variant: "outlined", size: "small", startIcon: icon, color: o.active ? "primary" : "inherit",
+        sx: { textTransform: "none", minHeight: 30, py: .25, px: 1.25, borderRadius: "8px", fontSize: 13, lineHeight: 1.2, borderColor: o.active ? undefined : "divider", bgcolor: o.active ? "action.selected" : undefined, "& .MuiButton-startIcon svg": { width: 14, height: 14 } } }), text);
+      return h("button", Object.assign(p, { className: "fov-btn" }), icon, text);
+    };
+    var row = function (label, value, props, k) { return h("div", Object.assign({ key: k }, props || { className: "fov-row" }), h("span", null, label), num(value)); };
+    var sw = function (c) { return h("span", { className: "fov-dot", style: { background: "var(--fov-" + c + ")", margin: "0 6px 0 0" } }); };
+    var section = function (key, title, summary, body) {
+      var open = panel.sec[key], bid = uid + "-" + key;
+      return h("section", { className: "fov-sec", key: key, "data-gui-node-id": rootId + "/panel-" + key, "data-gui-component": "FanoutViz.Panel.Section", "data-fov-sec": key },
+        h("button", { type: "button", className: "fov-shead", "aria-expanded": open ? "true" : "false", "aria-controls": bid, "data-gui-inspector-control": "true", onClick: function () { updPanel(function (p) { p.sec[key] = !p.sec[key]; }); } },
+          h("span", null, title), summary ? h("small", null, summary) : null, h("span", { className: "fov-chev" + (open ? " up" : ""), style: { flex: "none", display: "inline-flex" } }, ICON.chev)),
+        open ? h("div", { className: "fov-sbody", id: bid }, body) : null);
+    };
+    var statusLine = lst.phase === "building" ? h("div", { className: "fov-note" }, h("span", { className: "fov-busy", "aria-hidden": "true" }), "Building ", num(fmt(lst.target)), " dependents in the worker… ", num(Math.round(lst.progress * 100) + "%"))
+      : lst.phase === "error" ? h("div", { className: "fov-note fov-warn" }, "Live kernel unavailable: " + lst.error)
+      : lst.phase === "idle" ? h("div", { className: "fov-note" }, "Starting the live kernel…")
+      : lst.phase === "writing" ? h("div", { className: "fov-note" }, h("span", { className: "fov-busy", "aria-hidden": "true" }), "Writing master.factor…")
+      : stressing ? h("div", { className: "fov-note" }, h("span", { className: "fov-busy", "aria-hidden": "true" }), "Stress: writing back to back in the worker.") : null;
+    var depChips = Wv && Wv.firstHot && Wv.firstHot.length ? h("div", { className: "fov-chips", "data-gui-inspector-control": "true" }, Wv.firstHot.map(function (i) {
+      return h("button", { type: "button", key: i, className: "fov-chip", onClick: function () { goDep(i); }, onMouseEnter: function () { if (C.highlight) C.highlight(null); }, "aria-label": "Select dep." + i + " (its hot flipped)" }, "dep." + i); })) : null;
+    var TIP = {
+      replay: "The sweep replays the kernel's real recompute order (explain().meta.recomputed: every level in index order, then every hot, then the alarms) over the write's measured duration (see Timing), at an even pace inside the write. this.me 4.2.1 has no progress hook, so it is a replay of the real order, not a live stream.",
+      lines: "Dependent i sits at angle i/N (N = " + fmt(N) + "). Each one has two facts (value, limit) and three derived values; its line lights up when the replay reaches its level.",
+      cutoff: "Gold: hot = level > limit flipped in this write. Pink: alarm = hot == true recomputed, only behind those flips. Every other alarm is skipped (early cutoff): its input did not change.",
+      k: "Every derived value the write recomputed: all levels and hots (they read master.factor), plus the alarms behind a hot that changed.",
+      changed: "Recomputed values whose value really changed (all levels, the flipped hots and their alarms).",
+      heap: "A worker's heap is not readable by the page: estimated as N × 6.1 KB + log entries × 225 B (calibrated on V8).",
+      guard: "Stress resets the kernel when the estimated heap passes ~300 MB (for a 100k kernel, already larger when built: when the log alone does). Every write appends to the kernel's log, so sustained writes drift slower; the reset starts a fresh kernel.",
+      drift: "p50 of the last 10 writes vs the first 10 since this kernel was built (shown after 20 writes).",
+      pct: "Over the last 20 writes of this kernel.",
+    };
+    var sizeBtns = h("span", { className: "fov-ctl", role: "group", "aria-label": "Live kernel size" },
+      Btn({ "aria-pressed": lst.target === 10000 ? "true" : "false", active: lst.target === 10000, disabled: busy || stressing, "data-fov": "n10k", onClick: function () { pick(10000); } }, null, "10k"),
+      small ? null : Btn({ "aria-pressed": lst.target === 100000 ? "true" : "false", active: lst.target === 100000, disabled: busy || stressing, "data-fov": "n100k", title: "Builds 100,000 dependents (300,000 derived values) in the worker: about 10–20 s, then several seconds per write", onClick: function () { pick(100000); } }, null, "100k · slow"));
+    var pauseBtn = Btn({ "aria-label": paused ? "Play the animation" : "Pause the animation", "data-fov": "pause", onClick: togglePause }, paused ? ICON.play : ICON.pause, paused ? "Play" : "Pause");
+    var writeBtn = Btn({ disabled: busy || stressing || lst.phase === "error" || !lst.n, "data-fov": "write", onClick: function () { live.write().catch(function () {}); } }, ICON.write, "Write");
+    var stressBtn = Btn({ disabled: busy || lst.phase === "error" || !lst.n, active: stressing, "data-fov": "stress", "aria-pressed": stressing ? "true" : "false", onClick: function () { (stressing ? live.stop() : live.stress()).catch(function () {}); } }, stressing ? ICON.stop : ICON.stress, stressing ? "Stop" : "Stress");
+    // bodies that don't change with every wave are memoized (a stress run re-renders the panel ~2–3×/s)
+    var controlsBody = React.useMemo(function () { return [h("div", { key: 0, className: "fov-ctl" }, pauseBtn, writeBtn, stressBtn), h("div", { key: 1, style: { marginTop: 6 } }, sizeBtns), h("div", { key: 2, role: "status", "aria-live": "polite" }, statusLine)]; },
+      [paused, busy, stressing, small, lst.target, lst.n, lst.phase, lst.phase === "building" ? Math.round(lst.progress * 100) : 0, lst.error]);
+    var modelBody = React.useMemo(function () { return [
+      h("div", { key: 0, className: "fov-formula" }, h("div", null, "dep.i.level = value * master.factor"), h("div", null, "dep.i.hot = level > limit"), h("div", null, "dep.i.alarm = hot == true")),
+      h("div", { key: 1, className: "fov-note" }, "A real this.me 4.2.1 kernel in a Web Worker, N = " + fmt(N) + ". Each write moves master.factor a small seeded step.", Info(TIP.lines, "About the lines", "i"))]; }, [N]);
+    var P = selInfo && selInfo.p, fl = selInfo && selInfo.flags && selInfo.flags[selInfo.i] || 0;
+    var selBody = !selDep ? [h("div", { key: 0, className: "fov-note" }, "Click a line, use ←/→ on the figure, or pick a dependent whose hot flipped:"), h("div", { key: 1 }, depChips)]
+      : [h("div", { key: "h", className: "fov-row" }, h("b", null, "dep." + selDep), selInfo && selInfo.loading ? h("span", { className: "fov-busy", "aria-hidden": "true" }) : null),
+        P ? [row("value", P.value, null, "v"), row("limit", P.limit, null, "l"), row("level = value × " + P.factor, typeof P.level === "number" ? String(+P.level.toFixed(4)) : String(P.level), null, "lv"),
+          row(h("span", null, sw("gold"), "hot = level > limit"), String(P.hot), null, "ho"), row(h("span", null, sw("pink"), "alarm = hot == true"), String(P.alarm), null, "al"),
+          Wv ? h("div", { key: "w", className: "fov-note" }, "Last write: hot ", fl & 1 ? h("b", null, "flipped") : "unchanged", ", alarm ", fl & 2 ? h("b", null, "recomputed") : "skipped (early cutoff)", ".") : null] : null,
+        selInfo && selInfo.error ? h("div", { key: "e", className: "fov-note fov-warn" }, selInfo.error) : null,
+        h("div", { key: "c", className: "fov-ctl", style: { marginTop: 8 } },
+          Btn({ "aria-label": "Previous dependent", "data-fov": "prev", onClick: function () { goDep(selDep - 1); } }, ICON.prev, null),
+          Btn({ "aria-label": "Next dependent", "data-fov": "next", onClick: function () { goDep(selDep + 1); } }, ICON.next, null),
+          Btn({ "data-fov": "explain", onClick: explainDep, title: "Open the .GUI Inspector on dep." + selDep + ".hot and run explain() in the worker" }, null, "Explain in Inspector"))];
+    var goBox = h("form", { className: "fov-go", "data-gui-inspector-control": "true", onSubmit: function (e) { e.preventDefault(); var v = parseInt(e.target.elements[0].value, 10); if (v >= 1 && v <= N) goDep(v); } },
+      h("label", { htmlFor: uid + "-go", className: "fov-note", style: { margin: 0 } }, "Go to dep."), h("input", { id: uid + "-go", type: "number", min: 1, max: N, inputMode: "numeric", placeholder: "1–" + fmt(N), "data-fov": "go" }),
+      Btn({ type: "submit" }, null, "Select"));
+    var panelEl = h("aside", { className: "fov-panel", "data-gui-node-id": rootId + "/panel", "data-gui-component": "FanoutViz.Panel", "aria-label": "Live kernel panel", "data-fov": "panel", "data-open": panel.open ? "true" : "false" },
+      h("div", { className: "fov-phead" },
+        h("div", { className: "fov-ptitle" }, GA.Chip ? h(GA.Chip, { label: "LIVE", size: "small", color: "success", variant: "outlined", sx: { height: 20, fontSize: 10.5, fontWeight: 700, letterSpacing: ".05em" } }) : h("span", { className: "fov-tag live", style: { margin: 0 } }, "live"),
+          h("span", null, "Live kernel"), h("span", { className: "fov-pmini" }, Wv ? "k " + fmt(Wv.k) + " · " + ms(Wv.writeMs) : lst.phase === "building" ? Math.round(lst.progress * 100) + "%" : "")),
+        h("button", { type: "button", className: "fov-ibtn", "aria-label": paused ? "Play the animation" : "Pause the animation", "data-gui-inspector-control": "true", "data-fov": "pause-mini", onClick: togglePause }, paused ? ICON.play : ICON.pause),
+        h("button", { type: "button", className: "fov-ibtn", "aria-label": "Write master.factor", disabled: busy || stressing || lst.phase === "error" || !lst.n, "data-gui-inspector-control": "true", "data-fov": "write-mini", onClick: function () { live.write().catch(function () {}); } }, ICON.write),
+        h("button", { type: "button", className: "fov-ibtn", "aria-label": panel.open ? "Close the panel" : "Open the panel", "aria-expanded": panel.open ? "true" : "false", "aria-controls": uid + "-body", "data-gui-inspector-control": "true", "data-fov": "panel-toggle",
+          onClick: function () { updPanel(function (p) { p.open = !p.open; }); } }, h("span", { className: "fov-chev" + (panel.open ? " up" : ""), style: { display: "inline-flex" } }, ICON.chev))),
+      panel.open ? h("div", { id: uid + "-body", "aria-busy": busy || stressing ? "true" : "false", "data-fov": "status" },
+        section("controls", "Controls", null, controlsBody),
+        section("write", "This write", Wv ? "#" + S.nWrites : null, !Wv ? h("div", { className: "fov-note" }, "No write yet.") : [
+          row("master.factor", Wv.from + " → " + Wv.factor, null, 0),
+          row(h("span", null, "k recomputed", Info(TIP.k, "About k", "i")), fmt(Wv.k), hl("lines"), 1),
+          h("div", { key: 2, className: "fov-note", style: { marginTop: 0, textAlign: "right" } }, fmt(Wv.levels) + " level + " + fmt(Wv.hots) + " hot + " + fmt(Wv.alarms) + " alarm"),
+          row(h("span", null, "changed", Info(TIP.changed, "About changed", "i")), fmt(Wv.changed), hl("changed"), 3),
+          row(h("span", null, sw("gold"), "m · hot flipped"), fmt(Wv.m), hl("hot"), 4),
+          row(h("span", null, sw("pink"), "alarms recomputed"), fmt(Wv.alarms), hl("alarm"), 5),
+          row(h("span", null, "alarms skipped", Info(TIP.cutoff, "About early cutoff", "i")), fmt(Wv.levels - Wv.alarms), null, 6),
+          depChips ? h("div", { key: 7, className: "fov-note" }, "Flipped, e.g.:") : null, depChips ? h("div", { key: 8 }, depChips) : null]),
+        section("timing", "Timing", Wv ? ms(Wv.writeMs) : null, !Wv ? h("div", { className: "fov-note" }, "–") : [
+          row("this write", ms(Wv.writeMs), null, 0), row(h("span", null, "p50 · p95", Info(TIP.pct, "About p50 and p95", "i")), ms(S.p50) + " · " + ms(S.p95), null, 1),
+          row("window", "last " + S.window, null, 2), row("reading the wave", ms(Wv.analysisMs), null, 3), row("built " + fmt(lst.n) + " in", ms(lst.buildMs), null, 4),
+          row(h("span", null, "replay", Info(TIP.replay, "About the replay", "i")), ms(Wv.writeMs), null, 5)]),
+        section("stress", "Stress", stressing ? "running" : st && st.writes ? fmt(st.writes) + " writes" : null, [
+          h("div", { key: 0, className: "fov-ctl" }, stressBtn),
+          row("writes", fmt(st ? st.writes : 0), null, 1), row("writes/s", (st ? st.wps : 0).toFixed(2), null, 2),
+          row(h("span", null, "drift", Info(TIP.drift, "About drift", "i")), S && S.drift != null ? (S.drift >= 0 ? "+" : "") + Math.round(S.drift * 100) + "%" : "–", null, 3),
+          row(h("span", null, "heap ≈", Info(TIP.heap, "About the heap estimate", "i")), S ? fmt(S.heapMB) + " MB" : "–", null, 4), row("log ≈", S ? fmt(S.logMB) + " MB" : "–", null, 5),
+          row(h("span", null, "kernel reset (log size)", Info(TIP.guard, "About the memory guard", "i")), "×" + (lst.resets || 0), null, 6),
+          h("div", { key: 7, className: "fov-note", "data-fov": "stress-line" }, "Sustained writes slow down as the log grows; a reset starts a fresh kernel.")]),
+        section("model", "Model", "this.me 4.2.1", modelBody),
+        section("selected", "Selected dependent", selDep ? "dep." + selDep : null, [h("div", { key: 0 }, selBody), h("div", { key: 1 }, goBox)])) : null);
     var hitLayer = React.useMemo(function () {
       return h("svg", { className: "fov-hit", ref: hitRef, viewBox: "-1 -1 2 2", "aria-hidden": "true", onClick: onHit },
         WEDGES.map(function (d, s) { return h("g", { key: s, "data-gui-node-id": sliceId(s), "data-gui-component": "FanoutViz.Slice", className: sel.kind === "slice" && sel.s === s ? "on" : undefined },
@@ -564,26 +714,15 @@
     }, [sel.kind, sel.s, rootId, N]);
     var label = "Live: " + fmt(N) + " real dependents of master.factor, one line each; gold dots are hot flags that changed in the last write, pink dots the alarms it recomputed.";
     return h("figure", { className: "fov", ref: wrapRef, "data-gui-node-id": props["data-gui-node-id"], style: { margin: "0 0 28px" } },
-      h("div", { className: "fov-disc", ref: discRef, tabIndex: 0, role: "group", "aria-label": label + " Click a line or use the arrow keys to select a dependent.", onKeyDown: onKey },
-        h("div", { ref: rotRef, style: { position: "absolute", left: 0, top: 0, transformOrigin: "50% 50%", willChange: "transform" } },
-          h("canvas", { ref: baseRef, "aria-hidden": "true" }), h("canvas", { ref: waveRef, "aria-hidden": "true" }), h("canvas", { ref: dotsRef, "aria-hidden": "true" }), h("canvas", { ref: overRef, "aria-hidden": "true" }), hitLayer)),
-      h("div", { className: "fov-k", ref: kRef, "data-fov": "k" }, h("span", { "data-k": "" }, "k = –"), h("span", { className: "fov-tag rep" }, "replay"),
-        h("span", null, "in real order at the measured duration" + (Wv ? " (" + ms(Wv.writeMs) + ")" : ""))),
-      h("figcaption", { className: "fov-cap" }, h("b", null, "Each line is one real dependent"), " of master.factor in a live this.me kernel (", num(fmt(N)), " dependents, angle i/N). After a write, the sweep replays the kernel's real recompute order at the write's measured duration:",
-        h("span", { className: "fov-nw" }, h("span", { className: "fov-dot", style: { background: "var(--fov-gold, #e09f00)" } }), "hot flipped"), h("span", { className: "fov-nw" }, h("span", { className: "fov-dot", style: { background: "var(--fov-pink, #c2185b)" } }), "alarm recomputed"), " — the alarms whose hot did not change are skipped (early cutoff)."),
-      h("div", { className: "fov-live", "aria-busy": busy || stressing ? "true" : "false", "data-gui-inspector-control": "true" },
-        h("div", null, h("span", { className: "fov-tag live", style: { marginLeft: 0 } }, "live"), "Measured on this device: this.me 4.2.1 in a Web Worker. Per dependent: ",
-          h("span", { className: "fov-num fov-nw" }, "level = value * master.factor"), " · ", h("span", { className: "fov-num fov-nw" }, "hot = level > limit"), " · ", h("span", { className: "fov-num fov-nw" }, "alarm = hot == true"), "."),
-        h("div", { className: "fov-bar" },
-          h("button", { type: "button", className: "fov-btn", "aria-label": paused ? "Play the animation" : "Pause the animation", "data-fov": "pause", onClick: togglePause }, paused ? ICON.play : ICON.pause, paused ? "Play" : "Pause"),
-          h("button", { type: "button", className: "fov-btn", disabled: busy || stressing || lst.phase === "error" || !lst.n, "data-fov": "write", onClick: function () { live.write().catch(function () {}); } }, ICON.write, "Write master.factor"),
-          h("button", { type: "button", className: "fov-btn" + (stressing ? " fov-stop" : ""), disabled: busy || lst.phase === "error" || !lst.n, "data-fov": "stress", "aria-pressed": stressing ? "true" : "false",
-            onClick: function () { (stressing ? live.stop() : live.stress()).catch(function () {}); } }, stressing ? ICON.stop : ICON.stress, stressing ? "Stop" : "Stress"),
-          h("span", { className: "fov-seg-g", role: "group", "aria-label": "Live kernel size" },
-            h("button", { type: "button", className: "fov-btn fov-seg", "aria-pressed": lst.target === 10000 ? "true" : "false", disabled: busy || stressing, "data-fov": "n10k", onClick: function () { pick(10000); } }, "10k"),
-            small ? null : h("button", { type: "button", className: "fov-btn fov-seg", "aria-pressed": lst.target === 100000 ? "true" : "false", disabled: busy || stressing, "data-fov": "n100k", title: "Builds 100,000 dependents (300,000 derived values) in the background worker: about 10–20 s to build and several seconds per write", onClick: function () { pick(100000); } }, "100k", h("small", null, "slow: ~10–20 s build")))),
-        h("div", { className: "fov-out", role: "status", "aria-live": "polite", "data-fov": "status" }, h("div", null, line1), line2 ? h("div", null, line2) : null, line3 ? h("div", { "data-fov": "stress-line" }, line3) : null),
-        info));
+      h("div", { className: "fov-dash" },
+        h("div", { className: "fov-vcol", ref: vizColRef },
+          h("div", { className: "fov-disc", ref: discRef, tabIndex: 0, role: "group", "aria-label": label + " Click a line or use the arrow keys to select a dependent.", onKeyDown: onKey },
+            h("div", { ref: rotRef, style: { position: "absolute", left: 0, top: 0, transformOrigin: "50% 50%", willChange: "transform" } },
+              h("canvas", { ref: baseRef, "aria-hidden": "true" }), h("canvas", { ref: waveRef, "aria-hidden": "true" }), h("canvas", { ref: dotsRef, "aria-hidden": "true" }), h("canvas", { ref: hlRef, "aria-hidden": "true" }), h("canvas", { ref: overRef, "aria-hidden": "true" }), hitLayer)),
+          h("div", { className: "fov-k", ref: kRef, "data-fov": "k" }, h("span", { "data-k": "" }, "k = –"), h("span", { className: "fov-tag rep" }, "replay"), Info(TIP.replay, "About the replay")),
+          h("figcaption", { className: "fov-short" }, "Each line is a real dependent of master.factor.", Info(TIP.lines, "About the lines"), " ",
+            h("span", { className: "fov-legend" }, h("span", { className: "fov-nw" }, sw("gold"), "hot flipped"), h("span", { className: "fov-nw" }, sw("pink"), "alarm recomputed"), Info(TIP.cutoff, "About the colours and early cutoff")))),
+        panelEl));
   }
   root.FanoutViz = FanoutViz;
 })(typeof window !== "undefined" ? window : this);
