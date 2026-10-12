@@ -195,6 +195,15 @@
     ".aid-map-fig{min-width:0}.aid-map-svg{display:block;width:100%;max-width:680px;aspect-ratio:1;cursor:crosshair;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:12px;background-image:linear-gradient(var(--mui-palette-divider,rgba(128,128,128,.15)) 1px,transparent 1px),linear-gradient(90deg,var(--mui-palette-divider,rgba(128,128,128,.15)) 1px,transparent 1px);background-size:10% 10%}",
     ".aid-map-bg{fill:transparent}.aid-map-line{fill:none;stroke-linejoin:round;stroke-linecap:round;opacity:.55;transition:opacity .25s,stroke-width .25s}.aid-map-line.off{opacity:.08;stroke-dasharray:6 6}.aid-map-line.sel{opacity:1}",
     ".aid-map-stop.on{fill:var(--mui-palette-text-primary,#e6edf3)}.aid-map-stop.off{fill:none;stroke:var(--mui-palette-text-secondary,#8b949e);stroke-width:1.5}.aid-map-ring{fill:none;stroke:var(--mui-palette-warning-main,#d29922);stroke-width:2.5}.aid-map-pick{fill:none;stroke:var(--mui-palette-primary-main,#58a6ff);stroke-width:3}",
+    ".aid-map-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 8px}.aid-map-tabs [aria-selected=true]{border-color:var(--mui-palette-primary-main,#58a6ff)!important;color:var(--mui-palette-primary-main,#58a6ff)}",
+    ".aid-metro-wrap{overflow-x:auto;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:12px;-webkit-overflow-scrolling:touch}.aid-metro-svg{display:block;width:100%;min-width:760px;height:auto;cursor:pointer}",
+    ".aid-metro-link{fill:none;stroke:var(--mui-palette-text-secondary,#8b949e);stroke-width:.6;opacity:.14}.aid-metro-link.on{opacity:.9;stroke-width:1.2;stroke:var(--mui-palette-primary-main,#58a6ff)}",
+    ".aid-metro-rl{font:700 11px " + MONO + ";fill:var(--mui-palette-text-primary,#e6edf3)}.aid-metro-rv{font:10px " + MONO + ";fill:var(--mui-palette-text-secondary,#8b949e)}.aid-metro-row.sel .aid-metro-rl{fill:var(--mui-palette-primary-main,#58a6ff)}",
+    ".aid-metro-seg{fill:none;stroke-linecap:round;transition:stroke-width .35s,opacity .35s}.aid-metro-seg.off{opacity:.22;stroke-dasharray:3 5;stroke-width:1.6!important}.aid-metro-seg.sel,.aid-metro-seg.rsel{filter:drop-shadow(0 0 3px var(--mui-palette-primary-main,#58a6ff))}",
+    ".aid-metro-tight{fill:none;stroke:var(--mui-palette-warning-main,#f0b429);stroke-linecap:round;transition:opacity .35s,stroke-width .35s}",
+    ".aid-metro-win{fill:var(--mui-palette-divider,rgba(128,128,128,.35))}.aid-metro-win.tight{fill:var(--mui-palette-warning-main,#f0b429)}",
+    ".aid-metro-stop.on{fill:var(--mui-palette-background-default,#0d1117);stroke:var(--mui-palette-text-primary,#e6edf3);stroke-width:.9}.aid-metro-stop.off{fill:none;stroke:var(--mui-palette-text-secondary,#8b949e);stroke-width:.7;opacity:.45}.aid-metro-stop.ic.on{stroke-width:1.6}",
+    ".aid-map-legend .sw.tightc{border-radius:3px;height:8px;width:16px;vertical-align:0;background:var(--mui-palette-warning-main,#f0b429)}.aid-map-legend .sw.strip{border-radius:0;height:3px;width:16px;vertical-align:3px;background:repeating-linear-gradient(90deg,var(--mui-palette-warning-main,#f0b429) 0 3px,transparent 3px 5px)}.aid-map-legend .sw.ic{background:transparent;border:2px solid var(--mui-palette-text-primary,#e6edf3);width:8px;height:8px}",
     ".aid-map-legend{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px;font-size:12px;color:var(--mui-palette-text-secondary,#8b949e)}.aid-map-legend .sw{display:inline-block;width:12px;height:12px;margin-right:5px;vertical-align:-2px;border-radius:50%}",
     ".aid-map-legend .sw.line{border-radius:2px;height:4px;vertical-align:2px;width:16px;background:hsl(210 70% 52%)}.aid-map-legend .sw.on{background:var(--mui-palette-text-primary,#e6edf3)}.aid-map-legend .sw.off{border:1.5px solid var(--mui-palette-text-secondary,#8b949e)}.aid-map-legend .sw.ring{border:2.5px solid var(--mui-palette-warning-main,#d29922)}.aid-map-legend .sw.faded{border-radius:2px;height:4px;vertical-align:2px;width:16px;background:hsl(210 70% 52%);opacity:.15}",
     ".aid-map-side{min-width:0}.aid-map-side h3{margin:0 0 6px;font-size:13px;font-weight:700}.aid-map-routes{display:flex;flex-wrap:wrap;gap:6px}.aid-map-rt i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}",
@@ -806,8 +815,9 @@
   // Every mark is a value read from the worker's kernel with live.read, re-read after every wave:
   // line width = routes[r].perHour, faded line = routes[r].trips[t].live false, filled dot = some st[j].served,
   // ring = some trip through the stop has a win[w].tight. One SVG, a handful of <path>s; no per-stop DOM nodes.
-  var MAP_URL = HERE + "data/madrid-s1-map.json?v=1";
+  var MAP_URL = HERE + "data/madrid-s1-map.json?v=2";
   var HUES = [210, 12, 140, 280, 45, 320, 180, 95, 250, 0, 160, 30, 300];
+  var MY0 = 34, MDY = 44;
   function CityMap() {
     var fmtV = function (v) { return typeof v === "number" ? String(Math.round(v * 1000) / 1000) : JSON.stringify(v); }, fmtN = function (v) { return String(Math.round(v * 10) / 10); };
     var SYN = window.MeSyntax || null;
@@ -826,8 +836,22 @@
         trips.forEach(function (x) { at.live.push(paths.length); paths.push(x.p + ".live");
           x.st0 = paths.length; x.stops.forEach(function (s, j) { paths.push(x.p + ".st." + (j + 1) + ".served"); });
           x.w0 = paths.length; for (var w = 1; w <= x.wins; w++) paths.push(x.p + ".win." + w + ".tight"); });
+        at.tph = []; trips.forEach(function (x) { at.tph.push(paths.length); paths.push(x.p + ".perHour"); });
         var used = new Uint8Array(m.stops.length); trips.forEach(function (x) { x.stops.forEach(function (s) { used[s] = 1; }); });
-        if (alive) setGeo({ m: m, trips: trips, paths: paths, at: at, used: used });
+        // metro layout: route r = row r; its trips (TRIPS order) end to end, each trip's stops in STOP_TIMES order.
+        // Only order and membership are used, never the generated x / y.
+        var MX0 = 92, MX1 = 992, GAP = 10, occ = {}, row = [], segs = [];
+        m.routes.forEach(function (rt, ri) { var y = MY0 + ri * MDY, n = 0; rt.forEach(function (st) { n += st.length; });
+          var u = (MX1 - MX0 - GAP * (rt.length - 1)) / Math.max(1, n - rt.length), x = MX0, list = [];
+          rt.forEach(function (st, ti) { var g = trips.findIndex(function (q) { return q.r === ri && q.t === ti; }), xs = [];
+            st.forEach(function (s, j) { xs.push(x); (occ[s] = occ[s] || []).push({ r: ri, g: g, j: j, x: x, y: y }); list.push({ s: s, g: g, j: j, x: x }); if (j < st.length - 1) x += u; });
+            segs.push({ g: g, r: ri, y: y, x0: xs[0], x1: xs[xs.length - 1] }); x += GAP; });
+          row.push({ y: y, stops: list }); });
+        var links = []; Object.keys(occ).forEach(function (s) { var o = occ[s]; if (new Set(o.map(function (q) { return q.r; })).size < 2) return;
+          for (var i = 1; i < o.length; i++) if (o[i].r !== o[i - 1].r) links.push({ s: +s, a: o[i - 1], b: o[i] }); });
+        var metro = { occ: occ, row: row, segs: segs, links: links, H: MY0 + (m.routes.length - 1) * MDY + 28,
+          inter: Object.keys(occ).filter(function (s) { return new Set(occ[s].map(function (q) { return q.r; })).size > 1; }).length };
+        if (alive) setGeo({ m: m, trips: trips, paths: paths, at: at, used: used, metro: metro });
       }, function (e) { if (alive) setGeo({ error: e.message }); });
       return function () { alive = false; }; }, []);
     var ready = (lst.phase === "ready" || lst.phase === "writing") && lst.scale === 1;
@@ -841,6 +865,7 @@
       live.explain(target.path).then(function (x) { setEx({ path: target.path, x: x }); }, function (e) { setEx({ path: target.path, error: e.message }); }); };
     useEffect(function () { if (pick && ready) explainPath(pick); }, [lst.waveSeq]);   // keep the card in step with the kernel
     // derived marks (pure functions of the values just read)
+    var base = useRef(0), ts = useState("metro"), tab = ts[0], setTab = ts[1];
     var marks = useMemo(function () {
       if (!geo || geo.error || !vals) return null; var V = vals.v, m = geo.m, n = m.stops.length;
       var served = new Uint8Array(n), tight = new Uint8Array(n), max = 0, rph = geo.at.route.map(function (i) { var x = +V[i] || 0; if (x > max) max = x; return x; });
@@ -849,7 +874,11 @@
       var dot = function (s) { var p = m.stops[s]; return "M" + (p[0] - 4) + "," + (1000 - p[1]) + "a4,4 0 1,0 8,0a4,4 0 1,0 -8,0"; };
       var on = [], off = [], ring = [];
       for (var s = 0; s < n; s++) { if (!geo.used[s]) continue; (served[s] ? on : off).push(dot(s)); if (tight[s]) { var p = m.stops[s]; ring.push("M" + (p[0] - 9) + "," + (1000 - p[1]) + "a9,9 0 1,0 18,0a9,9 0 1,0 -18,0"); } }
-      return { rph: rph, max: max || 1, tl: tl, on: on.join(""), off: off.join(""), ring: ring.join(""), nOn: on.length, nOff: off.length, nRing: ring.length, nUsed: on.length + off.length };
+      var tph = geo.at.tph.map(function (i) { return +V[i] || 0; }), tw = geo.trips.map(function (x) { var n = 0; for (var w = 0; w < x.wins; w++) if (V[x.w0 + w]) n++; return n; });
+      var tsv = geo.trips.map(function (x) { var n = 0; x.stops.forEach(function (s, j) { if (V[x.st0 + j]) n++; }); return n; });
+      if (!base.current) { var b = 0; tph.forEach(function (q) { if (q > b) b = q; }); if (b) base.current = b; }
+      return { rph: rph, max: max || 1, tl: tl, tph: tph, tw: tw, tsv: tsv, nTightWin: tw.reduce(function (a, b) { return a + b; }, 0), nWin: geo.trips.reduce(function (a, x) { return a + x.wins; }, 0),
+        nTightTrip: tw.filter(function (q) { return q > 0; }).length, nDead: tl.filter(function (q) { return !q.live; }).length, nServedSt: tsv.reduce(function (a, b) { return a + b; }, 0), on: on.join(""), off: off.join(""), ring: ring.join(""), nOn: on.length, nOff: off.length, nRing: ring.length, nUsed: on.length + off.length };
     }, [geo, vals]);
     // click → nearest stop (within 14 units) else nearest trip line; both answered by me.explain in the worker
     var svgRef = useRef(null);
@@ -861,15 +890,66 @@
         var ax = a[0], ay = 1000 - a[1], bx = b[0] - ax, by = 1000 - b[1] - ay, L = bx * bx + by * by || 1, t = Math.max(0, Math.min(1, ((q.x - ax) * bx + (q.y - ay) * by) / L));
         var dx = ax + t * bx - q.x, dy = ay + t * by - q.y, d2 = dx * dx + dy * dy; if (d2 < bl) { bl = d2; best = { kind: "trip", r: x.r, path: x.p + ".perHour" }; } } }); }
       if (best) { if (best.kind === "stop") best.on = geo.trips.filter(function (x) { return x.stops.indexOf(best.stop) >= 0; }).length; explainPath(best); } };
+    var metroRef = useRef(null);
+    var onMetro = function (e) { if (!marks || !geo.metro) return; var svg = metroRef.current, pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+      var q = pt.matrixTransform(svg.getScreenCTM().inverse()), M = geo.metro, ri = Math.round((q.y - MY0) / MDY); if (ri < 0 || ri >= M.row.length || Math.abs(q.y - M.row[ri].y) > 18) return;
+      if (q.x < 86) return explainPath({ kind: "trip", r: ri, path: "routes." + (ri + 1) + ".perHour" });
+      var best = null, bd = 3.2; M.row[ri].stops.forEach(function (o) { var d = Math.abs(o.x - q.x); if (d < bd) { bd = d; best = o; } });
+      if (best && Math.abs(q.y - M.row[ri].y) < 8) { var t = geo.trips[best.g]; return explainPath({ kind: "stop", stop: best.s, on: M.occ[best.s].length, path: t.p + ".st." + (best.j + 1) + ".served" }); }
+      var sg = M.segs.filter(function (z) { return z.r === ri && q.x >= z.x0 - 5 && q.x <= z.x1 + 5; })[0];
+      if (sg) explainPath({ kind: "seg", r: ri, g: sg.g, path: geo.trips[sg.g].p + ".perHour" }); };
+    // line width: the trip's perHour read from the kernel, cubed against the timetable's busiest trip (first read)
+    var segW = function (g) { var ph = marks ? marks.tph[g] : 0, b = base.current || 1; return ph <= 0 ? 1.2 : 2 + 8 * Math.pow(ph / b, 3); };
+    var hue = function (r) { return "hsl(" + HUES[r % HUES.length] + " 70% 52%)"; };
+    var metroDots = useMemo(function () { if (!geo || !geo.metro || !vals) return null; var M = geo.metro, V = vals.v, on = [], off = [], ion = [], ioff = [], win = [], wt = [];
+      var dot = function (x, y, r) { return "M" + (x - r).toFixed(1) + "," + y + "a" + r + "," + r + " 0 1,0 " + 2 * r + ",0a" + r + "," + r + " 0 1,0 " + -2 * r + ",0"; };
+      M.row.forEach(function (rw) { rw.stops.forEach(function (o) { var t = geo.trips[o.g], sv = V[t.st0 + o.j], ic = new Set(M.occ[o.s].map(function (q) { return q.r; })).size > 1;
+        (ic ? (sv ? ion : ioff) : (sv ? on : off)).push(dot(+o.x.toFixed(1), rw.y, ic ? 3.4 : 2)); }); });
+      M.segs.forEach(function (z) { var t = geo.trips[z.g], w = (z.x1 - z.x0) / t.wins; for (var k = 0; k < t.wins; k++) (V[t.w0 + k] ? wt : win).push("M" + (z.x0 + k * w + .6).toFixed(1) + "," + (z.y + 14) + "h" + Math.max(.6, w - 1.2).toFixed(1) + "v3h" + (-Math.max(.6, w - 1.2)).toFixed(1) + "z"); });
+      return { on: on.join(""), off: off.join(""), ion: ion.join(""), ioff: ioff.join(""), win: win.join(""), wt: wt.join("") }; }, [geo, vals]);
+    var metroFig = function () { var M = geo && geo.metro;
+      if (geo && geo.error) return h("div", { className: "aid-map-fig" }, h("div", { className: "aid-warn" }, "Could not load the map data: " + geo.error));
+      if (!M) return h("div", { className: "aid-map-fig" }, h("div", { className: "aid-note" }, "Loading the map…"));
+      var selStop = pick && pick.kind === "stop" ? pick.stop : -1, selR = pick && (pick.kind === "trip" || pick.kind === "seg") ? pick.r : -1, D = metroDots;
+      return h("div", { className: "aid-map-fig" },
+        h("div", { className: "aid-metro-wrap" },
+          h("svg", { ref: metroRef, viewBox: "0 0 1000 " + M.H, className: "aid-metro-svg", role: "img", "data-aid": "metro-svg", onClick: onMetro,
+            "aria-label": "Metro diagram: 13 routes as rows, trips and stops in their data order, interchanges connected; widths, rings and fades are kernel values" },
+            h("g", { className: "aid-metro-links" }, M.links.map(function (l, i) { var on = l.s === selStop || l.a.r === selR || l.b.r === selR;
+              return h("path", { key: i, d: "M" + l.a.x.toFixed(1) + "," + l.a.y + "L" + l.b.x.toFixed(1) + "," + l.b.y, className: "aid-metro-link" + (on ? " on" : "") }); })),
+            M.row.map(function (rw, ri) { return h("g", { key: "r" + ri, className: "aid-metro-row" + (selR === ri ? " sel" : ""), "data-aid": "metro-row" },
+              h("rect", { x: 2, y: rw.y - 9, width: 5, height: 18, rx: 2, fill: hue(ri) }),
+              h("text", { x: 12, y: rw.y - 2, className: "aid-metro-rl" }, "Route " + (ri + 1)),
+              h("text", { x: 12, y: rw.y + 11, className: "aid-metro-rv" }, (marks ? fmtN(marks.rph[ri]) : "…") + " /h")); }),
+            marks ? M.segs.map(function (z) { var n = marks.tw[z.g], W = geo.trips[z.g].wins; return n ? h("path", { key: "t" + z.g, d: "M" + z.x0.toFixed(1) + "," + z.y + "H" + z.x1.toFixed(1), className: "aid-metro-tight", strokeWidth: segW(z.g) + 7, style: { opacity: .35 + .65 * n / W } }) : null; }) : null,
+            M.segs.map(function (z) { var lv = marks ? marks.tl[z.g].live : true;
+              return h("path", { key: "s" + z.g, d: "M" + z.x0.toFixed(1) + "," + z.y + "H" + z.x1.toFixed(1), stroke: hue(z.r), strokeWidth: segW(z.g), "data-aid": "metro-seg",
+                className: "aid-metro-seg" + (lv ? "" : " off") + (pick && pick.kind === "seg" && pick.g === z.g ? " sel" : "") + (selR === z.r ? " rsel" : "") }); }),
+            D ? [h("path", { key: "w", d: D.win, className: "aid-metro-win" }), h("path", { key: "wt", d: D.wt, className: "aid-metro-win tight" }),
+              h("path", { key: "off", d: D.off, className: "aid-metro-stop off" }), h("path", { key: "on", d: D.on, className: "aid-metro-stop on" }),
+              h("path", { key: "ioff", d: D.ioff, className: "aid-metro-stop ic off" }), h("path", { key: "ion", d: D.ion, className: "aid-metro-stop ic on" })] : null,
+            selStop >= 0 ? (M.occ[selStop] || []).map(function (o, i) { return h("circle", { key: "p" + i, cx: o.x, cy: o.y, r: 7, className: "aid-map-pick" }); }) : null)),
+        h("div", { className: "aid-map-legend", "data-aid": "map-legend" },
+          h("span", null, h("i", { className: "sw line" }), "width = ", me("trips[t].perHour"), " (cubed, vs the timetable)"),
+          h("span", null, h("i", { className: "sw tightc" }), "amber casing = trip with a ", me("win[w].tight"), marks ? " · " + marks.nTightTrip + " of " + geo.trips.length : ""),
+          h("span", null, h("i", { className: "sw strip" }), "ticks = its windows, amber = tight", marks ? " · " + marks.nTightWin + " of " + marks.nWin : ""),
+          h("span", null, h("i", { className: "sw faded" }), "dashed, hollow stops = ", me("trips[t].live"), " / ", me("st[j].served"), " false", marks ? " · " + marks.nDead + " trips" : ""),
+          h("span", null, h("i", { className: "sw ic" }), "interchange · " + M.inter + " stops on 2+ routes")),
+        h("div", { className: "aid-note", "data-aid": "map-status" }, !vals ? "Reading the kernel…" :
+          fmt(geo.paths.length) + " paths read with me(path) in the worker in " + vals.ms + " ms after wave " + vals.seq + " · served stop_times " + (marks ? marks.nServedSt : 0) + " of " + fmt(geo.trips.reduce(function (a, t) { return a + t.stops.length; }, 0)))); };
     var GA = G.Atoms || {}, Btn = function (o, text) { var q2 = Object.assign({ type: "button", "data-gui-inspector-control": "true" }, o);
       return GA.Button ? h(GA.Button, Object.assign(q2, { variant: "outlined", size: "small", color: "inherit", disableElevation: true, sx: { textTransform: "none", minHeight: 28, py: .15, px: 1, borderRadius: "8px", fontSize: 12, lineHeight: 1.2, borderColor: "divider" } }), text) : h("button", q2, text); };
     var LABEL = "Schematic · positions generated by the benchmark, not real Madrid geography";
-    var head = [h("h2", { key: "h", id: "aid-map-h" }, "Map."), h("div", { key: "l", className: "aid-map-label", "data-aid": "map-label" }, LABEL)];
+    var head = [h("h2", { key: "h", id: "aid-map-h" }, "Map."),
+      h("div", { key: "t", className: "aid-ctl aid-map-tabs", role: "tablist", "aria-label": "Map view", "data-aid": "map-tabs" },
+        Btn({ role: "tab", "aria-selected": tab === "metro" ? "true" : "false", "aria-pressed": tab === "metro" ? "true" : "false", "data-aid": "tab-metro", onClick: function () { setTab("metro"); } }, "Metro · route order from the data"),
+        Btn({ role: "tab", "aria-selected": tab === "schem" ? "true" : "false", "aria-pressed": tab === "schem" ? "true" : "false", "data-aid": "tab-schem", onClick: function () { setTab("schem"); } }, LABEL)),
+      tab === "schem" ? h("div", { key: "l", className: "aid-map-label", "data-aid": "map-label" }, LABEL) : h("div", { key: "l", className: "aid-note", "data-aid": "map-label", style: { marginBottom: 8 } }, "One row per route: its 10 trips end to end (TRIPS order), each trip's stops in STOP_TIMES order. Grey connectors join the same stop on two routes. No coordinates are used.")];
     if (lst.scale && lst.scale !== 1) return h("section", { className: "aid-map", "aria-labelledby": "aid-map-h", "data-aid": "map" }, head, h("div", { className: "aid-note" }, "The map is drawn for scale 1; switch the demo to Scale 1 to see it."));
     var x = ex && ex.x, der = x && x.derivation;
     return h("section", { className: "aid-map", "aria-labelledby": "aid-map-h", "data-aid": "map" }, head,
       h("div", { className: "aid-map-grid" },
-        h("div", { className: "aid-map-fig" },
+        tab === "metro" ? metroFig() : h("div", { className: "aid-map-fig" },
           geo && geo.error ? h("div", { className: "aid-warn" }, "Could not load the map data: " + geo.error) :
           h("svg", { ref: svgRef, viewBox: "-20 -20 1040 1040", className: "aid-map-svg", role: "img", "data-aid": "map-svg", onClick: onClick,
             "aria-label": "Schematic of the 13 routes and their stops at generated benchmark positions; values from the kernel" },
@@ -889,13 +969,13 @@
         h("div", { className: "aid-map-side" },
           h("h3", null, "Routes · ", me("routes[r].perHour")),
           h("div", { className: "aid-map-routes", "data-aid": "map-routes" }, (geo && geo.m ? geo.m.routes : []).map(function (rt, ri) {
-            return Btn({ key: ri, "data-aid": "map-route", "aria-pressed": pick && pick.kind === "trip" && pick.r === ri ? "true" : "false", onClick: function () { explainPath({ kind: "trip", r: ri, path: "routes." + (ri + 1) + ".perHour" }); } },
+            return Btn({ key: ri, "data-aid": "map-route", "aria-pressed": pick && (pick.kind === "trip" || pick.kind === "seg") && pick.r === ri ? "true" : "false", onClick: function () { explainPath({ kind: "trip", r: ri, path: "routes." + (ri + 1) + ".perHour" }); } },
               h("span", { className: "aid-map-rt" }, h("i", { style: { background: "hsl(" + HUES[ri % HUES.length] + " 70% 52%)" } }), (ri + 1) + " · " + (marks ? fmtN(marks.rph[ri]) : "…"))); })),
           h("div", { className: "aid-note" }, "Click a stop or a line on the map, or a route here: the card is ", me("me.explain(path)"), " from the kernel."),
           h("div", { className: "aid-map-card", "data-aid": "map-card", "aria-live": "polite" },
             !pick ? h("div", { className: "aid-note" }, "Nothing selected.") :
             h("div", null,
-              h("div", { className: "aid-map-ct" }, pick.kind === "stop" ? "Stop #" + (pick.stop + 1) + " (STOPS row " + (pick.stop + 2) + ") · on " + pick.on + " trip" + (pick.on === 1 ? "" : "s") + " · explaining the first:" : "Route " + (pick.r + 1)),
+              h("div", { className: "aid-map-ct" }, pick.kind === "stop" ? "Stop #" + (pick.stop + 1) + " (STOPS row " + (pick.stop + 2) + ") · on " + pick.on + " trip" + (pick.on === 1 ? "" : "s") + " · explaining the first:" : pick.kind === "seg" ? "Route " + (pick.r + 1) + " · trip " + (geo.trips[pick.g].t + 1) : "Route " + (pick.r + 1)),
               me('me.explain("' + pick.path + '")'),
               !ex ? h("div", { className: "aid-note" }, "…") : ex.error ? h("div", { className: "aid-warn" }, ex.error) :
               h("div", { className: "aid-try-out" }, "value ", h("b", null, fmtV(x.value)),
