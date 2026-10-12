@@ -173,13 +173,13 @@
     ".aid-chain>li::after{content:'';position:absolute;left:8.5px;top:21px;bottom:2px;width:1px;background:var(--mui-palette-divider,rgba(128,128,128,.4))}.aid-chain>li:last-child::after{display:none}.aid-chain b{display:block;font-size:12px;letter-spacing:.03em;text-transform:uppercase}",
     ".aid-hist{list-style:none;margin:0;padding:0}.aid-hist li{padding:4px 0;border-bottom:1px dashed var(--mui-palette-divider,rgba(128,128,128,.3));font-size:12px;line-height:1.45;overflow-wrap:anywhere}.aid-hist li:last-child{border-bottom:0}",
     ".aid-how{margin:0 0 28px}.aid-how h2{margin:0 0 12px;font-size:1.35rem;font-weight:800;letter-spacing:-.01em}",
-    ".aid-how-flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 12px;font:12px/1.4 " + MONO + "}.aid-how-flow span{padding:3px 8px;border-radius:999px;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3))}.aid-how-flow i{font-style:normal;color:var(--mui-palette-text-secondary,#8b949e)}",
+    ".aid-how-flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 12px;font:12px/1.4 " + MONO + "}.aid-how-flow>span{padding:3px 8px;border-radius:999px;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3))}.aid-how-flow>i{font-style:normal;color:var(--mui-palette-text-secondary,#8b949e)}",
     ".aid-how-grid{display:grid;grid-template-columns:1fr;gap:10px}@media (min-width:900px){.aid-how-grid{grid-template-columns:minmax(0,1.05fr) minmax(0,1.35fr) minmax(0,.9fr)}}",
     ".aid-how-card{padding:12px 14px;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:12px;background:var(--mui-palette-background-paper,transparent);min-width:0}",
-    ".aid-how-card h3{margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mui-palette-primary-main,#2aa)}.aid-how-card h3 b{display:inline-block;min-width:18px;margin-right:6px;color:var(--mui-palette-text-secondary,#8b949e)}",
+    ".aid-how-card h3{margin:0;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.aid-how-t{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:6px;width:100%;min-height:32px;cursor:pointer;color:var(--mui-palette-primary-main,#2aa);border-radius:6px}.aid-how-t:focus-visible{outline:2px solid var(--mui-palette-primary-main,#2aa);outline-offset:2px}.aid-how-t b{display:inline-block;min-width:18px;color:var(--mui-palette-text-secondary,#8b949e)}.aid-how-chev{margin-left:auto;display:inline-flex;width:16px;height:16px;transition:transform .15s;color:var(--mui-palette-text-secondary,#8b949e)}.aid-how-chev svg{width:16px;height:16px}.aid-how-card.on .aid-how-chev{transform:rotate(180deg)}.aid-how-body{margin-top:8px}.aid-how-grid{align-items:start}",
     ".aid-how-map{list-style:none;margin:0;padding:0}.aid-how-map li{display:grid;grid-template-columns:minmax(0,.85fr) 14px minmax(0,1.3fr);gap:6px;align-items:baseline;padding:5px 0;border-bottom:1px dashed var(--mui-palette-divider,rgba(128,128,128,.25));font-size:12px;line-height:1.45}.aid-how-map li:last-child{border-bottom:0}",
-    ".aid-how-map .a{color:var(--mui-palette-text-secondary,#8b949e);text-align:center}.aid-how code,.aid-how-der code{font-family:" + MONO + ";font-size:11.5px;overflow-wrap:anywhere}.aid-how code.pth{overflow-wrap:normal;word-break:normal}.aid-how code.nw{white-space:nowrap}.aid-how-map small{display:block;color:var(--mui-palette-text-secondary,#8b949e);font-size:11px}",
-    ".aid-how-der{list-style:none;margin:0;padding:0}.aid-how-der li{padding:4px 0;border-bottom:1px dashed var(--mui-palette-divider,rgba(128,128,128,.25));font:11.5px/1.5 " + MONO + ";overflow-wrap:anywhere}.aid-how-der li:last-child{border-bottom:0}.aid-how-der .p{color:var(--mui-palette-text-secondary,#8b949e)}.aid-how-der .k{color:var(--mui-palette-primary-main,#2aa)}",
+    ".aid-how-map .a{color:var(--mui-palette-text-secondary,#8b949e);text-align:center}.aid-how code,.aid-how-der code{font-family:" + MONO + ";font-size:11.5px;overflow-wrap:anywhere}.aid-how code.me-code{font-family:" + MONO + ";font-size:11.5px;overflow-wrap:normal;word-break:normal;background:none;padding:0}.aid-how code.nw{white-space:nowrap}.aid-how-flow code.me-code{border:0;background:none;padding:0;margin:0;box-shadow:none;font-size:12px}.aid-how-map small{display:block;color:var(--mui-palette-text-secondary,#8b949e);font-size:11px}",
+    ".aid-how-der{list-style:none;margin:0;padding:0}.aid-how-der li{padding:4px 0;border-bottom:1px dashed var(--mui-palette-divider,rgba(128,128,128,.25));font:11.5px/1.5 " + MONO + "}.aid-how-der li:last-child{border-bottom:0}.aid-how-der .p{color:var(--mui-palette-text-secondary,#8b949e)}.aid-how-der .k{color:var(--mui-palette-primary-main,#2aa)}",
     ".aid-how-w{margin:0;padding:0;list-style:none;font:11.5px/1.5 " + MONO + "}.aid-how-w li{padding:3px 0 3px 14px;position:relative;overflow-wrap:anywhere}.aid-how-w li::before{content:'↓';position:absolute;left:0;color:var(--mui-palette-text-secondary,#8b949e)}.aid-how-w li:first-child::before{content:'✎';color:var(--mui-palette-primary-main,#2aa)}",
     ".aid-how-foot{margin-top:10px;font-size:12px;color:var(--mui-palette-text-secondary,#8b949e)}.aid-how-foot a{color:var(--mui-palette-primary-main,#2aa)}",
     ".aid-formula{font:12px/1.7 " + MONO + ";overflow-x:auto;white-space:pre}",
@@ -673,9 +673,12 @@
   // ── How: GTFS-Madrid-Bench → .me paths → ["="] → one write → the wave. Every row is what ai-model.js build()
   // declares and tools/build-data.mjs keeps from the feed (r, t, w, j, s = 1-based file order; s = CALENDAR row). ──
   function How() {
+    // .me code goes through the shared highlighter (assets/me-syntax, as on Space and the gui-doc pages): theme colours, text unchanged.
+    var SYN = window.MeSyntax || null;
+    // cls "nw": one unbreakable chip (tokens without the highlighter's <wbr> break hints)
+    var me = function (t, cls) { var nw = cls === "nw";
+      return h("code", { className: "me-code" + (cls ? " " + cls : "") }, !SYN ? t : nw && SYN.tokenize ? SYN.tokenize(t).map(function (k, i) { return k.c ? h("span", { key: i, className: k.c }, k.v) : k.v; }) : SYN.render(h, t)); };
     var c = function (t) { return h("code", null, t); };
-    // a path breaks only after a dot (never inside a name)
-    var cp = function (t) { var parts = t.split("."); return h("code", { className: "pth" }, parts.map(function (x, i) { return h(React.Fragment, { key: i }, i ? "." : null, i ? h("wbr") : null, x); })); };
     var MAP = [
       ["routes.txt", "route_id", "routes[r]"],
       ["trips.txt", "trip_id · route_id", "routes[r].trips[t]"],
@@ -684,7 +687,7 @@
       ["frequencies.txt", "headway_secs", "routes[r].trips[t].win[w].base"],
       ["stop_times.txt", "one row per stop", "routes[r].trips[t].st[j]"],
     ];
-    var ADDED = [["policy.factor", "1"], ["policy.minHeadway", "165"], ["services[s].enabled", "1"]];
+    var ADDED = ["policy.factor(1)", "policy.minHeadway(165)", "services[s].enabled(1)"];
     var DER = [
       ["win", "headway", "base * policy.factor"],
       ["win", "perHour", "3600 / headway"],
@@ -697,18 +700,28 @@
       ["city", "perHour", "routes[1].perHour + … + routes[R].perHour"],
     ];
     var WAVE = ["policy.factor(0.9)", "win.headway", "win.perHour · win.tight", "trip.perHour", "route.perHour · route.anyTight", "city.perHour"];
+    var st = useState({}), open = st[0], setOpen = st[1];
+    useEffect(function () { if (SYN && SYN.watchTheme) SYN.watchTheme(); }, []);
+    var card = function (id, n, title, body) {
+      var on = !!open[id], bid = "aid-how-b-" + id;
+      return h("div", { className: "aid-how-card" + (on ? " on" : ""), "data-aid-how": id },
+        h("h3", null, h("button", { type: "button", className: "aid-how-t", "aria-expanded": on ? "true" : "false", "aria-controls": bid, "data-aid": "how-toggle-" + id,
+          onClick: function () { setOpen(function (o) { var x = Object.assign({}, o); x[id] = !o[id]; return x; }); } },
+          h("b", null, n), h("span", null, title), h("span", { className: "aid-how-chev", "aria-hidden": "true" }, ICON.chev))),
+        h("div", { id: bid, className: "aid-how-body", hidden: !on }, body));
+    };
     return h("section", { className: "aid-how", "aria-labelledby": "aid-how-h", "data-aid": "how" },
       h("h2", { id: "aid-how-h" }, "How."),
-      h("div", { className: "aid-how-flow", "aria-hidden": "true" }, h("span", null, "GTFS table"), h("i", null, "→"), h("span", null, ".me path"), h("i", null, "→"), h("span", null, '["="]'), h("i", null, "→"), h("span", null, "one write"), h("i", null, "→"), h("span", null, "wave")),
+      h("div", { className: "aid-how-flow", "aria-label": "GTFS table, .me path, [\"=\"], one write, wave" }, h("span", null, "GTFS table"), h("i", null, "→"), h("span", null, ".me path"), h("i", null, "→"), h("span", null, me('["="]', "nw")), h("i", null, "→"), h("span", null, "one write"), h("i", null, "→"), h("span", null, "wave")),
       h("div", { className: "aid-how-grid" },
-        h("div", { className: "aid-how-card" }, h("h3", null, h("b", null, "1"), "GTFS → path"),
-          h("ul", { className: "aid-how-map" }, MAP.map(function (m, i) { return h("li", { key: i }, h("span", null, c(m[0]), h("small", null, m[1])), h("span", { className: "a" }, "→"), cp(m[2])); })),
-          h("div", { className: "aid-how-foot" }, "Added, not in the feed: ", ADDED.map(function (a, i) { return h(React.Fragment, { key: i }, i ? " · " : null, h("code", { className: "nw" }, a[0] + " = " + a[1])); }))),
-        h("div", { className: "aid-how-card" }, h("h3", null, h("b", null, "2"), '["="] derivations'),
-          h("ul", { className: "aid-how-der" }, DER.map(function (d, i) { return h("li", { key: i }, h("span", { className: "p" }, d[0]), '["="]("', h("span", { className: "k" }, d[1]), '", "' + d[2] + '")'); }))),
-        h("div", { className: "aid-how-card" }, h("h3", null, h("b", null, "3"), "One write → wave"),
-          h("ul", { className: "aid-how-w" }, WAVE.map(function (w, i) { return h("li", { key: i }, i ? w : h("b", null, w)); })),
-          h("div", { className: "aid-how-foot" }, c("st[j].served"), " reads only ", c("trip.live"), ": a headway write never reaches stop_times. ", c("services[s].enabled(0)"), " does."))),
+        card("map", "1", "GTFS → path", [
+          h("ul", { key: "l", className: "aid-how-map" }, MAP.map(function (m, i) { return h("li", { key: i }, h("span", null, c(m[0]), h("small", null, m[1])), h("span", { className: "a" }, "→"), me(m[2])); })),
+          h("div", { key: "f", className: "aid-how-foot" }, "Added, not in the feed: ", ADDED.map(function (a, i) { return h(React.Fragment, { key: i }, i ? " · " : null, me(a, "nw")); }))]),
+        card("der", "2", '["="] derivations',
+          h("ul", { className: "aid-how-der" }, DER.map(function (d, i) { return h("li", { key: i }, me(d[0] + '["="]("' + d[1] + '", "' + d[2] + '")')); }))),
+        card("wave", "3", "One write → wave", [
+          h("ul", { key: "l", className: "aid-how-w" }, WAVE.map(function (w, i) { return h("li", { key: i }, w.split(" · ").map(function (x, j) { return h(React.Fragment, { key: j }, j ? " · " : null, me(x)); })); })),
+          h("div", { key: "f", className: "aid-how-foot" }, me("st[j].served"), " reads only ", me("trip.live"), ": a headway write never reaches stop_times. ", me("services[s].enabled(0)"), " does.")])),
       h("div", { className: "aid-how-foot" }, "Full model: ", h("a", { href: "https://neurons-me.github.io/.me/docs/Benchmarks/GTFS/Madrid/" }, "GTFS Madrid benchmark"), " · source: ", h("a", { href: SRC_URL + "ai-model.js", target: "_blank", rel: "noopener" }, "ai-model.js"), " build()"));
   }
   var N = function (type, id, props, children) { return Object.assign({ type: type, props: Object.assign({}, props || {}, { "data-gui-node-id": id }) }, children ? { children: children } : {}); };
