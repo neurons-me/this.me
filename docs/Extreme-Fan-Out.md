@@ -8,7 +8,7 @@ mepath:
     url: https://neurons-me.github.io/.me/docs/
 crumb: Fan-Out
 scripts:
-  - /assets/fanout-viz/fanout-viz.js?v=3.1.2
+  - /assets/fanout-viz/fanout-viz.js?v=3.1.3
 ---
 
 # Extreme Fan-Out
@@ -19,7 +19,7 @@ scripts:
 **Live fan-out.** A real this.me kernel in your browser: one line per dependent of `master.factor`, the recompute order replayed at the measured duration (needs JavaScript).
 </div>
 
-`.me` (npm `this.me`) is a reactive kernel. Facts live at paths (`master.factor`). A derived value is declared once with `["="]` and recomputes when one of its inputs changes. The work a write causes is its wave, and **k** is the size of that wave: how many derived values it recomputed. `me.explain(path)` returns the formula, its inputs and the last wave (`k`, `recomputed`, `changed`, `sourcePath`).
+`.me` is a reactive kernel. Facts live at paths (`master.factor`); a derived value, declared once with `["="]`, recomputes when one of its inputs changes. The work a write causes is its wave, and **k** is the size of that wave: how many derived values it recomputed. `me.explain(path)` returns the formula, its inputs and the last wave (`k`, `recomputed`, `changed`, `sourcePath`).
 
 Fan-out is the case where k is large on purpose: many values read the same input, so one write has to reach all of them.
 
@@ -158,5 +158,7 @@ Fan-out is not a pathological case. It is the natural shape of broadcast: one co
 <div class="doc-cards" markdown="0">
 <a class="card" href="https://neurons-me.github.io/.me/docs/Benchmarks/GTFS/Madrid/"><img src="https://suign.github.io/assets/imgs/MADRID-GRAPH-ME.jpg" alt="GTFS-Madrid benchmark page"><span class="card-kind">Benchmark</span><span class="card-title">GTFS-Madrid</span><span class="card-desc">The same kernel on a real transit feed: k as the data grows, skewed fan-out, deletes.</span></a>
 <a class="card" href="https://neurons-me.github.io/.me/docs/Benchmarks/benchmarks.html"><img src="https://neurons-me.github.io/.me/docs/assets/kernel-timeline-og.jpg" alt="Kernel benchmarks"><span class="card-kind">Benchmark</span><span class="card-title">Kernel benchmarks</span><span class="card-desc">Fan-out, sustained writes and reads, measured across versions.</span></a>
+<a class="card" href="https://neurons-me.github.io/.me/Demos/SmartCities/AI-Decides/"><img src="https://neurons-me.github.io/.me/Demos/SmartCities/AI-Decides/assets/ai-decides-og.png" alt="AI decides, .me computes"><span class="card-kind">Demo</span><span class="card-title">AI decides, .me computes</span><span class="card-desc">The same waves on GTFS-Madrid-Bench: a policy decides a headway change, one write, explain() back to the decision.</span></a>
+<a class="card" href="https://neurons-me.github.io/smart-cities/"><img src="https://neurons-me.github.io/smart-cities/assets/SMART-CITIES-ME.jpg" alt="Smart Cities demos"><span class="card-kind">Demos</span><span class="card-title">Smart Cities</span><span class="card-desc">City demos on .me: Madrid transit, the Port of Veracruz, a hospital.</span></a>
 <a class="card" href="https://neurons-me.github.io/.me/docs/Hemisphere-Scale.html"><img src="https://neurons-me.github.io/.me/docs/assets/card-hemisphere.webp" alt="Hemisphere Scale"><span class="card-kind">Docs</span><span class="card-title">Hemisphere Scale</span><span class="card-desc">The opposite case: 1 million nodes, one write, k = 6.</span></a>
 </div>

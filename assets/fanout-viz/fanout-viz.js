@@ -1,4 +1,4 @@
-/*! fanout-viz 3.1.2 · .me extreme fan-out, driven by a real this.me kernel · MIT · neurons.me
+/*! fanout-viz 3.1.3 · .me extreme fan-out, driven by a real this.me kernel · MIT · neurons.me
  * Every line is one real dependent of a live this.me 4.2.1 kernel running in a Web Worker (CDN, SRI-checked), at angle
  * i/N; nothing on the canvas is decorative.
  * - Model (in the worker), per dependent i = 1…N (10,000 by default, 100,000 on request):
@@ -60,7 +60,7 @@
     ".fov-legend{display:inline-flex;flex-wrap:wrap;gap:4px 12px;justify-content:center;align-items:center}.fov-legend .fov-dot{margin:0 5px 0 0}" +
     ".fov-info{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;margin-left:4px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--mui-palette-text-secondary, #8b949e);cursor:help;vertical-align:-4px}" +
     ".fov-info:hover,.fov-info:focus-visible{color:var(--mui-palette-primary-main, #2aa);outline:none;background:color-mix(in srgb, currentColor 12%, transparent)}.fov-info svg{width:14px;height:14px}" +
-    ".fov-panel{contain:layout paint;border:1px solid var(--mui-palette-divider, rgba(128,128,128,.3));border-radius:12px;background:var(--mui-palette-background-paper, transparent);font-size:13px;color:var(--mui-palette-text-primary, inherit);overflow:hidden}" +
+    ".fov-kernel{padding:6px 14px 2px;font:11.5px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mui-palette-text-secondary,#888)}.fov-kernel a{color:var(--mui-palette-primary-main,inherit);text-decoration:none}.fov-kernel a:hover{text-decoration:underline}.fov-panel{contain:layout paint;border:1px solid var(--mui-palette-divider, rgba(128,128,128,.3));border-radius:12px;background:var(--mui-palette-background-paper, transparent);font-size:13px;color:var(--mui-palette-text-primary, inherit);overflow:hidden}" +
     "@container (max-width: 759px){.fov-panel{border-radius:16px 16px 12px 12px;box-shadow:0 -6px 18px rgba(0,0,0,.08)}.fov-phead::before{content:'';position:absolute;left:50%;top:5px;width:36px;height:4px;margin-left:-18px;border-radius:2px;background:var(--mui-palette-divider, rgba(128,128,128,.4))}.fov-phead{padding-top:14px}}" +
     ".fov-phead{position:relative;display:flex;align-items:center;gap:6px;padding:8px 8px 8px 12px}.fov-ptitle{flex:1;min-width:0;display:flex;align-items:center;gap:6px;font-weight:600;white-space:nowrap;overflow:hidden}" +
     ".fov-pmini{font-weight:400;color:var(--mui-palette-text-secondary, #8b949e);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px;overflow:hidden;text-overflow:ellipsis}" +
@@ -97,7 +97,7 @@
   }
   var ORIG_N = 9000;   // the original illustration's line count; the line density is kept at its look for any N
   var SLICES = 128;
-  var ME_URL = "https://cdn.jsdelivr.net/npm/this.me@4.2.1/dist/me.umd.js", ME_SRI = "sha384-ElnWCZOb324gqFJ2M/Fxy4CZ6Si131WIbR54iYomzEbTloUDLfBzZ05qi1nZ7+4G";
+  var ME_VERSION = "4.2.1", ME_URL = "https://cdn.jsdelivr.net/npm/this.me@" + ME_VERSION + "/dist/me.umd.js", ME_SRI = "sha384-ElnWCZOb324gqFJ2M/Fxy4CZ6Si131WIbR54iYomzEbTloUDLfBzZ05qi1nZ7+4G";
   var SMALL_Q = "(max-width: 600px)";
   function smallDevice() {
     if (!root.matchMedia) return false;
@@ -109,7 +109,7 @@
 
   // ── the live kernel: a real this.me in a Web Worker (all kernel work stays off the main thread) ──
   function KERNEL_WORKER() {
-    var me = null, N = 0, f = 2, R = null, entries = 0, writes = [], firstTen = [], nWrites = 0, resets = 0, ready = null, stressing = false, stressT0 = 0, stressN = 0;
+    var me = null, KV = "?", N = 0, f = 2, R = null, entries = 0, writes = [], firstTen = [], nWrites = 0, resets = 0, ready = null, stressing = false, stressT0 = 0, stressN = 0;
     var BYTES_PER_DEP = 6250, BYTES_PER_ENTRY = 225, LIMIT = 300 * 1048576;   // heap estimate, calibrated on V8 (Node 22)
     function load(url, sri) {
       if (!ready) ready = fetch(url, { integrity: sri, mode: "cors", credentials: "omit" }).then(function (r) { if (!r.ok) throw new Error("this.me: HTTP " + r.status); return r.text(); })
@@ -160,7 +160,7 @@
         meta: { dependsOn: m.dependsOn, k: m.k, sourcePath: m.sourcePath, lastComputedAt: m.lastComputedAt, recomputedAt: m.recomputedAt,
           recomputedCount: Array.isArray(m.recomputed) ? m.recomputed.length : undefined, recomputedFirst: first(m.recomputed),
           changedCount: Array.isArray(m.changed) ? m.changed.length : undefined, changedFirst: first(m.changed),
-          kernel: "this.me 4.2.1 · Web Worker · N = " + N, explainMs: +dt.toFixed(2),
+          kernel: "this.me " + KV + " · Web Worker · N = " + N, explainMs: +dt.toFixed(2),
           shortened: "recomputed / changed (k paths each) cross from the worker as counts + first 6 paths; the full lists are not sent to the page" } };
     }
     function shortInspect(path) {
@@ -190,6 +190,7 @@
     onmessage = function (e) {
       var q = e.data, reply = function (o) { o.id = q.id; o.ok = true; postMessage(o); }, fail = function (err) { postMessage({ id: q.id, ok: false, error: String(err && err.message || err) }); };
       if (q.op === "stop") { stressing = false; return reply({}); }
+      KV = (String(q.url).match(/this\.me@([\w.-]+)/) || [])[1] || "?";   // the worker's kernel version, from the URL it loads
       load(q.url, q.sri).then(function () {
         if (q.op === "build") { stressing = false; resets = 0; var b = build(q.n | 0, q.id); return reply({ n: N, buildMs: b }); }
         if (!me) throw new Error("no kernel yet");
@@ -349,7 +350,7 @@
     useEffect(function () { return function () { var store = nodeStore(); if (store && partIds.current) partIds.current.forEach(function (id) { store.actions.unregisterNode(id); }); partIds.current = null; }; }, [rootId]);
     var rec = function (seg, type, prov, rp) { var id = rootId + "/" + seg;
       return { id: id, path: rootId + "." + seg, type: type, part: seg, parentId: rootId, provenance: prov, spec: { type: type, props: rp, provenance: prov }, resolvedProps: rp }; };
-    var SRC = "live kernel (this.me 4.2.1, Web Worker)";
+    var SRC = "live kernel (this.me " + ME_VERSION + ", Web Worker)";
     var depRecord = function (i, n) { return rec("dependent", "FanoutViz.Dependent", { semanticPath: "dep." + i + ".hot", source: SRC,
       note: "Dependent " + fmt(i) + " of " + fmt(n) + ": facts dep." + i + ".value and .limit; derived .level = value * master.factor, .hot = level > limit, .alarm = hot == true. Explain shows .hot." },
       { index: i, of: n, angle: (i / n * 360).toFixed(3) + "°", paths: ["dep." + i + ".level", "dep." + i + ".hot", "dep." + i + ".alarm"] }); };
@@ -690,7 +691,7 @@
     var chipsEl = function () { var a = []; for (var j = 0; j < 8; j++) a.push(h("button", { type: "button", key: j, className: "fov-chip", "data-chip": j, hidden: true, onClick: onChip }));
       return h("div", { className: "fov-chips", "data-gui-inspector-control": "true" }, a); };
     var TIP = {
-      replay: "The sweep replays the kernel's real recompute order (explain().meta.recomputed: every level in index order, then every hot, then the alarms) over the write's measured duration (see Timing), at an even pace inside the write. this.me 4.2.1 has no progress hook, so it is a replay of the real order, not a live stream.",
+      replay: "The sweep replays the kernel's real recompute order (explain().meta.recomputed: every level in index order, then every hot, then the alarms) over the write's measured duration (see Timing), at an even pace inside the write. this.me " + ME_VERSION + " has no progress hook, so it is a replay of the real order, not a live stream.",
       lines: "Dependent i sits at angle i/N (N = " + fmt(N) + "). Each one has two facts (value, limit) and three derived values; its line lights up when the replay reaches its level.",
       cutoff: "Gold: hot = level > limit flipped in this write. Pink: alarm = hot == true recomputed, only behind those flips. Every other alarm is skipped (early cutoff): its input did not change.",
       k: "Every derived value the write recomputed: all levels and hots (they read master.factor), plus the alarms behind a hot that changed.",
@@ -728,6 +729,7 @@
         h("button", { type: "button", className: "fov-ibtn", "aria-label": panel.open ? "Close the panel" : "Open the panel", "aria-expanded": panel.open ? "true" : "false", "aria-controls": uid + "-body", "data-gui-inspector-control": "true", "data-fov": "panel-toggle",
           onClick: function () { updPanel(function (p) { p.open = !p.open; }); } }, h("span", { className: "fov-chev" + (panel.open ? " up" : ""), style: { display: "inline-flex" } }, ICON.chev))),
       panel.open ? h("div", { id: uid + "-body", "aria-busy": busy || stressing ? "true" : "false", "data-fov": "status" },
+        h("div", { key: "kernel", className: "fov-kernel", "data-fov": "kernel" }, h("a", { href: "https://www.npmjs.com/package/this.me", target: "_blank", rel: "noopener", title: "this.me on npm" }, "this.me@" + ME_VERSION), " · TypeScript · Web Worker"),
         section("controls", "Controls", null, [h("div", { key: 0, className: "fov-ctl" }, pauseBtn, writeBtn, stressBtn), h("div", { key: 1, style: { marginTop: 6 } }, sizeBtns), h("div", { key: 2, role: "status", "aria-live": "polite" }, statusLine)]),
         section("write", "This write", Wv ? "wnum" : null, !Wv ? noWave : [
           row("master.factor", "factor", null, 0),
@@ -749,9 +751,9 @@
           row(h("span", null, "heap ≈", Info(TIP.heap, "About the heap estimate", "i")), "heap", null, 4), row("log ≈", "log", null, 5),
           row(h("span", null, "kernel reset (log size)", Info(TIP.guard, "About the memory guard", "i")), "resets", null, 6),
           h("div", { key: 7, className: "fov-note", "data-fov": "stress-line" }, "Sustained writes slow down as the log grows; a reset starts a fresh kernel.")]),
-        section("model", "Model", "=this.me 4.2.1", [
+        section("model", "Model", "=this.me " + ME_VERSION, [
           h("div", { key: 0, className: "fov-formula" }, h("div", null, "dep.i.level = value * master.factor"), h("div", null, "dep.i.hot = level > limit"), h("div", null, "dep.i.alarm = hot == true")),
-          h("div", { key: 1, className: "fov-note" }, "A real this.me 4.2.1 kernel in a Web Worker, N = " + fmt(N) + ". Each write moves master.factor a small seeded step.", Info(TIP.lines, "About the lines", "i"))]),
+          h("div", { key: 1, className: "fov-note" }, "A real this.me " + ME_VERSION + " kernel in a Web Worker, N = " + fmt(N) + ". Each write moves master.factor a small seeded step.", Info(TIP.lines, "About the lines", "i"))]),
         section("selected", "Selected dependent", selDep ? "=dep." + selDep : null, [h("div", { key: 0 }, selBody), h("div", { key: 1 }, goBox)])) : null);
     var hitLayer = React.useMemo(function () {
       return h("svg", { className: "fov-hit", ref: hitRef, viewBox: "-1 -1 2 2", "aria-hidden": "true", onClick: onHit },

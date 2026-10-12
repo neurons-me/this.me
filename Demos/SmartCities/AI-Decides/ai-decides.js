@@ -1,4 +1,4 @@
-/*! AI-Decides 1.0.2 · "AI decides, .me computes" on GTFS-Madrid-Bench data · MIT · neurons.me
+/*! AI-Decides 1.0.3 · "AI decides, .me computes" on GTFS-Madrid-Bench data · MIT · neurons.me
  * A versioned policy function (policy:fair-headway@1, ai-model.js) proposes a headway decision with its reason; the
  * decision is stored in a real this.me 4.2.1 kernel as facts (decisions.<n>.by/at/scenario/reason/…/inputsHash) and ONE
  * write (policy.factor, or services.<s>.enabled for a suspension) starts the wave. The kernel runs in a Web Worker
@@ -15,7 +15,7 @@
   var MONO = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
   var HERE = new URL(".", (document.currentScript && document.currentScript.src) || location.href).href;
   var MODEL_URL = HERE + "ai-model.js?v=1.0.0", DATA_URL = function (s) { return HERE + "data/madrid-s" + s + ".json?v=1"; };
-  var ME_URL = "https://cdn.jsdelivr.net/npm/this.me@4.2.1/dist/me.umd.js", ME_SRI = "sha384-ElnWCZOb324gqFJ2M/Fxy4CZ6Si131WIbR54iYomzEbTloUDLfBzZ05qi1nZ7+4G";
+  var ME_VERSION = "4.2.1", ME_URL = "https://cdn.jsdelivr.net/npm/this.me@" + ME_VERSION + "/dist/me.umd.js", ME_SRI = "sha384-ElnWCZOb324gqFJ2M/Fxy4CZ6Si131WIbR54iYomzEbTloUDLfBzZ05qi1nZ7+4G";
   var SRC_URL = "https://github.com/neurons-me/.me/blob/main/Demos/SmartCities/AI-Decides/";
   var params = new URLSearchParams(location.search);
   var NF = {}, fmt = function (n, d) { if (n == null || isNaN(n)) return "–"; var k = d == null ? 0 : d;   // formatters cached: the replay updates k every frame
@@ -26,8 +26,9 @@
 
   // ── the kernel worker: this.me 4.2.1 (fetched with SRI) + ai-model.js + the data; everything heavy happens here ──
   function KERNEL_WORKER() {
-    var E = null, ready = null, scale = 0;
+    var E = null, ready = null, scale = 0, KV = "?";
     function load(q) {
+      KV = (String(q.url).match(/this\.me@([\w.-]+)/) || [])[1] || "?";   // the worker's kernel version, from the URL it loads
       if (!ready) ready = fetch(q.url, { integrity: q.sri, mode: "cors", credentials: "omit" }).then(function (r) { if (!r.ok) throw new Error("this.me: HTTP " + r.status); return r.text(); })
         .then(function (txt) { var u = URL.createObjectURL(new Blob([txt], { type: "text/javascript" })); importScripts(u); URL.revokeObjectURL(u); importScripts(q.model); if (!self.Me || !self.Me.ME || !self.AIDecidesModel) throw new Error("this.me or the model did not load"); });
       return ready;
@@ -38,7 +39,7 @@
       return { path: ex.path || path, value: ex.value, expr: ex.expr, derivation: d ? { expression: d.expression, inputs: (d.inputs || []).slice(0, 8), inputsTotal: (d.inputs || []).length } : undefined,
         meta: { dependsOn: Array.isArray(m.dependsOn) ? m.dependsOn.slice(0, 12) : m.dependsOn, dependsOnCount: Array.isArray(m.dependsOn) ? m.dependsOn.length : undefined, k: m.k, sourcePath: m.sourcePath, lastComputedAt: m.lastComputedAt, recomputedAt: m.recomputedAt,
           recomputedCount: Array.isArray(m.recomputed) ? m.recomputed.length : undefined, recomputedFirst: first(m.recomputed), changedCount: Array.isArray(m.changed) ? m.changed.length : undefined, changedFirst: first(m.changed),
-          kernel: "this.me 4.2.1 · Web Worker · GTFS-Madrid-Bench scale " + scale, explainMs: +dt.toFixed(2), shortened: "recomputed / changed cross from the worker as counts + first 6 paths" } };
+          kernel: "this.me " + KV + " · Web Worker · GTFS-Madrid-Bench scale " + scale, explainMs: +dt.toFixed(2), shortened: "recomputed / changed cross from the worker as counts + first 6 paths" } };
     }
     function shortInspect(path) {
       var req = { scheme: "me", namespace: "self", operation: "inspect", path: path, raw: "me://self:inspect/" + path, contextRaw: null };
@@ -149,7 +150,7 @@
     ".aid-legend{display:inline-flex;flex-wrap:wrap;gap:4px 12px;justify-content:center}.aid-sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}",
     ".aid-tag{display:inline-block;margin:0 6px;padding:0 7px;line-height:1.5;border-radius:999px;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border:1px solid currentColor}",
     ".aid-tag.rep{color:var(--mui-palette-text-secondary,#8b949e)}.aid-tag.live{color:var(--mui-palette-success-main,#2e9d6e)}.aid-tag.gen{color:var(--mui-palette-warning-main,#b7791f)}",
-    ".aid-panel{contain:layout paint;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:12px;background:var(--mui-palette-background-paper,transparent);font-size:13px;color:var(--mui-palette-text-primary,inherit);overflow:hidden}",
+    ".aid-kernel{padding:6px 14px 2px;font:11.5px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mui-palette-text-secondary,#888)}.aid-kernel a{color:var(--mui-palette-primary-main,inherit);text-decoration:none}.aid-kernel a:hover{text-decoration:underline}.aid-panel{contain:layout paint;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:12px;background:var(--mui-palette-background-paper,transparent);font-size:13px;color:var(--mui-palette-text-primary,inherit);overflow:hidden}",
     "@container (max-width: 819px){.aid-panel{border-radius:16px 16px 12px 12px}.aid-phead{padding-top:14px}.aid-phead::before{content:'';position:absolute;left:50%;top:5px;width:36px;height:4px;margin-left:-18px;border-radius:2px;background:var(--mui-palette-divider,rgba(128,128,128,.4))}}",
     ".aid-phead{position:relative;display:flex;align-items:center;gap:6px;padding:8px 8px 8px 12px}.aid-ptitle{flex:1;min-width:0;display:flex;align-items:center;gap:6px;font-weight:600;white-space:nowrap;overflow:hidden}",
     ".aid-pmini{font:11.5px " + MONO + ";font-weight:400;color:var(--mui-palette-text-secondary,#8b949e);overflow:hidden;text-overflow:ellipsis}",
@@ -256,7 +257,7 @@
     // ── .GUI parts: the figure's centre, one part per route, the selected node, the panel and its sections ──
     var partIds = useRef(null);
     var rec = function (seg, type, prov, rp, parent) { var id = rootId + "/" + seg; return { id: id, path: rootId + "." + seg, type: type, part: seg, parentId: parent || rootId, provenance: prov, spec: { type: type, props: rp, provenance: prov }, resolvedProps: rp }; };
-    var SRC = "live kernel (this.me 4.2.1, Web Worker) · GTFS-Madrid-Bench (generated)";
+    var SRC = "live kernel (this.me " + ME_VERSION + ", Web Worker) · GTFS-Madrid-Bench (generated)";
     var nodeRecord = function (path, label) { return rec("node", "AIDecides.Node", { semanticPath: path, source: SRC, note: label + ": " + path + ". Explain reads it from the worker kernel." }, { path: path, label: label }); };
     useEffect(function () {
       var store = nodeStore(); if (!store || !store.actions || !info) return;
@@ -546,7 +547,8 @@
         h("div", { className: "aid-ptitle" }, GA.Chip ? h(GA.Chip, { label: "LIVE", size: "small", color: "success", variant: "outlined", sx: { height: 20, fontSize: 10.5, fontWeight: 700, letterSpacing: ".05em" } }) : h("span", { className: "aid-tag live" }, "live"), h("span", null, "Decide & compute"), h("span", { className: "aid-pmini", "data-aid": "mini" }, mini)),
         h("button", { type: "button", className: "aid-ibtn", "aria-label": panel.open ? "Close the panel" : "Open the panel", "aria-expanded": panel.open ? "true" : "false", "aria-controls": uid + "-body", "data-gui-inspector-control": "true", "data-aid": "panel-toggle", onClick: function () { updPanel(function (p) { p.open = !p.open; }); } }, h("span", { className: "aid-chev" + (panel.open ? " up" : "") }, ICON.chev))),
       panel.open ? h("div", { id: uid + "-body", "aria-busy": busy ? "true" : "false" },
-        section("decision", "Decision", scen ? (SCEN.filter(function (x) { return x[0] === scen; })[0] || [0, ""])[1] : null, decisionBody),
+        h("div", { key: "kernel", className: "aid-kernel", "data-aid": "kernel" }, h("a", { href: "https://www.npmjs.com/package/this.me", target: "_blank", rel: "noopener", title: "this.me on npm" }, "this.me@" + ME_VERSION), " · TypeScript · Web Worker"),
+                section("decision", "Decision", scen ? (SCEN.filter(function (x) { return x[0] === scen; })[0] || [0, ""])[1] : null, decisionBody),
         section("service", "Suspend service", suspended ? suspended + " suspended" : null, serviceBody),
         section("wave", "This wave", Wv ? "k " + fmt(Wv.k) + " · " + ms(Wv.writeMs) : null, waveBody),
         section("routes", "Changed, by route", Wv ? fmt(Wv.routes.length) + " routes" : null, routesBody),
@@ -562,7 +564,7 @@
             h("canvas", { ref: ringsRef, "aria-hidden": "true" }), h("canvas", { ref: baseRef, "aria-hidden": "true" }), h("canvas", { ref: base2Ref, "aria-hidden": "true", style: { visibility: "hidden" } }), h("canvas", { ref: litRef, className: "aid-lit", "aria-hidden": "true" }), h("canvas", { ref: overRef, "aria-hidden": "true" }), hitLayer,
             !info ? h("div", { style: { position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", fontSize: 13, color: "var(--mui-palette-text-secondary, #8b949e)" } }, status || "Starting the kernel…") : null),
           h("div", { className: "aid-k" }, h("span", { ref: kRef, "data-aid": "k" }, "k = –"), h("span", { className: "aid-tag rep" }, slow ? "replay · ×10 slower" : "replay · measured duration"),
-            Info("The wave is replayed in the kernel's real recompute order (explain().meta.recomputed) over the write's measured duration (or 10× slower if you ask). this.me 4.2.1 has no progress hook, so this is a replay of the real order, not a live stream. k and the timing are measured.", "About the replay")),
+            Info("The wave is replayed in the kernel's real recompute order (explain().meta.recomputed) over the write's measured duration (or 10× slower if you ask). this.me " + ME_VERSION + " has no progress hook, so this is a replay of the real order, not a live stream. k and the timing are measured.", "About the replay")),
           h("figcaption", { className: "aid-cap" }, "Inner ring: routes · then trips · ticks: frequency windows (length = departures/hour) · outer ring: stop_times.", h("br"),
             h("span", { className: "aid-legend" }, h("span", null, sw(dark ? "#26aa94" : "#046c5c"), "running"), h("span", null, sw(dark ? "#f0b429" : "#c27c00"), "below the floor"),
               h("span", null, sw(dark ? "#ffd166" : "#b45309", true), "tight flipped"), h("span", null, sw("rgba(140,150,160,.55)"), "suspended")))),
@@ -652,9 +654,10 @@
       h("ul", { style: { paddingLeft: 20, margin: 0 } },
         li("d", [h("b", { key: 0 }, "The data"), " is GTFS-Madrid-Bench (", L("https://doi.org/10.5281/zenodo.14038823", "Zenodo 10.5281/zenodo.14038823"), "), base version. The benchmark generated it from Madrid Metro's feed, so ids, names and clock times are encoded; its headways (headway_secs), trips, stop_times and day flags are used as they are. Measured on it: ", L("https://neurons-me.github.io/.me/docs/Benchmarks/GTFS/Madrid/", "GTFS-Madrid benchmarks"), "."]),
         li("p", [h("b", { key: 0 }, "The decider"), " is a versioned function, policy:fair-headway@1: one factor for every line, the largest cut that keeps the windows below the floor within the scenario's limit. It stores its reason, the scenario and an inputs hash as facts (decisions.<n>.*) before the one write. A language model could take its place later: it would propose, and the same record and the same checks would apply."]),
-        li("k", [h("b", { key: 0 }, "The kernel"), " is this.me 4.2.1 from npm (SRI-pinned) in a Web Worker. k, the changed values, the early cutoff and the timings come from the kernel (explain().meta); the animation replays the real recompute order at the measured duration."]),
+        li("k", [h("b", { key: 0 }, "The kernel"), " is this.me " + ME_VERSION + " from npm (SRI-pinned) in a Web Worker. k, the changed values, the early cutoff and the timings come from the kernel (explain().meta); the animation replays the real recompute order at the measured duration."]),
         li("a", [h("b", { key: 0 }, "Added by us"), ": policy.factor, the 165 s floor (policy.minHeadway) and each service's on/off switch. The feed has no fares, capacity or demand, so the demo has none."]),
-        li("l", [h("b", { key: 0 }, "Kernel limits met on the way"), " (open items): the [] aggregate is much slower than explicit sums at this size, so the model spells the sums out; the ?: ternary does not evaluate; booleans do not take part in arithmetic. See ", L("https://github.com/neurons-me/.me/issues", "the .me issues"), "."])));
+        li("l", [h("b", { key: 0 }, "Kernel limits met on the way"), " (open items): the [] aggregate is much slower than explicit sums at this size, so the model spells the sums out; the ?: ternary does not evaluate; booleans do not take part in arithmetic. See ", L("https://github.com/neurons-me/.me/issues", "the .me issues"), "."])),
+      h("p", { key: "rel", style: { marginTop: 14 } }, ["Related: ", L("https://neurons-me.github.io/.me/docs/Extreme-Fan-Out.html", "Extreme Fan-Out"), " (the concept behind k) · ", L("https://neurons-me.github.io/.me/docs/Benchmarks/GTFS/Madrid/", "GTFS-Madrid benchmark"), " · ", L("https://neurons-me.github.io/smart-cities/", "Smart Cities demos"), "."]));
   }
   var N = function (type, id, props, children) { return Object.assign({ type: type, props: Object.assign({}, props || {}, { "data-gui-node-id": id }) }, children ? { children: children } : {}); };
   var pageType = function (type, Comp) { return { type: type, resolve: function (spec) { var p = Object.assign({}, spec.props || {}); delete p.key; return h(Comp, p); } }; };
