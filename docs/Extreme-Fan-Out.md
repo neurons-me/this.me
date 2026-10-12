@@ -8,15 +8,15 @@ mepath:
     url: https://neurons-me.github.io/.me/docs/
 crumb: Fan-Out
 scripts:
-  - /assets/fanout-viz/fanout-viz.js?v=2.0.1
+  - /assets/fanout-viz/fanout-viz.js?v=3.0.0
 ---
 
 # Extreme Fan-Out
 
-> One write. 100,000 dependents recompute — and nothing else does.
+> One write. Every real dependent recomputes — and only what actually changed goes further.
 
-<div class="fanout-viz" data-n="100000" data-caption="1 write → 100,000 dependents" markdown="1">
-**1 write → 100,000 dependents.** One value at the centre, one line per derived value that reads it.
+<div class="fanout-viz" markdown="1">
+**Live fan-out.** A real this.me kernel in your browser: one line per dependent of `master.factor`, the recompute order replayed at the measured duration (needs JavaScript).
 </div>
 
 `.me` (npm `this.me`) is a reactive kernel. Facts live at paths (`master.factor`). A derived value is declared once with `["="]` and recomputes when one of its inputs changes. The work a write causes is its wave, and **k** is the size of that wave: how many derived values it recomputed. `me.explain(path)` returns the formula, its inputs and the last wave (`k`, `recomputed`, `changed`, `sourcePath`).
