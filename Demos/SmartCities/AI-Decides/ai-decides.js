@@ -14,7 +14,7 @@
   var h = React.createElement, useState = React.useState, useEffect = React.useEffect, useRef = React.useRef, useMemo = React.useMemo;
   var MONO = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
   var HERE = new URL(".", (document.currentScript && document.currentScript.src) || location.href).href;
-  var MODEL_URL = HERE + "ai-model.js?v=1.0.0", DATA_URL = function (s) { return HERE + "data/madrid-s" + s + ".json?v=1"; };
+  var MODEL_URL = HERE + "ai-model.js?v=1.0.1", DATA_URL = function (s) { return HERE + "data/madrid-s" + s + ".json?v=1"; };
   var ME_VERSION = "4.2.1", ME_URL = "https://cdn.jsdelivr.net/npm/this.me@" + ME_VERSION + "/dist/me.umd.js", ME_SRI = "sha384-ElnWCZOb324gqFJ2M/Fxy4CZ6Si131WIbR54iYomzEbTloUDLfBzZ05qi1nZ7+4G";
   var SRC_URL = "https://github.com/neurons-me/.me/blob/main/Demos/SmartCities/AI-Decides/";
   var params = new URLSearchParams(location.search);
@@ -190,6 +190,13 @@
     ".aid-try h4{margin:10px 0 6px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mui-palette-text-secondary,#8b949e)}.aid-try-grid{display:grid;grid-template-columns:1fr;gap:14px}@media (min-width:900px){.aid-try-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}.aid-try-col{min-width:0}",
     ".aid-try-raw{margin-bottom:8px}.aid-try-rl{font-size:11.5px;color:var(--mui-palette-text-secondary,#8b949e);margin-bottom:2px}.aid-try-raw pre{margin:0;padding:6px 8px;border-radius:8px;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));font:11px/1.55 " + MONO + ";overflow-x:auto;white-space:pre}.aid-try-raw .hd{color:var(--mui-palette-text-secondary,#8b949e)}",
     ".aid-try-paths{list-style:none;margin:0;padding:0}.aid-try-paths li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 10px;padding:3px 0;border-bottom:1px dashed var(--mui-palette-divider,rgba(128,128,128,.25));align-items:baseline}.aid-try-paths .v{font:600 12px " + MONO + "}.aid-try-paths small{grid-column:1/-1;font-size:11px;color:var(--mui-palette-text-secondary,#8b949e)}",
+    ".aid-qa{display:grid;gap:12px;margin:0 0 22px}.aid-q,.aid-a{border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:14px;padding:14px 16px;background:var(--mui-palette-background-paper,transparent)}.aid-a{border-color:var(--mui-palette-primary-main,#58a6ff)}",
+    ".aid-qk{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--mui-palette-text-secondary,#8b949e);margin-bottom:6px}.aid-qstate{letter-spacing:0;text-transform:none;font-weight:600}",
+    ".aid-q h2{margin:0;font-size:clamp(1.15rem,2.6vw,1.5rem);line-height:1.3;font-weight:800}.aid-qs{margin-top:6px;font-size:12.5px;color:var(--mui-palette-text-secondary,#8b949e)}.aid-qbtns{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px}.aid-qkern{padding:0 4px}",
+    ".aid-akpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media (max-width:600px){.aid-akpis{grid-template-columns:1fr}}.aid-akpi{all:unset;box-sizing:border-box;display:flex;flex-direction:column;gap:2px;padding:10px 12px;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:12px;cursor:pointer}button.aid-akpi:hover{border-color:var(--mui-palette-primary-main,#58a6ff)}",
+    ".aid-akpi small{font-size:11.5px;color:var(--mui-palette-text-secondary,#8b949e)}.aid-akpi b{font-size:1.6rem;font-weight:800;font-variant-numeric:tabular-nums}.aid-akpi .arr{color:var(--mui-palette-success-main,#2e9d6e)}.aid-akpi em{font-style:normal;font-size:12.5px;color:var(--mui-palette-text-secondary,#8b949e)}.aid-akpi em.up{color:var(--mui-palette-success-main,#2e9d6e);font-weight:700}.aid-akpi.warn{border-color:var(--mui-palette-warning-main,#f0b429)}.aid-akpi.warn b{color:var(--mui-palette-warning-main,#f0b429)}",
+    ".aid-alist{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:4px}.aid-alist button{all:unset;box-sizing:border-box;width:100%;display:grid;grid-template-columns:10px 70px minmax(40px,1fr) auto auto;gap:8px;align-items:center;padding:5px 8px;border-radius:8px;cursor:pointer;font-size:12.5px;font-variant-numeric:tabular-nums}.aid-alist button:hover,.aid-alist button:focus-visible{background:var(--mui-palette-action-hover,rgba(128,128,128,.12))}",
+    ".aid-alist i{width:10px;height:10px;border-radius:3px}.aid-alist .bar{height:6px;border-radius:3px;background:var(--mui-palette-divider,rgba(128,128,128,.25));overflow:hidden}.aid-alist .bar span{display:block;height:100%;background:var(--mui-palette-warning-main,#f0b429)}.aid-alist .ph{color:var(--mui-palette-text-secondary,#8b949e)}@media (max-width:600px){.aid-alist button{grid-template-columns:10px 62px minmax(30px,1fr) auto}.aid-alist .ph{display:none}}",
     ".aid-map{margin:28px 0 8px}.aid-map h2{margin:0 0 4px;font-size:1.35rem;font-weight:800}.aid-map-label{display:inline-block;margin-bottom:10px;padding:2px 8px;border:1px dashed var(--mui-palette-warning-main,#b7791f);border-radius:6px;color:var(--mui-palette-warning-main,#b7791f);font-size:12px;font-weight:600}",
     ".aid-map-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px}@media (max-width:760px){.aid-map-grid{grid-template-columns:1fr}}",
     ".aid-map-fig{min-width:0}.aid-map-svg{display:block;width:100%;max-width:680px;aspect-ratio:1;cursor:crosshair;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:12px;background-image:linear-gradient(var(--mui-palette-divider,rgba(128,128,128,.15)) 1px,transparent 1px),linear-gradient(90deg,var(--mui-palette-divider,rgba(128,128,128,.15)) 1px,transparent 1px);background-size:10% 10%}",
@@ -984,6 +991,71 @@
                   der.inputs.length > 4 ? " · +" + (der.inputs.length - 4) + " more" : null] : null,
                 x.meta && x.meta.k != null ? [h("br", { key: "d" }), "last wave k = " + fmt(x.meta.k)] : null))))));
   }
+  // ── Question → Answer: the answer block is read live from the worker's kernel with me(path); nothing is hardcoded.
+  // Before = the values read while policy.factor is 1 (the timetable); after = the values read now.
+  function QA() {
+    var GA = G.Atoms || {}, SYN = window.MeSyntax || null, me = function (t) { return h("code", { className: "me-code" }, SYN ? SYN.render(h, t) : t); };
+    var fmtV = function (v) { return typeof v === "number" ? String(Math.round(v * 1000) / 1000) : JSON.stringify(v); }, r1 = function (v) { return (Math.round(v * 10) / 10).toLocaleString("en-US"); };
+    var ls = useState(live.state()), lst = ls[0], setLst = ls[1];
+    useEffect(function () { return live.subscribe(function (s) { setLst(Object.assign({}, s)); }); }, []);
+    var info = lst.info, ready = (lst.phase === "ready" || lst.phase === "writing") && !!info;
+    var plan = useMemo(function () { if (!info) return null; var P = ["policy.factor", "policy.minHeadway", "city.perHour"], R = info.routes.length, tw = [];
+      for (var r = 1; r <= R; r++) { P.push("routes." + r + ".perHour"); P.push("routes." + r + ".anyTight"); }
+      info.trips.forEach(function (x) { var a = []; for (var w = 1; w <= x[4]; w++) { a.push(P.length); P.push("routes." + (x[0] + 1) + ".trips." + (x[1] + 1) + ".win." + w + ".tight"); } tw.push({ r: x[0], at: a }); });
+      return { P: P, R: R, tw: tw }; }, [info]);
+    var vs = useState(null), cur = vs[0], setCur = vs[1], before = useRef(null);
+    useEffect(function () { if (!ready || !plan) return; var alive = true;
+      live.read(plan.P).then(function (res) { if (!alive) return; var V = res.values, o = { factor: V[0], floor: V[1], city: V[2], ms: res.ms, routes: [], trips: 0, wins: 0, nTrips: plan.tw.length, nWins: 0 };
+        for (var r = 0; r < plan.R; r++) o.routes.push({ r: r, ph: V[3 + 2 * r], any: !!V[4 + 2 * r], trips: 0, wins: 0, nTrips: 0, nWins: 0 });
+        plan.tw.forEach(function (t) { var n = 0; t.at.forEach(function (i) { if (V[i]) n++; }); var R0 = o.routes[t.r]; R0.nTrips++; R0.nWins += t.at.length; o.nWins += t.at.length; if (n) { R0.trips++; o.trips++; } R0.wins += n; o.wins += n; });
+        if (o.factor === 1 && !before.current) before.current = o; setCur(o); }, function () {});
+      return function () { alive = false; }; }, [ready, plan, lst.waveSeq]);
+    var xs = useState(null), ex = xs[0], setEx = xs[1];
+    var explain = function (path, title) { setEx({ path: path, title: title }); live.explain(path).then(function (x) { setEx({ path: path, title: title, x: x }); }, function (e) { setEx({ path: path, title: title, error: e.message }); }); };
+    useEffect(function () { if (ex && ready) explain(ex.path, ex.title); }, [lst.waveSeq]);
+    var B = before.current, A = cur, applied = A && A.factor !== 1, busy = lst.phase !== "ready";
+    var Btn = function (o, text) { var q = Object.assign({ type: "button", "data-gui-inspector-control": "true" }, o);
+      return GA.Button ? h(GA.Button, Object.assign(q, { disableElevation: true, sx: { textTransform: "none", borderRadius: "10px", fontWeight: 700 } }), text) : h("button", q, text); };
+    var down = A ? A.routes.filter(function (x) { return x.wins > 0; }).sort(function (a, b) { return b.wins - a.wins || a.r - b.r; }) : [];
+    var pct = B && A ? (A.city / B.city - 1) * 100 : 0, uni = B && A ? A.routes.map(function (x) { return Math.round((x.ph / B.routes[x.r].ph - 1) * 1000) / 10; }) : [];
+    var uniform = uni.length && uni.every(function (u) { return u === uni[0]; });
+    var x = ex && ex.x, der = x && x.derivation;
+    return h("section", { className: "aid-qa", "data-aid": "qa", "aria-labelledby": "aid-q" },
+      h("div", { className: "aid-q" },
+        h("div", { className: "aid-qk" }, "Question"),
+        h("h2", { id: "aid-q" }, "If Madrid's buses came 10% more often, how much more service would the city get, and which routes would drop below the minimum safe headway?"),
+        h("div", { className: "aid-qs" }, "Headway = time between buses. The dataset (GTFS-Madrid-Bench, generated) has supply only: no passengers, no traffic."),
+        h("div", { className: "aid-qbtns" },
+          Btn({ variant: "contained", color: "primary", "data-aid": "qa-apply", disabled: !ready || busy || applied, onClick: function () { live.apply("ten").catch(function () {}); } }, "Apply: buses 10% more often"),
+          Btn({ variant: "outlined", color: "inherit", "data-aid": "qa-reset", disabled: !ready || busy || !applied, onClick: function () { live.apply("timetable").catch(function () {}); } }, "Back to the timetable"),
+          h("span", { className: "aid-kernel aid-qkern", "data-aid": "qa-kernel" }, h("a", { href: "https://www.npmjs.com/package/this.me", target: "_blank", rel: "noopener", title: "this.me on npm" }, "this.me@" + ME_VERSION), " · TypeScript · Web Worker"))),
+      h("div", { className: "aid-a", "data-aid": "qa-answer", "aria-live": "polite" },
+        h("div", { className: "aid-qk" }, "Answer", h("span", { className: "aid-qstate" }, !A ? " · reading the kernel…" : applied ? " · after the decision (headway × " + A.factor + ")" : " · before the decision (timetable)")),
+        !A || !B ? h("div", { className: "aid-note" }, ready ? "Reading the kernel…" : "Building the kernel…") : h("div", null,
+          h("div", { className: "aid-akpis" },
+            h("button", { type: "button", className: "aid-akpi", "data-aid": "qa-city", onClick: function () { explain("city.perHour", "City-wide departures per hour"); } },
+              h("small", null, "City-wide service · departures / hour"), h("b", null, r1(B.city), applied ? h("span", { className: "arr" }, " → " + r1(A.city)) : null),
+              h("em", { className: applied ? "up" : "" }, applied ? (pct >= 0 ? "+" : "") + r1(pct) + "% more service" : "apply the decision to compare")),
+            h("div", { className: "aid-akpi" + (applied && A.wins ? " warn" : ""), "data-aid": "qa-tight" },
+              h("small", null, "Below the minimum safe headway (" + A.floor + " s = " + Math.floor(A.floor / 60) + " min " + (A.floor % 60) + " s between buses)"),
+              h("b", null, A.routes.filter(function (q) { return q.wins; }).length + " of " + A.routes.length + " routes"),
+              h("em", null, A.trips + " of " + A.nTrips + " trips · " + A.wins + " of " + A.nWins + " time windows"))),
+          !applied ? h("div", { className: "aid-note" }, "Before: no window is below the floor (the shortest published headway is above " + A.floor + " s).") :
+          h("ul", { className: "aid-alist", "data-aid": "qa-routes" }, down.map(function (q) { return h("li", { key: q.r },
+            h("button", { type: "button", "data-aid": "qa-route", onClick: function () { explain("routes." + (q.r + 1) + ".anyTight", "Route " + (q.r + 1)); } },
+              h("i", { style: { background: "hsl(" + HUES[q.r % HUES.length] + " 70% 52%)" } }), h("b", null, "Route " + (q.r + 1)),
+              h("span", { className: "bar" }, h("span", { style: { width: Math.round(q.wins / q.nWins * 100) + "%" } })),
+              h("span", null, q.wins + "/" + q.nWins + " windows · " + q.trips + "/" + q.nTrips + " trips"),
+              h("span", { className: "ph" }, r1(B.routes[q.r].ph) + " → " + r1(q.ph) + " /h"))); })),
+          applied ? h("div", { className: "aid-note", "data-aid": "qa-uniform" }, uniform ? "Service rises by the same " + uni[0] + "% on every route: one factor for all lines (3600 / headway), so the gain is uniform. What differs is how close each route's published headways already were to the floor." : "Change per route: " + uni.join("% · ") + "%.") : null,
+          h("div", { className: "aid-note" }, "Read with ", me("me(path)"), " in the worker: ", fmt(plan.P.length), " paths in " + A.ms + " ms · tight = ", me("headway < policy.minHeadway"), " · click a row for ", me("me.explain(path)"), "."),
+          ex ? h("div", { className: "aid-map-card", "data-aid": "qa-card" }, h("div", { className: "aid-map-ct" }, ex.title), me('me.explain("' + ex.path + '")'),
+            !x ? (ex.error ? h("div", { className: "aid-warn" }, ex.error) : h("div", { className: "aid-note" }, "…")) :
+            h("div", { className: "aid-try-out" }, "value ", h("b", null, fmtV(x.value)),
+              der && der.expression ? [h("br", { key: "b" }), me('"' + (der.expression.length > 140 ? der.expression.slice(0, 140) + "…" : der.expression) + '"')] : null,
+              der && der.inputs && der.inputs.length ? [h("br", { key: "c" }), "inputs: " + der.inputs.length + " · first: ", me(String(der.inputs[0] && der.inputs[0].path || der.inputs[0]))] : null,
+              x.meta && x.meta.k != null ? [h("br", { key: "d" }), "last wave k = " + fmt(x.meta.k)] : null)) : null)));
+  }
   var N = function (type, id, props, children) { return Object.assign({ type: type, props: Object.assign({}, props || {}, { "data-gui-node-id": id }) }, children ? { children: children } : {}); };
   var pageType = function (type, Comp) { return { type: type, resolve: function (spec) { var p = Object.assign({}, spec.props || {}); delete p.key; return h(Comp, p); } }; };
   var spec = N("Box", "page", { sx: { minHeight: "100vh", bgcolor: "background.default", color: "text.primary" } }, [
@@ -991,6 +1063,7 @@
     N("Box", "main", { component: "main", sx: { maxWidth: 1180, mx: "auto", px: { xs: 2, sm: 4 }, pt: { xs: 3, sm: 4.5 }, pb: 8 } }, [
       N("Typography", "kicker", { component: "p", sx: { fontSize: ".75rem", fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: "text.secondary", mb: 1 } }, ["Smart Cities · GTFS-Madrid-Bench"]),
       N("Typography", "title", { component: "h1", sx: { fontSize: "clamp(2rem, 5vw, 2.75rem)", fontWeight: 800, letterSpacing: "-.02em", lineHeight: 1.1, mb: 3 } }, ["AI decides, .me computes"]),
+      N("AIDQA", "qa"),
       N("AIDHow", "how"),
       N("AIDDashboard", "ai-decides"),
       N("AIDMap", "map"),
@@ -1001,7 +1074,7 @@
   var mode = "dark"; try { mode = params.get("mode") || localStorage.getItem(scope.themeModeKey) || "dark"; if (params.get("mode")) localStorage.setItem(scope.themeModeKey, mode); } catch (e) {}
   var PageTheme = function (p) { return h(G.Theme, { initialThemeId: "neurons.me", initialMode: mode }, p.children); };
   var INSPECTOR_ON = params.get("inspector") === "1"; if (G.getInspectorEnabled() !== INSPECTOR_ON) G.setInspectorEnabled(INSPECTOR_ON);
-  var reg = Object.assign({}, G.Registry || G.registry); [["AIDTopBar", TopBar], ["AIDDashboard", Dashboard], ["AIDNotes", Notes], ["AIDHow", How], ["AIDMap", CityMap]].forEach(function (x) { reg[x[0]] = pageType(x[0], x[1]); });
+  var reg = Object.assign({}, G.Registry || G.registry); [["AIDTopBar", TopBar], ["AIDDashboard", Dashboard], ["AIDNotes", Notes], ["AIDHow", How], ["AIDMap", CityMap], ["AIDQA", QA]].forEach(function (x) { reg[x[0]] = pageType(x[0], x[1]); });
   // render / RunMe left out: mount() must not wrap the worker facade in a full runtime (Explain is answered by the worker)
   G.mount(spec, ROOT, { me: window.AIDecidesKernel, gui: Object.assign({}, G, { render: undefined, RunMe: undefined, Theme: PageTheme, registry: reg }), devtools: { enabled: true, inspector: INSPECTOR_ON, adminView: false, inspectorToggleVisible: false } });
   document.documentElement.classList.add("gui-on");

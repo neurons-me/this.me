@@ -27,6 +27,7 @@
     { id: "am-peak", label: "Weekday AM peak", ask: "Shorten waits for the morning peak.", kind: "cut", maxCut: 0.15, maxTight: 0.25 },
     { id: "event", label: "Event tonight", ask: "A big event ends late: run as often as is safe.", kind: "cut", maxCut: 0.25, maxTight: 0.6 },
     { id: "save", label: "Off-peak, save energy", ask: "Quiet hours: stretch every headway 10%.", kind: "set", factor: 1.1 },
+    { id: "ten", label: "Buses 10% more often", ask: "Run every bus 10% more often (headway x 0.9).", kind: "set", factor: 0.9 },
     { id: "timetable", label: "Back to the timetable", ask: "Undo every headway change.", kind: "set", factor: 1 }
   ];
   function fnv(str) { var h = 0x811c9dc5; for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return ("0000000" + h.toString(16)).slice(-8); }
@@ -43,7 +44,7 @@
     if (scenario.kind === "set") {
       factor = scenario.factor;
       reason = factor === 1 ? "Back to the published headways (factor 1.00) on every line."
-        : "Stretch every headway by " + Math.round((factor - 1) * 100) + "% on every line (same for all). " + pct(share(factor)) + " of windows below the " + fl + " s floor.";
+        : (factor < 1 ? "Shorten every headway by " + Math.round((1 - factor) * 100) + "% on every line (same for all). " : "Stretch every headway by " + Math.round((factor - 1) * 100) + "% on every line (same for all). ") + pct(share(factor)) + " of windows below the " + fl + " s floor.";
     } else {
       factor = 1; var lim = scenario.maxTight, best = 1;
       for (var c = 1; c <= Math.round(scenario.maxCut * 100); c++) { var f = r2(1 - c / 100), s = share(f); tried.push([f, s]); if (s <= lim) best = f; else break; }
