@@ -8,7 +8,7 @@ mepath:
     url: https://neurons-me.github.io/.me/docs/
 crumb: Fan-Out
 scripts:
-  - /assets/fanout-viz/fanout-viz.js?v=3.0.0
+  - /assets/fanout-viz/fanout-viz.js?v=3.0.1
 ---
 
 # Extreme Fan-Out

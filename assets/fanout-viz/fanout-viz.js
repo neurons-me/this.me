@@ -1,4 +1,4 @@
-/*! fanout-viz 3.0.0 · .me extreme fan-out, driven by a real this.me kernel · MIT · neurons.me
+/*! fanout-viz 3.0.1 · .me extreme fan-out, driven by a real this.me kernel · MIT · neurons.me
  * Every line is one real dependent of a live this.me 4.2.1 kernel running in a Web Worker (CDN, SRI-checked), at angle
  * i/N; nothing on the canvas is decorative.
  * - Model (in the worker), per dependent i = 1…N (10,000 by default, 100,000 on request):
@@ -19,6 +19,8 @@
  * - .GUI: the figure, its centre (master.factor), 128 angular slices and a "selected dependent" part are registered;
  *   clicking a line selects that dependent (angle-bucket hit test), arrows step to its neighbours, and the Inspector's
  *   Explain is answered by the worker (shortened there; counts reach the page, never the k-long lists).
+ * - Small screens (max-width 600px, or a coarse pointer with navigator.deviceMemory <= 4) get no 100k option: the
+ *   button is hidden and any 100k request falls back to 10k (a 100k kernel needs ~0.7–0.9 GB in the worker).
  * - Pause / play (localStorage); reduced motion starts paused, no rotation, a write shows its final state at once.
  */
 (function (root) {
@@ -45,7 +47,7 @@
     ".fov-btn:focus-visible{outline:2px solid var(--mui-palette-primary-main, #2aa);outline-offset:2px}" +
     ".fov-btn:disabled{opacity:.5;cursor:default}.fov-btn[aria-pressed=true].fov-seg,.fov-btn.fov-stop{background:color-mix(in srgb, var(--mui-palette-primary-main, #2aa) 16%, transparent);border-color:var(--mui-palette-primary-main, #2aa)}" +
     ".fov-btn svg{width:14px;height:14px;flex:none}.fov-btn small{color:var(--mui-palette-text-secondary, #8b949e);font-size:11.5px}" +
-    ".fov-seg-g{display:inline-flex;gap:0}.fov-seg-g .fov-btn:first-child{border-radius:8px 0 0 8px}.fov-seg-g .fov-btn:last-child{border-radius:0 8px 8px 0;margin-left:-1px}" +
+    ".fov-seg-g{display:inline-flex;gap:0}.fov-seg-g .fov-btn:first-child{border-radius:8px 0 0 8px}.fov-seg-g .fov-btn:last-child{border-radius:0 8px 8px 0;margin-left:-1px}.fov-seg-g .fov-btn:only-child{border-radius:8px;margin-left:0}" +
     ".fov-live{margin:12px auto 0;max-width:680px;padding-top:12px;border-top:1px solid var(--mui-palette-divider, rgba(128,128,128,.3));text-align:center;font-size:13px;line-height:1.6;color:var(--mui-palette-text-secondary, #8b949e)}" +
     ".fov-tag{display:inline-block;margin:0 6px;padding:0 7px;line-height:1.5;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;border:1px solid currentColor;font-family:inherit}" +
     ".fov-tag.live{color:var(--mui-palette-success-main, #2e9d6e)}.fov-tag.rep{color:var(--mui-palette-text-secondary, #8b949e)}" +
@@ -75,6 +77,13 @@
   var ORIG_N = 9000;   // the original illustration's line count; the line density is kept at its look for any N
   var SLICES = 128;
   var ME_URL = "https://cdn.jsdelivr.net/npm/this.me@4.2.1/dist/me.umd.js", ME_SRI = "sha384-ElnWCZOb324gqFJ2M/Fxy4CZ6Si131WIbR54iYomzEbTloUDLfBzZ05qi1nZ7+4G";
+  var SMALL_Q = "(max-width: 600px)";
+  function smallDevice() {
+    if (!root.matchMedia) return false;
+    if (root.matchMedia(SMALL_Q).matches) return true;
+    var mem = root.navigator && root.navigator.deviceMemory;
+    return !!(root.matchMedia("(pointer: coarse)").matches && typeof mem === "number" && mem <= 4);
+  }
   var KIND_LEVEL = 0, KIND_HOT = 1, KIND_ALARM = 2;
 
   // ── the live kernel: a real this.me in a Web Worker (all kernel work stays off the main thread) ──
@@ -200,6 +209,7 @@
       return new Promise(function (res, rej) { var id = ++seq; pending[id] = { res: res, rej: rej, onProgress: onProgress }; var m = { id: id, op: op, url: ME_URL, sri: ME_SRI }; for (var k in args) m[k] = args[k]; worker().postMessage(m); });
     }
     function build(n) {
+      if (n > 10000 && smallDevice()) n = 10000;   // small screens / low-memory touch devices: 10k only
       if (building && st.target === n) return building;
       set({ phase: "building", target: n, progress: 0, error: null, wave: null, stress: null, resets: 0, lastReset: null });
       var b = building = call("build", { n: n }, function (d) { if (building === b) set({ progress: d.done / d.n }); })
@@ -274,6 +284,11 @@
     var reduceNow = !!(root.matchMedia && root.matchMedia("(prefers-reduced-motion: reduce)").matches);
     var pausedInit = function () { if (reduceNow) return true; try { return root.localStorage.getItem(PAUSE_KEY) === "1"; } catch (e) { return false; } };
     var ps = useState(pausedInit), paused = ps[0], setPaused = ps[1];
+    var sm = useState(smallDevice), small = sm[0], setSmall = sm[1];
+    useEffect(function () {
+      if (!root.matchMedia) return; var qs = [root.matchMedia(SMALL_Q), root.matchMedia("(pointer: coarse)")], on = function () { setSmall(smallDevice()); };
+      qs.forEach(function (q) { if (q.addEventListener) q.addEventListener("change", on); }); return function () { qs.forEach(function (q) { if (q.removeEventListener) q.removeEventListener("change", on); }); };
+    }, []);
     var ls = useState(live.state()), lst = ls[0], setLst = ls[1];
     var ss = useState({ kind: "none" }), sel = ss[0], setSel = ss[1];          // none | slice {s} | center | dep {i}
     var xs = useState(null), selInfo = xs[0], setSelInfo = xs[1];
@@ -566,7 +581,7 @@
             onClick: function () { (stressing ? live.stop() : live.stress()).catch(function () {}); } }, stressing ? ICON.stop : ICON.stress, stressing ? "Stop" : "Stress"),
           h("span", { className: "fov-seg-g", role: "group", "aria-label": "Live kernel size" },
             h("button", { type: "button", className: "fov-btn fov-seg", "aria-pressed": lst.target === 10000 ? "true" : "false", disabled: busy || stressing, "data-fov": "n10k", onClick: function () { pick(10000); } }, "10k"),
-            h("button", { type: "button", className: "fov-btn fov-seg", "aria-pressed": lst.target === 100000 ? "true" : "false", disabled: busy || stressing, "data-fov": "n100k", title: "Builds 100,000 dependents (300,000 derived values) in the background worker: about 10–20 s to build and several seconds per write", onClick: function () { pick(100000); } }, "100k", h("small", null, "slow: ~10–20 s build")))),
+            small ? null : h("button", { type: "button", className: "fov-btn fov-seg", "aria-pressed": lst.target === 100000 ? "true" : "false", disabled: busy || stressing, "data-fov": "n100k", title: "Builds 100,000 dependents (300,000 derived values) in the background worker: about 10–20 s to build and several seconds per write", onClick: function () { pick(100000); } }, "100k", h("small", null, "slow: ~10–20 s build")))),
         h("div", { className: "fov-out", role: "status", "aria-live": "polite", "data-fov": "status" }, h("div", null, line1), line2 ? h("div", null, line2) : null, line3 ? h("div", { "data-fov": "stress-line" }, line3) : null),
         info));
   }
