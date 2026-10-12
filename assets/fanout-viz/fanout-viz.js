@@ -1,4 +1,4 @@
-/*! fanout-viz 2.0.0 · .me extreme fan-out, one write → N dependents · MIT · neurons.me
+/*! fanout-viz 2.0.1 · .me extreme fan-out, one write → N dependents · MIT · neurons.me
  * A radial canvas illustration ported from the "Fan-Out Extreme" section of
  * https://neurons-me.github.io/Inverted-Dependency-Indexing-Beautiful-Viz.html, with the same rendering parameters:
  * lines from the centre at angle i/N·2π ± 0.0075 rad, length 55–100% of a radius of 42% of the canvas, 0.5 px wide
@@ -97,7 +97,21 @@
         .then(function (txt) { var u = URL.createObjectURL(new Blob([txt], { type: "text/javascript" })); importScripts(u); URL.revokeObjectURL(u); if (!self.Me || !self.Me.ME) throw new Error("this.me did not load"); });
       return ready;
     }
-    var first = function (a) { return Array.isArray(a) ? a.slice(0, 3) : undefined; };
+    var first = function (a) { return Array.isArray(a) ? a.slice(0, 6) : undefined; };
+    var related = function (p, focus) { return p === focus || p.indexOf(focus + ".") === 0 || focus.indexOf(p + ".") === 0; };
+    // the kernel's own inspect for a path (recomputeMode, scopes, memories), shortened here: only the memories that
+    // touch the path or the paths its formula reads (what the Inspector filters to anyway), no index
+    function shortInspect(path) {
+      var req = { scheme: "me", namespace: "self", operation: "inspect", path: path, raw: "me://self:inspect/" + path, contextRaw: null };
+      var ins = (typeof me.execute === "function" ? me.execute(req) : me.inspect()) || {}, ex = me.explain(path) || {};
+      var focus = [path].concat(((ex.derivation && ex.derivation.inputs) || []).map(function (x) { return String(x.path || ""); }).filter(Boolean));
+      var mem = Array.isArray(ins.memories) ? ins.memories : [], keep = mem.filter(function (m) { var p = String(m && m.path || ""); return p && focus.some(function (f) { return related(p, f); }); });
+      var stale = ins.staleDerivations;
+      return { path: path, value: ins.value, recomputeMode: ins.recomputeMode, secretScopes: ins.secretScopes, encryptedScopes: ins.encryptedScopes, noiseScopes: ins.noiseScopes,
+        staleDerivations: Array.isArray(stale) ? stale.slice(0, 20) : stale, staleDerivationsCount: Array.isArray(stale) ? stale.length : undefined,
+        memories: keep.slice(-200), memoriesTotal: mem.length,
+        shortened: "memories filtered in the worker to this path and the paths it reads (" + keep.length + " of " + mem.length + "); index omitted" };
+    }
     // the explain() payload, shortened here: the k-long recomputed / changed lists stay in the worker
     function shortExplain(path) {
       var t = performance.now(), ex = me.explain(path) || {}, ms = performance.now() - t, m = ex.meta || {}, d = ex.derivation;
@@ -107,7 +121,7 @@
           recomputedCount: Array.isArray(m.recomputed) ? m.recomputed.length : undefined, recomputedFirst: first(m.recomputed),
           changedCount: Array.isArray(m.changed) ? m.changed.length : undefined, changedFirst: first(m.changed),
           kernel: "this.me 4.2.1 · Web Worker · N = " + N, explainMs: +ms.toFixed(2),
-          shortened: "recomputed / changed (k paths each) are summarised in the worker as counts + first 3; the full lists are not sent to the page" } };
+          shortened: "recomputed / changed (k paths each) cross from the worker as counts + first 6 paths; the full lists are not sent to the page" } };
     }
     onmessage = function (e) {
       var q = e.data, reply = function (o) { o.id = q.id; o.ok = true; postMessage(o); }, fail = function (err) { postMessage({ id: q.id, ok: false, error: String(err && err.message || err) }); };
@@ -126,6 +140,7 @@
           return reply({ n: N, factor: factor, writeMs: writeMs, explainMs: explainMs, k: m.k, recomputedCount: Array.isArray(m.recomputed) ? m.recomputed.length : undefined, probe: probe, probeValue: ex && ex.value });
         }
         if (q.op === "explain") return reply({ payload: shortExplain(q.path) });
+        if (q.op === "inspect") return reply({ payload: shortInspect(q.path) });
         throw new Error("unknown op " + q.op);
       }).catch(fail);
     };
@@ -153,6 +168,22 @@
               function (err) { if (building === b) { set({ phase: "error", error: err.message }); building = null; } throw err; });
       return b;
     }
+    // Page-side adapter for the .GUI Inspector, which reads meta.recomputed / meta.changed as arrays (their length is
+    // the count, the first six are listed): rebuild them as sparse arrays of the real length holding only the first
+    // paths the worker sent. Nothing else is materialised; toJSON keeps the Inspector's JSON view to a summary.
+    function waveList(count, firstPaths) {
+      if (typeof count !== "number") return undefined;
+      var a = new Array(count); (firstPaths || []).forEach(function (p, i) { a[i] = p; });
+      Object.defineProperty(a, "toJSON", { value: function () { return { count: count, first: firstPaths || [], note: "full list stays in the worker" }; } });
+      return a;
+    }
+    function adapt(p) {
+      var m = p && p.meta; if (!m) return p;
+      if (m.recomputedCount != null) m.recomputed = waveList(m.recomputedCount, m.recomputedFirst);
+      if (m.changedCount != null) m.changed = waveList(m.changedCount, m.changedFirst);
+      return p;
+    }
+    var PATH_RE = /^(master\.factor|dep\.\d+\.(out|value))$/;
     function ensure() { return st.phase === "ready" || st.phase === "writing" ? Promise.resolve() : (building || build(st.target)); }
     return {
       state: function () { return st; },
@@ -165,14 +196,20 @@
       },
       explain: function (path) {
         path = String(path || "");
-        if (!/^(master\.factor|dep\.\d+\.(out|value))$/.test(path)) return Promise.resolve({ path: path, value: undefined, meta: { note: "not a path of the live fan-out kernel (master.factor, dep.<i>.value, dep.<i>.out)" } });
-        return ensure().then(function () { return call("explain", { path: path }); }).then(function (r) { return r.payload; });
+        if (!PATH_RE.test(path)) return Promise.resolve({ path: path, value: undefined, meta: { note: "not a path of the live fan-out kernel (master.factor, dep.<i>.value, dep.<i>.out)" } });
+        return ensure().then(function () { return call("explain", { path: path }); }).then(function (r) { return adapt(r.payload); });
+      },
+      // only the Inspector's self:inspect request is answered (recomputeMode etc. from the real kernel); anything else is refused
+      execute: function (req) {
+        var path = String(req && req.path || "");
+        if (!req || req.operation !== "inspect" || !PATH_RE.test(path)) return Promise.reject(new Error("the fan-out kernel only answers self:inspect for its own paths"));
+        return ensure().then(function () { return call("inspect", { path: path }); }).then(function (r) { return r.payload; });
       },
     };
   })();
   // What the Inspector talks to (landing-gui.js mounts with { me: window.FanoutKernel } on pages with the viz):
-  // explain() only, answered by the worker kernel. No inspect/execute, so nothing else is asked of it.
-  root.FanoutKernel = { explain: live.explain, __live: live };
+  // explain() and execute(self:inspect) for its own paths, answered by the worker kernel and shortened there.
+  root.FanoutKernel = { explain: live.explain, execute: live.execute, __live: live };
   var ICON = {
     pause: h("svg", { viewBox: "0 0 16 16", "aria-hidden": "true" }, h("rect", { x: 3.5, y: 2.5, width: 3, height: 11, rx: 1, fill: "currentColor" }), h("rect", { x: 9.5, y: 2.5, width: 3, height: 11, rx: 1, fill: "currentColor" })),
     play: h("svg", { viewBox: "0 0 16 16", "aria-hidden": "true" }, h("path", { d: "M4.5 2.6v10.8a.6.6 0 0 0 .9.5l8.6-5.4a.6.6 0 0 0 0-1L5.4 2.1a.6.6 0 0 0-.9.5z", fill: "currentColor" })),
@@ -404,6 +441,8 @@
       C.redraw = function () { if (raf) return; start(); };
       var rto = 0;
       function redraw() { clearTimeout(rto); rto = setTimeout(function () { if (layout() || isStill() || !raf) frame(); }, 120); }
+      // starting paused (remembered from an earlier visit): freeze on the full picture, not the empty start of the pulse
+      if (C.paused) T = GROW + HOLD_FULL / 2;
       layout(); frame(); start();
       var ro = root.ResizeObserver ? new ResizeObserver(redraw) : null; if (ro) ro.observe(wrap);
       var io = root.IntersectionObserver ? new IntersectionObserver(function (es) { visible = es[0].isIntersecting; if (visible) start(); }, { threshold: .1 }) : null; if (io) io.observe(wrap);
