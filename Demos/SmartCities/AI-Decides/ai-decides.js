@@ -172,6 +172,16 @@
     ".aid-chain{list-style:none;margin:6px 0 0;padding:0;counter-reset:c}.aid-chain>li{position:relative;padding:0 0 10px 26px;overflow-wrap:anywhere}.aid-chain>li::before{counter-increment:c;content:counter(c);position:absolute;left:0;top:1px;width:18px;height:18px;border-radius:50%;font-size:11px;line-height:18px;text-align:center;font-weight:700;color:var(--mui-palette-primary-contrastText,#fff);background:var(--mui-palette-primary-main,#2aa)}",
     ".aid-chain>li::after{content:'';position:absolute;left:8.5px;top:21px;bottom:2px;width:1px;background:var(--mui-palette-divider,rgba(128,128,128,.4))}.aid-chain>li:last-child::after{display:none}.aid-chain b{display:block;font-size:12px;letter-spacing:.03em;text-transform:uppercase}",
     ".aid-hist{list-style:none;margin:0;padding:0}.aid-hist li{padding:4px 0;border-bottom:1px dashed var(--mui-palette-divider,rgba(128,128,128,.3));font-size:12px;line-height:1.45;overflow-wrap:anywhere}.aid-hist li:last-child{border-bottom:0}",
+    ".aid-how{margin:0 0 28px}.aid-how h2{margin:0 0 12px;font-size:1.35rem;font-weight:800;letter-spacing:-.01em}",
+    ".aid-how-flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 12px;font:12px/1.4 " + MONO + "}.aid-how-flow span{padding:3px 8px;border-radius:999px;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3))}.aid-how-flow i{font-style:normal;color:var(--mui-palette-text-secondary,#8b949e)}",
+    ".aid-how-grid{display:grid;grid-template-columns:1fr;gap:10px}@media (min-width:900px){.aid-how-grid{grid-template-columns:minmax(0,1.05fr) minmax(0,1.35fr) minmax(0,.9fr)}}",
+    ".aid-how-card{padding:12px 14px;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:12px;background:var(--mui-palette-background-paper,transparent);min-width:0}",
+    ".aid-how-card h3{margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mui-palette-primary-main,#2aa)}.aid-how-card h3 b{display:inline-block;min-width:18px;margin-right:6px;color:var(--mui-palette-text-secondary,#8b949e)}",
+    ".aid-how-map{list-style:none;margin:0;padding:0}.aid-how-map li{display:grid;grid-template-columns:minmax(0,.85fr) 14px minmax(0,1.3fr);gap:6px;align-items:baseline;padding:5px 0;border-bottom:1px dashed var(--mui-palette-divider,rgba(128,128,128,.25));font-size:12px;line-height:1.45}.aid-how-map li:last-child{border-bottom:0}",
+    ".aid-how-map .a{color:var(--mui-palette-text-secondary,#8b949e);text-align:center}.aid-how code,.aid-how-der code{font-family:" + MONO + ";font-size:11.5px;overflow-wrap:anywhere}.aid-how code.pth{overflow-wrap:normal;word-break:normal}.aid-how code.nw{white-space:nowrap}.aid-how-map small{display:block;color:var(--mui-palette-text-secondary,#8b949e);font-size:11px}",
+    ".aid-how-der{list-style:none;margin:0;padding:0}.aid-how-der li{padding:4px 0;border-bottom:1px dashed var(--mui-palette-divider,rgba(128,128,128,.25));font:11.5px/1.5 " + MONO + ";overflow-wrap:anywhere}.aid-how-der li:last-child{border-bottom:0}.aid-how-der .p{color:var(--mui-palette-text-secondary,#8b949e)}.aid-how-der .k{color:var(--mui-palette-primary-main,#2aa)}",
+    ".aid-how-w{margin:0;padding:0;list-style:none;font:11.5px/1.5 " + MONO + "}.aid-how-w li{padding:3px 0 3px 14px;position:relative;overflow-wrap:anywhere}.aid-how-w li::before{content:'↓';position:absolute;left:0;color:var(--mui-palette-text-secondary,#8b949e)}.aid-how-w li:first-child::before{content:'✎';color:var(--mui-palette-primary-main,#2aa)}",
+    ".aid-how-foot{margin-top:10px;font-size:12px;color:var(--mui-palette-text-secondary,#8b949e)}.aid-how-foot a{color:var(--mui-palette-primary-main,#2aa)}",
     ".aid-formula{font:12px/1.7 " + MONO + ";overflow-x:auto;white-space:pre}",
     ".aid-busy{display:inline-block;width:10px;height:10px;margin-right:6px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;vertical-align:-1px;animation:aidspin .8s linear infinite}@keyframes aidspin{to{transform:rotate(360deg)}}",
     "@media (prefers-reduced-motion: reduce){.aid-busy{animation:none;border-right-color:currentColor;opacity:.6}}",
@@ -659,14 +669,56 @@
         li("l", [h("b", { key: 0 }, "Kernel limits met on the way"), " (open items): the [] aggregate is much slower than explicit sums at this size, so the model spells the sums out; the ?: ternary does not evaluate; booleans do not take part in arithmetic. See ", L("https://github.com/neurons-me/.me/issues", "the .me issues"), "."])),
       h("p", { key: "rel", style: { marginTop: 14 } }, ["Related: ", L("https://neurons-me.github.io/.me/docs/Extreme-Fan-Out.html", "Extreme Fan-Out"), " (the concept behind k) · ", L("https://neurons-me.github.io/.me/docs/Benchmarks/GTFS/Madrid/", "GTFS-Madrid benchmark"), " · ", L("https://neurons-me.github.io/smart-cities/", "Smart Cities demos"), "."]));
   }
+
+  // ── How: GTFS-Madrid-Bench → .me paths → ["="] → one write → the wave. Every row is what ai-model.js build()
+  // declares and tools/build-data.mjs keeps from the feed (r, t, w, j, s = 1-based file order; s = CALENDAR row). ──
+  function How() {
+    var c = function (t) { return h("code", null, t); };
+    // a path breaks only after a dot (never inside a name)
+    var cp = function (t) { var parts = t.split("."); return h("code", { className: "pth" }, parts.map(function (x, i) { return h(React.Fragment, { key: i }, i ? "." : null, i ? h("wbr") : null, x); })); };
+    var MAP = [
+      ["routes.txt", "route_id", "routes[r]"],
+      ["trips.txt", "trip_id · route_id", "routes[r].trips[t]"],
+      ["trips.txt", "service_id", "routes[r].trips[t].service"],
+      ["calendar.txt", "monday…sunday", "services[s].days"],
+      ["frequencies.txt", "headway_secs", "routes[r].trips[t].win[w].base"],
+      ["stop_times.txt", "one row per stop", "routes[r].trips[t].st[j]"],
+    ];
+    var ADDED = [["policy.factor", "1"], ["policy.minHeadway", "165"], ["services[s].enabled", "1"]];
+    var DER = [
+      ["win", "headway", "base * policy.factor"],
+      ["win", "perHour", "3600 / headway"],
+      ["win", "tight", "headway < policy.minHeadway"],
+      ["trip", "live", "services[s].enabled == 1"],
+      ["st[j]", "served", "routes[r].trips[t].live"],
+      ["trip", "perHour", "(win[1].perHour + … + win[n].perHour) / n * services[s].enabled"],
+      ["route", "perHour", "trips[1].perHour + … + trips[n].perHour"],
+      ["route", "anyTight", "win[1].tight || … || win[n].tight"],
+      ["city", "perHour", "routes[1].perHour + … + routes[R].perHour"],
+    ];
+    var WAVE = ["policy.factor(0.9)", "win.headway", "win.perHour · win.tight", "trip.perHour", "route.perHour · route.anyTight", "city.perHour"];
+    return h("section", { className: "aid-how", "aria-labelledby": "aid-how-h", "data-aid": "how" },
+      h("h2", { id: "aid-how-h" }, "How."),
+      h("div", { className: "aid-how-flow", "aria-hidden": "true" }, h("span", null, "GTFS table"), h("i", null, "→"), h("span", null, ".me path"), h("i", null, "→"), h("span", null, '["="]'), h("i", null, "→"), h("span", null, "one write"), h("i", null, "→"), h("span", null, "wave")),
+      h("div", { className: "aid-how-grid" },
+        h("div", { className: "aid-how-card" }, h("h3", null, h("b", null, "1"), "GTFS → path"),
+          h("ul", { className: "aid-how-map" }, MAP.map(function (m, i) { return h("li", { key: i }, h("span", null, c(m[0]), h("small", null, m[1])), h("span", { className: "a" }, "→"), cp(m[2])); })),
+          h("div", { className: "aid-how-foot" }, "Added, not in the feed: ", ADDED.map(function (a, i) { return h(React.Fragment, { key: i }, i ? " · " : null, h("code", { className: "nw" }, a[0] + " = " + a[1])); }))),
+        h("div", { className: "aid-how-card" }, h("h3", null, h("b", null, "2"), '["="] derivations'),
+          h("ul", { className: "aid-how-der" }, DER.map(function (d, i) { return h("li", { key: i }, h("span", { className: "p" }, d[0]), '["="]("', h("span", { className: "k" }, d[1]), '", "' + d[2] + '")'); }))),
+        h("div", { className: "aid-how-card" }, h("h3", null, h("b", null, "3"), "One write → wave"),
+          h("ul", { className: "aid-how-w" }, WAVE.map(function (w, i) { return h("li", { key: i }, i ? w : h("b", null, w)); })),
+          h("div", { className: "aid-how-foot" }, c("st[j].served"), " reads only ", c("trip.live"), ": a headway write never reaches stop_times. ", c("services[s].enabled(0)"), " does."))),
+      h("div", { className: "aid-how-foot" }, "Full model: ", h("a", { href: "https://neurons-me.github.io/.me/docs/Benchmarks/GTFS/Madrid/" }, "GTFS Madrid benchmark"), " · source: ", h("a", { href: SRC_URL + "ai-model.js", target: "_blank", rel: "noopener" }, "ai-model.js"), " build()"));
+  }
   var N = function (type, id, props, children) { return Object.assign({ type: type, props: Object.assign({}, props || {}, { "data-gui-node-id": id }) }, children ? { children: children } : {}); };
   var pageType = function (type, Comp) { return { type: type, resolve: function (spec) { var p = Object.assign({}, spec.props || {}); delete p.key; return h(Comp, p); } }; };
   var spec = N("Box", "page", { sx: { minHeight: "100vh", bgcolor: "background.default", color: "text.primary" } }, [
     N("AIDTopBar", "topbar"),
     N("Box", "main", { component: "main", sx: { maxWidth: 1180, mx: "auto", px: { xs: 2, sm: 4 }, pt: { xs: 3, sm: 4.5 }, pb: 8 } }, [
       N("Typography", "kicker", { component: "p", sx: { fontSize: ".75rem", fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: "text.secondary", mb: 1 } }, ["Smart Cities · GTFS-Madrid-Bench"]),
-      N("Typography", "title", { component: "h1", sx: { fontSize: "clamp(2rem, 5vw, 2.75rem)", fontWeight: 800, letterSpacing: "-.02em", lineHeight: 1.1, mb: 1 } }, ["AI decides, .me computes"]),
-      N("Typography", "subtitle", { component: "p", sx: { fontSize: "1.02rem", color: "text.secondary", mb: 3.5, maxWidth: 760 } }, ["A policy proposes a headway change and says why. The kernel stores the decision as a fact, one write recomputes every route, trip and window that depends on it, and explain() on any of them leads back to the decision."]),
+      N("Typography", "title", { component: "h1", sx: { fontSize: "clamp(2rem, 5vw, 2.75rem)", fontWeight: 800, letterSpacing: "-.02em", lineHeight: 1.1, mb: 3 } }, ["AI decides, .me computes"]),
+      N("AIDHow", "how"),
       N("AIDDashboard", "ai-decides"),
       N("AIDNotes", "notes"),
     ]),
@@ -675,7 +727,7 @@
   var mode = "dark"; try { mode = params.get("mode") || localStorage.getItem(scope.themeModeKey) || "dark"; if (params.get("mode")) localStorage.setItem(scope.themeModeKey, mode); } catch (e) {}
   var PageTheme = function (p) { return h(G.Theme, { initialThemeId: "neurons.me", initialMode: mode }, p.children); };
   var INSPECTOR_ON = params.get("inspector") === "1"; if (G.getInspectorEnabled() !== INSPECTOR_ON) G.setInspectorEnabled(INSPECTOR_ON);
-  var reg = Object.assign({}, G.Registry || G.registry); [["AIDTopBar", TopBar], ["AIDDashboard", Dashboard], ["AIDNotes", Notes]].forEach(function (x) { reg[x[0]] = pageType(x[0], x[1]); });
+  var reg = Object.assign({}, G.Registry || G.registry); [["AIDTopBar", TopBar], ["AIDDashboard", Dashboard], ["AIDNotes", Notes], ["AIDHow", How]].forEach(function (x) { reg[x[0]] = pageType(x[0], x[1]); });
   // render / RunMe left out: mount() must not wrap the worker facade in a full runtime (Explain is answered by the worker)
   G.mount(spec, ROOT, { me: window.AIDecidesKernel, gui: Object.assign({}, G, { render: undefined, RunMe: undefined, Theme: PageTheme, registry: reg }), devtools: { enabled: true, inspector: INSPECTOR_ON, adminView: false, inspectorToggleVisible: false } });
   document.documentElement.classList.add("gui-on");
