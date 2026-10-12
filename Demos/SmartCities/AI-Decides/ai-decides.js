@@ -73,6 +73,7 @@
         if (q.op === "undo") { var w = E.undo(); if (w) postWave(w); return reply({ none: !w }); }
         if (q.op === "chain") return reply({ payload: E.chain(q.path) });
         if (q.op === "explain") return reply({ payload: shortExplain(q.path) });
+        if (q.op === "read") { var t0 = performance.now(), vals = q.paths.map(function (p) { return E.me(p); }); return reply({ payload: { values: vals, ms: +(performance.now() - t0).toFixed(3) } }); }
         if (q.op === "inspect") return reply({ payload: shortInspect(q.path) });
         throw new Error("unknown op " + q.op);
       }).catch(fail);
@@ -121,6 +122,9 @@
       service: function (s, on) { return busy((on ? "Resuming" : "Suspending") + " service " + s, call("service", { s: s, on: on })).then(function () { if (st.scenario) return api.propose(st.scenario); }); },
       undo: function () { return busy("Undoing", call("undo", {})).then(function () { if (st.scenario) return api.propose(st.scenario); }); },
       chain: function (path) { return ready().then(function () { return call("chain", { path: path }); }).then(function (r) { return r.payload; }); },
+      // plain reads, me(path) in the worker's kernel (the How. block's Try it panel); only this demo's own paths
+      read: function (paths) { paths = [].concat(paths).map(String); if (!paths.every(function (p) { return PATH_RE.test(p); })) return Promise.reject(new Error("not a path of this demo's kernel"));
+        return ready().then(function () { return call("read", { paths: paths }); }).then(function (r) { return r.payload; }); },
       explain: function (path) { path = String(path || "");
         if (!PATH_RE.test(path)) return Promise.resolve({ path: path, value: undefined, meta: { note: "not a path of this demo's kernel" } });
         return ready().then(function () { return call("explain", { path: path }); }).then(function (r) { return adapt(r.payload); }); },
@@ -176,11 +180,17 @@
     ".aid-how-flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 12px;font:12px/1.4 " + MONO + "}.aid-how-flow>span{padding:3px 8px;border-radius:999px;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3))}.aid-how-flow>i{font-style:normal;color:var(--mui-palette-text-secondary,#8b949e)}",
     ".aid-how-grid{display:grid;grid-template-columns:1fr;gap:10px}@media (min-width:900px){.aid-how-grid{grid-template-columns:minmax(0,1.05fr) minmax(0,1.35fr) minmax(0,.9fr)}}",
     ".aid-how-card{padding:12px 14px;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:12px;background:var(--mui-palette-background-paper,transparent);min-width:0}",
-    ".aid-how-card h3{margin:0;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.aid-how-t{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:6px;width:100%;min-height:32px;cursor:pointer;color:var(--mui-palette-primary-main,#2aa);border-radius:6px}.aid-how-t:focus-visible{outline:2px solid var(--mui-palette-primary-main,#2aa);outline-offset:2px}.aid-how-t b{display:inline-block;min-width:18px;color:var(--mui-palette-text-secondary,#8b949e)}.aid-how-chev{margin-left:auto;display:inline-flex;width:16px;height:16px;transition:transform .15s;color:var(--mui-palette-text-secondary,#8b949e)}.aid-how-chev svg{width:16px;height:16px}.aid-how-card.on .aid-how-chev{transform:rotate(180deg)}.aid-how-body{margin-top:8px}.aid-how-grid{align-items:start}",
+    ".aid-how-card h3{margin:0;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.aid-how-t{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:6px;width:100%;min-height:32px;cursor:pointer;color:var(--mui-palette-primary-main,#2aa);border-radius:6px}.aid-how-t:focus-visible{outline:2px solid var(--mui-palette-primary-main,#2aa);outline-offset:2px}.aid-how-t b{display:inline-block;min-width:18px;color:var(--mui-palette-text-secondary,#8b949e)}.aid-how-chev{margin-left:auto;display:inline-flex;width:16px;height:16px;transition:transform .15s;color:var(--mui-palette-text-secondary,#8b949e)}.aid-how-chev svg{width:16px;height:16px}.aid-how-card.on .aid-how-chev{transform:rotate(180deg)}.aid-how-body{margin-top:8px}.aid-how-grid{align-items:start}.aid-how-card .aid-how-t{display:none}",
     ".aid-how-map{list-style:none;margin:0;padding:0}.aid-how-map li{display:grid;grid-template-columns:minmax(0,.85fr) 14px minmax(0,1.3fr);gap:6px;align-items:baseline;padding:5px 0;border-bottom:1px dashed var(--mui-palette-divider,rgba(128,128,128,.25));font-size:12px;line-height:1.45}.aid-how-map li:last-child{border-bottom:0}",
     ".aid-how-map .a{color:var(--mui-palette-text-secondary,#8b949e);text-align:center}.aid-how code,.aid-how-der code{font-family:" + MONO + ";font-size:11.5px;overflow-wrap:anywhere}.aid-how code.me-code{font-family:" + MONO + ";font-size:11.5px;overflow-wrap:normal;word-break:normal;background:none;padding:0}.aid-how code.nw{white-space:nowrap}.aid-how-flow code.me-code{border:0;background:none;padding:0;margin:0;box-shadow:none;font-size:12px}.aid-how-map small{display:block;color:var(--mui-palette-text-secondary,#8b949e);font-size:11px}",
     ".aid-how-der{list-style:none;margin:0;padding:0}.aid-how-der li{padding:4px 0;border-bottom:1px dashed var(--mui-palette-divider,rgba(128,128,128,.25));font:11.5px/1.5 " + MONO + "}.aid-how-der li:last-child{border-bottom:0}.aid-how-der .p{color:var(--mui-palette-text-secondary,#8b949e)}.aid-how-der .k{color:var(--mui-palette-primary-main,#2aa)}",
     ".aid-how-w{margin:0;padding:0;list-style:none;font:11.5px/1.5 " + MONO + "}.aid-how-w li{padding:3px 0 3px 14px;position:relative;overflow-wrap:anywhere}.aid-how-w li::before{content:'↓';position:absolute;left:0;color:var(--mui-palette-text-secondary,#8b949e)}.aid-how-w li:first-child::before{content:'✎';color:var(--mui-palette-primary-main,#2aa)}",
+    ".aid-how-main{margin:2px 0 10px;padding:8px 12px;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:10px;font-size:13px;font-weight:600;width:auto;display:inline-flex;gap:10px}.aid-how-main .aid-how-chev{margin-left:4px}.aid-how-main[aria-expanded=true] .aid-how-chev{transform:rotate(180deg)}.aid-how-body>*+*{margin-top:10px}",
+    ".aid-how-file{color:inherit;text-decoration:underline dotted;text-underline-offset:3px}.aid-how-map a.a{text-decoration:none}.aid-how-map a.a:hover{color:var(--mui-palette-primary-main,#2aa)}",
+    ".aid-try h4{margin:10px 0 6px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mui-palette-text-secondary,#8b949e)}.aid-try-grid{display:grid;grid-template-columns:1fr;gap:14px}@media (min-width:900px){.aid-try-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}.aid-try-col{min-width:0}",
+    ".aid-try-raw{margin-bottom:8px}.aid-try-rl{font-size:11.5px;color:var(--mui-palette-text-secondary,#8b949e);margin-bottom:2px}.aid-try-raw pre{margin:0;padding:6px 8px;border-radius:8px;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));font:11px/1.55 " + MONO + ";overflow-x:auto;white-space:pre}.aid-try-raw .hd{color:var(--mui-palette-text-secondary,#8b949e)}",
+    ".aid-try-paths{list-style:none;margin:0;padding:0}.aid-try-paths li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 10px;padding:3px 0;border-bottom:1px dashed var(--mui-palette-divider,rgba(128,128,128,.25));align-items:baseline}.aid-try-paths .v{font:600 12px " + MONO + "}.aid-try-paths small{grid-column:1/-1;font-size:11px;color:var(--mui-palette-text-secondary,#8b949e)}",
+    ".aid-try-res{margin-top:8px;min-height:20px}.aid-try-out{font-size:12px;line-height:1.7;overflow-wrap:anywhere}",
     ".aid-how-foot{margin-top:10px;font-size:12px;color:var(--mui-palette-text-secondary,#8b949e)}.aid-how-foot a{color:var(--mui-palette-primary-main,#2aa)}",
     ".aid-formula{font:12px/1.7 " + MONO + ";overflow-x:auto;white-space:pre}",
     ".aid-busy{display:inline-block;width:10px;height:10px;margin-right:6px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;vertical-align:-1px;animation:aidspin .8s linear infinite}@keyframes aidspin{to{transform:rotate(360deg)}}",
@@ -670,22 +680,27 @@
       h("p", { key: "rel", style: { marginTop: 14 } }, ["Related: ", L("https://neurons-me.github.io/.me/docs/Extreme-Fan-Out.html", "Extreme Fan-Out"), " (the concept behind k) · ", L("https://neurons-me.github.io/.me/docs/Benchmarks/GTFS/Madrid/", "GTFS-Madrid benchmark"), " · ", L("https://neurons-me.github.io/smart-cities/", "Smart Cities demos"), "."]));
   }
 
-  // ── How: GTFS-Madrid-Bench → .me paths → ["="] → one write → the wave. Every row is what ai-model.js build()
-  // declares and tools/build-data.mjs keeps from the feed (r, t, w, j, s = 1-based file order; s = CALENDAR row). ──
+  // ── How: GTFS-Madrid-Bench → .me paths → ["="] → one write → the wave. Every row is what tools/build-data.mjs keeps
+  // from the feed and ai-model.js build() declares (r, t, w, j, s = 1-based file order; s = CALENDAR row). One toggle opens
+  // the three columns and a Try it panel on one real trip, driven by the demo's own kernel (the Web Worker).
+  var GH = "https://github.com/neurons-me/.me/blob/main/Demos/SmartCities/AI-Decides/";
+  var ZEN = "https://zenodo.org/records/14038823/files/GTFS-Scale-1-CHANGE.tar.xz";   // the CSVs ship inside it (no per-file URL)
+  var SAMPLE_URL = HERE + "data/madrid-s1-sample.json?v=1";
   function How() {
-    // .me code goes through the shared highlighter (assets/me-syntax, as on Space and the gui-doc pages): theme colours, text unchanged.
     var SYN = window.MeSyntax || null;
     // cls "nw": one unbreakable chip (tokens without the highlighter's <wbr> break hints)
     var me = function (t, cls) { var nw = cls === "nw";
       return h("code", { className: "me-code" + (cls ? " " + cls : "") }, !SYN ? t : nw && SYN.tokenize ? SYN.tokenize(t).map(function (k, i) { return k.c ? h("span", { key: i, className: k.c }, k.v) : k.v; }) : SYN.render(h, t)); };
-    var c = function (t) { return h("code", null, t); };
+    var a = function (href, text, title, cls) { return h("a", { href: href, target: "_blank", rel: "noopener", title: title, className: cls }, text); };
+    var file = function (name) { return a(ZEN, h("code", null, name), "In GTFS-Scale-1-CHANGE.tar.xz (Zenodo 10.5281/zenodo.14038823): data/shared/base-1-" + name.replace(".txt", "").toUpperCase() + ".csv", "aid-how-file"); };
+    // [GTFS file, field, .me path, build-data.mjs line]
     var MAP = [
-      ["routes.txt", "route_id", "routes[r]"],
-      ["trips.txt", "trip_id · route_id", "routes[r].trips[t]"],
-      ["trips.txt", "service_id", "routes[r].trips[t].service"],
-      ["calendar.txt", "monday…sunday", "services[s].days"],
-      ["frequencies.txt", "headway_secs", "routes[r].trips[t].win[w].base"],
-      ["stop_times.txt", "one row per stop", "routes[r].trips[t].st[j]"],
+      ["routes.txt", "route_id", "routes[r]", 19],
+      ["trips.txt", "trip_id · route_id", "routes[r].trips[t]", 21],
+      ["trips.txt", "service_id", "routes[r].trips[t].service", 16],
+      ["calendar.txt", "monday…sunday", "services[s].days", 26],
+      ["frequencies.txt", "headway_secs", "routes[r].trips[t].win[w].base", 17],
+      ["stop_times.txt", "one row per stop", "routes[r].trips[t].st[j]", 18],
     ];
     var ADDED = ["policy.factor(1)", "policy.minHeadway(165)", "services[s].enabled(1)"];
     var DER = [
@@ -700,29 +715,82 @@
       ["city", "perHour", "routes[1].perHour + … + routes[R].perHour"],
     ];
     var WAVE = ["policy.factor(0.9)", "win.headway", "win.perHour · win.tight", "trip.perHour", "route.perHour · route.anyTight", "city.perHour"];
-    var st = useState({}), open = st[0], setOpen = st[1];
+    var os = useState(false), open = os[0], setOpen = os[1];
     useEffect(function () { if (SYN && SYN.watchTheme) SYN.watchTheme(); }, []);
-    var card = function (id, n, title, body) {
-      var on = !!open[id], bid = "aid-how-b-" + id;
-      return h("div", { className: "aid-how-card" + (on ? " on" : ""), "data-aid-how": id },
-        h("h3", null, h("button", { type: "button", className: "aid-how-t", "aria-expanded": on ? "true" : "false", "aria-controls": bid, "data-aid": "how-toggle-" + id,
-          onClick: function () { setOpen(function (o) { var x = Object.assign({}, o); x[id] = !o[id]; return x; }); } },
-          h("b", null, n), h("span", null, title), h("span", { className: "aid-how-chev", "aria-hidden": "true" }, ICON.chev))),
-        h("div", { id: bid, className: "aid-how-body", hidden: !on }, body));
-    };
     return h("section", { className: "aid-how", "aria-labelledby": "aid-how-h", "data-aid": "how" },
       h("h2", { id: "aid-how-h" }, "How."),
       h("div", { className: "aid-how-flow", "aria-label": "GTFS table, .me path, [\"=\"], one write, wave" }, h("span", null, "GTFS table"), h("i", null, "→"), h("span", null, ".me path"), h("i", null, "→"), h("span", null, me('["="]', "nw")), h("i", null, "→"), h("span", null, "one write"), h("i", null, "→"), h("span", null, "wave")),
-      h("div", { className: "aid-how-grid" },
-        card("map", "1", "GTFS → path", [
-          h("ul", { key: "l", className: "aid-how-map" }, MAP.map(function (m, i) { return h("li", { key: i }, h("span", null, c(m[0]), h("small", null, m[1])), h("span", { className: "a" }, "→"), me(m[2])); })),
-          h("div", { key: "f", className: "aid-how-foot" }, "Added, not in the feed: ", ADDED.map(function (a, i) { return h(React.Fragment, { key: i }, i ? " · " : null, me(a, "nw")); }))]),
-        card("der", "2", '["="] derivations',
-          h("ul", { className: "aid-how-der" }, DER.map(function (d, i) { return h("li", { key: i }, me(d[0] + '["="]("' + d[1] + '", "' + d[2] + '")')); }))),
-        card("wave", "3", "One write → wave", [
-          h("ul", { key: "l", className: "aid-how-w" }, WAVE.map(function (w, i) { return h("li", { key: i }, w.split(" · ").map(function (x, j) { return h(React.Fragment, { key: j }, j ? " · " : null, me(x)); })); })),
-          h("div", { key: "f", className: "aid-how-foot" }, me("st[j].served"), " reads only ", me("trip.live"), ": a headway write never reaches stop_times. ", me("services[s].enabled(0)"), " does.")])),
+      h("button", { type: "button", className: "aid-how-t aid-how-main", "aria-expanded": open ? "true" : "false", "aria-controls": "aid-how-body", "data-aid": "how-toggle", onClick: function () { setOpen(!open); } },
+        h("span", null, open ? "Hide the mapping" : "Show the mapping, the derivations and a live trip"), h("span", { className: "aid-how-chev", "aria-hidden": "true" }, ICON.chev)),
+      h("div", { id: "aid-how-body", className: "aid-how-body", hidden: !open },
+        h("div", { className: "aid-how-grid" },
+          h("div", { className: "aid-how-card" }, h("h3", null, h("b", null, "1"), "GTFS → path"),
+            h("ul", { className: "aid-how-map" }, MAP.map(function (m, i) { return h("li", { key: i }, h("span", null, file(m[0]), h("small", null, m[1])),
+              a(GH + "tools/build-data.mjs#L" + m[3], "→", "build-data.mjs line " + m[3], "a"), me(m[2])); })),
+            h("div", { className: "aid-how-foot" }, "Added, not in the feed: ", ADDED.map(function (x, i) { return h(React.Fragment, { key: i }, i ? " · " : null, me(x, "nw")); }))),
+          h("div", { className: "aid-how-card" }, h("h3", null, h("b", null, "2"), '["="] derivations'),
+            h("ul", { className: "aid-how-der" }, DER.map(function (d, i) { return h("li", { key: i }, me(d[0] + '["="]("' + d[1] + '", "' + d[2] + '")')); }))),
+          h("div", { className: "aid-how-card" }, h("h3", null, h("b", null, "3"), "One write → wave"),
+            h("ul", { className: "aid-how-w" }, WAVE.map(function (w, i) { return h("li", { key: i }, w.split(" · ").map(function (x, j) { return h(React.Fragment, { key: j }, j ? " · " : null, me(x)); })); })),
+            h("div", { className: "aid-how-foot" }, me("st[j].served"), " reads only ", me("trip.live"), ": a headway write never reaches stop_times. ", me("services[s].enabled(0)"), " does."))),
+        h("div", { className: "aid-how-foot" }, "Adapter: ", a(GH + "tools/build-data.mjs#L12-L29", "build-data.mjs"), " (CSV → compact JSON) → ", a(GH + "ai-model.js#L61-L90", "ai-model.js build()"), " (JSON → .me paths and ", me('["="]', "nw"), "). ",
+          "Data: ", a(ZEN, "GTFS-Scale-1-CHANGE.tar.xz"), " (Zenodo 10.5281/zenodo.14038823, data/shared/base-1-*.csv; no per-file links, the CSVs ship inside the package)."),
+        open ? h(TryIt, { me: me }) : null),
       h("div", { className: "aid-how-foot" }, "Full model: ", h("a", { href: "https://neurons-me.github.io/.me/docs/Benchmarks/GTFS/Madrid/" }, "GTFS Madrid benchmark"), " · source: ", h("a", { href: SRC_URL + "ai-model.js", target: "_blank", rel: "noopener" }, "ai-model.js"), " build()"));
+  }
+  // Try it: one real trip (routes.1.trips.1 at scale 1): its raw CSV rows (data/madrid-s1-sample.json, extracted verbatim by
+  // tools/build-sample.mjs), the paths they became read live from the kernel, and real calls: read, explain, one write, undo.
+  function TryIt(p) {
+    var me = p.me, T = "routes.1.trips.1", W1 = T + ".win.1";
+    var GA = G.Atoms || {}, Btn = function (o, text) { var q = Object.assign({ type: "button", "data-gui-inspector-control": "true" }, o);
+      return GA.Button ? h(GA.Button, Object.assign(q, { variant: "outlined", size: "small", color: "inherit", disableElevation: true, sx: { textTransform: "none", minHeight: 30, py: .25, px: 1.25, borderRadius: "8px", fontSize: 13, lineHeight: 1.2, borderColor: "divider" } }), text) : h("button", q, text); };
+    var ls = useState(live.state()), lst = ls[0], setLst = ls[1];
+    useEffect(function () { return live.subscribe(function (s) { setLst(Object.assign({}, s)); }); }, []);
+    var ss = useState(null), sample = ss[0], setSample = ss[1];
+    useEffect(function () { var alive = true; fetch(SAMPLE_URL).then(function (r) { return r.json(); }).then(function (j) { if (alive) setSample(j); }, function (e) { if (alive) setSample({ error: e.message }); }); return function () { alive = false; }; }, []);
+    var PATHS = [
+      ["trips.txt · service_id", T + ".service"], ["calendar.txt · day flags", "services.1.days"], ["(added)", "services.1.enabled"],
+      ["frequencies.txt · headway_secs, row 1", W1 + ".base"], ["= base * policy.factor", W1 + ".headway"], ["= 3600 / headway", W1 + ".perHour"], ["= headway < policy.minHeadway", W1 + ".tight"],
+      ["= services[1].enabled == 1", T + ".live"], ["= mean win perHour * enabled", T + ".perHour"], ["stop_times.txt row 1 · = trip.live", T + ".st.1.served"],
+      ["= trips sum", "routes.1.perHour"], ["= routes sum", "city.perHour"], ["(added)", "policy.factor"]];
+    var vs = useState(null), vals = vs[0], setVals = vs[1];
+    var ready = (lst.phase === "ready" || lst.phase === "writing") && lst.scale === 1;
+    useEffect(function () { if (!ready) return; var alive = true; live.read(PATHS.map(function (x) { return x[1]; })).then(function (r) { if (alive) setVals(r.values); }, function () {}); return function () { alive = false; }; }, [ready, lst.waveSeq]);
+    var rs = useState(null), out = rs[0], setOut = rs[1];
+    var fmtV = function (v) { return typeof v === "number" ? String(Math.round(v * 1000) / 1000) : JSON.stringify(v); };
+    var doRead = function () { live.read(W1 + ".headway").then(function (r) { setOut({ kind: "read", code: 'me("' + W1 + '.headway")', value: r.values[0], ms: r.ms }); }, function (e) { setOut({ kind: "error", text: e.message }); }); };
+    var doExplain = function () { live.explain(W1 + ".headway").then(function (x) { setOut({ kind: "explain", code: 'me.explain("' + W1 + '.headway")', x: x }); }, function (e) { setOut({ kind: "error", text: e.message }); }); };
+    var en = lst.state && lst.state.enabled ? lst.state.enabled[0] : 1, busy = lst.phase !== "ready";
+    var doWrite = function () { live.service(1, !en).then(function () { var w = live.state().wave; setOut({ kind: "write", code: "me.services[1].enabled(" + (en ? 0 : 1) + ")", w: w }); }, function (e) { setOut({ kind: "error", text: e.message }); }); };
+    var doUndo = function () { live.undo().then(function () { var w = live.state().wave; setOut({ kind: "undo", w: w }); }, function (e) { setOut({ kind: "error", text: e.message }); }); };
+    var raw = function (k, label) { var f = sample && sample.rows && sample.rows[k]; if (!f) return null;
+      return h("div", { key: k, className: "aid-try-raw" }, h("div", { className: "aid-try-rl" }, h("code", null, f.file), " ", label, f.total > f.rows.length ? " · " + f.rows.length + " of " + f.total + " rows" : ""),
+        h("pre", null, h("span", { className: "hd" }, "    " + f.header), "\n", f.rows.map(function (r) { return ("    " + r.line).slice(-4) + " " + r.text; }).join("\n"))); };
+    var waveLine = function (w) { return w ? h("div", { className: "aid-try-out" }, me(w.write.replace(/\.(\d+)\./g, "[$1].") + "(" + w.to + ")"), "  ", w.from + " → " + w.to, " · k = ", h("b", null, fmt(w.k)), " recomputed · ", h("b", null, fmt(w.changed)), " changed") : null; };
+    if (lst.scale && lst.scale !== 1) return h("div", { className: "aid-how-card aid-try", "data-aid": "try" }, h("h3", null, "Try it"), h("div", { className: "aid-note" }, "The Try it trip is from scale 1; switch the demo to Scale 1 to use it."));
+    return h("div", { className: "aid-how-card aid-try", "data-aid": "try" },
+      h("h3", null, "Try it · one real trip"),
+      h("div", { className: "aid-note" }, me("routes[1].trips[1]"), " = trip_id ", h("code", null, sample ? sample.trip_id : "…"), " (route_id ", h("code", null, sample ? sample.route_id : "…"), ", service_id ", h("code", null, sample ? sample.service_id : "…"), "), GTFS-Madrid-Bench scale 1, generated data: ids are encoded by the benchmark."),
+      h("div", { className: "aid-try-grid" },
+        h("div", { className: "aid-try-col" }, h("h4", null, "Raw GTFS rows"),
+          sample && sample.error ? h("div", { className: "aid-note" }, "Could not load the rows: " + sample.error) : !sample ? h("div", { className: "aid-note" }, "Loading…") :
+          [raw("routes", "· the route"), raw("trips", "· the trip"), raw("calendar", "· its service"), raw("frequencies", "· its headway windows"), raw("stop_times", "· its stops")]),
+        h("div", { className: "aid-try-col" }, h("h4", null, "The paths they became · live"),
+          h("ul", { className: "aid-try-paths", "data-aid": "try-paths" }, PATHS.map(function (x, i) { return h("li", { key: i }, me('me("' + x[1] + '")'), h("span", { className: "v" }, vals ? fmtV(vals[i]) : "…"), h("small", null, x[0])); })),
+          h("h4", null, "Real kernel calls"),
+          h("div", { className: "aid-ctl" },
+            Btn({ "data-aid": "try-read", disabled: !ready, onClick: doRead }, "Read"),
+            Btn({ "data-aid": "try-explain", disabled: !ready, onClick: doExplain }, "Explain"),
+            Btn({ "data-aid": "try-write", disabled: !ready || busy, onClick: doWrite }, en ? "Suspend service 1" : "Resume service 1"),
+            Btn({ "data-aid": "try-undo", disabled: !ready || busy || !lst.undoable, onClick: doUndo }, "Undo")),
+          h("div", { className: "aid-note" }, "Suspend and Undo are the demo's own actions (the Service and Decision panels): they go into its history too."),
+          h("div", { className: "aid-try-res", "data-aid": "try-out", "aria-live": "polite" },
+            !out ? null : out.kind === "error" ? h("div", { className: "aid-warn" }, out.text)
+            : out.kind === "read" ? h("div", { className: "aid-try-out" }, me(out.code), " → ", h("b", null, fmtV(out.value)), " · " + out.ms + " ms in the worker")
+            : out.kind === "explain" ? h("div", { className: "aid-try-out" }, me(out.code), h("br"), "value ", h("b", null, fmtV(out.x.value)), " · ", me('"' + ((out.x.derivation && out.x.derivation.expression) || out.x.expr || "") + '"'),
+                h("br"), "inputs: ", ((out.x.derivation && out.x.derivation.inputs) || []).map(function (q, i) { return h(React.Fragment, { key: i }, i ? " · " : null, me(String(q && q.path || q)), q && q.value !== undefined ? " = " + fmtV(q.value) : null); }),
+                out.x.meta && out.x.meta.k != null ? [h("br", { key: "b" }), "last wave k = " + fmt(out.x.meta.k) + (out.x.meta.sourcePath ? " · from " : "")] : null, out.x.meta && out.x.meta.sourcePath ? me(String(out.x.meta.sourcePath)) : null)
+            : waveLine(out.w)))));
   }
   var N = function (type, id, props, children) { return Object.assign({ type: type, props: Object.assign({}, props || {}, { "data-gui-node-id": id }) }, children ? { children: children } : {}); };
   var pageType = function (type, Comp) { return { type: type, resolve: function (spec) { var p = Object.assign({}, spec.props || {}); delete p.key; return h(Comp, p); } }; };
