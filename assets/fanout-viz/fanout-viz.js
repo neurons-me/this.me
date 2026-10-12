@@ -1,4 +1,4 @@
-/*! fanout-viz 3.1.0 · .me extreme fan-out, driven by a real this.me kernel · MIT · neurons.me
+/*! fanout-viz 3.1.1 · .me extreme fan-out, driven by a real this.me kernel · MIT · neurons.me
  * Every line is one real dependent of a live this.me 4.2.1 kernel running in a Web Worker (CDN, SRI-checked), at angle
  * i/N; nothing on the canvas is decorative.
  * - Model (in the worker), per dependent i = 1…N (10,000 by default, 100,000 on request):
@@ -60,7 +60,7 @@
     ".fov-legend{display:inline-flex;flex-wrap:wrap;gap:4px 12px;justify-content:center;align-items:center}.fov-legend .fov-dot{margin:0 5px 0 0}" +
     ".fov-info{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;margin-left:4px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--mui-palette-text-secondary, #8b949e);cursor:help;vertical-align:-4px}" +
     ".fov-info:hover,.fov-info:focus-visible{color:var(--mui-palette-primary-main, #2aa);outline:none;background:color-mix(in srgb, currentColor 12%, transparent)}.fov-info svg{width:14px;height:14px}" +
-    ".fov-panel{border:1px solid var(--mui-palette-divider, rgba(128,128,128,.3));border-radius:12px;background:var(--mui-palette-background-paper, transparent);font-size:13px;color:var(--mui-palette-text-primary, inherit);overflow:hidden}" +
+    ".fov-panel{contain:layout paint;border:1px solid var(--mui-palette-divider, rgba(128,128,128,.3));border-radius:12px;background:var(--mui-palette-background-paper, transparent);font-size:13px;color:var(--mui-palette-text-primary, inherit);overflow:hidden}" +
     "@container (max-width: 759px){.fov-panel{border-radius:16px 16px 12px 12px;box-shadow:0 -6px 18px rgba(0,0,0,.08)}.fov-phead::before{content:'';position:absolute;left:50%;top:5px;width:36px;height:4px;margin-left:-18px;border-radius:2px;background:var(--mui-palette-divider, rgba(128,128,128,.4))}.fov-phead{padding-top:14px}}" +
     ".fov-phead{position:relative;display:flex;align-items:center;gap:6px;padding:8px 8px 8px 12px}.fov-ptitle{flex:1;min-width:0;display:flex;align-items:center;gap:6px;font-weight:600;white-space:nowrap;overflow:hidden}" +
     ".fov-pmini{font-weight:400;color:var(--mui-palette-text-secondary, #8b949e);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px;overflow:hidden;text-overflow:ellipsis}" +
@@ -71,7 +71,7 @@
     ".fov-shead:hover{background:color-mix(in srgb, currentColor 5%, transparent)}.fov-shead:focus-visible{outline:2px solid var(--mui-palette-primary-main, #2aa);outline-offset:-2px}.fov-shead span{flex:1}.fov-shead small{font-weight:400;text-transform:none;letter-spacing:0;color:var(--mui-palette-text-secondary, #8b949e);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}" +
     ".fov-sbody{padding:2px 12px 10px}.fov-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:2px 6px;margin:0 -6px;border-radius:6px;line-height:1.55}.fov-row>span:first-child{color:var(--mui-palette-text-secondary, #8b949e);min-width:0}" +
     ".fov-row.hl{cursor:default}.fov-row.hl:hover,.fov-row.hl:focus-visible{background:color-mix(in srgb, var(--mui-palette-primary-main, #2aa) 12%, transparent);outline:none}" +
-    ".fov-row .fov-num{text-align:right;white-space:nowrap}.fov-ctl{display:flex;flex-wrap:wrap;gap:6px}.fov-ctl .fov-btn{min-height:30px;padding:3px 10px}.fov-note{margin-top:4px;color:var(--mui-palette-text-secondary, #8b949e);font-size:12px;line-height:1.45}" +
+    ".fov-row .fov-num{text-align:right;white-space:nowrap;min-width:8ch;flex:none}.fov-v:empty::before{content:'–';opacity:.5}.fov-ctl{display:flex;flex-wrap:wrap;gap:6px}.fov-ctl .fov-btn{min-height:30px;padding:3px 10px}.fov-note{margin-top:4px;color:var(--mui-palette-text-secondary, #8b949e);font-size:12px;line-height:1.45}" +
     ".fov-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.fov-chip{padding:1px 8px;border-radius:999px;border:1px solid var(--mui-palette-divider, rgba(128,128,128,.4));background:transparent;color:inherit;font:inherit;font-size:11.5px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;cursor:pointer}.fov-chip:hover,.fov-chip:focus-visible{border-color:var(--mui-palette-primary-main, #2aa);outline:none}" +
     ".fov-go{display:flex;gap:6px;align-items:center;margin-top:6px}.fov-go input{width:96px;min-height:28px;padding:2px 8px;border-radius:8px;border:1px solid var(--mui-palette-divider, rgba(128,128,128,.4));background:transparent;color:inherit;font:inherit;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}" +
     ".fov-formula{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.7}" +
@@ -320,7 +320,7 @@
   });
   function FanoutViz(props) {
     var rootId = props["data-gui-node-id"] || "fanout-viz", depId = rootId + "/dependent";
-    var wrapRef = useRef(null), vizColRef = useRef(null), hlRef = useRef(null), discRef = useRef(null), rotRef = useRef(null), baseRef = useRef(null), waveRef = useRef(null), dotsRef = useRef(null), overRef = useRef(null), hitRef = useRef(null), markRef = useRef(null), markGRef = useRef(null), kRef = useRef(null);
+    var wrapRef = useRef(null), vizColRef = useRef(null), hlRef = useRef(null), hl2Ref = useRef(null), panelRef = useRef(null), discRef = useRef(null), rotRef = useRef(null), baseRef = useRef(null), waveRef = useRef(null), dotsRef = useRef(null), overRef = useRef(null), hitRef = useRef(null), markRef = useRef(null), markGRef = useRef(null), kRef = useRef(null);
     var reduceNow = !!(root.matchMedia && root.matchMedia("(prefers-reduced-motion: reduce)").matches);
     var pausedInit = function () { if (reduceNow) return true; try { return root.localStorage.getItem(PAUSE_KEY) === "1"; } catch (e) { return false; } };
     var ps = useState(pausedInit), paused = ps[0], setPaused = ps[1];
@@ -331,7 +331,6 @@
     }, []);
     var ls = useState(live.state()), lst = ls[0], setLst = ls[1];
     var ss = useState({ kind: "none" }), sel = ss[0], setSel = ss[1];          // none | slice {s} | center | dep {i}
-    var xs = useState(null), selInfo = xs[0], setSelInfo = xs[1];
     var ctl = useRef({ paused: paused, optIn: false, selDep: 0, redraw: null, geo: null, flags: null, rot: 0 });
     ctl.current.paused = paused;
     if (!WEDGES) { WEDGES = []; for (var w0 = 0; w0 < SLICES; w0++) WEDGES.push(wedge(w0)); }
@@ -340,7 +339,10 @@
     ctl.current.selDep = selDep;
     var sliceId = function (s) { return rootId + "/slice-" + String(s).padStart(3, "0"); };
 
-    useEffect(function () { return live.subscribe(function (s) { setLst(Object.assign({}, s)); }); }, []);
+    // React re-renders only on structural changes (phase, size, first wave, a reset…); the per-write numbers are written
+    // straight into the panel's DOM by the painter below, so a stress run does not re-render the dashboard
+    var structKey = function (s) { return [s.phase, s.n, s.target, s.error, s.resets, s.wave ? 1 : 0, s.stress ? 1 : 0, s.phase === "building" ? Math.round(s.progress * 20) : 0].join("|"); };
+    useEffect(function () { var key = structKey(live.state()); return live.subscribe(function (s) { var k = structKey(s); if (k !== key) { key = k; setLst(Object.assign({}, s)); } }); }, []);
 
     // ── .GUI parts: centre, 128 slices, the selected dependent (provenance → real kernel paths) ──
     var partIds = useRef(null);
@@ -393,14 +395,55 @@
       };
       sync(); return store.subscribe(sync);
     }, [rootId, depId]);
-    // the selected dependent's real values + its last-wave status
+    // the panel painter: stat values → textContent of [data-v] nodes, at most ~4×/s (setTimeout + rAF), only for
+    // nodes that exist (collapsed sections and a closed panel render none) and only while the panel is on screen
+    var painter = useRef(null), selP = useRef({ i: 0, p: null, err: null, w: -1 });
     useEffect(function () {
-      if (ctl.current.redraw) ctl.current.redraw();
-      if (!selDep) { setSelInfo(null); return; }
-      var alive = true; setSelInfo({ i: selDep, loading: true });
-      live.dependent(selDep).then(function (p) { if (alive) setSelInfo({ i: selDep, p: p, flags: ctl.current.flags }); }, function (e) { if (alive) setSelInfo({ i: selDep, error: e.message }); });
-      return function () { alive = false; };
-    }, [selDep, N, lst.wave && lst.wave.stats && lst.wave.stats.nWrites, lst.resets]);
+      var last = 0, timer = 0, raf = 0, onScreen = true, io = null, fetching = 0;
+      var M = function (x) { return x == null ? "–" : x; };
+      function values(s) {
+        var w = s.wave, S = w && w.stats, t = s.stress, v = {};
+        v.mini = w ? "k " + fmt(w.k) + " · " + ms(w.writeMs) : s.phase === "building" ? Math.round(s.progress * 100) + "%" : "";
+        if (w) {
+          v.wnum = "#" + S.nWrites; v.factor = w.from + " → " + w.factor; v.k = fmt(w.k); v.kparts = fmt(w.levels) + " level + " + fmt(w.hots) + " hot + " + fmt(w.alarms) + " alarm";
+          v.changed = fmt(w.changed); v.m = fmt(w.m); v.alarms = fmt(w.alarms); v.skipped = fmt(w.levels - w.alarms);
+          v.tsum = ms(w.writeMs); v.twrite = ms(w.writeMs); v.tpct = ms(S.p50) + " · " + ms(S.p95); v.twin = "last " + S.window; v.twave = ms(w.analysisMs); v.treplay = ms(w.writeMs);
+          v.drift = S.drift != null ? (S.drift >= 0 ? "+" : "") + Math.round(S.drift * 100) + "%" : "–"; v.heap = fmt(S.heapMB) + " MB"; v.log = fmt(S.logMB) + " MB";
+        }
+        v.tbuild = ms(s.buildMs); v.resets = "×" + (s.resets || 0);
+        v.ssum = s.phase === "stressing" ? "running" : t && t.writes ? fmt(t.writes) + " writes" : ""; v.swrites = fmt(t ? t.writes : 0); v.swps = (t ? t.wps : 0).toFixed(2);
+        var sp = selP.current, P = sp.p, fl = (ctl.current.flags && ctl.current.flags[sp.i]) || 0;
+        if (P) { v.sval = M(P.value); v.slim = M(P.limit); v.slevl = "level = value × " + P.factor; v.slev = typeof P.level === "number" ? String(+P.level.toFixed(4)) : String(P.level); v.shot = String(P.hot); v.salarm = String(P.alarm);
+          v.slast = w ? "Last write: hot " + (fl & 1 ? "flipped" : "unchanged") + ", alarm " + (fl & 2 ? "recomputed" : "skipped (early cutoff)") + "." : ""; }
+        else if (sp.err) v.slast = sp.err;
+        return v;
+      }
+      function fetchSel(i, nW) {   // the selected dependent's live values, re-read once per write (only while its section is open)
+        var tok = ++fetching; selP.current.w = nW;
+        live.dependent(i).then(function (p) { if (tok !== fetching) return; selP.current = { i: i, p: p, err: null, w: nW, t: selP.current.t }; schedule(); },
+          function (e) { if (tok !== fetching) return; selP.current = { i: i, p: null, err: e.message, w: nW }; schedule(); });
+      }
+      function paint() {
+        raf = 0; var el = panelRef.current; if (!el) return; if (!onScreen) { stale = true; return; } stale = false; last = performance.now();
+        var s = live.state(), w = s.wave, nW = w ? w.stats.nWrites * 1000 + (s.resets || 0) : -1, v = values(s);
+        var nodes = el.querySelectorAll("[data-v]");
+        for (var q = 0; q < nodes.length; q++) { var n = nodes[q], x = v[n.getAttribute("data-v")]; if (x != null && n.textContent !== x) n.textContent = x; }
+        var chips = el.querySelectorAll("[data-chip]"), fh = (w && w.firstHot) || [];
+        for (var c = 0; c < chips.length; c++) { var ch = chips[c], j = +ch.getAttribute("data-chip"), di = fh[j];
+          if (di) { var t = "dep." + di; if (ch.textContent !== t) { ch.textContent = t; ch.setAttribute("data-i", di); ch.setAttribute("aria-label", "Select " + t + " (its hot flipped)"); } if (ch.hidden) ch.hidden = false; } else if (!ch.hidden) ch.hidden = true; }
+        var si = ctl.current.selDep;
+        if (si && el.querySelector("[data-v=sval]") && (selP.current.i !== si || (selP.current.w !== nW && performance.now() - (selP.current.t || 0) > 1000))) { selP.current.t = performance.now(); if (selP.current.i !== si) selP.current = { i: si, p: null, err: null, w: -1 }; fetchSel(si, nW); }
+      }
+      var stale = false;
+      // ≤ 4 paints/s; ≤ 2/s while stress writes back to back (the numbers change every write anyway)
+      function schedule() { if (timer || raf) return; var wait = Math.max(0, (live.state().phase === "stressing" ? 500 : 250) - (performance.now() - last)); timer = setTimeout(function () { timer = 0; raf = requestAnimationFrame(paint); }, wait); }
+      painter.current = { schedule: schedule, now: function () { if (timer) { clearTimeout(timer); timer = 0; } if (!raf) raf = requestAnimationFrame(paint); } };
+      var off = live.subscribe(schedule);
+      if (root.IntersectionObserver && wrapRef.current) { io = new IntersectionObserver(function (es) { onScreen = es[0].isIntersecting; if (onScreen && stale) schedule(); }); io.observe(wrapRef.current); }
+      return function () { off(); if (io) io.disconnect(); clearTimeout(timer); if (raf) cancelAnimationFrame(raf); painter.current = null; };
+    }, []);
+    useEffect(function () { if (painter.current) painter.current.now(); });   // after any render: fill nodes that just mounted
+    useEffect(function () { if (ctl.current.redraw) ctl.current.redraw(); }, [selDep, N]);
 
     // build the default 10k kernel once the figure is near the screen, then one real write (all in the worker)
     useEffect(function () {
@@ -414,9 +457,9 @@
     // reaches them), over (guide, centre, selection). All in one rotating layer, with the hit SVG, in a circular mask.
     useEffect(function () {
       injectCss();
-      var wrap = wrapRef.current, hl = hlRef.current, base = baseRef.current, wave = waveRef.current, dots = dotsRef.current, over = overRef.current, rot = rotRef.current;
-      var hctx = hl && hl.getContext("2d"), bctx = base && base.getContext("2d"), wctx = wave && wave.getContext("2d"), dctx = dots && dots.getContext("2d"), ctx = over && over.getContext("2d");
-      if (!wrap || !bctx || !wctx || !dctx || !ctx || !hctx) return;
+      var wrap = wrapRef.current, hl = hlRef.current, hl2 = hl2Ref.current, base = baseRef.current, wave = waveRef.current, dots = dotsRef.current, over = overRef.current, rot = rotRef.current;
+      var hctx = hl && hl.getContext("2d"), h2ctx = hl2 && hl2.getContext("2d"), bctx = base && base.getContext("2d"), wctx = wave && wave.getContext("2d"), dctx = dots && dots.getContext("2d"), ctx = over && over.getContext("2d");
+      if (!wrap || !bctx || !wctx || !dctx || !ctx || !hctx || !h2ctx) return;
       var C = ctl.current, reduce = root.matchMedia ? root.matchMedia("(prefers-reduced-motion: reduce)") : { matches: false };
       var isStill = function () { return reduce.matches && !C.optIn; };
       var R = rng(20261011), ang = new Float64Array(N), len = new Float64Array(N);   // same sequence as RASTER
@@ -475,20 +518,27 @@
         if (isStill() || C.paused || !visible || document.hidden) P = d.E;   // no motion: the final state at once
         drawNewDots(); drawHl(); frame(); start();
       });
-      // hover highlight from the panel: one set of the last wave drawn once on its own layer, the rest dimmed
-      function drawHl() {
-        var kind = C.hlKind, Wd = hl.width; hctx.setTransform(1, 0, 0, 1, 0, 0); hctx.clearRect(0, 0, Wd, Wd);
-        var on = !!(kind && wv && col); dots.style.opacity = on && kind !== "changed" ? ".15" : ""; wave.style.opacity = on && kind !== "lines" && kind !== "changed" ? ".45" : "";
-        if (!on || kind === "lines" || kind === "changed") { if (on && kind === "changed") { drawSet(wv.hotCh, col.gold, 0); drawSet(wv.alarmRec, col.pink, 5.5); } return; }
-        if (kind === "hot") drawSet(wv.hotCh, col.gold, 0); else if (kind === "alarm") drawSet(wv.alarmRec, col.pink, 5.5);
-        function drawSet(arr, color, out) {
-          var c = Wd / 2, f = Wd * .42, u = Wd / 800, r = col.dotR * 2.1 * u; hctx.setTransform(1, 0, 0, 1, c, c);
-          hctx.beginPath(); hctx.fillStyle = color;
-          for (var k = 1; k < arr.length; k += 2) { var i = arr[k] - 1, l = len[i] * f + out * u, x = cosA[i] * l, y = sinA[i] * l; hctx.moveTo(x + r, y); hctx.arc(x, y, r, 0, Math.PI * 2); }
-          hctx.fill(); hctx.setTransform(1, 0, 0, 1, 0, 0);
-        }
+      // hover highlight from the panel: the last wave's hot and alarm sets are precomputed on two overlay canvases (in
+      // idle time after each wave); hovering only toggles which overlay shows and dims the rest, no drawing
+      var hlDirty = true, idle = 0;
+      var ric = root.requestIdleCallback || function (f) { return setTimeout(f, 60); }, cic = root.cancelIdleCallback || clearTimeout;
+      function buildHl() {
+        hlDirty = false; [hctx, h2ctx].forEach(function (x) { x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, hl.width, hl.height); });
+        if (!wv || !col) return;
+        var Wd = hl.width, c = Wd / 2, f = Wd * .42, u = Wd / 800, r = col.dotR * 2.1 * u;
+        var drawSet = function (x, arr, color, out) { x.setTransform(1, 0, 0, 1, c, c); x.beginPath(); x.fillStyle = color;
+          for (var k = 1; k < arr.length; k += 2) { var i = arr[k] - 1, l = len[i] * f + out * u, px = cosA[i] * l, py = sinA[i] * l; x.moveTo(px + r, py); x.arc(px, py, r, 0, Math.PI * 2); }
+          x.fill(); x.setTransform(1, 0, 0, 1, 0, 0); };
+        drawSet(hctx, wv.hotCh, col.gold, 0); drawSet(h2ctx, wv.alarmRec, col.pink, 5.5);
       }
-      C.highlight = function (kind) { if (C.hlKind === kind) return; C.hlKind = kind; drawHl(); };
+      function drawHl() { hlDirty = true; cic(idle); if (C.hlKind === "hot" || C.hlKind === "alarm" || C.hlKind === "changed") buildHl(); else idle = ric(function () { idle = 0; if (hlDirty) buildHl(); }); showHl(); }
+      function showHl() {
+        var kind = C.hlKind, on = !!(kind && wv && col);
+        if (on && hlDirty && kind !== "lines") buildHl();
+        hl.style.visibility = on && (kind === "hot" || kind === "changed") ? "visible" : "hidden"; hl2.style.visibility = on && (kind === "alarm" || kind === "changed") ? "visible" : "hidden";
+        dots.style.opacity = on && kind !== "changed" ? ".15" : ""; wave.style.opacity = on && kind !== "lines" && kind !== "changed" ? ".45" : "";
+      }
+      C.highlight = function (kind) { if (C.hlKind === kind) return; C.hlKind = kind; showHl(); };
       function drawNewDots() {
         if (!wv || !col) return; var Wd = dots.width, c = Wd / 2, f = Wd * .42, u = Wd / 800;
         dctx.setTransform(1, 0, 0, 1, c, c);
@@ -530,8 +580,8 @@
         var d = Math.min(2, root.devicePixelRatio || 1), changed = readColors();
         if (w === size && d === dpr) { if (changed) { colorize(); redrawDots(); drawHl(); } return changed; }
         size = w; dpr = d; var px = Math.round(w * d);
-        [dots, hl, over].forEach(function (cv) { cv.width = cv.height = px; });
-        [base, wave, dots, hl, over].forEach(function (cv) { cv.style.width = cv.style.height = w + "px"; });
+        [dots, hl, hl2, over].forEach(function (cv) { cv.width = cv.height = px; });
+        [base, wave, dots, hl, hl2, over].forEach(function (cv) { cv.style.width = cv.style.height = w + "px"; });
         if (discRef.current) discRef.current.style.width = discRef.current.style.height = w + "px";
         if (rot) rot.style.width = rot.style.height = w + "px";
         rasterize(); return true;
@@ -571,7 +621,7 @@
       var onDown = function (e) { var i = place(e); if (i) selectDep(i, e.pointerType !== "mouse"); };
       disc.addEventListener("pointermove", onMove);
       disc.addEventListener("pointerdown", onDown);
-      return function () { disc.removeEventListener("pointerdown", onDown); disc.removeEventListener("pointermove", onMove); offWave(); C.redraw = null; C.highlight = null; job++; if (worker) worker.terminate(); clearTimeout(rto); if (raf) cancelAnimationFrame(raf); if (ro) ro.disconnect(); if (io) io.disconnect(); mo.disconnect(); document.removeEventListener("visibilitychange", onVis); if (reduce.removeEventListener) reduce.removeEventListener("change", onRm); };
+      return function () { disc.removeEventListener("pointerdown", onDown); disc.removeEventListener("pointermove", onMove); offWave(); cic(idle); C.redraw = null; C.highlight = null; job++; if (worker) worker.terminate(); clearTimeout(rto); if (raf) cancelAnimationFrame(raf); if (ro) ro.disconnect(); if (io) io.disconnect(); mo.disconnect(); document.removeEventListener("visibilitychange", onVis); if (reduce.removeEventListener) reduce.removeEventListener("change", onRm); };
     }, [N]);
     var C = ctl.current, GA = (root.GUI && root.GUI.Atoms) || {};
     var togglePause = function () {
@@ -611,8 +661,9 @@
     };
     var busy = lst.phase === "building" || lst.phase === "writing", stressing = lst.phase === "stressing";
     var pick = function (n) { if (busy || stressing || (lst.n === n && lst.phase !== "error")) return; live.build(n).then(function () { return live.write(); }).catch(function () {}); };
-    var Wv = lst.wave, S = Wv && Wv.stats, st = lst.stress;
+    var Wv = lst.wave;   // structural only: whether a wave exists; its numbers are painted into [data-v] nodes
     var num = function (x, k) { return h("span", { className: "fov-num", key: k }, x); };
+    var V = function (key) { return h("span", { className: "fov-num fov-v", "data-v": key }); };   // React never owns its text
     var Info = function (tip, label, k) { return h(InfoTip, { key: k, tip: tip, label: label }); };
     var Btn = function (o, icon, text) {   // .GUI Button (MUI) when available; same look as the native fallback
       var active = !!o.active, p = Object.assign({ type: "button", "data-gui-inspector-control": "true" }, o); delete p.active; o = { active: active };
@@ -620,13 +671,14 @@
         sx: { textTransform: "none", minHeight: 30, py: .25, px: 1.25, borderRadius: "8px", fontSize: 13, lineHeight: 1.2, borderColor: o.active ? undefined : "divider", bgcolor: o.active ? "action.selected" : undefined, "& .MuiButton-startIcon svg": { width: 14, height: 14 } } }), text);
       return h("button", Object.assign(p, { className: "fov-btn" }), icon, text);
     };
-    var row = function (label, value, props, k) { return h("div", Object.assign({ key: k }, props || { className: "fov-row" }), h("span", null, label), num(value)); };
+    var row = function (label, vkey, props, k) { return h("div", Object.assign({ key: k }, props || { className: "fov-row" }), h("span", null, label), V(vkey)); };
     var sw = function (c) { return h("span", { className: "fov-dot", style: { background: "var(--fov-" + c + ")", margin: "0 6px 0 0" } }); };
-    var section = function (key, title, summary, body) {
+    var section = function (key, title, sumKey, body) {
       var open = panel.sec[key], bid = uid + "-" + key;
       return h("section", { className: "fov-sec", key: key, "data-gui-node-id": rootId + "/panel-" + key, "data-gui-component": "FanoutViz.Panel.Section", "data-fov-sec": key },
         h("button", { type: "button", className: "fov-shead", "aria-expanded": open ? "true" : "false", "aria-controls": bid, "data-gui-inspector-control": "true", onClick: function () { updPanel(function (p) { p.sec[key] = !p.sec[key]; }); } },
-          h("span", null, title), summary ? h("small", null, summary) : null, h("span", { className: "fov-chev" + (open ? " up" : ""), style: { flex: "none", display: "inline-flex" } }, ICON.chev)),
+          h("span", null, title), typeof sumKey === "string" && sumKey.charAt(0) === "=" ? h("small", null, sumKey.slice(1)) : sumKey ? h("small", { "data-v": sumKey }) : null,
+          h("span", { className: "fov-chev" + (open ? " up" : ""), style: { flex: "none", display: "inline-flex" } }, ICON.chev)),
         open ? h("div", { className: "fov-sbody", id: bid }, body) : null);
     };
     var statusLine = lst.phase === "building" ? h("div", { className: "fov-note" }, h("span", { className: "fov-busy", "aria-hidden": "true" }), "Building ", num(fmt(lst.target)), " dependents in the worker… ", num(Math.round(lst.progress * 100) + "%"))
@@ -634,8 +686,9 @@
       : lst.phase === "idle" ? h("div", { className: "fov-note" }, "Starting the live kernel…")
       : lst.phase === "writing" ? h("div", { className: "fov-note" }, h("span", { className: "fov-busy", "aria-hidden": "true" }), "Writing master.factor…")
       : stressing ? h("div", { className: "fov-note" }, h("span", { className: "fov-busy", "aria-hidden": "true" }), "Stress: writing back to back in the worker.") : null;
-    var depChips = Wv && Wv.firstHot && Wv.firstHot.length ? h("div", { className: "fov-chips", "data-gui-inspector-control": "true" }, Wv.firstHot.map(function (i) {
-      return h("button", { type: "button", key: i, className: "fov-chip", onClick: function () { goDep(i); }, onMouseEnter: function () { if (C.highlight) C.highlight(null); }, "aria-label": "Select dep." + i + " (its hot flipped)" }, "dep." + i); })) : null;
+    var onChip = function (e) { var i = +e.currentTarget.getAttribute("data-i"); if (i) goDep(i); };
+    var chipsEl = function () { var a = []; for (var j = 0; j < 8; j++) a.push(h("button", { type: "button", key: j, className: "fov-chip", "data-chip": j, hidden: true, onClick: onChip }));
+      return h("div", { className: "fov-chips", "data-gui-inspector-control": "true" }, a); };
     var TIP = {
       replay: "The sweep replays the kernel's real recompute order (explain().meta.recomputed: every level in index order, then every hot, then the alarms) over the write's measured duration (see Timing), at an even pace inside the write. this.me 4.2.1 has no progress hook, so it is a replay of the real order, not a live stream.",
       lines: "Dependent i sits at angle i/N (N = " + fmt(N) + "). Each one has two facts (value, limit) and three derived values; its line lights up when the replay reaches its level.",
@@ -653,19 +706,11 @@
     var pauseBtn = Btn({ "aria-label": paused ? "Play the animation" : "Pause the animation", "data-fov": "pause", onClick: togglePause }, paused ? ICON.play : ICON.pause, paused ? "Play" : "Pause");
     var writeBtn = Btn({ disabled: busy || stressing || lst.phase === "error" || !lst.n, "data-fov": "write", onClick: function () { live.write().catch(function () {}); } }, ICON.write, "Write");
     var stressBtn = Btn({ disabled: busy || lst.phase === "error" || !lst.n, active: stressing, "data-fov": "stress", "aria-pressed": stressing ? "true" : "false", onClick: function () { (stressing ? live.stop() : live.stress()).catch(function () {}); } }, stressing ? ICON.stop : ICON.stress, stressing ? "Stop" : "Stress");
-    // bodies that don't change with every wave are memoized (a stress run re-renders the panel ~2–3×/s)
-    var controlsBody = React.useMemo(function () { return [h("div", { key: 0, className: "fov-ctl" }, pauseBtn, writeBtn, stressBtn), h("div", { key: 1, style: { marginTop: 6 } }, sizeBtns), h("div", { key: 2, role: "status", "aria-live": "polite" }, statusLine)]; },
-      [paused, busy, stressing, small, lst.target, lst.n, lst.phase, lst.phase === "building" ? Math.round(lst.progress * 100) : 0, lst.error]);
-    var modelBody = React.useMemo(function () { return [
-      h("div", { key: 0, className: "fov-formula" }, h("div", null, "dep.i.level = value * master.factor"), h("div", null, "dep.i.hot = level > limit"), h("div", null, "dep.i.alarm = hot == true")),
-      h("div", { key: 1, className: "fov-note" }, "A real this.me 4.2.1 kernel in a Web Worker, N = " + fmt(N) + ". Each write moves master.factor a small seeded step.", Info(TIP.lines, "About the lines", "i"))]; }, [N]);
-    var P = selInfo && selInfo.p, fl = selInfo && selInfo.flags && selInfo.flags[selInfo.i] || 0;
-    var selBody = !selDep ? [h("div", { key: 0, className: "fov-note" }, "Click a line, use ←/→ on the figure, or pick a dependent whose hot flipped:"), h("div", { key: 1 }, depChips)]
-      : [h("div", { key: "h", className: "fov-row" }, h("b", null, "dep." + selDep), selInfo && selInfo.loading ? h("span", { className: "fov-busy", "aria-hidden": "true" }) : null),
-        P ? [row("value", P.value, null, "v"), row("limit", P.limit, null, "l"), row("level = value × " + P.factor, typeof P.level === "number" ? String(+P.level.toFixed(4)) : String(P.level), null, "lv"),
-          row(h("span", null, sw("gold"), "hot = level > limit"), String(P.hot), null, "ho"), row(h("span", null, sw("pink"), "alarm = hot == true"), String(P.alarm), null, "al"),
-          Wv ? h("div", { key: "w", className: "fov-note" }, "Last write: hot ", fl & 1 ? h("b", null, "flipped") : "unchanged", ", alarm ", fl & 2 ? h("b", null, "recomputed") : "skipped (early cutoff)", ".") : null] : null,
-        selInfo && selInfo.error ? h("div", { key: "e", className: "fov-note fov-warn" }, selInfo.error) : null,
+    var selBody = !selDep ? [h("div", { key: 0, className: "fov-note" }, "Click a line, use ←/→ on the figure, or pick a dependent whose hot flipped:"), h("div", { key: 1 }, chipsEl())]
+      : [h("div", { key: "h", className: "fov-row" }, h("b", { "data-fov": "sel-name" }, "dep." + selDep)),
+        row("value", "sval", null, "v"), row("limit", "slim", null, "l"), h("div", { key: "lv", className: "fov-row" }, h("span", { "data-v": "slevl" }), V("slev")),
+        row(h("span", null, sw("gold"), "hot = level > limit"), "shot", null, "ho"), row(h("span", null, sw("pink"), "alarm = hot == true"), "salarm", null, "al"),
+        h("div", { key: "w", className: "fov-note", "data-v": "slast" }),
         h("div", { key: "c", className: "fov-ctl", style: { marginTop: 8 } },
           Btn({ "aria-label": "Previous dependent", "data-fov": "prev", onClick: function () { goDep(selDep - 1); } }, ICON.prev, null),
           Btn({ "aria-label": "Next dependent", "data-fov": "next", onClick: function () { goDep(selDep + 1); } }, ICON.next, null),
@@ -673,38 +718,41 @@
     var goBox = h("form", { className: "fov-go", "data-gui-inspector-control": "true", onSubmit: function (e) { e.preventDefault(); var v = parseInt(e.target.elements[0].value, 10); if (v >= 1 && v <= N) goDep(v); } },
       h("label", { htmlFor: uid + "-go", className: "fov-note", style: { margin: 0 } }, "Go to dep."), h("input", { id: uid + "-go", type: "number", min: 1, max: N, inputMode: "numeric", placeholder: "1–" + fmt(N), "data-fov": "go" }),
       Btn({ type: "submit" }, null, "Select"));
-    var panelEl = h("aside", { className: "fov-panel", "data-gui-node-id": rootId + "/panel", "data-gui-component": "FanoutViz.Panel", "aria-label": "Live kernel panel", "data-fov": "panel", "data-open": panel.open ? "true" : "false" },
+    var noWave = h("div", { className: "fov-note" }, "No write yet.");
+    var panelEl = h("aside", { className: "fov-panel", ref: panelRef, "data-gui-node-id": rootId + "/panel", "data-gui-component": "FanoutViz.Panel", "aria-label": "Live kernel panel", "data-fov": "panel", "data-open": panel.open ? "true" : "false" },
       h("div", { className: "fov-phead" },
         h("div", { className: "fov-ptitle" }, GA.Chip ? h(GA.Chip, { label: "LIVE", size: "small", color: "success", variant: "outlined", sx: { height: 20, fontSize: 10.5, fontWeight: 700, letterSpacing: ".05em" } }) : h("span", { className: "fov-tag live", style: { margin: 0 } }, "live"),
-          h("span", null, "Live kernel"), h("span", { className: "fov-pmini" }, Wv ? "k " + fmt(Wv.k) + " · " + ms(Wv.writeMs) : lst.phase === "building" ? Math.round(lst.progress * 100) + "%" : "")),
+          h("span", null, "Live kernel"), h("span", { className: "fov-pmini", "data-v": "mini" })),
         h("button", { type: "button", className: "fov-ibtn", "aria-label": paused ? "Play the animation" : "Pause the animation", "data-gui-inspector-control": "true", "data-fov": "pause-mini", onClick: togglePause }, paused ? ICON.play : ICON.pause),
         h("button", { type: "button", className: "fov-ibtn", "aria-label": "Write master.factor", disabled: busy || stressing || lst.phase === "error" || !lst.n, "data-gui-inspector-control": "true", "data-fov": "write-mini", onClick: function () { live.write().catch(function () {}); } }, ICON.write),
         h("button", { type: "button", className: "fov-ibtn", "aria-label": panel.open ? "Close the panel" : "Open the panel", "aria-expanded": panel.open ? "true" : "false", "aria-controls": uid + "-body", "data-gui-inspector-control": "true", "data-fov": "panel-toggle",
           onClick: function () { updPanel(function (p) { p.open = !p.open; }); } }, h("span", { className: "fov-chev" + (panel.open ? " up" : ""), style: { display: "inline-flex" } }, ICON.chev))),
       panel.open ? h("div", { id: uid + "-body", "aria-busy": busy || stressing ? "true" : "false", "data-fov": "status" },
-        section("controls", "Controls", null, controlsBody),
-        section("write", "This write", Wv ? "#" + S.nWrites : null, !Wv ? h("div", { className: "fov-note" }, "No write yet.") : [
-          row("master.factor", Wv.from + " → " + Wv.factor, null, 0),
-          row(h("span", null, "k recomputed", Info(TIP.k, "About k", "i")), fmt(Wv.k), hl("lines"), 1),
-          h("div", { key: 2, className: "fov-note", style: { marginTop: 0, textAlign: "right" } }, fmt(Wv.levels) + " level + " + fmt(Wv.hots) + " hot + " + fmt(Wv.alarms) + " alarm"),
-          row(h("span", null, "changed", Info(TIP.changed, "About changed", "i")), fmt(Wv.changed), hl("changed"), 3),
-          row(h("span", null, sw("gold"), "m · hot flipped"), fmt(Wv.m), hl("hot"), 4),
-          row(h("span", null, sw("pink"), "alarms recomputed"), fmt(Wv.alarms), hl("alarm"), 5),
-          row(h("span", null, "alarms skipped", Info(TIP.cutoff, "About early cutoff", "i")), fmt(Wv.levels - Wv.alarms), null, 6),
-          depChips ? h("div", { key: 7, className: "fov-note" }, "Flipped, e.g.:") : null, depChips ? h("div", { key: 8 }, depChips) : null]),
-        section("timing", "Timing", Wv ? ms(Wv.writeMs) : null, !Wv ? h("div", { className: "fov-note" }, "–") : [
-          row("this write", ms(Wv.writeMs), null, 0), row(h("span", null, "p50 · p95", Info(TIP.pct, "About p50 and p95", "i")), ms(S.p50) + " · " + ms(S.p95), null, 1),
-          row("window", "last " + S.window, null, 2), row("reading the wave", ms(Wv.analysisMs), null, 3), row("built " + fmt(lst.n) + " in", ms(lst.buildMs), null, 4),
-          row(h("span", null, "replay", Info(TIP.replay, "About the replay", "i")), ms(Wv.writeMs), null, 5)]),
-        section("stress", "Stress", stressing ? "running" : st && st.writes ? fmt(st.writes) + " writes" : null, [
+        section("controls", "Controls", null, [h("div", { key: 0, className: "fov-ctl" }, pauseBtn, writeBtn, stressBtn), h("div", { key: 1, style: { marginTop: 6 } }, sizeBtns), h("div", { key: 2, role: "status", "aria-live": "polite" }, statusLine)]),
+        section("write", "This write", Wv ? "wnum" : null, !Wv ? noWave : [
+          row("master.factor", "factor", null, 0),
+          row(h("span", null, "k recomputed", Info(TIP.k, "About k", "i")), "k", hl("lines"), 1),
+          h("div", { key: 2, className: "fov-note", style: { marginTop: 0, textAlign: "right" }, "data-v": "kparts" }),
+          row(h("span", null, "changed", Info(TIP.changed, "About changed", "i")), "changed", hl("changed"), 3),
+          row(h("span", null, sw("gold"), "m · hot flipped"), "m", hl("hot"), 4),
+          row(h("span", null, sw("pink"), "alarms recomputed"), "alarms", hl("alarm"), 5),
+          row(h("span", null, "alarms skipped", Info(TIP.cutoff, "About early cutoff", "i")), "skipped", null, 6),
+          h("div", { key: 7, className: "fov-note" }, "Flipped, e.g.:"), h("div", { key: 8 }, chipsEl())]),
+        section("timing", "Timing", Wv ? "tsum" : null, !Wv ? noWave : [
+          row("this write", "twrite", null, 0), row(h("span", null, "p50 · p95", Info(TIP.pct, "About p50 and p95", "i")), "tpct", null, 1),
+          row("window", "twin", null, 2), row("reading the wave", "twave", null, 3), row("built " + fmt(lst.n || N) + " in", "tbuild", null, 4),
+          row(h("span", null, "replay", Info(TIP.replay, "About the replay", "i")), "treplay", null, 5)]),
+        section("stress", "Stress", "ssum", [
           h("div", { key: 0, className: "fov-ctl" }, stressBtn),
-          row("writes", fmt(st ? st.writes : 0), null, 1), row("writes/s", (st ? st.wps : 0).toFixed(2), null, 2),
-          row(h("span", null, "drift", Info(TIP.drift, "About drift", "i")), S && S.drift != null ? (S.drift >= 0 ? "+" : "") + Math.round(S.drift * 100) + "%" : "–", null, 3),
-          row(h("span", null, "heap ≈", Info(TIP.heap, "About the heap estimate", "i")), S ? fmt(S.heapMB) + " MB" : "–", null, 4), row("log ≈", S ? fmt(S.logMB) + " MB" : "–", null, 5),
-          row(h("span", null, "kernel reset (log size)", Info(TIP.guard, "About the memory guard", "i")), "×" + (lst.resets || 0), null, 6),
+          row("writes", "swrites", null, 1), row("writes/s", "swps", null, 2),
+          row(h("span", null, "drift", Info(TIP.drift, "About drift", "i")), "drift", null, 3),
+          row(h("span", null, "heap ≈", Info(TIP.heap, "About the heap estimate", "i")), "heap", null, 4), row("log ≈", "log", null, 5),
+          row(h("span", null, "kernel reset (log size)", Info(TIP.guard, "About the memory guard", "i")), "resets", null, 6),
           h("div", { key: 7, className: "fov-note", "data-fov": "stress-line" }, "Sustained writes slow down as the log grows; a reset starts a fresh kernel.")]),
-        section("model", "Model", "this.me 4.2.1", modelBody),
-        section("selected", "Selected dependent", selDep ? "dep." + selDep : null, [h("div", { key: 0 }, selBody), h("div", { key: 1 }, goBox)])) : null);
+        section("model", "Model", "=this.me 4.2.1", [
+          h("div", { key: 0, className: "fov-formula" }, h("div", null, "dep.i.level = value * master.factor"), h("div", null, "dep.i.hot = level > limit"), h("div", null, "dep.i.alarm = hot == true")),
+          h("div", { key: 1, className: "fov-note" }, "A real this.me 4.2.1 kernel in a Web Worker, N = " + fmt(N) + ". Each write moves master.factor a small seeded step.", Info(TIP.lines, "About the lines", "i"))]),
+        section("selected", "Selected dependent", selDep ? "=dep." + selDep : null, [h("div", { key: 0 }, selBody), h("div", { key: 1 }, goBox)])) : null);
     var hitLayer = React.useMemo(function () {
       return h("svg", { className: "fov-hit", ref: hitRef, viewBox: "-1 -1 2 2", "aria-hidden": "true", onClick: onHit },
         WEDGES.map(function (d, s) { return h("g", { key: s, "data-gui-node-id": sliceId(s), "data-gui-component": "FanoutViz.Slice", className: sel.kind === "slice" && sel.s === s ? "on" : undefined },
@@ -718,7 +766,7 @@
         h("div", { className: "fov-vcol", ref: vizColRef },
           h("div", { className: "fov-disc", ref: discRef, tabIndex: 0, role: "group", "aria-label": label + " Click a line or use the arrow keys to select a dependent.", onKeyDown: onKey },
             h("div", { ref: rotRef, style: { position: "absolute", left: 0, top: 0, transformOrigin: "50% 50%", willChange: "transform" } },
-              h("canvas", { ref: baseRef, "aria-hidden": "true" }), h("canvas", { ref: waveRef, "aria-hidden": "true" }), h("canvas", { ref: dotsRef, "aria-hidden": "true" }), h("canvas", { ref: hlRef, "aria-hidden": "true" }), h("canvas", { ref: overRef, "aria-hidden": "true" }), hitLayer)),
+              h("canvas", { ref: baseRef, "aria-hidden": "true" }), h("canvas", { ref: waveRef, "aria-hidden": "true" }), h("canvas", { ref: dotsRef, "aria-hidden": "true" }), h("canvas", { ref: hlRef, "aria-hidden": "true", style: { visibility: "hidden" } }), h("canvas", { ref: hl2Ref, "aria-hidden": "true", style: { visibility: "hidden" } }), h("canvas", { ref: overRef, "aria-hidden": "true" }), hitLayer)),
           h("div", { className: "fov-k", ref: kRef, "data-fov": "k" }, h("span", { "data-k": "" }, "k = –"), h("span", { className: "fov-tag rep" }, "replay"), Info(TIP.replay, "About the replay")),
           h("figcaption", { className: "fov-short" }, "Each line is a real dependent of master.factor.", Info(TIP.lines, "About the lines"), " ",
             h("span", { className: "fov-legend" }, h("span", { className: "fov-nw" }, sw("gold"), "hot flipped"), h("span", { className: "fov-nw" }, sw("pink"), "alarm recomputed"), Info(TIP.cutoff, "About the colours and early cutoff")))),
