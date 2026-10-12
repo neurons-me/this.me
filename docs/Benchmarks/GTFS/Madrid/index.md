@@ -15,6 +15,8 @@ crumb: Madrid
 
 The Madrid metro feed from [GTFS-Madrid-Bench](https://github.com/oeg-upm/gtfs-bench), loaded into `.me` and changed with the benchmark's own update packages. Four runs, all on this.me 4.2.0, on 2026-10-10. What a write's wave is, and what **k** counts, is explained in [Extreme Fan-Out](../../../Extreme-Fan-Out.html).
 
+**Live:** a policy decides a headway change on this data and the kernel recomputes it in your browser, with explain() back to the decision. [AI decides, .me computes — run it live →](https://neurons-me.github.io/.me/Demos/SmartCities/AI-Decides/)
+
 Machine: shared Linux VM (Intel Xeon, 8 vCPU, 16 GiB), Node 22.23.3, the published `this.me@4.2.0` build (`dist/me.es.js` sha256 `8cc94d52…`). 4.1.0 was re-run on the same machine the same day. Every results file records its own run line.
 
 ## Data and workload {#data}
@@ -126,6 +128,7 @@ GTFS_AGG=bracket ME_VERSION=4.2.0 node tests/Benchmarks/GTFS-Madrid/sweep-seed0.
 
 <div class="doc-cards" markdown="0">
 <a class="card" href="https://neurons-me.github.io/.me/docs/Extreme-Fan-Out.html"><img src="https://suign.github.io/assets/imgs/EXTREME-FAN-OUT.jpg" alt="Extreme Fan-Out"><span class="card-kind">Docs</span><span class="card-title">Extreme Fan-Out</span><span class="card-desc">The concept behind k: one write, 100,000 dependents, every wave traceable with explain().</span></a>
+<a class="card" href="https://neurons-me.github.io/.me/Demos/SmartCities/AI-Decides/"><img src="https://neurons-me.github.io/.me/Demos/SmartCities/AI-Decides/assets/ai-decides-og.png" alt="AI decides, .me computes"><span class="card-kind">Demo</span><span class="card-title">AI decides, .me computes</span><span class="card-desc">A policy decides headways on this data; one write, the wave replayed, explain() back to the decision.</span></a>
 <a class="card" href="https://neurons-me.github.io/.me/Tests/gtfs-madrid-universe.html"><img src="https://suign.github.io/assets/imgs/MADRID-GTFS-DATA-me.jpg" alt="GTFS Madrid live universe"><span class="card-kind">Demo</span><span class="card-title">GTFS Madrid universe</span><span class="card-desc">A small subset live in the browser: click a node for explain(), mutate to see k.</span></a>
 <a class="card" href="https://neurons-me.github.io/.me/docs/Tests/madrid-knowledge.html"><img src="https://suign.github.io/assets/imgs/SMARTCITY.jpg" alt="Madrid fares"><span class="card-kind">Demo</span><span class="card-title">Madrid fares</span><span class="card-desc">The same city as a human story: fares, abono, Sol → Atocha.</span></a>
 <a class="card" href="https://neurons-me.github.io/mlearning.studio/GTFS/"><img src="https://neurons-me.github.io/mlearning.studio/GTFS/og.jpg" alt="GTFS on mlearning.studio"><span class="card-kind">Dataset</span><span class="card-title">GTFS on mlearning.studio</span><span class="card-desc">The feed format, the Madrid dataset, GTFS-Madrid-Bench links.</span></a>

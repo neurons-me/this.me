@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>AI decides, .me computes · .me</title>
+<meta name="description" content="A versioned policy proposes a headway change for GTFS-Madrid-Bench (generated data) and says why. A real this.me kernel stores the decision as a fact, one write recomputes every route, trip and frequency window behind it, and explain() on any of them leads back to the decision."/>
+<link rel="canonical" href="https://neurons-me.github.io/.me/Demos/SmartCities/AI-Decides/"/>
+<meta property="og:title" content="AI decides, .me computes · .me"/>
+<meta property="og:description" content="A policy picks a headway change and its reason; the kernel stores it as a fact. One write, every dependent route, trip and window recomputes, and explain() leads back to the decision. GTFS-Madrid-Bench, generated data; no fares, no capacity."/>
+<meta property="og:image" content="https://neurons-me.github.io/.me/Demos/SmartCities/AI-Decides/assets/ai-decides-og.png"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:image:type" content="image/png"/>
+<meta property="og:image:alt" content="The radial view after a decision: routes, trips and frequency windows of GTFS-Madrid-Bench around the decided factor ×0.90, windows below the 165 s floor in amber, next to the decision card with the policy's reason"/>
+<meta property="og:url" content="https://neurons-me.github.io/.me/Demos/SmartCities/AI-Decides/"/>
+<meta property="og:type" content="website"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="AI decides, .me computes · .me"/>
+<meta name="twitter:description" content="A policy picks a headway change and its reason; the kernel stores it as a fact. One write, every dependent route, trip and window recomputes, and explain() leads back to the decision."/>
+<meta name="twitter:image" content="https://neurons-me.github.io/.me/Demos/SmartCities/AI-Decides/assets/ai-decides-og.png"/>
+<meta name="twitter:image:alt" content="The radial view after a decision: routes, trips and frequency windows of GTFS-Madrid-Bench around the decided factor ×0.90, windows below the 165 s floor in amber, next to the decision card with the policy's reason"/>
+<link rel="icon" type="image/png" href="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1760629064/neurons.me_b50f6a.png"/>
+<!-- .GUI theme: page-scoped storage keys, neurons.me dark by default -->
+<script>
+  window.__thisGuiThemeScope = { scopeId: "ai-decides", themeModeKey: "ai-decides.themeMode", themeIdKey: "ai-decides.themeId", defaultMode: "dark" };
+  try {
+    var q = new URLSearchParams(location.search).get("mode");
+    if (q === "light" || q === "dark") localStorage.setItem("ai-decides.themeMode", q);
+    if (!localStorage.getItem("ai-decides.themeMode")) localStorage.setItem("ai-decides.themeMode", "dark");
+    if (!localStorage.getItem("ai-decides.themeId")) localStorage.setItem("ai-decides.themeId", "neurons.me");
+  } catch (e) {}
+</script>
+<!-- No icon font: every icon on this page is inline SVG. If a .GUI component ever renders an icon-font span, hide it. -->
+<style>.material-symbols-rounded,.material-symbols-outlined,.material-icons{display:none!important}html,body{margin:0}#boot-error{font:13px/1.5 ui-monospace,Menlo,monospace;color:#c97e7e;padding:24px;display:none}</style>
+<!-- Pinned dependencies (jsDelivr, exact versions, Subresource Integrity). The kernel (this.me 4.2.1) is fetched with SRI in the worker. -->
+<script src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/this.gui@4.2.0/dist/this.gui.umd.js" integrity="sha384-tAyskhiyJweQ9xXPVOSEJ0OQDE+lFsqRJvGRb8LVoqLbdNxYmJEhW21+fxcAYG0d" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+<noscript><p style="font:15px/1.6 system-ui;padding:24px;max-width:720px">AI decides, .me computes: a policy proposes a headway change for GTFS-Madrid-Bench (generated data), a real this.me kernel stores the decision and recomputes what depends on it. This page needs JavaScript.</p></noscript>
+<div id="boot-error">.GUI (this.gui@4.2.0) or React failed to load, so this page cannot render.</div>
+<script>if (!window.GUI || !window.React || !window.ReactDOM) document.getElementById("boot-error").style.display = "block";</script>
+<script src="./ai-decides.js?v=1.0.0"></script>
+</body>
+</html>
