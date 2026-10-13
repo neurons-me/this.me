@@ -78,4 +78,4 @@ Any other name is a path. There is no instance method called `subscribe`, for ex
 
 ## See also
 
-[me.explain(path)](./Explain.html) · [Primitives](./Primitives.html) (the two verbs: declare and resolve) · [Syntax](./Syntax.html) · [Axioms](./Axioms.html) (A-struct-0: one callable, chainable value)
+[me.explain(path)](./Explain.html) · [Primitives](./Primitives.html) (the two verbs: declare and resolve) · [me:// URI grammar](./Syntax.html) · [Syntax](https://neurons-me.github.io/.me/Typescript/typedocs/Syntax.html) · [Axioms](./Axioms.html) (A-struct-0: one callable, chainable value)

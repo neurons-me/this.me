@@ -6,6 +6,7 @@ image: https://neurons-me.github.io/.me/docs/assets/card-ok.webp
 mepath:
   - text: Docs
     url: https://neurons-me.github.io/.me/docs/
+canonical: https://suign.github.io/WhatIsOK.html
 crumb: O(k)
 ---
 
