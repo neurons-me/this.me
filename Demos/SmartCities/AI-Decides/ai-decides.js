@@ -203,6 +203,9 @@
     ".aid-pqa .aid-how{margin:0}.aid-pqa .aid-how h2{font-size:13px;margin:0 0 6px}.aid-pqa .aid-how-flow{font-size:10.5px;gap:3px;margin:0 0 6px}.aid-pqa .aid-how-grid,.aid-pqa .aid-try-grid{grid-template-columns:1fr!important}.aid-pqa .aid-how-map li{grid-template-columns:minmax(0,1fr) 12px minmax(0,1.2fr)}",
     ".aid-pqa .aid-akpis{grid-template-columns:1fr;gap:6px}.aid-pqa .aid-akpi{padding:7px 9px}.aid-pqa .aid-akpi b{font-size:1.2rem}.aid-pqa .aid-akpi small,.aid-pqa .aid-akpi em{font-size:11px}.aid-pqa .aid-note{font-size:11px;line-height:1.4}",
     ".aid-pqa .aid-alist{gap:1px;margin-top:6px}.aid-pqa .aid-alist button{grid-template-columns:8px 56px minmax(24px,1fr) auto;gap:6px;padding:3px 4px;font-size:11.5px}.aid-pqa .aid-alist .ph{display:block;grid-column:2 / -1;font-size:10.5px;margin-top:-2px}.aid-pqa .aid-alist i{width:8px;height:8px}.aid-pqa .aid-qn{font-size:11px;padding:6px 8px}.aid-pqa .aid-map-card{font-size:11px;padding:8px}",
+    ".aid-rel-cards{margin:28px 0 8px}.aid-rel-cards h2{margin:0 0 10px;font-size:1.35rem;font-weight:800}.aid-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}@media (max-width:900px){.aid-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (max-width:480px){.aid-cards{grid-template-columns:1fr}}",
+    ".aid-card2{display:flex;flex-direction:column;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:14px;overflow:hidden;background:var(--mui-palette-background-paper,transparent);color:inherit;text-decoration:none;transition:transform .15s,border-color .15s,box-shadow .15s}.aid-card2:hover,.aid-card2:focus-visible{transform:translateY(-2px);border-color:var(--mui-palette-primary-main,#58a6ff);box-shadow:0 6px 18px rgba(0,0,0,.18)}",
+    ".aid-card2 .img{display:block;aspect-ratio:1200/630;background:var(--mui-palette-action-hover,rgba(128,128,128,.12));overflow:hidden}.aid-card2 img{width:100%;height:100%;object-fit:cover;display:block}.aid-card2 .tx{display:flex;flex-direction:column;gap:3px;padding:10px 12px 12px}.aid-card2 b{font-size:14px;font-weight:800}.aid-card2 small{font-size:12px;line-height:1.4;color:var(--mui-palette-text-secondary,#8b949e)}",
     ".aid-map{margin:28px 0 8px}.aid-map h2{margin:0 0 4px;font-size:1.35rem;font-weight:800}.aid-map-label{display:inline-block;margin-bottom:10px;padding:2px 8px;border:1px dashed var(--mui-palette-warning-main,#b7791f);border-radius:6px;color:var(--mui-palette-warning-main,#b7791f);font-size:12px;font-weight:600}",
     ".aid-map-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px}@media (max-width:760px){.aid-map-grid{grid-template-columns:1fr}}",
     ".aid-map-fig{min-width:0}.aid-map-svg{display:block;width:100%;max-width:680px;aspect-ratio:1;cursor:crosshair;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:12px;background-image:linear-gradient(var(--mui-palette-divider,rgba(128,128,128,.15)) 1px,transparent 1px),linear-gradient(90deg,var(--mui-palette-divider,rgba(128,128,128,.15)) 1px,transparent 1px);background-size:10% 10%}",
@@ -711,8 +714,7 @@
         li("p", [h("b", { key: 0 }, "Decision"), ": policy:fair-headway@1, one factor for every line. Its reason, scenario and inputs hash are recorded as facts (decisions.<n>.*) before the one write. A language model could propose later under the same record and checks."]),
         li("k", [h("b", { key: 0 }, "Kernel"), ": this.me " + ME_VERSION + " from npm, SRI-pinned, in a Web Worker. k, changed values, early cutoff and timings come from explain().meta; the animation replays the actual recompute order."]),
         li("a", [h("b", { key: 0 }, "Scenario inputs we set"), ": policy.factor, the 165 s minimum headway (policy.minHeadway) and each service's on/off switch. The feed has no fares, capacity or demand, so this run models supply only."]),
-        li("l", [h("b", { key: 0 }, "Open kernel items"), ": the [] aggregate is much slower than explicit sums at this size, so the model spells the sums out; the ?: ternary does not evaluate; booleans do not take part in arithmetic. See ", L("https://github.com/neurons-me/.me/issues", "the .me issues"), "."])),
-      h("p", { key: "rel", style: { marginTop: 14 } }, ["Related: ", L("https://neurons-me.github.io/.me/docs/Extreme-Fan-Out.html", "Extreme Fan-Out"), " (the concept behind k) · ", L("https://neurons-me.github.io/.me/docs/Benchmarks/GTFS/Madrid/", "GTFS-Madrid benchmark"), " · ", L("https://neurons-me.github.io/smart-cities/", "Smart Cities demos"), "."]));
+        li("l", [h("b", { key: 0 }, "Open kernel items"), ": the [] aggregate is much slower than explicit sums at this size, so the model spells the sums out; the ?: ternary does not evaluate; booleans do not take part in arithmetic. See ", L("https://github.com/neurons-me/.me/issues", "the .me issues"), "."])));
   }
 
   // ── How: GTFS-Madrid-Bench → .me paths → ["="] → one write → the wave. Every row is what tools/build-data.mjs keeps
@@ -1089,6 +1091,19 @@
               der && der.inputs && der.inputs.length ? [h("br", { key: "c" }), "reads " + nI + " values" + (nI > der.inputs.length ? " (explain returned the first " + der.inputs.length + ", shortened)" : "") + " · first: ", me(String(der.inputs[0] && der.inputs[0].path || der.inputs[0])), der.inputs[0] && der.inputs[0].value !== undefined ? " = " + fmtV(der.inputs[0].value) : null] : null,
               x.meta && x.meta.k != null ? [h("br", { key: "d" }), "last wave k = " + fmt(x.meta.k)] : null)) : null)));
   }
+  // related pages, as image cards (the Smart Cities landing style)
+  var RELATED = [
+    ["https://neurons-me.github.io/.me/docs/Extreme-Fan-Out.html", "https://suign.github.io/assets/imgs/EXTREME-FAN-OUT.jpg", "Extreme Fan-Out", "The concept behind k: one write, every dependent value recomputes."],
+    ["https://neurons-me.github.io/.me/docs/Benchmarks/GTFS/Madrid/", "https://suign.github.io/assets/imgs/MADRID-GRAPH-ME.jpg", "GTFS-Madrid benchmark", "The same feed measured at scale: build, write and read timings."],
+    ["https://neurons-me.github.io/smart-cities/", "https://neurons-me.github.io/smart-cities/assets/SMART-CITIES-ME.jpg", "Smart Cities demos", "The other city demos on the same kernel."],
+    ["https://neurons-me.github.io/robots/", "https://neurons-me.github.io/robots/assets/ROBOTS-CONTEXT-LAB.jpg", "Robots", "Robots that understand context: one object, four meanings, zero copies."]];
+  function Related(p) {
+    return h("section", { className: "aid-rel-cards", "data-gui-node-id": p["data-gui-node-id"], "data-aid": "related", "aria-labelledby": "aid-rel-h" },
+      h("h2", { id: "aid-rel-h" }, "Related"),
+      h("div", { className: "aid-cards" }, RELATED.map(function (c) { return h("a", { key: c[0], className: "aid-card2", href: c[0], "data-aid": "related-card" },
+        h("span", { className: "img" }, h("img", { src: c[1], alt: "", loading: "lazy", decoding: "async" })),
+        h("span", { className: "tx" }, h("b", null, c[2]), h("small", null, c[3]))); })));
+  }
   var N = function (type, id, props, children) { return Object.assign({ type: type, props: Object.assign({}, props || {}, { "data-gui-node-id": id }) }, children ? { children: children } : {}); };
   // never blank the page: a component that throws is replaced by a message, the rest keeps rendering
   function Boundary(props) { React.Component.call(this, props); this.state = { err: null }; }
@@ -1108,6 +1123,7 @@
       N("Typography", "kicker", { component: "p", sx: { fontSize: ".75rem", fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: "text.secondary", mb: 1 } }, ["Smart Cities · GTFS-Madrid-Bench"]),
       N("Typography", "title", { component: "h1", sx: { fontSize: "clamp(2rem, 5vw, 2.75rem)", fontWeight: 800, letterSpacing: "-.02em", lineHeight: 1.1, mb: 3 } }, ["AI decides, .me computes"]),
       N("AIDDashboard", "ai-decides"),
+      N("AIDRelated", "related"),
       N("AIDMap", "map"),
       N("AIDNotes", "notes"),
     ]),
@@ -1116,7 +1132,7 @@
   var mode = "dark"; try { mode = params.get("mode") || localStorage.getItem(scope.themeModeKey) || "dark"; if (params.get("mode")) localStorage.setItem(scope.themeModeKey, mode); } catch (e) {}
   var PageTheme = function (p) { return h(G.Theme, { initialThemeId: "neurons.me", initialMode: mode }, p.children); };
   var INSPECTOR_ON = params.get("inspector") === "1"; if (G.getInspectorEnabled() !== INSPECTOR_ON) G.setInspectorEnabled(INSPECTOR_ON);
-  var reg = Object.assign({}, G.Registry || G.registry); [["AIDTopBar", TopBar], ["AIDDashboard", Dashboard], ["AIDNotes", Notes], ["AIDHow", How], ["AIDMap", CityMap], ["AIDQuestion", Question], ["AIDAnswer", Answer]].forEach(function (x) { reg[x[0]] = pageType(x[0], x[1]); });
+  var reg = Object.assign({}, G.Registry || G.registry); [["AIDTopBar", TopBar], ["AIDDashboard", Dashboard], ["AIDNotes", Notes], ["AIDHow", How], ["AIDMap", CityMap], ["AIDRelated", Related], ["AIDQuestion", Question], ["AIDAnswer", Answer]].forEach(function (x) { reg[x[0]] = pageType(x[0], x[1]); });
   // render / RunMe left out: mount() must not wrap the worker facade in a full runtime (Explain is answered by the worker)
   G.mount(spec, ROOT, { me: window.AIDecidesKernel, gui: Object.assign({}, G, { render: undefined, RunMe: undefined, Theme: PageTheme, registry: reg }), devtools: { enabled: true, inspector: INSPECTOR_ON, adminView: false, inspectorToggleVisible: false } });
   document.documentElement.classList.add("gui-on");
