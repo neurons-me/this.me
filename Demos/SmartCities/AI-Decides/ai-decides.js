@@ -1035,6 +1035,7 @@
         for (var w = 1; w <= x[4]; w++) { t.at.push(P.length); P.push(p + ".win." + w + ".tight"); t.hw.push(P.length); P.push(p + ".win." + w + ".headway"); } tw.push(t); });
       return { P: P, R: R, S: info.services.length, tw: tw }; }, [info]);
     var vs = useState(null), cur = vs[0], setCur = vs[1], before = useRef(null);
+    useEffect(function () { before.current = null; setCur(null); }, [info]);   // a new kernel (scale switch): new baseline
     useEffect(function () { if (!ready || !plan) return; var alive = true;
       live.read(plan.P).then(function (res) { if (!alive) return; var V = res.values, k = 3, o = { factor: V[0], floor: V[1], city: V[2], ms: res.ms, routes: [], off: [], trips: 0, wins: 0, nTrips: 0, nWins: 0 };
         for (var r = 0; r < plan.R; r++) o.routes.push({ r: r, ph: V[k++], trips: 0, wins: 0, nTrips: 0, nWins: 0, hw: 0, nHw: 0 });
@@ -1060,7 +1061,7 @@
     return h("section", { className: "aid-qa ans", "data-aid": "qa-answer-sec", "aria-labelledby": "aid-a" },
       h("div", { className: "aid-a", "data-aid": "qa-answer", "aria-live": "polite" },
         h("div", { className: "aid-qk", id: "aid-a" }, "Answer", h("span", { className: "aid-qstate" }, state)),
-        !A || !B ? h("div", { className: "aid-note" }, ready ? "Reading the kernel…" : "Building the kernel…") : other ? h("div", null,
+        !A || !B || !plan ? h("div", { className: "aid-note" }, ready ? "Reading the kernel…" : "Building the kernel" + (lst.target === 10 ? " (scale 10, a few seconds)" : "") + "…") : other ? h("div", null,
           h("div", { className: "aid-qn", "data-aid": "qa-other" }, "Current state: factor × " + A.factor + (lastHw ? " (from “" + lastHw.scenarioLabel + "”)" : "") + " — not the 10% question.",
             h("button", { type: "button", className: "aid-qbtn-s", "data-aid": "qa-set10", onClick: function () { live.apply("ten").catch(function () {}); } }, "Set to 10%")), off) : h("div", null,
           off,
@@ -1072,7 +1073,7 @@
               h("small", null, "Below the 165 s minimum (" + Math.floor(A.floor / 60) + " min " + (A.floor % 60) + " s between buses)"),
               h("b", null, down.length + " of " + A.routes.length + " routes"),
               h("em", null, A.trips + " of " + A.nTrips + " running trips · " + A.wins + " of " + A.nWins + " time windows"))),
-          !at10 && !A.off.length ? h("div", { className: "aid-note" }, "Before: no window is below the 165 s minimum. Every route runs at a mean headway of about " + r1(A.routes[0].hw) + " s.") : null,
+          !at10 && !A.off.length ? h("div", { className: "aid-note" }, (function () { var hs = A.routes.map(function (q) { return q.hw; }), lo = Math.min.apply(null, hs), hi = Math.max.apply(null, hs); return "Before: no window is below the 165 s minimum. Mean headway per route: " + (Math.round(lo) === Math.round(hi) ? "about " + r1(lo) : Math.round(lo) + "–" + Math.round(hi)) + " s."; })()) : null,
           down.length ? h("ul", { className: "aid-alist", "data-aid": "qa-routes" }, down.map(function (q) { return h("li", { key: q.r },
             h("button", { type: "button", "data-aid": "qa-route", onClick: function () { explain("routes." + (q.r + 1) + ".anyTight", "Route " + (q.r + 1) + " · any window below the 165 s minimum"); } },
               h("i", { style: { background: "hsl(" + HUES[q.r % HUES.length] + " 70% 52%)" } }), h("b", null, "Route " + (q.r + 1)),
@@ -1089,7 +1090,18 @@
               x.meta && x.meta.k != null ? [h("br", { key: "d" }), "last wave k = " + fmt(x.meta.k)] : null)) : null)));
   }
   var N = function (type, id, props, children) { return Object.assign({ type: type, props: Object.assign({}, props || {}, { "data-gui-node-id": id }) }, children ? { children: children } : {}); };
-  var pageType = function (type, Comp) { return { type: type, resolve: function (spec) { var p = Object.assign({}, spec.props || {}); delete p.key; return h(Comp, p); } }; };
+  // never blank the page: a component that throws is replaced by a message, the rest keeps rendering
+  function Boundary(props) { React.Component.call(this, props); this.state = { err: null }; }
+  Boundary.prototype = Object.create(React.Component.prototype); Boundary.prototype.constructor = Boundary;
+  Boundary.getDerivedStateFromError = function (err) { return { err: err }; };
+  Boundary.prototype.componentDidCatch = function (err) { try { console.warn("[AI-Decides] " + this.props.name + " failed:", err); } catch (e) {} };
+  Boundary.prototype.render = function () { var self = this; if (!this.state.err) return this.props.children;
+    return h("div", { className: "aid-note aid-warn", role: "alert", "data-aid": "boundary", style: { padding: "10px 12px", border: "1px dashed currentColor", borderRadius: 10, margin: "8px 0" } }, this.props.name + " could not render: " + String(this.state.err && this.state.err.message || this.state.err) + ". ",
+      h("button", { type: "button", className: "aid-qbtn-s", onClick: function () { self.setState({ err: null }); } }, "Retry"), " ",
+      h("button", { type: "button", className: "aid-qbtn-s", onClick: function () { live.build(1).catch(function () {}); self.setState({ err: null }); } }, "Back to scale 1")); };
+  var Safe = function (name, Comp) { return function (p) { return h(Boundary, { name: name }, h(Comp, p)); }; };
+  Question = Safe("Question", Question); How = Safe("How", How); Answer = Safe("Answer", Answer);
+  var pageType = function (type, Comp) { return { type: type, resolve: function (spec) { var p = Object.assign({}, spec.props || {}); delete p.key; return h(Boundary, { name: type.replace(/^AID/, "") }, h(Comp, p)); } }; };
   var spec = N("Box", "page", { sx: { minHeight: "100vh", bgcolor: "background.default", color: "text.primary" } }, [
     N("AIDTopBar", "topbar"),
     N("Box", "main", { component: "main", sx: { maxWidth: 1180, mx: "auto", px: { xs: 2, sm: 4 }, pt: { xs: 3, sm: 4.5 }, pb: 8 } }, [
