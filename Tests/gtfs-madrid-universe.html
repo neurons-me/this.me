@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>.me — GTFS Madrid live knowledge universe</title>
+  <title>GTFS Madrid · Live knowledge universe — .me</title>
   <meta name="description" content="Real GTFS Madrid shaped as a reactive knowledge graph in this.me: relationships → dependencies, mutate → affected set k. n vs k; scale result briefly." />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content=".me — GTFS Madrid live knowledge universe" />
+  <meta property="og:title" content="GTFS Madrid · Live knowledge universe — .me" />
   <meta property="og:description" content="Real GTFS Madrid shaped as a reactive knowledge graph in this.me: relationships → dependencies, mutate → affected set k. n vs k; scale result briefly." />
   <link rel="canonical" href="https://neurons-me.github.io/.me/Tests/gtfs-madrid-universe.html" />
   <meta property="og:url" content="https://neurons-me.github.io/.me/Tests/gtfs-madrid-universe.html" />
   <meta property="og:image" content="https://suign.github.io/assets/imgs/MADRID-GTFS-DATA-me.jpg" />
   <meta property="og:image:alt" content="Madrid GTFS data in .me" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content=".me — GTFS Madrid live knowledge universe" />
+  <meta name="twitter:title" content="GTFS Madrid · Live knowledge universe — .me" />
   <meta name="twitter:description" content="Real GTFS Madrid shaped as a reactive knowledge graph in this.me: relationships → dependencies, mutate → affected set k. n vs k; scale result briefly." />
   <meta name="twitter:image" content="https://suign.github.io/assets/imgs/MADRID-GTFS-DATA-me.jpg" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/this.gui@1.4.6/dist/styles.css" />
@@ -66,6 +66,10 @@
     .status .kernel { color: #51606d; font-size: 0.76rem; flex-basis: 100%; line-height: 1.5; }
     .status.ok { border-color: rgba(16,185,129,0.35); }
     .status.bad { border-color: rgba(220,38,38,0.45); }
+    .kstat { margin: 0 0 8px; font-size: 0.74rem; }
+    .kstat > summary { cursor: pointer; font-weight: 700; color: #51606d; letter-spacing: 0.02em; }
+    .kstat .status { margin: 6px 0 0; padding: 6px 8px; font-size: 0.76rem; }
+    .kstat .status .big { font-size: 0.8rem; }
     .pass-badge, .fail-badge, .run-badge { font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; letter-spacing: 0.04em; white-space: nowrap; }
     .pass-badge { background: rgba(16,185,129,0.12); color: #047857; }
     .fail-badge { background: rgba(220,38,38,0.12); color: #b91c1c; }
@@ -246,23 +250,19 @@
     <a href="https://neurons-me.github.io/.me/docs/Smart-Cities.html">Syntax</a>
     <a href="https://neurons-me.github.io/.me/Tests/gtfs-madrid-universe.html" class="active">GTFS</a>
     <a href="https://neurons-me.github.io/.me/docs/Tests/madrid-knowledge.html">Fares</a>
+    <a href="https://neurons-me.github.io/.me/Demos/SmartCities/AI-Decides/">Let AI Decide</a>
   </nav>
   <div class="page">
-    <h1>Live knowledge universe</h1>
+    <h1>GTFS Madrid · Live knowledge universe</h1>
     <p class="rule" style="margin-bottom:6px">
-      We loaded real evolving <strong>GTFS Madrid</strong> into <code>.me</code>: routes, trips, services, stop times —
-      with relationships expressed as live dependencies. Change a fact → the kernel follows the affected set <strong>k</strong>,
-      not the whole universe <strong>n</strong>.
+      Routes, trips, services and stop times in <code>.me</code>, linked as live dependencies.
+      Change a fact and the kernel recomputes only the affected set <strong>k</strong>, not all <strong>n</strong>.
     </p>
     <p class="rule" style="margin-bottom:6px">
-      On the full benchmark, <strong>n</strong> grew ~100× (stop times 2.4k → 236k) while <strong>k</strong> p95/max stayed flat (~18 / 27).
-      This page is the interactive subset: <strong>click a node</strong> → <code>me.explain(path)</code>; mutate to watch the wave.
+      On the full benchmark <strong>n</strong> grew ~100× (2.4k → 236k stop times) while <strong>k</strong> p95/max stayed ~18 / 27. <span class="meta">(Scale 100 measured on this.me 4.1.0; scales 1 and 10 re-run on 4.2.1 with the same k: p50 1 / p95 18 / max 27.)</span>
+      Click a node for <code>me.explain(path)</code>; mutate to watch the wave.
     </p>
 
-    <div class="status" id="status">
-      <span class="run-badge">RUNNING</span>
-      <span class="big">Loading kernel…</span>
-    </div>
     <div id="fatal"></div>
 
     <div class="layout">
@@ -290,6 +290,13 @@
       </div>
 
       <div class="side-card">
+        <details class="kstat" id="kstat">
+          <summary id="kstat-sum">Kernel · RUNNING · this.me@4.2.1</summary>
+          <div class="status" id="status">
+            <span class="run-badge">RUNNING</span>
+            <span class="big">Loading kernel…</span>
+          </div>
+        </details>
         <div class="stats">
           <div class="stat"><div class="lbl">n</div><div class="val" id="stat-n">—</div></div>
           <div class="stat"><div class="lbl">k</div><div class="val" id="stat-k">—</div></div>
@@ -380,8 +387,8 @@
       Density ghosts are visual-only — not wired into the kernel.
     </p>
     <p class="note warn" id="kernel-note">
-      Kernel: published <code>this.me@4.1.0</code> (hash-pinned). Isolation demos still pin 4.0.2;
-      DELETE via <code>me["-"]</code> needs 4.1.0 for ABSENCE invalidation. Append <code>?local=1</code>
+      Kernel: published <code>this.me@4.2.1</code> (hash-pinned). Isolation demos still pin 4.0.2;
+      DELETE via <code>me["-"]</code> needs ≥ 4.1.0 for ABSENCE invalidation. Append <code>?local=1</code>
       to load <code>../Typescript/dist/me.es.js</code> instead (static serve from repo root).
     </p>
     <p class="meta">
@@ -406,16 +413,16 @@
   </div>
 
 <script type="module">
-// ── Kernel: published this.me@4.1.0 (DELETE ABSENCE). Isolation pins 4.0.2. ──
+// ── Kernel: published this.me@4.2.1 (DELETE ABSENCE since 4.1.0). Isolation pins 4.0.2. ──
 const KERNEL = {
-  version: "4.1.0",
-  sha256: "47cc8f9a9b5ee2921a59023d400e694d6c9b9f80a0782db850b06156cbb46afa",
+  version: "4.2.1",
+  sha256: "0bd2cc60d15dfc9ff8942d390c075bbc22b4ae3a24d3cbfe581511ea84478757",
   urls: [
-    "https://cdn.jsdelivr.net/npm/this.me@4.1.0/dist/me.es.js",
-    "https://unpkg.com/this.me@4.1.0/dist/me.es.js",
+    "https://cdn.jsdelivr.net/npm/this.me@4.2.1/dist/me.es.js",
+    "https://unpkg.com/this.me@4.2.1/dist/me.es.js",
   ],
   localRel: "../Typescript/dist/me.es.js",
-  whyNot402: "4.0.2 evaluates absolute cross-branch `=` but does not invalidate dependents after me[\"-\"] DELETE (ABSENCE).",
+  whyNot402: "4.0.2 evaluates absolute cross-branch `=` but does not invalidate dependents after me[\"-\"] DELETE (ABSENCE); that was fixed in 4.1.0.",
 };
 
 const SERVICE_ACTIVE =
@@ -502,7 +509,7 @@ async function loadKernel() {
         desc: [
           `this.me@${KERNEL.version} from npm, `, ["code", "dist/me.es.js"], " loaded from ",
           ["code", new URL(url).host], " (sha256 ", ["code", hash.slice(0, 16) + "…"], ", verified).",
-          ` Prefer 4.1.0 over isolation’s 4.0.2: ${KERNEL.whyNot402}`,
+          ` Uses 4.2.1 rather than isolation’s 4.0.2: ${KERNEL.whyNot402}`,
         ],
       };
     } catch (e) {
@@ -974,6 +981,9 @@ function setStatus(ok, title, kernelDesc) {
     el("span", "big", title),
     kd,
   );
+  const sum = $("kstat-sum");
+  if (sum) sum.textContent = `Kernel · ${ok ? "READY" : "ERROR"} · this.me@${KERNEL.version}` + (ok ? "" : ` · ${title}`);
+  if (!ok && $("kstat")) $("kstat").open = true;
 }
 
 function stopWaveAnim() {

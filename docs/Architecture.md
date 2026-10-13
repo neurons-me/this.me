@@ -38,7 +38,7 @@ Secret scopes ([`secret.ts`](https://github.com/neurons-me/.me/blob/main/Typescr
 
 ---
 
-Real, verified performance numbers — measured against the actual test suite, including the ones that don't flatter the claim — live at **[What is O(k)?](https://suign.github.io/WhatIsOK.html)**, not here.
+Real, verified performance numbers — measured against the actual test suite, including the ones that don't flatter the claim — live at **[What is O(k)?](https://neurons-me.github.io/.me/docs/O-k.html)**, not here.
 
 ### Related
 
