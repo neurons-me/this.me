@@ -1,180 +1,150 @@
 ---
-layout: readme
-title: me:// URI Scheme — Grammar Specification
+layout: gui-doc
+title: ".me Syntax"
+description: "The syntax of this.me 4.2.1: dot builds the path, [] selects members, () writes, reads or applies an operator. Names are labels in any language. Every example on this page was run against this.me 4.2.1."
+image: https://neurons-me.github.io/.me/docs/assets/card-syntax-me.webp
+mepath:
+  - text: Docs
+    url: https://neurons-me.github.io/.me/docs/
+crumb: Syntax
 ---
 
+# .me Syntax
 
-# `me://` URI Scheme — Grammar Specification
+> A path is an address, a call is an operation on it. Meaning comes from the structure, not from the words.
 
-**neurons.me / suiGn** **Status:** Draft v0.1 **License:** CC0 1.0 Universal — Public Domain
+Kernel: **this.me 4.2.1** ([npm](https://www.npmjs.com/package/this.me)). Every example below was run against the published 4.2.1 build; the output shown is what it returned. How a single path is written and read in detail: [me.whatever(what)](./Paths.html).
 
-------
+## Algebra first
 
-## 1. Primitives
-
-```abnf
-me-uri     = "me://" namespace [ selector ] [ "/" path ]
-
-namespace  = handle "." space
-handle     = 1*( ALPHA / DIGIT / "-" / "_" )
-             ; handles MUST NOT contain "."
-             ; "." is reserved as a structural operator
-space      = label *( "." label )
-label      = 1*( ALPHA / DIGIT / "-" )
-
-selector   = "[" selector-value "]"
-selector-value = ""                        ; explicit fanout
-             / "current"                   ; local surface only
-             / "surface:" surface-name     ; named surface
-             / "claim:" claim-token        ; pairing handshake
-surface-name = 1*( ALPHA / DIGIT / "-" / "_" )
-claim-token  = 1*( ALPHA / DIGIT / "-" / "_" )
-
-path       = segment *( "." segment )
-segment    = 1*( ALPHA / DIGIT / "-" / "_" )
+```ts
+me.path.to.node(value)   // write
+me("path.to.node")       // read
 ```
 
-------
+The names are any symbols you choose:
 
-## 2. The `.` Operator
+```ts
+me.alpha.beta.gamma(10);
+me("alpha.beta.gamma");          // 10
 
-`.` is not a character. It is a structural operator with exactly one meaning:
+me.ventas.clientes.total(10);
+me("ventas.clientes.total");     // 10
 
-> **descend into the next level**
-
-This rule applies uniformly across the entire system:
-
-| Context   | Example                  | Meaning             |
-| --------- | ------------------------ | ------------------- |
-| Space     | `neurons.me`             | root space          |
-| Sub-space | `dev.neurons.me`         | refinement of space |
-| Namespace | `suign.neurons.me`       | handle inside space |
-| Path      | `profile.name`           | descent into tree   |
-| Deep path | `wallet.primary.balance` | chained descent     |
-
-Because `.` has exactly one meaning, the parser is deterministic. No regex heuristics, no edge cases.
-
-**Handles must not contain `.`** — this is not a validation rule, it is a semantic invariant. Allowing `.` in handles would make the system interpretive rather than structural.
-
-------
-
-## 3. Identity vs Transport
-
-These are not the same thing, even when they share the same string.
-
-| Scheme     | Domain            | Parsed as         |
-| ---------- | ----------------- | ----------------- |
-| `me://`    | semantic parsing  | namespace grammar |
-| `https://` | transport parsing | DNS / HTTP host   |
-
-**Rule:** `me://` defines meaning. `https://` only reaches it.
-
-```
-me://suign.neurons.me[macbook]/profile.name
-     ─────────────────────────
-     semantic identity namespace
-     parsed by me:// grammar
-
-https://suign.neurons.me/profile.name
-        ─────────────────
-        DNS host
-        parsed by HTTP/DNS
-        may project to me:// via resolver — but is not me:// by itself
+me.売上.顧客.合計(10);
+me("売上.顧客.合計");              // 10
 ```
 
-DNS never shapes identity directly. Only explicit resolver rules may project a DNS host into a namespace.
+Same algebra, different vocabulary.
 
-------
+## Path construction
 
-## 4. Namespace vs Surface vs Host
+| Symbol | Role |
+|---|---|
+| `.` | Descends one level: creates hierarchy. |
+| `[]` | Addresses indexed or selected members. |
+| `()` | Executes: a write with a value, a read on the root, or an operator. |
 
-These three terms are distinct and must not be conflated:
+```ts
+me.user.name("Ana");
+me.user.age(22);
+me("user.name");          // "Ana"
+me("user.age");           // 22
 
-| Term          | Definition                                   | Example                     |
-| ------------- | -------------------------------------------- | --------------------------- |
-| **space**     | root semantic world                          | `neurons.me`                |
-| **namespace** | derived identity space                       | `suign.neurons.me`          |
-| **surface**   | runtime execution context within a namespace | `[macbook]`, `[iphone]`     |
-| **host**      | HTTP/DNS transport address                   | `suign.neurons.me` (as DNS) |
-
-A surface is not a namespace. An iPhone, a MacBook, and a server process are all surfaces of the same namespace — not separate namespaces.
-
-------
-
-## 5. Resolver Rules for DNS → Namespace Projection
-
-| Input                        | Projection rule                                              |
-| ---------------------------- | ------------------------------------------------------------ |
-| `me://suign.neurons.me`      | canonical — always semantic namespace                        |
-| `https://suign.neurons.me`   | transport host; resolver may project to `suign.neurons.me` namespace |
-| `https://foo.bar.neurons.me` | not auto-projected as username; treated as raw namespace string or rejected |
-| `hostname.local`             | surface-local transport; no semantic namespace auto-inferred |
-| `localhost`                  | loopback transport alias only; not a semantic namespace      |
-
-**Single-label projection rule:** exactly one extra label over a known root space = user namespace projection is permitted.
-
-```
-suign.neurons.me    →  handle=suign, space=neurons.me  ✓
-foo.bar.neurons.me  →  NOT handle=foo.bar — reject or treat as raw namespace
+me.products[1].name("Keyboard");
+me.products[1].price(80);
+me("products[1].name");   // "Keyboard"
+me("products[1].price");  // 80
 ```
 
-Multi-label subdomains are either a raw namespace string or invalid unless explicitly declared projectable.
+## Any language
 
-------
+The same derivation, written with English and Spanish names:
 
-## 6. Human Layer vs System Layer
+```ts
+me.shop.items[1].price(100);
+me.shop.tax_rate(0.16);
+me.shop.items[1]["="]("total", "price + (price * shop.tax_rate)");
+me("shop.items[1].total");          // 116
 
-The system supports two surface forms for the same identity:
-
-```
-Human layer:    suign@neurons.me          (familiar, email-like)
-Semantic layer: me://suign.neurons.me     (canonical)
-Web surface:    https://suign.neurons.me  (transport ingress only)
-```
-
-`suign@neurons.me` resolves to `suign.neurons.me` as a canonical step, not a parsing rule.
-
-`@` = human-friendly binding operator `.` = system-level structural operator
-
-Both coexist. Neither overrides the other.
-
-------
-
-## 7. Canonical Examples
-
-```
-me://suign.neurons.me/profile.name
-me://suign.neurons.me[macbook]/wallet.primary.balance
-me://suign.neurons.me[surface:iphone]/runtime.battery
-me://suign.neurons.me[current]/session.active
-me://suign.neurons.me[]/chat.general
-me://suign.neurons.me[claim:xyz123]/new-surface
+me.tienda.articulos[1].precio(100);
+me.tienda.impuesto(0.16);
+me.tienda.articulos[1]["="]("total", "precio + (precio * tienda.impuesto)");
+me("tienda.articulos[1].total");    // 116
 ```
 
-------
+Paths written with non-Latin names (`me.売上.顧客.合計`) are written and read as above. In 4.2.1, formula text inside `["="]` that names such paths does not evaluate: `me.店舗.商品[1]["="]("合計", "価格 + (価格 * 店舗.税率)")` leaves `合計` `undefined`, and `explain()` reports `evaluation-failed`.
 
-## 8. Invalid Forms
+## Selectors `[]`
 
+`[]` addresses members that already exist below. What kind of plural a space is (bounded, ordered, evicting) is a separate concern: see [Plurality Is Grammar](https://neurons-me.github.io/.me/Typescript/typedocs/Plurality-Is-Grammar.html).
+
+```ts
+me.fleet.trucks[1].fuel(100);
+me.fleet.trucks[2].fuel(200);
+me.fleet.trucks[3].fuel(400);
+me.price_per_liter(2);
+me.fleet["trucks[i]"]["="]("cost", "fuel * price_per_liter");   // broadcast [i]
 ```
-me://john.dev.neurons.me     ; ambiguous if john.dev could be a handle
-                             ; INVALID — handles must not contain "."
-me://suign@neurons.me        ; @ is human layer only, not me:// grammar
-me://localhost/profile       ; localhost is transport, not namespace
-                             ; INVALID as canonical me:// identity
+
+| Form | Example | Returns |
+|---|---|---|
+| Fixed index | `me("fleet.trucks[2].fuel")` | `200` |
+| Broadcast `[i]` | `me("fleet.trucks[2].cost")` | `400` |
+| Logical filter | `me("fleet.trucks[fuel >= 200].fuel")` | `{ "2": 200, "3": 400 }` |
+| Range | `me("fleet.trucks[1..2].fuel")` | `{ "1": 100, "2": 200 }` |
+| Multi-select | `me("fleet.trucks[[1,3]].fuel")` | `{ "1": 100, "3": 400 }` |
+| Transform | `me("fleet.trucks[x => x.fuel * 0.5]")` | `{ "1": 50, "2": 100, "3": 200 }` |
+
+### Collection aggregates: `x[]` and `x[].f`
+
+An empty `[]` reads an aggregate over the members of a collection: `x[]` is the count, `x[].f` the exact sum of field `f`. Both work in `me()`, `explain()` and formula text.
+
+```ts
+me("fleet.trucks[]");                                   // 3
+me("fleet.trucks[].fuel");                              // 700
+me.fleet["="]("fuelX2", "fleet.trucks[].fuel * 2");     // collection path from the root
+me("fleet.fuelX2");                                     // 1400
 ```
 
-------
+- Computed over the public view (what `me.as(null)` sees), for every caller including the owner.
+- A member without the field, or with a non-numeric value, makes the sum `undefined` (never a partial sum). An empty collection is `undefined`, not `0`.
+- The collection is bound from the root, even inside a scoped formula: write `fleet.trucks[].fuel`, not `trucks[].fuel`. Per member, use `[i]`.
+- The literal key `[]` is written with a quoted selector: `z["[]"].w`.
 
-## 9. The Invariant
+## Operators
 
-> A symbol must fulfill its meaning by definition.
+An operator is a bracketed key called on a path, such as `me.order["="]("total", "subtotal + tax")` or `me.wallet["_"]("key")`. The full set (`@`, `_`, `~`, `__` / `->`, `=`, `?`, `-`), one verified example each: [.me Operators](./Operators.html).
 
-`.` means descent. Always. At every level. In every context.
+## Small scenarios
 
-This is not enforced by validation logic. It is enforced by the grammar itself. A system where symbols cannot lie does not need rules to be consistent — consistency is structural.
+```ts
+me.products[1].price(1000);
+me.products[1].discount(100);
+me.products[1]["="]("final", "price - discount");
+me("products[1].final");            // 900
 
-------
+me.routes[1].distance_km(120);
+me.routes[1].fuel_l(12);
+me.routes[1]["="]("efficiency", "distance_km / fuel_l");
+me("routes[1].efficiency");         // 10
 
-**∴ suiGn / neurons.me — Draft v0.1**
+me.students[1].math(90);
+me.students[1].science(80);
+me.students[1]["="]("avg", "(math + science) / 2");
+me("students[1].avg");              // 85
 
----
+me.sensors[1].temp(21);
+me.sensors[2].temp(30);
+me("sensors[temp >= 25].temp");     // { "2": 30 }
+```
+
+## See also
+
+- [me.whatever(what)](./Paths.html): how a path is written and read, and why `me.a.b()` is not a read.
+- [me.explain(path)](./Explain.html): why a path has its value.
+- [What is O(k)?](./O-k.html): what one write recomputes.
+- [.me Operators](./Operators.html): every operator with one example.
+- [Pointer Composition](./Pointer-Composition.html): pointers composed, cycles failing closed.
+- [me:// URI grammar](./me-uri.html): the `me://` address scheme (namespace, surface, path).
+[Plurality Is Grammar](https://neurons-me.github.io/.me/Typescript/typedocs/Plurality-Is-Grammar.html) · [Algebra of Contexts](https://neurons-me.github.io/.me/Typescript/typedocs/Algebra-of-Contexts.html) · [Proxy Calls](https://neurons-me.github.io/.me/Typescript/typedocs/Proxy-Calls.html)

@@ -1,12 +1,36 @@
 ---
-layout: readme
-title: The Primitives of .me
+layout: gui-doc
+title: "The Primitives of .me"
+description: "The vocabulary .me is built from: distinction, the root primitive me, and the two verbs, declare and resolve."
+image: https://neurons-me.github.io/.me/docs/assets/card-primitives.webp
+mepath:
+  - text: Docs
+    url: https://neurons-me.github.io/.me/docs/
+crumb: Primitives
 ---
 
 
 # 𓂀 The Primitives of .me
 
-**.me** is a declarative language. Everything you can write in it is built from a small, irreducible set of symbols — its primitives. Where [Axioms](./Axioms.html) describe the invariants the kernel guarantees, Primitives describe the vocabulary the kernel is built from: the symbols you actually write, what they do, and what they execute — the same inherent logic as `true`/`false`, `and`/`or`. Operators whose meaning is computable simply because of what they natively are.
+Primitives are the vocabulary `.me` is built from: the symbols you write. [Axioms](./Axioms.html) are the guarantees the kernel keeps about them. `_` is a primitive; "a secret scope's root is invisible while its leaves stay readable" is the axiom built on it (A0/A2).
+
+## Distinction: the primitive beneath .me
+
+> If you cannot differentiate A from not-A, there is nothing.
+
+[The Axiom of Distinction](https://suign.github.io/AxiomOfDistinction.html) takes distinction as the minimal condition for information. A distinction implies two exclusive states, and the transition between them is movement. In `.me` this is literal: a path is either declared or resolved, and a secret scope is a distinction in what the public view contains:
+
+```ts
+me.profile.name("Ana");
+me.wallet["_"]("vault-key");
+me.wallet.balance(500);
+me("wallet");          // undefined
+me.inspect().index;
+// { "profile.name": "Ana" }
+me("wallet.balance");  // 500
+```
+
+The index has no `wallet` entry: the branch is not listed in the public index at all, rather than listed and locked. A leaf is still read by its exact path. Run on this.me 4.2.1. See also [Encrypted Audiences](https://suign.github.io/EncryptedAudiences.html) and [Ontology of Identity](https://suign.github.io/OntologyOfIdentity.html).
 
 ## The Root Primitive
 
@@ -14,7 +38,7 @@ title: The Primitives of .me
 me
 ```
 
-One callable, infinitely chainable value. Every other primitive is a way of acting on `me` or on a path beneath it.
+One callable, infinitely chainable value. Everything else acts on `me` or on a path beneath it.
 
 ## The Two Verbs
 
@@ -23,32 +47,19 @@ Declare meaning
 Resolve meaning
 ```
 
-Declaring is calling a path with a value. Resolving is calling a path without one, or querying it.
+Declaring is calling a path with a value. Resolving is reading a path.
 
 ```ts
 me.profile.name("Abella");   // declare
 me("profile.name");          // resolve
 ```
 
-## The Operator Primitives
+## See also
 
-| Symbol | Name | Declares |
-|---|---|---|
-| `@` | Identity | Binds a normalized identity claim to a path. `me["@"]("jabellae")` |
-| `_` | Secret scope | Marks a path as structurally stealth — its root becomes invisible, its leaves remain traversable. `me.wallet["_"]("key")` |
-| `~` | Noise reset | Cuts secret derivation at a chosen boundary, making prior secrets discontinuous. `me.wallet["~"]("noise")` |
-| `__` / `->` | Structural pointer | A lightweight reference that dereferences automatically when traversed. `me.profile.card["__"]("wallet")` |
-| `?` | Query | Runs a query or calculation and records it as a first-class memory event. `me.profile["?"]("name")` |
-| `-` | Tombstone remove | Deletes a value in a way that is auditable and irreversible at read time. `me.wallet.hidden["-"]("notes")` |
-
-## Why Primitives, Not Just Rules
-
-A primitive is a piece of grammar — it can be described without proving anything about it. An [Axiom](./Axioms.html) is a guarantee the kernel runtime upholds *about* a primitive, backed by kernel evidence and an executable proof.
-
-`_` is a primitive. "A secret scope's root is always invisible while its leaves remain readable" is the axiom built on top of it (A0/A2).
-
-## Self-Description
-
-Because the runtime of `.me` is written in the same semantic model it interprets, these primitives are not just user-facing syntax — they are also how the kernel describes its own behavior internally. This is what makes `.me` *self-semantic*: the language can describe itself using its own primitives.
+- [.me Operators](./Operators.html): `@`, `_`, `~`, `__` / `->`, `=`, `?`, `-`, one example each.
+- [.me Syntax](./Syntax.html): `.`, `[]` and `()`, selectors, any-language names.
+- [me.whatever(what)](./Paths.html): how a path is written and read, and why `me.a.b()` is not a read.
+- [What is .me?](./me.html): the identity primitive and the self-semantic runtime.
+- [Axioms](./Axioms.html)
 
 ---

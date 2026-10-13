@@ -1,6 +1,12 @@
 ---
-layout: readme
-title: The Axioms of .me
+layout: gui-doc
+title: "The Axioms of .me"
+description: "The invariants the .me kernel guarantees (A-struct-0, A0–A9), each with a short example and runtime proof."
+image: https://neurons-me.github.io/.me/docs/assets/card-axioms.webp
+mepath:
+  - text: Docs
+    url: https://neurons-me.github.io/.me/docs/
+crumb: Axioms
 ---
 
 

@@ -331,7 +331,9 @@
     if (n.nodeType !== 1) return null;
     const t = tagOf(n);
     if (t === "a") return N("Link", { href: n.getAttribute("href"), underline: "hover", sx: { color: "primary.main", fontWeight: "inherit" } }, inl(n));
-    if (t === "code") return N("Box", { component: "code", sx: { fontFamily: MONO, fontSize: ".86em", px: .5, py: .125, borderRadius: "4px", bgcolor: "action.hover", color: "text.primary", overflowWrap: "anywhere" } }, [n.textContent]);
+    // Inline code that is .me code (starts with me. / me( / me[) goes through the .me highlighter too.
+    if (t === "code") { const tx = n.textContent, isMe = SYN && /^me[.(\[]/.test(tx);
+      return N("Box", { component: "code", className: isMe ? "me-code" : undefined, sx: { fontFamily: MONO, fontSize: ".86em", px: .5, py: .125, borderRadius: "4px", bgcolor: "action.hover", color: "text.primary", overflowWrap: "anywhere" } }, isMe ? SYN.render(h, tx) : [tx]); }
     if (t === "strong" || t === "b") return N("Box", { component: "strong", sx: { fontWeight: 700, color: "text.primary" } }, inl(n));
     if (t === "em" || t === "i") return N("Box", { component: "em" }, inl(n));
     if (t === "br") return N("Box", { component: "br" });

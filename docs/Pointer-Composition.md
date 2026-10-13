@@ -1,6 +1,12 @@
 ---
-layout: readme
-title: Pointer Composition
+layout: gui-doc
+title: "Pointer Composition"
+description: "How .me pointers compose: a chain of -> edges resolves by substitution, a direct read stays a pointer marker, and self-pointers and cycles of any length fail closed. Every contract is an executable test."
+image: https://neurons-me.github.io/.me/docs/assets/card-pointer.webp
+mepath:
+  - text: Docs
+    url: https://neurons-me.github.io/.me/docs/
+crumb: Pointer Composition
 ---
 
 # 🔗 Pointer Composition
@@ -141,3 +147,9 @@ Source: [`tests/contracts/pointer-category.contract.test.mjs`](https://github.co
 A pointer chain isn't a special code path bolted onto single-hop pointers — the same suffix-preserving substitution just gets applied again for each edge. That's why composition, self-pointers, and cycles of any length all fall out of one mechanism instead of needing separate handling: the resolver only needs to remember which edges it has already followed in the current pass, and a cycle is nothing more than an edge asked to redirect twice.
 
 ---
+
+## See also
+
+- [.me Syntax](./Syntax.html): paths, selectors and calls.
+- [.me Operators](./Operators.html): `__` / `->` alongside the other operators.
+- [Axioms A4](./Axioms.html#a4--structural-pointers-__---): structural pointers.
