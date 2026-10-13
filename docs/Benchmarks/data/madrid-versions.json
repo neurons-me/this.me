@@ -1,0 +1,158 @@
+{
+ "_doc": "GTFS-Madrid benchmark per version. Every value is copied from a committed results file (path in 'src' per value); a missing key means not measured. Do not hand-edit numbers without a results file.",
+ "generated": "2026-10-13",
+ "run": {
+  "machine": "shared Linux VM, Intel Xeon 8 vCPU, 16 GiB",
+  "node": "Node 22.23.3"
+ },
+ "foot": "Single runs per version on one shared VM (Node v22.23.3): 4.1.0 and 4.2.0 seed0 sweeps on 2026-10-10, 4.1.0 skew on 2026-10-07, 4.2.1 on 2026-10-13. Same VM, different days: differences under ~10% are within noise. — = not measured.",
+ "baseline": "Relative values divide by each line's first measured version (4.1.0, or 4.2.0 for the [] aggregate, which 4.1.0 does not have).",
+ "series": [
+  {
+   "key": "upd_per_k",
+   "name": "UPDATE cost per recomputed value",
+   "benchmark": "run 2",
+   "what": "slope of service-flip apply time vs k, skew census, 22 runs pooled (ms per k; 0.035 = 35 µs)",
+   "visible": true,
+   "warmup": false
+  },
+  {
+   "key": "del_p50",
+   "name": "trip DELETE p50, scale 10",
+   "benchmark": "run 1/3",
+   "what": "seed0 sweep, 242 deletes, apply ms p50",
+   "visible": true,
+   "warmup": false
+  },
+  {
+   "key": "load10",
+   "name": "scale-10 load",
+   "benchmark": "run 1",
+   "what": "load base + wire aggregates, ms (one run)",
+   "visible": true,
+   "warmup": false
+  },
+  {
+   "key": "agg_create",
+   "name": "[] aggregate CREATE p50, scale 10",
+   "benchmark": "run 4",
+   "what": "GTFS_AGG=bracket, 1,020 CREATEs, apply ms p50",
+   "visible": true,
+   "warmup": false
+  }
+ ],
+ "builds": [
+  {
+   "id": "4.1.0",
+   "sha": "4.1.0",
+   "version": "4.1.0",
+   "label": "4.1.0",
+   "kind": "release",
+   "npm": "4.1.0",
+   "subject": "Correctness release for derived values: topological wave, early cutoff, removals, cycles",
+   "values": {
+    "upd_per_k": {
+     "ms": 0.05838,
+     "min": 0.05838,
+     "max": 0.05838,
+     "n": 1100,
+     "src": "Typescript/tests/Benchmarks/GTFS-Madrid/results/skew/v4.1.0/scale10-skew-sweep.md",
+     "note": "2026-10-07, r = 0.946 (GC stalls in that run)"
+    },
+    "del_p50": {
+     "ms": 170.616,
+     "min": 170.616,
+     "max": 170.616,
+     "n": 242,
+     "src": "Typescript/tests/Benchmarks/GTFS-Madrid/results/v4.1.0-same-machine/scale10-base-seed0-sweep.tsv"
+    },
+    "load10": {
+     "ms": 4413.79,
+     "min": 4413.79,
+     "max": 4413.79,
+     "n": 1,
+     "src": "Typescript/tests/Benchmarks/GTFS-Madrid/results/v4.1.0-same-machine/scale10-base-seed0-sweep.md"
+    }
+   }
+  },
+  {
+   "id": "4.2.0",
+   "sha": "4.2.0",
+   "version": "4.2.0",
+   "label": "4.2.0",
+   "kind": "release",
+   "npm": "4.2.0",
+   "subject": "Adds the [] collection aggregate; pointer formulas recompute (#4); root _ stealth for guests",
+   "values": {
+    "upd_per_k": {
+     "ms": 0.05202,
+     "min": 0.05202,
+     "max": 0.05202,
+     "n": 1100,
+     "src": "Typescript/tests/Benchmarks/GTFS-Madrid/results/skew/v4.2.0/explicit/scale10-skew-sweep.md"
+    },
+    "del_p50": {
+     "ms": 143.795,
+     "min": 143.795,
+     "max": 143.795,
+     "n": 242,
+     "src": "Typescript/tests/Benchmarks/GTFS-Madrid/results/v4.2.0/explicit/scale10-base-seed0-sweep.tsv"
+    },
+    "load10": {
+     "ms": 4730.47,
+     "min": 4730.47,
+     "max": 4730.47,
+     "n": 1,
+     "src": "Typescript/tests/Benchmarks/GTFS-Madrid/results/v4.2.0/explicit/scale10-base-seed0-sweep.md"
+    },
+    "agg_create": {
+     "ms": 49.673,
+     "min": 49.673,
+     "max": 49.673,
+     "n": 1020,
+     "src": "Typescript/tests/Benchmarks/GTFS-Madrid/results/v4.2.0/bracket/scale10-base-seed0-sweep.tsv"
+    }
+   }
+  },
+  {
+   "id": "4.2.1",
+   "sha": "4.2.1",
+   "version": "4.2.1",
+   "label": "4.2.1",
+   "kind": "release",
+   "npm": "4.2.1",
+   "subject": "Performance release, no behavior change: each formula compiled once per kernel",
+   "values": {
+    "upd_per_k": {
+     "ms": 0.0352,
+     "min": 0.0352,
+     "max": 0.0352,
+     "n": 1100,
+     "src": "Typescript/tests/Benchmarks/GTFS-Madrid/results/skew/v4.2.1/explicit/scale10-skew-sweep.md"
+    },
+    "del_p50": {
+     "ms": 118.64,
+     "min": 118.64,
+     "max": 118.64,
+     "n": 242,
+     "src": "Typescript/tests/Benchmarks/GTFS-Madrid/results/v4.2.1/explicit/scale10-base-seed0-sweep.tsv"
+    },
+    "load10": {
+     "ms": 4243.92,
+     "min": 4243.92,
+     "max": 4243.92,
+     "n": 1,
+     "src": "Typescript/tests/Benchmarks/GTFS-Madrid/results/v4.2.1/explicit/scale10-base-seed0-sweep.md"
+    },
+    "agg_create": {
+     "ms": 42.467,
+     "min": 42.467,
+     "max": 42.467,
+     "n": 1020,
+     "src": "Typescript/tests/Benchmarks/GTFS-Madrid/results/v4.2.1/bracket/scale10-base-seed0-sweep.tsv"
+    }
+   }
+  }
+ ],
+ "annotations": []
+}

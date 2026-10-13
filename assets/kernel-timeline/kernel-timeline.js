@@ -206,7 +206,7 @@
         shown.map(function (s) { var p = s.pts[i], v = b.values[s.key]; return h("td", { key: s.key, title: v ? "min " + v.min + " · max " + v.max + " · n " + v.n : null }, p ? fmtMs(p.ms) : v ? "n/c" : "—"); })); }))));
     var run = doc.run || {};
     var foot = h("div", { className: "kt-foot" },
-      "Medians of " + run.rounds + " interleaved rounds per build, one machine (" + run.machine + ", " + run.node + "). " + (mode === "rel" ? doc.baseline + " " : "ms on a log scale. ") +
+      (doc.foot ? doc.foot + " " : "Medians of " + run.rounds + " interleaved rounds per build, one machine (" + run.machine + ", " + run.node + "). ") + (mode === "rel" ? doc.baseline + " " : "ms on a log scale. ") +
       (B.some(function (b) { return b.kind === "unreleased"; }) ? "Dashed segment: an unreleased branch. " : "") + "⚠ = dominated by first-write warm-up. n/c = not comparable (see the data file). ",
       h("a", { href: src }, "Data (JSON)"), ".");
     return h("div", { className: "kt", "data-gui-node-id": props["data-gui-node-id"] }, ctl, legend,

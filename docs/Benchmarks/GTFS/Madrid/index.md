@@ -9,6 +9,8 @@ mepath:
   - text: GTFS
     url: https://neurons-me.github.io/.me/docs/Benchmarks/GTFS/
 crumb: Madrid
+scripts:
+  - /assets/kernel-timeline/kernel-timeline.js?v=3
 ---
 
 # GTFS-Madrid
@@ -127,6 +129,22 @@ Deletes are a phase of the same skew run, no separate command.
 GTFS_AGG=bracket ME_VERSION=4.2.1 node tests/Benchmarks/GTFS-Madrid/sweep-seed0.ts --scale=1
 GTFS_AGG=bracket ME_VERSION=4.2.1 node tests/Benchmarks/GTFS-Madrid/sweep-seed0.ts --scale=10
 ```
+
+## Across versions {#versions}
+
+<div class="kernel-timeline" data-src="{{ '/docs/Benchmarks/data/madrid-versions.json' | relative_url }}" markdown="1">
+
+The interactive chart needs JavaScript. The same numbers, each with the results file it comes from: [madrid-versions.json]({{ '/docs/Benchmarks/data/madrid-versions.json' | relative_url }}).
+
+</div>
+
+| version | what changed (CHANGELOG) | UPDATE per k | trip DELETE p50 (scale 10) | scale-10 load | `[]` CREATE p50 |
+|---|---|---:|---:|---:|---:|
+| [4.1.0](https://www.npmjs.com/package/this.me/v/4.1.0) | Correctness release for derived values: topological wave, early cutoff, removals, cycles | 58 µs (2026-10-07) | 171 ms | 4,414 ms | not measured (no `[]` yet) |
+| [4.2.0](https://www.npmjs.com/package/this.me/v/4.2.0) | Adds the `[]` collection aggregate; formulas through pointers recompute (#4); root `_` stealth for guests | 52 µs | 144 ms | 4,730 ms | 50 ms |
+| [4.2.1](https://www.npmjs.com/package/this.me/v/4.2.1) | Performance only, no behavior change: each formula is compiled once per kernel instead of on every recompute | 35 µs | 119 ms | 4,244 ms | 42 ms |
+
+One run per version on the same shared VM, on different days (4.1.0 skew 2026-10-07; 4.1.0 and 4.2.0 sweeps 2026-10-10; 4.2.1 2026-10-13): differences under ~10% (the load column) are within noise. k is the same on all three. Changelog: [CHANGELOG.md](https://github.com/neurons-me/.me/blob/main/Typescript/CHANGELOG.md).
 
 ## Known limits {#known-limits}
 
