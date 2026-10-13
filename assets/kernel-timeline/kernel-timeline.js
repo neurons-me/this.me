@@ -207,7 +207,7 @@
     var run = doc.run || {};
     var foot = h("div", { className: "kt-foot" },
       (doc.foot ? doc.foot + " " : "Medians of " + run.rounds + " interleaved rounds per build, one machine (" + run.machine + ", " + run.node + "). ") + (mode === "rel" ? doc.baseline + " " : "ms on a log scale. ") +
-      (B.some(function (b) { return b.kind === "unreleased"; }) ? "Dashed segment: an unreleased branch. " : "") + "⚠ = dominated by first-write warm-up. n/c = not comparable (see the data file). ",
+      (B.some(function (b) { return b.kind === "unreleased"; }) ? "Dashed segment: an unreleased branch. " : "") + (doc.warmupNote === false ? "" : "⚠ = dominated by first-write warm-up. ") + "n/c = not comparable (see the data file). ",
       h("a", { href: src }, "Data (JSON)"), ".");
     return h("div", { className: "kt", "data-gui-node-id": props["data-gui-node-id"] }, ctl, legend,
       h("div", { className: "kt-plot", ref: plotRef }, svg, tip), annList, tbl, foot);
