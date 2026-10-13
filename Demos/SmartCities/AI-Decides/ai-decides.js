@@ -1095,7 +1095,7 @@
   var RELATED = [
     ["https://neurons-me.github.io/.me/docs/Extreme-Fan-Out.html", "https://suign.github.io/assets/imgs/EXTREME-FAN-OUT.jpg", "Extreme Fan-Out", "The concept behind k: one write, every dependent value recomputes."],
     ["https://neurons-me.github.io/.me/docs/Benchmarks/GTFS/Madrid/", "https://suign.github.io/assets/imgs/MADRID-GRAPH-ME.jpg", "GTFS-Madrid benchmark", "The same feed measured at scale: build, write and read timings."],
-    ["https://neurons-me.github.io/smart-cities/", "https://neurons-me.github.io/smart-cities/assets/SMART-CITIES-ME.jpg", "Smart Cities demos", "The other city demos on the same kernel."],
+    ["https://neurons-me.github.io/smart-cities/", "https://neurons-me.github.io/smart-cities/assets/SMART-CITIES-ME.jpg", "Smart Cities", "The other city demos on the same kernel."],
     ["https://neurons-me.github.io/robots/", "https://neurons-me.github.io/robots/assets/ROBOTS-CONTEXT-LAB.jpg", "Robots", "Robots that understand context: one object, four meanings, zero copies."]];
   function Related(p) {
     return h("section", { className: "aid-rel-cards", "data-gui-node-id": p["data-gui-node-id"], "data-aid": "related", "aria-labelledby": "aid-rel-h" },
