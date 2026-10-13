@@ -44,13 +44,13 @@
     if (scenario.kind === "set") {
       factor = scenario.factor;
       reason = factor === 1 ? "Back to the published headways (factor 1.00) on every line."
-        : (factor < 1 ? "Shorten every headway by " + Math.round((1 - factor) * 100) + "% on every line (same for all). " : "Stretch every headway by " + Math.round((factor - 1) * 100) + "% on every line (same for all). ") + pct(share(factor)) + " of windows below the " + fl + " s floor.";
+        : (factor < 1 ? "Shorten every headway by " + Math.round((1 - factor) * 100) + "% on every line (same for all). " : "Stretch every headway by " + Math.round((factor - 1) * 100) + "% on every line (same for all). ") + pct(share(factor)) + " of windows below the " + fl + " s minimum.";
     } else {
       factor = 1; var lim = scenario.maxTight, best = 1;
       for (var c = 1; c <= Math.round(scenario.maxCut * 100); c++) { var f = r2(1 - c / 100), s = share(f); tried.push([f, s]); if (s <= lim) best = f; else break; }
       factor = best; var s1 = share(factor), next = tried.filter(function (x) { return x[0] < factor; })[0];
       reason = "Cut every line's headway by " + Math.round((1 - factor) * 100) + "% (the same for every line). That puts " + pct(s1) + " of the " + W.toLocaleString("en-US") +
-        " frequency windows below the " + fl + " s floor; this scenario allows " + pct(lim) + "." +
+        " frequency windows below the " + fl + " s minimum; this scenario allows " + pct(lim) + "." +
         (next ? " Cutting " + Math.round((1 - next[0]) * 100) + "% would put " + pct(next[1]) + " below." : " The scenario's cap is " + Math.round(scenario.maxCut * 100) + "%.");
     }
     var inputs = { policy: POLICY.label, scenario: scenario.id, floor: fl, maxCut: scenario.maxCut, maxTight: scenario.maxTight, setFactor: scenario.factor, windows: W, headwaySum: H.reduce(function (a, b) { return a + b; }, 0), scale: data.scale };

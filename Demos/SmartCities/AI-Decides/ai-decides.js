@@ -14,7 +14,7 @@
   var h = React.createElement, useState = React.useState, useEffect = React.useEffect, useRef = React.useRef, useMemo = React.useMemo;
   var MONO = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
   var HERE = new URL(".", (document.currentScript && document.currentScript.src) || location.href).href;
-  var MODEL_URL = HERE + "ai-model.js?v=1.0.1", DATA_URL = function (s) { return HERE + "data/madrid-s" + s + ".json?v=1"; };
+  var MODEL_URL = HERE + "ai-model.js?v=1.0.2", DATA_URL = function (s) { return HERE + "data/madrid-s" + s + ".json?v=1"; };
   var ME_VERSION = "4.2.1", ME_URL = "https://cdn.jsdelivr.net/npm/this.me@" + ME_VERSION + "/dist/me.umd.js", ME_SRI = "sha384-ElnWCZOb324gqFJ2M/Fxy4CZ6Si131WIbR54iYomzEbTloUDLfBzZ05qi1nZ7+4G";
   var SRC_URL = "https://github.com/neurons-me/.me/blob/main/Demos/SmartCities/AI-Decides/";
   var params = new URLSearchParams(location.search);
@@ -22,7 +22,7 @@
     var f = NF[k] || (NF[k] = new Intl.NumberFormat("en-US", { maximumFractionDigits: k, minimumFractionDigits: Math.min(k, 1) })); return f.format(Number(n)); };
   var ms = function (x) { return x == null ? "–" : x >= 100 ? fmt(x) + " ms" : x.toFixed(1) + " ms"; };
   var val = function (v) { return typeof v === "number" ? (Number.isInteger(v) ? fmt(v) : fmt(v, 2)) : v === undefined ? "–" : String(v); };
-  var SCEN = [["am-peak", "Weekday AM peak"], ["event", "Event tonight"], ["save", "Off-peak, save energy"], ["timetable", "Back to the timetable"]];
+  var SCEN = [["ten", "Buses 10% more often"], ["am-peak", "Weekday AM peak"], ["event", "Event tonight"], ["save", "Off-peak, save energy"], ["timetable", "Back to the timetable"]];
 
   // ── the kernel worker: this.me 4.2.1 (fetched with SRI) + ai-model.js + the data; everything heavy happens here ──
   function KERNEL_WORKER() {
@@ -190,11 +190,12 @@
     ".aid-try h4{margin:10px 0 6px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mui-palette-text-secondary,#8b949e)}.aid-try-grid{display:grid;grid-template-columns:1fr;gap:14px}@media (min-width:900px){.aid-try-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}.aid-try-col{min-width:0}",
     ".aid-try-raw{margin-bottom:8px}.aid-try-rl{font-size:11.5px;color:var(--mui-palette-text-secondary,#8b949e);margin-bottom:2px}.aid-try-raw pre{margin:0;padding:6px 8px;border-radius:8px;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));font:11px/1.55 " + MONO + ";overflow-x:auto;white-space:pre}.aid-try-raw .hd{color:var(--mui-palette-text-secondary,#8b949e)}",
     ".aid-try-paths{list-style:none;margin:0;padding:0}.aid-try-paths li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 10px;padding:3px 0;border-bottom:1px dashed var(--mui-palette-divider,rgba(128,128,128,.25));align-items:baseline}.aid-try-paths .v{font:600 12px " + MONO + "}.aid-try-paths small{grid-column:1/-1;font-size:11px;color:var(--mui-palette-text-secondary,#8b949e)}",
-    ".aid-qa{display:grid;gap:12px;margin:0 0 22px}.aid-q,.aid-a{border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:14px;padding:14px 16px;background:var(--mui-palette-background-paper,transparent)}.aid-a{border-color:var(--mui-palette-primary-main,#58a6ff)}",
+    ".aid-qa{display:grid;gap:12px;margin:0 0 22px}.aid-qa.ans{margin:18px 0 22px}.aid-qn{margin:10px 0 0;padding:8px 10px;border-radius:10px;border:1px dashed var(--mui-palette-warning-main,#f0b429);font-size:12.5px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}.aid-other{margin-top:8px;font-size:12.5px}.aid-other summary{cursor:pointer;color:var(--mui-palette-text-secondary,#8b949e)}"+
+    ".aid-q,.aid-a{border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:14px;padding:14px 16px;background:var(--mui-palette-background-paper,transparent)}.aid-a{border-color:var(--mui-palette-primary-main,#58a6ff)}",
     ".aid-qk{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--mui-palette-text-secondary,#8b949e);margin-bottom:6px}.aid-qstate{letter-spacing:0;text-transform:none;font-weight:600}",
     ".aid-q h2{margin:0;font-size:clamp(1.15rem,2.6vw,1.5rem);line-height:1.3;font-weight:800}.aid-qs{margin-top:6px;font-size:12.5px;color:var(--mui-palette-text-secondary,#8b949e)}.aid-qbtns{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px}.aid-qkern{padding:0 4px}",
     ".aid-akpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media (max-width:600px){.aid-akpis{grid-template-columns:1fr}}.aid-akpi{all:unset;box-sizing:border-box;display:flex;flex-direction:column;gap:2px;padding:10px 12px;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:12px;cursor:pointer}button.aid-akpi:hover{border-color:var(--mui-palette-primary-main,#58a6ff)}",
-    ".aid-akpi small{font-size:11.5px;color:var(--mui-palette-text-secondary,#8b949e)}.aid-akpi b{font-size:1.6rem;font-weight:800;font-variant-numeric:tabular-nums}.aid-akpi .arr{color:var(--mui-palette-success-main,#2e9d6e)}.aid-akpi em{font-style:normal;font-size:12.5px;color:var(--mui-palette-text-secondary,#8b949e)}.aid-akpi em.up{color:var(--mui-palette-success-main,#2e9d6e);font-weight:700}.aid-akpi.warn{border-color:var(--mui-palette-warning-main,#f0b429)}.aid-akpi.warn b{color:var(--mui-palette-warning-main,#f0b429)}",
+    ".aid-akpi small{font-size:11.5px;color:var(--mui-palette-text-secondary,#8b949e)}.aid-akpi b{font-size:1.6rem;font-weight:800;font-variant-numeric:tabular-nums}.aid-akpi .arr{color:var(--mui-palette-success-main,#2e9d6e)}.aid-akpi .arr.dn,.aid-akpi em.dn{color:var(--mui-palette-error-main,#e5534b)}.aid-qbtn-s{font:inherit;font-weight:700;padding:3px 10px;border-radius:8px;border:1px solid currentColor;background:none;color:var(--mui-palette-primary-main,#58a6ff);cursor:pointer}.aid-rel code.me-code{font-size:11.5px}.aid-akpi em{font-style:normal;font-size:12.5px;color:var(--mui-palette-text-secondary,#8b949e)}.aid-akpi em.up{color:var(--mui-palette-success-main,#2e9d6e);font-weight:700}.aid-akpi.warn{border-color:var(--mui-palette-warning-main,#f0b429)}.aid-akpi.warn b{color:var(--mui-palette-warning-main,#f0b429)}",
     ".aid-alist{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:4px}.aid-alist button{all:unset;box-sizing:border-box;width:100%;display:grid;grid-template-columns:10px 70px minmax(40px,1fr) auto auto;gap:8px;align-items:center;padding:5px 8px;border-radius:8px;cursor:pointer;font-size:12.5px;font-variant-numeric:tabular-nums}.aid-alist button:hover,.aid-alist button:focus-visible{background:var(--mui-palette-action-hover,rgba(128,128,128,.12))}",
     ".aid-alist i{width:10px;height:10px;border-radius:3px}.aid-alist .bar{height:6px;border-radius:3px;background:var(--mui-palette-divider,rgba(128,128,128,.25));overflow:hidden}.aid-alist .bar span{display:block;height:100%;background:var(--mui-palette-warning-main,#f0b429)}.aid-alist .ph{color:var(--mui-palette-text-secondary,#8b949e)}@media (max-width:600px){.aid-alist button{grid-template-columns:10px 62px minmax(30px,1fr) auto}.aid-alist .ph{display:none}}",
     ".aid-map{margin:28px 0 8px}.aid-map h2{margin:0 0 4px;font-size:1.35rem;font-weight:800}.aid-map-label{display:inline-block;margin-bottom:10px;padding:2px 8px;border:1px dashed var(--mui-palette-warning-main,#b7791f);border-radius:6px;color:var(--mui-palette-warning-main,#b7791f);font-size:12px;font-weight:600}",
@@ -280,7 +281,7 @@
   };
   var LEAVES = { center: [], route: ["perHour", "anyTight"], trip: ["perHour", "live"], win: ["headway", "perHour", "tight", "base"], stop: [] };
   var PANEL_KEY = "ai-decides.panel", SLOW_KEY = "ai-decides.slow";
-  var SECTIONS = [["decision", "Decision", true], ["service", "Suspend service", false], ["wave", "This wave", true], ["routes", "Changed, by route", true], ["chain", "Explain chain", true], ["history", "Decisions log", false], ["model", "Model & data", false]];
+  var SECTIONS = [["decision", "Decision", true], ["service", "Other scenarios · try a suspension", false], ["wave", "This wave", true], ["routes", "Changed, by route", true], ["chain", "Explain chain", true], ["history", "Decisions log", false], ["model", "Model & data", false]];
   function loadPanel() { var d = { open: true, sec: {} }; SECTIONS.forEach(function (x) { d.sec[x[0]] = x[2]; });
     try { var v = JSON.parse(localStorage.getItem(PANEL_KEY) || "null"); if (v && typeof v === "object") { if (typeof v.open === "boolean") d.open = v.open; for (var k in v.sec) if (k in d.sec) d.sec[k] = !!v.sec[k]; } } catch (e) {}
     return d; }
@@ -381,7 +382,7 @@
           for (var q = 0; q < geo.W; q++) if (Wv.chWin[q] & 2) { var a = A(geo.uOf(q) + .5), t = tipOf(S.perHour[q]) * Rpx + 3.5 * dpr, x0 = cx + Math.cos(a) * t, y0 = cx + Math.sin(a) * t; pg.moveTo(x0 + rr, y0); pg.arc(x0, y0, rr, 0, Math.PI * 2); }
           ctx.fillStyle = col.gold; ctx.fill(pg); }
         // the floor's label last, on its plate, above the ticks and dots
-        ctx.font = Math.round(10.5 * dpr) + "px " + MONO; ctx.textAlign = "left"; var lx = cx + fr * .71 + 5 * dpr, ly = cx - fr * .71 - 3 * dpr, lab = info.floor + " s floor", tw = ctx.measureText(lab).width;
+        ctx.font = Math.round(10.5 * dpr) + "px " + MONO; ctx.textAlign = "left"; var lx = cx + fr * .71 + 5 * dpr, ly = cx - fr * .71 - 3 * dpr, lab = info.floor + " s minimum", tw = ctx.measureText(lab).width;
         ctx.fillStyle = getComputedStyle(document.body).backgroundColor || (dark ? "#0d1117" : "#fff"); ctx.globalAlpha = .85; ctx.fillRect(lx - 3 * dpr, ly - 11 * dpr, tw + 6 * dpr, 15 * dpr); ctx.globalAlpha = 1;   // a plate: readable over dense ticks
         ctx.fillStyle = col.text; ctx.fillText(lab, lx, ly);
       }
@@ -498,15 +499,18 @@
       : lst.phase === "error" ? h("div", { className: "aid-note aid-warn", role: "status" }, "Kernel unavailable: " + lst.error) : null;
     var undoBtn = Btn({ "data-aid": "undo", disabled: !ready || !lst.undoable, title: lst.undoable ? "Undo decision #" + lst.undoable + ": a new decision that writes the previous value" : "Nothing to undo", onClick: function () { live.undo().catch(function () {}); } }, lst.undoable ? "Undo #" + lst.undoable : "Undo");
     var decisionBody = [
-      h("div", { key: "q", className: "aid-note", style: { marginTop: 0 } }, "Pick a scenario: the policy proposes a decision and its reason. Apply stores it in the kernel and makes one write.",
-        Info("The decider is a plain, versioned function (policy:fair-headway@1 in ai-model.js), not a language model. Same scenario + same data = the same proposal and the same inputs hash. It uses one factor for every line (fair) and the largest cut, in 1% steps, that keeps the share of frequency windows below the floor within the scenario's limit (safe). The feed has no demand data, so a scenario is what you ask for, not a prediction.", "About the decider")),
-      h("div", { key: "s", className: "aid-ctl", role: "group", "aria-label": "Scenario", style: { marginTop: 8 } }, SCEN.map(function (x) { return h(React.Fragment, { key: x[0] }, Btn({ "data-aid": "scen-" + x[0], "aria-pressed": scen === x[0] ? "true" : "false", active: scen === x[0], disabled: !info, onClick: function () { live.propose(x[0]).catch(function () {}); } }, x[1])); })),
+      h("div", { key: "q", className: "aid-note", style: { marginTop: 0 } }, "Use “Apply: buses 10% more often” above, or the same decision here. The policy proposes it with its reason; Apply stores it in the kernel and makes one write.",
+        Info("The decider is a plain, versioned function (policy:fair-headway@1 in ai-model.js), not a language model. Same scenario + same data = the same proposal and the same inputs hash. It uses one factor for every line (fair) and the largest cut, in 1% steps, that keeps the share of frequency windows below the 165 s minimum within the scenario's limit (safe). The feed has no demand data, so a scenario is what you ask for, not a prediction.", "About the decider")),
+      h("div", { key: "s", className: "aid-ctl", role: "group", "aria-label": "Scenario", style: { marginTop: 8 } }, SCEN.slice(0, 1).map(function (x) { return h(React.Fragment, { key: x[0] }, Btn({ "data-aid": "scen-" + x[0], "aria-pressed": scen === x[0] ? "true" : "false", active: scen === x[0], disabled: !info, onClick: function () { live.propose(x[0]).catch(function () {}); } }, x[1])); })),
+      h("details", { key: "o", className: "aid-other", "data-aid": "other-scen", open: !!(scen && scen !== "ten") || undefined }, h("summary", null, "Other scenarios (not the 10% question)"),
+        h("div", { className: "aid-ctl", role: "group", "aria-label": "Other scenarios", style: { marginTop: 6 } }, SCEN.slice(1).map(function (x) { return h(React.Fragment, { key: x[0] }, Btn({ "data-aid": "scen-" + x[0], "aria-pressed": scen === x[0] ? "true" : "false", active: scen === x[0], disabled: !info, onClick: function () { live.propose(x[0]).catch(function () {}); } }, x[1])); }))),
+      P && scen === P.scenario && P.noop ? h("div", { key: "pn", className: "aid-note", "data-aid": "proposal-noop" }, "Already applied: policy.factor = " + P.factor + " (" + P.scenarioLabel + ").", h("div", { className: "aid-ctl", style: { marginTop: 6 } }, undoBtn)) :
       P && scen === P.scenario ? h("div", { key: "p", className: "aid-card", "data-aid": "proposal" },
         h("h4", null, "Proposal · would be decision #" + ((lst.decisions.length || 0) + 1)),
         row("by", h("span", { className: "aid-mono" }, P.by), "by"), h("div", { key: "ask", className: "aid-note", style: { marginTop: 0 } }, "Asked: " + P.ask),
         row("write", h("span", { className: "aid-mono" }, "policy.factor " + P.from + " → " + P.factor), "w"),
         h("div", { key: "r", className: "aid-reason", "data-aid": "reason" }, P.reason),
-        row(h("span", null, "inputs hash", Info("FNV-1a over the policy version, the scenario, the floor, the limits and the headways it read (count and sum). Stored with the decision: the same inputs must give the same hash.", "About the inputs hash")), h("span", { className: "aid-mono" }, P.inputsHash), "h"),
+        row(h("span", null, "inputs hash", Info("FNV-1a over the policy version, the scenario, the 165 s minimum, the limits and the headways it read (count and sum). Stored with the decision: the same inputs must give the same hash.", "About the inputs hash")), h("span", { className: "aid-mono" }, P.inputsHash), "h"),
         P.noop ? h("div", { className: "aid-note" }, "policy.factor is already " + P.factor + ": nothing to write.") : null,
         h("div", { className: "aid-ctl", style: { marginTop: 8 } }, Btn({ "data-aid": "apply", active: true, disabled: !ready || P.noop, onClick: function () { live.apply(P.scenario).catch(function () {}); } }, "Apply"), undoBtn))
         : h("div", { key: "p0", className: "aid-ctl", style: { marginTop: 8 } }, undoBtn),
@@ -524,14 +528,14 @@
       cur ? h("div", { key: "d", className: "aid-note" }, "service_id ", h("span", { className: "aid-mono" }, cur.id), " · days ", h("span", { className: "aid-mono" }, cur.days),
         Info("Day flags as in CALENDAR (Mon…Sun). In this generated feed every service runs either every day or no day, and calendar_dates only uses exception_type 0, so the demo does not gate on the calendar: the switch is ours.", "About the calendar")) : null];
     var cut = Wv && Wv.cutoff, counts = info && info.counts, lastD = (lst.decisions || [])[lst.decisions.length - 1] || {};
-    var waveBody = !Wv ? h("div", { className: "aid-note" }, "No decision applied yet. Pick a scenario and Apply.") : [
+    var waveBody = !Wv ? h("div", { className: "aid-note" }, "No decision applied yet. Use “Apply: buses 10% more often” above.") : [
       row("decision", "#" + Wv.n + " · " + (lastD.scenarioLabel || ""), "n"),
       row("write", h("span", { className: "aid-mono" }, Wv.write + " " + Wv.from + " → " + Wv.to), "w"),
       row(h("span", null, "k recomputed", Info("Every derived value this write recomputed: explain().meta.k of the wave (the length of meta.recomputed).", "About k")), h("span", { "data-aid": "wave-k" }, fmt(Wv.k)), "k"),
       row("changed", fmt(Wv.changed), "c"),
       row(h("span", null, "write took", Info("Measured in the worker around the one write (performance.now). The kernel recomputes eagerly inside the write.", "About the timing")), h("span", { "data-aid": "wave-ms" }, ms(Wv.writeMs)), "ms"),
       row("reading the wave · values", ms(Wv.analysisMs) + " · " + ms(Wv.readMs), "rd"),
-      Wv.k ? h("div", { key: "cut", className: "aid-card", "data-aid": "cutoff" }, h("h4", null, "Early cutoff", Info("A value whose inputs did not change is not recomputed, and a recomputed value that comes out equal stops the wave there. tight = headway < floor recomputes for every window but only flips where the headway crosses the floor; a route's anyTight only recomputes behind a flip.", "About early cutoff")),
+      Wv.k ? h("div", { key: "cut", className: "aid-card", "data-aid": "cutoff" }, h("h4", null, "Early cutoff", Info("A value whose inputs did not change is not recomputed, and a recomputed value that comes out equal stops the wave there. tight = headway < 165 s minimum recomputes for every window but only flips where the headway crosses the 165 s minimum; a route's anyTight only recomputes behind a flip.", "About early cutoff")),
         cut.tightRec ? row("tight recomputed · flipped", fmt(cut.tightRec) + " · " + fmt(cut.tightFlip), "t") : null,
         cut.tightRec ? row("route anyTight recomputed · changed", fmt(cut.anyRec) + " · " + fmt(cut.anyFlip), "a") : null,
         cut.tightRec ? row("anyTight not recomputed (no flip)", fmt(geo ? geo.R - cut.anyRec : 0), "as") : null,
@@ -543,7 +547,7 @@
       h("div", { key: "rp", className: "aid-ctl", style: { marginTop: 8 } }, Btn({ "data-aid": "replay", onClick: function () { if (C.replay) C.replay(); } }, "Replay"),
         Btn({ "data-aid": "slow", active: slow, "aria-pressed": slow ? "true" : "false", onClick: function () { var n = !slow; setSlow(n); try { localStorage.setItem(SLOW_KEY, n ? "1" : "0"); } catch (e) {} } }, "×10 slower"))];
     var sr = useState(false), showAll = sr[0], setShowAll = sr[1];
-    var routesSorted = Wv ? Wv.routes.slice().sort(function (a, b) { return Math.abs(b.perHour[1] - b.perHour[0]) - Math.abs(a.perHour[1] - a.perHour[0]) || a.r - b.r; }) : [];
+    var routesSorted = Wv ? Wv.routes.slice().sort(function (a, b) { return a.r - b.r; }) : [];
     var routesBody = !Wv ? h("div", { className: "aid-note" }, "Nothing changed yet.") : !routesSorted.length ? h("div", { className: "aid-note" }, "No route changed in this wave.") : [
       h("div", { key: "h", className: "aid-note", style: { marginTop: 0 } }, fmt(routesSorted.length) + " of " + fmt(info.routes.length) + " routes changed. Mean headway and departures/hour, before → after (read from the kernel)."),
       h("ul", { key: "l", className: "aid-rlist", "data-aid": "routes" }, (showAll ? routesSorted : routesSorted.slice(0, 8)).map(function (x) {
@@ -551,7 +555,7 @@
         return h("li", { key: x.r, tabIndex: 0, role: "button", "aria-pressed": on ? "true" : "false", "data-gui-inspector-control": "true", title: "route_id " + x.id, onClick: go, onKeyDown: function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } } },
           h("span", null, h("b", null, "Route " + (x.r + 1)), " ", Math.round(x.headway[0]) + " → " + Math.round(x.headway[1]) + " s"),
           h("span", { className: "aid-num" }, fmt(x.perHour[0], 1) + " → " + fmt(x.perHour[1], 1) + "/h"),
-          h("small", null, [x.flips ? x.flips + " tight flips" : null, x.trips ? x.trips + " trips" : null, x.stops ? fmt(x.stops) + " stop_times" : null, x.notLive ? x.notLive + "/" + x.tripsTotal + " trips not running" : null, x.anyTight[0] !== x.anyTight[1] ? "anyTight " + !!x.anyTight[0] + " → " + !!x.anyTight[1] : null].filter(Boolean).join(" · ") || "values changed")); })),
+          h("small", null, [x.flips ? x.flips + " windows crossed the 165 s minimum" : null, x.trips ? x.trips + " trips recomputed" : null, x.stops ? fmt(x.stops) + " stop_times" : null, x.notLive ? x.notLive + "/" + x.tripsTotal + " trips not running" : null, x.anyTight[0] !== x.anyTight[1] ? "anyTight " + !!x.anyTight[0] + " → " + !!x.anyTight[1] : null].filter(Boolean).join(" · ") || "values changed")); })),
       routesSorted.length > 8 ? h("div", { key: "m", style: { marginTop: 6 } }, Btn({ "data-aid": "routes-more", onClick: function () { setShowAll(!showAll); } }, showAll ? "Show fewer" : "Show all " + routesSorted.length)) : null];
     var c = chain, leaves = sel ? LEAVES[sel.type] : [];
     var explainInInspector = function () { var store = nodeStore(); if (!store || !selPath) return; store.actions.registerNode(nodeRecord(selPath, labelOf(info, sel))); store.actions.setInspectorEnabled(true); store.actions.selectNode(nodeId);
@@ -592,15 +596,14 @@
         h("div", { className: "aid-ptitle" }, GA.Chip ? h(GA.Chip, { label: "LIVE", size: "small", color: "success", variant: "outlined", sx: { height: 20, fontSize: 10.5, fontWeight: 700, letterSpacing: ".05em" } }) : h("span", { className: "aid-tag live" }, "live"), h("span", null, "Decide & compute"), h("span", { className: "aid-pmini", "data-aid": "mini" }, mini)),
         h("button", { type: "button", className: "aid-ibtn", "aria-label": panel.open ? "Close the panel" : "Open the panel", "aria-expanded": panel.open ? "true" : "false", "aria-controls": uid + "-body", "data-gui-inspector-control": "true", "data-aid": "panel-toggle", onClick: function () { updPanel(function (p) { p.open = !p.open; }); } }, h("span", { className: "aid-chev" + (panel.open ? " up" : "") }, ICON.chev))),
       panel.open ? h("div", { id: uid + "-body", "aria-busy": busy ? "true" : "false" },
-        h("div", { key: "kernel", className: "aid-kernel", "data-aid": "kernel" }, h("a", { href: "https://www.npmjs.com/package/this.me", target: "_blank", rel: "noopener", title: "this.me on npm" }, "this.me@" + ME_VERSION), " · TypeScript · Web Worker"),
                 section("decision", "Decision", scen ? (SCEN.filter(function (x) { return x[0] === scen; })[0] || [0, ""])[1] : null, decisionBody),
-        section("service", "Suspend service", suspended ? suspended + " suspended" : null, serviceBody),
+        section("service", "Other scenarios · try a suspension", suspended ? suspended + " suspended" : null, serviceBody),
         section("wave", "This wave", Wv ? "k " + fmt(Wv.k) + " · " + ms(Wv.writeMs) : null, waveBody),
         section("routes", "Changed, by route", Wv ? fmt(Wv.routes.length) + " routes" : null, routesBody),
         section("chain", "Explain chain", sel ? labelOf(info, sel) : null, chainBody),
         section("history", "Decisions log", hist.length ? String(hist.length) : null, historyBody),
         section("model", "Model & data", info ? "scale " + info.scale : null, modelBody)) : null);
-    var aria = info ? "Routes, trips and frequency windows of GTFS-Madrid-Bench scale " + info.scale + " around the circle; tick length is departures per hour; amber is below the " + info.floor + " s floor. Click, or use the arrow keys, to select." : "Loading the kernel";
+    var aria = info ? "Routes, trips and frequency windows of GTFS-Madrid-Bench scale " + info.scale + " around the circle; tick length is departures per hour; amber is below the " + info.floor + " s minimum. Click, or use the arrow keys, to select." : "Loading the kernel";
     var sw = function (bg, round) { return h("span", { className: "aid-sw", style: { background: bg, borderRadius: round ? "50%" : undefined } }); };
     return h("figure", { className: "aid", "data-gui-node-id": rootId, style: { margin: 0 } },
       h("div", { className: "aid-dash" },
@@ -611,7 +614,7 @@
           h("div", { className: "aid-k" }, h("span", { ref: kRef, "data-aid": "k" }, "k = –"), h("span", { className: "aid-tag rep" }, slow ? "replay · ×10 slower" : "replay · measured duration"),
             Info("The wave is replayed in the kernel's real recompute order (explain().meta.recomputed) over the write's measured duration (or 10× slower if you ask). this.me " + ME_VERSION + " has no progress hook, so this is a replay of the real order, not a live stream. k and the timing are measured.", "About the replay")),
           h("figcaption", { className: "aid-cap" }, "Inner ring: routes · then trips · ticks: frequency windows (length = departures/hour) · outer ring: stop_times.", h("br"),
-            h("span", { className: "aid-legend" }, h("span", null, sw(dark ? "#26aa94" : "#046c5c"), "running"), h("span", null, sw(dark ? "#f0b429" : "#c27c00"), "below the floor"),
+            h("span", { className: "aid-legend" }, h("span", null, sw(dark ? "#26aa94" : "#046c5c"), "running"), h("span", null, sw(dark ? "#f0b429" : "#c27c00"), "below the 165 s minimum"),
               h("span", null, sw(dark ? "#ffd166" : "#b45309", true), "tight flipped"), h("span", null, sw("rgba(140,150,160,.55)"), "suspended")))),
         panelEl));
   }
@@ -825,6 +828,8 @@
   var MAP_URL = HERE + "data/madrid-s1-map.json?v=2";
   var HUES = [210, 12, 140, 280, 45, 320, 180, 95, 250, 0, 160, 30, 300];
   var MY0 = 34, MDY = 44;
+  // how many values an expression reads (explain() may return fewer inputs than the expression has)
+  var nIn = function (der) { var e = String(der && der.expression || ""), m = e.match(/[A-Za-z_]\w*(\[\d+\])*(\.[A-Za-z_]\w*(\[\d+\])*)+/g) || [], u = {}; m.forEach(function (x) { u[x] = 1; }); return Math.max(Object.keys(u).length, (der && der.inputs || []).length); };
   function CityMap() {
     var fmtV = function (v) { return typeof v === "number" ? String(Math.round(v * 1000) / 1000) : JSON.stringify(v); }, fmtN = function (v) { return String(Math.round(v * 10) / 10); };
     var SYN = window.MeSyntax || null;
@@ -881,10 +886,10 @@
       var dot = function (s) { var p = m.stops[s]; return "M" + (p[0] - 4) + "," + (1000 - p[1]) + "a4,4 0 1,0 8,0a4,4 0 1,0 -8,0"; };
       var on = [], off = [], ring = [];
       for (var s = 0; s < n; s++) { if (!geo.used[s]) continue; (served[s] ? on : off).push(dot(s)); if (tight[s]) { var p = m.stops[s]; ring.push("M" + (p[0] - 9) + "," + (1000 - p[1]) + "a9,9 0 1,0 18,0a9,9 0 1,0 -18,0"); } }
-      var tph = geo.at.tph.map(function (i) { return +V[i] || 0; }), tw = geo.trips.map(function (x) { var n = 0; for (var w = 0; w < x.wins; w++) if (V[x.w0 + w]) n++; return n; });
+      var tph = geo.at.tph.map(function (i) { return +V[i] || 0; }), tw = geo.trips.map(function (x, g) { var n = 0; if (!V[geo.at.live[g]]) return 0; for (var w = 0; w < x.wins; w++) if (V[x.w0 + w]) n++; return n; });
       var tsv = geo.trips.map(function (x) { var n = 0; x.stops.forEach(function (s, j) { if (V[x.st0 + j]) n++; }); return n; });
       if (!base.current) { var b = 0; tph.forEach(function (q) { if (q > b) b = q; }); if (b) base.current = b; }
-      return { rph: rph, max: max || 1, tl: tl, tph: tph, tw: tw, tsv: tsv, nTightWin: tw.reduce(function (a, b) { return a + b; }, 0), nWin: geo.trips.reduce(function (a, x) { return a + x.wins; }, 0),
+      return { rph: rph, max: max || 1, tl: tl, tph: tph, tw: tw, tsv: tsv, nTightWin: tw.reduce(function (a, b) { return a + b; }, 0), nWin: geo.trips.reduce(function (a, x, g) { return a + (tl[g].live ? x.wins : 0); }, 0),
         nTightTrip: tw.filter(function (q) { return q > 0; }).length, nDead: tl.filter(function (q) { return !q.live; }).length, nServedSt: tsv.reduce(function (a, b) { return a + b; }, 0), on: on.join(""), off: off.join(""), ring: ring.join(""), nOn: on.length, nOff: off.length, nRing: ring.length, nUsed: on.length + off.length };
     }, [geo, vals]);
     // click → nearest stop (within 14 units) else nearest trip line; both answered by me.explain in the worker
@@ -927,7 +932,7 @@
             M.row.map(function (rw, ri) { return h("g", { key: "r" + ri, className: "aid-metro-row" + (selR === ri ? " sel" : ""), "data-aid": "metro-row" },
               h("rect", { x: 2, y: rw.y - 9, width: 5, height: 18, rx: 2, fill: hue(ri) }),
               h("text", { x: 12, y: rw.y - 2, className: "aid-metro-rl" }, "Route " + (ri + 1)),
-              h("text", { x: 12, y: rw.y + 11, className: "aid-metro-rv" }, (marks ? fmtN(marks.rph[ri]) : "…") + " /h")); }),
+              h("text", { x: 12, y: rw.y + 11, className: "aid-metro-rv" }, (marks ? fmtN(marks.rph[ri]) : "…") + " dep/h")); }),
             marks ? M.segs.map(function (z) { var n = marks.tw[z.g], W = geo.trips[z.g].wins; return n ? h("path", { key: "t" + z.g, d: "M" + z.x0.toFixed(1) + "," + z.y + "H" + z.x1.toFixed(1), className: "aid-metro-tight", strokeWidth: segW(z.g) + 7, style: { opacity: .35 + .65 * n / W } }) : null; }) : null,
             M.segs.map(function (z) { var lv = marks ? marks.tl[z.g].live : true;
               return h("path", { key: "s" + z.g, d: "M" + z.x0.toFixed(1) + "," + z.y + "H" + z.x1.toFixed(1), stroke: hue(z.r), strokeWidth: segW(z.g), "data-aid": "metro-seg",
@@ -937,16 +942,16 @@
               h("path", { key: "ioff", d: D.ioff, className: "aid-metro-stop ic off" }), h("path", { key: "ion", d: D.ion, className: "aid-metro-stop ic on" })] : null,
             selStop >= 0 ? (M.occ[selStop] || []).map(function (o, i) { return h("circle", { key: "p" + i, cx: o.x, cy: o.y, r: 7, className: "aid-map-pick" }); }) : null)),
         h("div", { className: "aid-map-legend", "data-aid": "map-legend" },
-          h("span", null, h("i", { className: "sw line" }), "width = ", me("trips[t].perHour"), " (cubed, vs the timetable)"),
-          h("span", null, h("i", { className: "sw tightc" }), "amber casing = trip with a ", me("win[w].tight"), marks ? " · " + marks.nTightTrip + " of " + geo.trips.length : ""),
-          h("span", null, h("i", { className: "sw strip" }), "ticks = its windows, amber = tight", marks ? " · " + marks.nTightWin + " of " + marks.nWin : ""),
+          h("span", null, h("i", { className: "sw line" }), "width = trip departures/hour ", me("trips[t].perHour"), " (cubed, vs the timetable)"),
+          h("span", null, h("i", { className: "sw tightc" }), "amber casing = running trip with a window below the 165 s minimum ", me("win[w].tight"), marks ? " · " + marks.nTightTrip + " of " + (geo.trips.length - marks.nDead) + " running" : ""),
+          h("span", null, h("i", { className: "sw strip" }), "ticks = its windows, amber = below the 165 s minimum", marks ? " · " + marks.nTightWin + " of " + marks.nWin : ""),
           h("span", null, h("i", { className: "sw faded" }), "dashed, hollow stops = ", me("trips[t].live"), " / ", me("st[j].served"), " false", marks ? " · " + marks.nDead + " trips" : ""),
           h("span", null, h("i", { className: "sw ic" }), "interchange · " + M.inter + " stops on 2+ routes")),
         h("div", { className: "aid-note", "data-aid": "map-status" }, !vals ? "Reading the kernel…" :
           fmt(geo.paths.length) + " paths read with me(path) in the worker in " + vals.ms + " ms after wave " + vals.seq + " · served stop_times " + (marks ? marks.nServedSt : 0) + " of " + fmt(geo.trips.reduce(function (a, t) { return a + t.stops.length; }, 0)))); };
     var GA = G.Atoms || {}, Btn = function (o, text) { var q2 = Object.assign({ type: "button", "data-gui-inspector-control": "true" }, o);
       return GA.Button ? h(GA.Button, Object.assign(q2, { variant: "outlined", size: "small", color: "inherit", disableElevation: true, sx: { textTransform: "none", minHeight: 28, py: .15, px: 1, borderRadius: "8px", fontSize: 12, lineHeight: 1.2, borderColor: "divider" } }), text) : h("button", q2, text); };
-    var LABEL = "Schematic · positions generated by the benchmark, not real Madrid geography";
+    var LABEL = "Schematic · positions generated by the benchmark (not geographic)";
     var head = [h("h2", { key: "h", id: "aid-map-h" }, "Map."),
       h("div", { key: "t", className: "aid-ctl aid-map-tabs", role: "tablist", "aria-label": "Map view", "data-aid": "map-tabs" },
         Btn({ role: "tab", "aria-selected": tab === "metro" ? "true" : "false", "aria-pressed": tab === "metro" ? "true" : "false", "data-aid": "tab-metro", onClick: function () { setTab("metro"); } }, "Metro · route order from the data"),
@@ -974,7 +979,7 @@
           h("div", { className: "aid-note", "data-aid": "map-status" }, !geo ? "Loading the map…" : !vals ? "Reading the kernel…" :
             fmt(geo.paths.length) + " paths read with me(path) in the worker in " + vals.ms + " ms after wave " + vals.seq + " · " + (marks ? marks.nUsed : 0) + " stops on trips (of " + fmt(geo.m.stops.length) + " in STOPS) · " + geo.trips.length + " trips")),
         h("div", { className: "aid-map-side" },
-          h("h3", null, "Routes · ", me("routes[r].perHour")),
+          h("h3", null, "Routes · departures/hour ", me("routes[r].perHour")),
           h("div", { className: "aid-map-routes", "data-aid": "map-routes" }, (geo && geo.m ? geo.m.routes : []).map(function (rt, ri) {
             return Btn({ key: ri, "data-aid": "map-route", "aria-pressed": pick && (pick.kind === "trip" || pick.kind === "seg") && pick.r === ri ? "true" : "false", onClick: function () { explainPath({ kind: "trip", r: ri, path: "routes." + (ri + 1) + ".perHour" }); } },
               h("span", { className: "aid-map-rt" }, h("i", { style: { background: "hsl(" + HUES[ri % HUES.length] + " 70% 52%)" } }), (ri + 1) + " · " + (marks ? fmtN(marks.rph[ri]) : "…"))); })),
@@ -988,72 +993,92 @@
               h("div", { className: "aid-try-out" }, "value ", h("b", null, fmtV(x.value)),
                 der && der.expression ? [h("br", { key: "b" }), me('"' + (der.expression.length > 160 ? der.expression.slice(0, 160) + "…" : der.expression) + '"')] : null,
                 der && der.inputs && der.inputs.length ? [h("br", { key: "c" }), "inputs: ", der.inputs.slice(0, 4).map(function (q, i) { return h(React.Fragment, { key: i }, i ? " · " : null, me(String(q && q.path || q)), q && q.value !== undefined ? " = " + fmtV(q.value) : null); }),
-                  der.inputs.length > 4 ? " · +" + (der.inputs.length - 4) + " more" : null] : null,
+                  nIn(der) > 4 ? " · inputs (first 4 shown of " + nIn(der) + (nIn(der) > der.inputs.length ? ", " + der.inputs.length + " returned by explain, shortened" : "") + ")" : null] : null,
                 x.meta && x.meta.k != null ? [h("br", { key: "d" }), "last wave k = " + fmt(x.meta.k)] : null))))));
   }
-  // ── Question → Answer: the answer block is read live from the worker's kernel with me(path); nothing is hardcoded.
-  // Before = the values read while policy.factor is 1 (the timetable); after = the values read now.
-  function QA() {
-    var GA = G.Atoms || {}, SYN = window.MeSyntax || null, me = function (t) { return h("code", { className: "me-code" }, SYN ? SYN.render(h, t) : t); };
-    var fmtV = function (v) { return typeof v === "number" ? String(Math.round(v * 1000) / 1000) : JSON.stringify(v); }, r1 = function (v) { return (Math.round(v * 10) / 10).toLocaleString("en-US"); };
-    var ls = useState(live.state()), lst = ls[0], setLst = ls[1];
-    useEffect(function () { return live.subscribe(function (s) { setLst(Object.assign({}, s)); }); }, []);
-    var info = lst.info, ready = (lst.phase === "ready" || lst.phase === "writing") && !!info;
-    var plan = useMemo(function () { if (!info) return null; var P = ["policy.factor", "policy.minHeadway", "city.perHour"], R = info.routes.length, tw = [];
-      for (var r = 1; r <= R; r++) { P.push("routes." + r + ".perHour"); P.push("routes." + r + ".anyTight"); }
-      info.trips.forEach(function (x) { var a = []; for (var w = 1; w <= x[4]; w++) { a.push(P.length); P.push("routes." + (x[0] + 1) + ".trips." + (x[1] + 1) + ".win." + w + ".tight"); } tw.push({ r: x[0], at: a }); });
-      return { P: P, R: R, tw: tw }; }, [info]);
-    var vs = useState(null), cur = vs[0], setCur = vs[1], before = useRef(null);
-    useEffect(function () { if (!ready || !plan) return; var alive = true;
-      live.read(plan.P).then(function (res) { if (!alive) return; var V = res.values, o = { factor: V[0], floor: V[1], city: V[2], ms: res.ms, routes: [], trips: 0, wins: 0, nTrips: plan.tw.length, nWins: 0 };
-        for (var r = 0; r < plan.R; r++) o.routes.push({ r: r, ph: V[3 + 2 * r], any: !!V[4 + 2 * r], trips: 0, wins: 0, nTrips: 0, nWins: 0 });
-        plan.tw.forEach(function (t) { var n = 0; t.at.forEach(function (i) { if (V[i]) n++; }); var R0 = o.routes[t.r]; R0.nTrips++; R0.nWins += t.at.length; o.nWins += t.at.length; if (n) { R0.trips++; o.trips++; } R0.wins += n; o.wins += n; });
-        if (o.factor === 1 && !before.current) before.current = o; setCur(o); }, function () {});
-      return function () { alive = false; }; }, [ready, plan, lst.waveSeq]);
-    var xs = useState(null), ex = xs[0], setEx = xs[1];
-    var explain = function (path, title) { setEx({ path: path, title: title }); live.explain(path).then(function (x) { setEx({ path: path, title: title, x: x }); }, function (e) { setEx({ path: path, title: title, error: e.message }); }); };
-    useEffect(function () { if (ex && ready) explain(ex.path, ex.title); }, [lst.waveSeq]);
-    var B = before.current, A = cur, applied = A && A.factor !== 1, busy = lst.phase !== "ready";
+  // ── Question → How → Answer. The answer is read live from the worker's kernel with me(path); nothing is hardcoded.
+  // Before = the values read while policy.factor is 1 and every service runs (the timetable); after = the values read now.
+  function useLive() { var ls = useState(live.state()), lst = ls[0], setLst = ls[1];
+    useEffect(function () { return live.subscribe(function (s) { setLst(Object.assign({}, s)); }); }, []); return lst; }
+  var TEN = 0.9;
+  function Question() {
+    var GA = G.Atoms || {}, lst = useLive(), ready = lst.phase === "ready" && !!lst.info, f = lst.state ? lst.state.factor : 1;
     var Btn = function (o, text) { var q = Object.assign({ type: "button", "data-gui-inspector-control": "true" }, o);
       return GA.Button ? h(GA.Button, Object.assign(q, { disableElevation: true, sx: { textTransform: "none", borderRadius: "10px", fontWeight: 700 } }), text) : h("button", q, text); };
-    var down = A ? A.routes.filter(function (x) { return x.wins > 0; }).sort(function (a, b) { return b.wins - a.wins || a.r - b.r; }) : [];
-    var pct = B && A ? (A.city / B.city - 1) * 100 : 0, uni = B && A ? A.routes.map(function (x) { return Math.round((x.ph / B.routes[x.r].ph - 1) * 1000) / 10; }) : [];
-    var uniform = uni.length && uni.every(function (u) { return u === uni[0]; });
-    var x = ex && ex.x, der = x && x.derivation;
+    var at10 = f === TEN;
     return h("section", { className: "aid-qa", "data-aid": "qa", "aria-labelledby": "aid-q" },
       h("div", { className: "aid-q" },
         h("div", { className: "aid-qk" }, "Question"),
         h("h2", { id: "aid-q" }, "If Madrid's buses came 10% more often, how much more service would the city get, and which routes would drop below the minimum safe headway?"),
-        h("div", { className: "aid-qs" }, "Headway = time between buses. The dataset (GTFS-Madrid-Bench, generated) has supply only: no passengers, no traffic."),
+        h("div", { className: "aid-qs" }, "Headway = time between buses; the minimum safe headway here is 165 s. The dataset (GTFS-Madrid-Bench, generated) has supply only: no passengers, no traffic."),
         h("div", { className: "aid-qbtns" },
-          Btn({ variant: "contained", color: "primary", "data-aid": "qa-apply", disabled: !ready || busy || applied, onClick: function () { live.apply("ten").catch(function () {}); } }, "Apply: buses 10% more often"),
-          Btn({ variant: "outlined", color: "inherit", "data-aid": "qa-reset", disabled: !ready || busy || !applied, onClick: function () { live.apply("timetable").catch(function () {}); } }, "Back to the timetable"),
-          h("span", { className: "aid-kernel aid-qkern", "data-aid": "qa-kernel" }, h("a", { href: "https://www.npmjs.com/package/this.me", target: "_blank", rel: "noopener", title: "this.me on npm" }, "this.me@" + ME_VERSION), " · TypeScript · Web Worker"))),
+          Btn({ variant: "contained", color: "primary", "data-aid": "qa-apply", disabled: !ready || at10, onClick: function () { live.apply("ten").catch(function () {}); } },
+            at10 ? "Applied: buses 10% more often" : f === 1 ? "Apply: buses 10% more often" : "Set to 10% (headway × 0.9)"),
+          Btn({ variant: "outlined", color: "inherit", "data-aid": "qa-reset", disabled: !ready || f === 1, onClick: function () { live.apply("timetable").catch(function () {}); } }, "Back to the timetable"),
+          h("span", { className: "aid-kernel aid-qkern", "data-aid": "qa-kernel" }, h("a", { href: "https://www.npmjs.com/package/this.me", target: "_blank", rel: "noopener", title: "this.me on npm" }, "this.me@" + ME_VERSION), " · TypeScript · Web Worker"))));
+  }
+  function Answer() {
+    var SYN = window.MeSyntax || null, me = function (t) { return h("code", { className: "me-code" }, SYN ? SYN.render(h, t) : t); };
+    var fmtV = function (v) { return typeof v === "number" ? String(Math.round(v * 1000) / 1000) : JSON.stringify(v); }, r1 = function (v) { return (Math.round(v * 10) / 10).toLocaleString("en-US"); };
+    var lst = useLive(), info = lst.info, ready = (lst.phase === "ready" || lst.phase === "writing") && !!info;
+    var plan = useMemo(function () { if (!info) return null; var P = ["policy.factor", "policy.minHeadway", "city.perHour"], R = info.routes.length, tw = [];
+      for (var r = 1; r <= R; r++) P.push("routes." + r + ".perHour");
+      info.services.forEach(function (x, i) { P.push("services." + (i + 1) + ".enabled"); });
+      info.trips.forEach(function (x) { var p = "routes." + (x[0] + 1) + ".trips." + (x[1] + 1), t = { r: x[0], live: P.length, at: [], hw: [] }; P.push(p + ".live");
+        for (var w = 1; w <= x[4]; w++) { t.at.push(P.length); P.push(p + ".win." + w + ".tight"); t.hw.push(P.length); P.push(p + ".win." + w + ".headway"); } tw.push(t); });
+      return { P: P, R: R, S: info.services.length, tw: tw }; }, [info]);
+    var vs = useState(null), cur = vs[0], setCur = vs[1], before = useRef(null);
+    useEffect(function () { if (!ready || !plan) return; var alive = true;
+      live.read(plan.P).then(function (res) { if (!alive) return; var V = res.values, k = 3, o = { factor: V[0], floor: V[1], city: V[2], ms: res.ms, routes: [], off: [], trips: 0, wins: 0, nTrips: 0, nWins: 0 };
+        for (var r = 0; r < plan.R; r++) o.routes.push({ r: r, ph: V[k++], trips: 0, wins: 0, nTrips: 0, nWins: 0, hw: 0, nHw: 0 });
+        for (var s2 = 0; s2 < plan.S; s2++) { if (!V[k] && info.services[s2].trips) o.off.push(s2 + 1); k++; }
+        plan.tw.forEach(function (t) { var R0 = o.routes[t.r]; t.hw.forEach(function (i) { R0.hw += V[i]; R0.nHw++; });
+          if (!V[t.live]) return;   // only running trips count
+          var n = 0; t.at.forEach(function (i) { if (V[i]) n++; }); R0.nTrips++; o.nTrips++; R0.nWins += t.at.length; o.nWins += t.at.length; if (n) { R0.trips++; o.trips++; } R0.wins += n; o.wins += n; });
+        o.routes.forEach(function (q) { q.hw = q.nHw ? q.hw / q.nHw : 0; });
+        if (o.factor === 1 && !o.off.length && !before.current) before.current = o; setCur(o); }, function () {});
+      return function () { alive = false; }; }, [ready, plan, lst.waveSeq]);
+    var xs = useState(null), ex = xs[0], setEx = xs[1];
+    var explain = function (path, title) { setEx({ path: path, title: title }); live.explain(path).then(function (x) { setEx({ path: path, title: title, x: x }); }, function (e) { setEx({ path: path, title: title, error: e.message }); }); };
+    useEffect(function () { if (ex && ready) explain(ex.path, ex.title); }, [lst.waveSeq]);
+    var B = before.current, A = cur, at10 = A && A.factor === TEN, other = A && A.factor !== 1 && A.factor !== TEN;
+    var lastHw = (lst.decisions || []).filter(function (d) { return d.write === "policy.factor"; }).slice(-1)[0];
+    var down = A ? A.routes.filter(function (q) { return q.wins > 0; }) : [];
+    var pct = B && A ? (A.city / B.city - 1) * 100 : 0, uni = B && A ? A.routes.map(function (q) { return Math.round((q.ph / B.routes[q.r].ph - 1) * 1000) / 10; }) : [];
+    var uniform = uni.length && uni.every(function (u) { return u === uni[0]; });
+    var x = ex && ex.x, der = x && x.derivation, nI = der ? nIn(der) : 0;
+    var off = A && A.off.length ? h("div", { className: "aid-qn", "data-aid": "qa-suspended" }, "Service " + A.off.join(", ") + " is suspended (from the panel) — not part of the 10% question. Its trips are left out of the counts below and lower the departures/hour.",
+      A.off.map(function (s2) { return h("button", { key: s2, type: "button", className: "aid-qbtn-s", "data-aid": "qa-resume", onClick: function () { live.service(s2, true).catch(function () {}); } }, "Resume service " + s2); })) : null;
+    var state = !A ? " · reading the kernel…" : at10 ? " · after the decision (headway × 0.9)" : other ? " · current state is not the 10% question" : " · before the decision (timetable)";
+    return h("section", { className: "aid-qa ans", "data-aid": "qa-answer-sec", "aria-labelledby": "aid-a" },
       h("div", { className: "aid-a", "data-aid": "qa-answer", "aria-live": "polite" },
-        h("div", { className: "aid-qk" }, "Answer", h("span", { className: "aid-qstate" }, !A ? " · reading the kernel…" : applied ? " · after the decision (headway × " + A.factor + ")" : " · before the decision (timetable)")),
-        !A || !B ? h("div", { className: "aid-note" }, ready ? "Reading the kernel…" : "Building the kernel…") : h("div", null,
+        h("div", { className: "aid-qk", id: "aid-a" }, "Answer", h("span", { className: "aid-qstate" }, state)),
+        !A || !B ? h("div", { className: "aid-note" }, ready ? "Reading the kernel…" : "Building the kernel…") : other ? h("div", null,
+          h("div", { className: "aid-qn", "data-aid": "qa-other" }, "Current state: factor × " + A.factor + (lastHw ? " (from “" + lastHw.scenarioLabel + "”)" : "") + " — not the 10% question.",
+            h("button", { type: "button", className: "aid-qbtn-s", "data-aid": "qa-set10", onClick: function () { live.apply("ten").catch(function () {}); } }, "Set to 10%")), off) : h("div", null,
+          off,
           h("div", { className: "aid-akpis" },
-            h("button", { type: "button", className: "aid-akpi", "data-aid": "qa-city", onClick: function () { explain("city.perHour", "City-wide departures per hour"); } },
-              h("small", null, "City-wide service · departures / hour"), h("b", null, r1(B.city), applied ? h("span", { className: "arr" }, " → " + r1(A.city)) : null),
-              h("em", { className: applied ? "up" : "" }, applied ? (pct >= 0 ? "+" : "") + r1(pct) + "% more service" : "apply the decision to compare")),
-            h("div", { className: "aid-akpi" + (applied && A.wins ? " warn" : ""), "data-aid": "qa-tight" },
-              h("small", null, "Below the minimum safe headway (" + A.floor + " s = " + Math.floor(A.floor / 60) + " min " + (A.floor % 60) + " s between buses)"),
-              h("b", null, A.routes.filter(function (q) { return q.wins; }).length + " of " + A.routes.length + " routes"),
-              h("em", null, A.trips + " of " + A.nTrips + " trips · " + A.wins + " of " + A.nWins + " time windows"))),
-          !applied ? h("div", { className: "aid-note" }, "Before: no window is below the floor (the shortest published headway is above " + A.floor + " s).") :
-          h("ul", { className: "aid-alist", "data-aid": "qa-routes" }, down.map(function (q) { return h("li", { key: q.r },
-            h("button", { type: "button", "data-aid": "qa-route", onClick: function () { explain("routes." + (q.r + 1) + ".anyTight", "Route " + (q.r + 1)); } },
+            h("button", { type: "button", className: "aid-akpi", "data-aid": "qa-city", onClick: function () { explain("city.perHour", "City departures/hour = sum of the 13 routes"); } },
+              h("small", null, "Service · departures/hour, city"), h("b", null, r1(B.city), at10 || A.off.length ? h("span", { className: "arr" + (A.city < B.city ? " dn" : "") }, " → " + r1(A.city)) : null),
+              h("em", { className: at10 || A.off.length ? (pct >= 0 ? "up" : "dn") : "" }, at10 || A.off.length ? (pct >= 0 ? "+" + r1(pct) + "% more service" : r1(-pct) + "% less service") + (A.off.length ? " (includes the suspension)" : "") : "apply the decision to compare")),
+            h("div", { className: "aid-akpi" + (A.wins ? " warn" : ""), "data-aid": "qa-tight" },
+              h("small", null, "Below the 165 s minimum (" + Math.floor(A.floor / 60) + " min " + (A.floor % 60) + " s between buses)"),
+              h("b", null, down.length + " of " + A.routes.length + " routes"),
+              h("em", null, A.trips + " of " + A.nTrips + " running trips · " + A.wins + " of " + A.nWins + " time windows"))),
+          !at10 && !A.off.length ? h("div", { className: "aid-note" }, "Before: no window is below the 165 s minimum. Every route runs at a mean headway of about " + r1(A.routes[0].hw) + " s.") : null,
+          down.length ? h("ul", { className: "aid-alist", "data-aid": "qa-routes" }, down.map(function (q) { return h("li", { key: q.r },
+            h("button", { type: "button", "data-aid": "qa-route", onClick: function () { explain("routes." + (q.r + 1) + ".anyTight", "Route " + (q.r + 1) + " · any window below the 165 s minimum"); } },
               h("i", { style: { background: "hsl(" + HUES[q.r % HUES.length] + " 70% 52%)" } }), h("b", null, "Route " + (q.r + 1)),
               h("span", { className: "bar" }, h("span", { style: { width: Math.round(q.wins / q.nWins * 100) + "%" } })),
-              h("span", null, q.wins + "/" + q.nWins + " windows · " + q.trips + "/" + q.nTrips + " trips"),
-              h("span", { className: "ph" }, r1(B.routes[q.r].ph) + " → " + r1(q.ph) + " /h"))); })),
-          applied ? h("div", { className: "aid-note", "data-aid": "qa-uniform" }, uniform ? "Service rises by the same " + uni[0] + "% on every route: one factor for all lines (3600 / headway), so the gain is uniform. What differs is how close each route's published headways already were to the floor." : "Change per route: " + uni.join("% · ") + "%.") : null,
-          h("div", { className: "aid-note" }, "Read with ", me("me(path)"), " in the worker: ", fmt(plan.P.length), " paths in " + A.ms + " ms · tight = ", me("headway < policy.minHeadway"), " · click a row for ", me("me.explain(path)"), "."),
+              h("span", null, q.wins + "/" + q.nWins + " windows · " + q.trips + "/" + q.nTrips + " trips with a window below 165 s"),
+              h("span", { className: "ph" }, "headway " + Math.round(B.routes[q.r].hw) + " → " + Math.round(q.hw) + " s · " + r1(B.routes[q.r].ph) + " → " + r1(q.ph) + " dep/h"))); })) : null,
+          at10 ? h("div", { className: "aid-note", "data-aid": "qa-uniform" }, uniform ? "Departures/hour " + (uni[0] >= 0 ? "rise" : "fall") + " by the same " + Math.abs(uni[0]) + "% on every route: one factor for all lines (departures/hour = 3600 / headway), so the change is uniform. What differs is how close each route's published headways already were to 165 s." : "Change per route: " + uni.join("% · ") + "%.") : null,
+          h("div", { className: "aid-note aid-rel" }, "How the values relate: ", me("headway = base × policy.factor"), " → ", me("perHour = 3600 / headway"), " → trip → route → city; ", me("tight = headway < 165"), " → route ", me("anyTight"), ". Read with ", me("me(path)"), " in the worker: ", fmt(plan.P.length), " paths in " + A.ms + " ms · click a card or a row for ", me("me.explain(path)"), "."),
           ex ? h("div", { className: "aid-map-card", "data-aid": "qa-card" }, h("div", { className: "aid-map-ct" }, ex.title), me('me.explain("' + ex.path + '")'),
             !x ? (ex.error ? h("div", { className: "aid-warn" }, ex.error) : h("div", { className: "aid-note" }, "…")) :
             h("div", { className: "aid-try-out" }, "value ", h("b", null, fmtV(x.value)),
               der && der.expression ? [h("br", { key: "b" }), me('"' + (der.expression.length > 140 ? der.expression.slice(0, 140) + "…" : der.expression) + '"')] : null,
-              der && der.inputs && der.inputs.length ? [h("br", { key: "c" }), "inputs: " + der.inputs.length + " · first: ", me(String(der.inputs[0] && der.inputs[0].path || der.inputs[0]))] : null,
+              der && der.inputs && der.inputs.length ? [h("br", { key: "c" }), "reads " + nI + " values" + (nI > der.inputs.length ? " (explain returned the first " + der.inputs.length + ", shortened)" : "") + " · first: ", me(String(der.inputs[0] && der.inputs[0].path || der.inputs[0])), der.inputs[0] && der.inputs[0].value !== undefined ? " = " + fmtV(der.inputs[0].value) : null] : null,
               x.meta && x.meta.k != null ? [h("br", { key: "d" }), "last wave k = " + fmt(x.meta.k)] : null)) : null)));
   }
   var N = function (type, id, props, children) { return Object.assign({ type: type, props: Object.assign({}, props || {}, { "data-gui-node-id": id }) }, children ? { children: children } : {}); };
@@ -1063,8 +1088,9 @@
     N("Box", "main", { component: "main", sx: { maxWidth: 1180, mx: "auto", px: { xs: 2, sm: 4 }, pt: { xs: 3, sm: 4.5 }, pb: 8 } }, [
       N("Typography", "kicker", { component: "p", sx: { fontSize: ".75rem", fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: "text.secondary", mb: 1 } }, ["Smart Cities · GTFS-Madrid-Bench"]),
       N("Typography", "title", { component: "h1", sx: { fontSize: "clamp(2rem, 5vw, 2.75rem)", fontWeight: 800, letterSpacing: "-.02em", lineHeight: 1.1, mb: 3 } }, ["AI decides, .me computes"]),
-      N("AIDQA", "qa"),
+      N("AIDQuestion", "question"),
       N("AIDHow", "how"),
+      N("AIDAnswer", "answer"),
       N("AIDDashboard", "ai-decides"),
       N("AIDMap", "map"),
       N("AIDNotes", "notes"),
@@ -1074,7 +1100,7 @@
   var mode = "dark"; try { mode = params.get("mode") || localStorage.getItem(scope.themeModeKey) || "dark"; if (params.get("mode")) localStorage.setItem(scope.themeModeKey, mode); } catch (e) {}
   var PageTheme = function (p) { return h(G.Theme, { initialThemeId: "neurons.me", initialMode: mode }, p.children); };
   var INSPECTOR_ON = params.get("inspector") === "1"; if (G.getInspectorEnabled() !== INSPECTOR_ON) G.setInspectorEnabled(INSPECTOR_ON);
-  var reg = Object.assign({}, G.Registry || G.registry); [["AIDTopBar", TopBar], ["AIDDashboard", Dashboard], ["AIDNotes", Notes], ["AIDHow", How], ["AIDMap", CityMap], ["AIDQA", QA]].forEach(function (x) { reg[x[0]] = pageType(x[0], x[1]); });
+  var reg = Object.assign({}, G.Registry || G.registry); [["AIDTopBar", TopBar], ["AIDDashboard", Dashboard], ["AIDNotes", Notes], ["AIDHow", How], ["AIDMap", CityMap], ["AIDQuestion", Question], ["AIDAnswer", Answer]].forEach(function (x) { reg[x[0]] = pageType(x[0], x[1]); });
   // render / RunMe left out: mount() must not wrap the worker facade in a full runtime (Explain is answered by the worker)
   G.mount(spec, ROOT, { me: window.AIDecidesKernel, gui: Object.assign({}, G, { render: undefined, RunMe: undefined, Theme: PageTheme, registry: reg }), devtools: { enabled: true, inspector: INSPECTOR_ON, adminView: false, inspectorToggleVisible: false } });
   document.documentElement.classList.add("gui-on");
