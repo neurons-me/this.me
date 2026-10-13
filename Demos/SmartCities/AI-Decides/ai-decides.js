@@ -198,6 +198,11 @@
     ".aid-akpi small{font-size:11.5px;color:var(--mui-palette-text-secondary,#8b949e)}.aid-akpi b{font-size:1.6rem;font-weight:800;font-variant-numeric:tabular-nums}.aid-akpi .arr{color:var(--mui-palette-success-main,#2e9d6e)}.aid-akpi .arr.dn,.aid-akpi em.dn{color:var(--mui-palette-error-main,#e5534b)}.aid-qbtn-s{font:inherit;font-weight:700;padding:3px 10px;border-radius:8px;border:1px solid currentColor;background:none;color:var(--mui-palette-primary-main,#58a6ff);cursor:pointer}.aid-rel code.me-code{font-size:11.5px}.aid-akpi em{font-style:normal;font-size:12.5px;color:var(--mui-palette-text-secondary,#8b949e)}.aid-akpi em.up{color:var(--mui-palette-success-main,#2e9d6e);font-weight:700}.aid-akpi.warn{border-color:var(--mui-palette-warning-main,#f0b429)}.aid-akpi.warn b{color:var(--mui-palette-warning-main,#f0b429)}",
     ".aid-alist{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:4px}.aid-alist button{all:unset;box-sizing:border-box;width:100%;display:grid;grid-template-columns:10px 70px minmax(40px,1fr) auto auto;gap:8px;align-items:center;padding:5px 8px;border-radius:8px;cursor:pointer;font-size:12.5px;font-variant-numeric:tabular-nums}.aid-alist button:hover,.aid-alist button:focus-visible{background:var(--mui-palette-action-hover,rgba(128,128,128,.12))}",
     ".aid-alist i{width:10px;height:10px;border-radius:3px}.aid-alist .bar{height:6px;border-radius:3px;background:var(--mui-palette-divider,rgba(128,128,128,.25));overflow:hidden}.aid-alist .bar span{display:block;height:100%;background:var(--mui-palette-warning-main,#f0b429)}.aid-alist .ph{color:var(--mui-palette-text-secondary,#8b949e)}@media (max-width:600px){.aid-alist button{grid-template-columns:10px 62px minmax(30px,1fr) auto}.aid-alist .ph{display:none}}",
+    ".aid-pqa{padding:8px 10px 4px;border-bottom:1px solid var(--mui-palette-divider,rgba(128,128,128,.25))}.aid-pqa .aid-qa{gap:8px;margin:0 0 8px}.aid-pqa .aid-qa.ans{margin:8px 0 6px}.aid-pqa .aid-q,.aid-pqa .aid-a{padding:9px 10px;border-radius:10px}",
+    ".aid-pqa .aid-qk{font-size:10px;margin-bottom:3px}.aid-pqa .aid-q h2{font-size:14.5px;line-height:1.35}.aid-pqa .aid-qs{font-size:11px;margin-top:4px}.aid-pqa .aid-qbtns{margin-top:8px;gap:6px}.aid-pqa .aid-qbtns button{font-size:12.5px;padding:4px 10px;min-height:0}",
+    ".aid-pqa .aid-how{margin:0}.aid-pqa .aid-how h2{font-size:13px;margin:0 0 6px}.aid-pqa .aid-how-flow{font-size:10.5px;gap:3px;margin:0 0 6px}.aid-pqa .aid-how-grid,.aid-pqa .aid-try-grid{grid-template-columns:1fr!important}.aid-pqa .aid-how-map li{grid-template-columns:minmax(0,1fr) 12px minmax(0,1.2fr)}",
+    ".aid-pqa .aid-akpis{grid-template-columns:1fr;gap:6px}.aid-pqa .aid-akpi{padding:7px 9px}.aid-pqa .aid-akpi b{font-size:1.2rem}.aid-pqa .aid-akpi small,.aid-pqa .aid-akpi em{font-size:11px}.aid-pqa .aid-note{font-size:11px;line-height:1.4}",
+    ".aid-pqa .aid-alist{gap:1px;margin-top:6px}.aid-pqa .aid-alist button{grid-template-columns:8px 56px minmax(24px,1fr) auto;gap:6px;padding:3px 4px;font-size:11.5px}.aid-pqa .aid-alist .ph{display:block;grid-column:2 / -1;font-size:10.5px;margin-top:-2px}.aid-pqa .aid-alist i{width:8px;height:8px}.aid-pqa .aid-qn{font-size:11px;padding:6px 8px}.aid-pqa .aid-map-card{font-size:11px;padding:8px}",
     ".aid-map{margin:28px 0 8px}.aid-map h2{margin:0 0 4px;font-size:1.35rem;font-weight:800}.aid-map-label{display:inline-block;margin-bottom:10px;padding:2px 8px;border:1px dashed var(--mui-palette-warning-main,#b7791f);border-radius:6px;color:var(--mui-palette-warning-main,#b7791f);font-size:12px;font-weight:600}",
     ".aid-map-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px}@media (max-width:760px){.aid-map-grid{grid-template-columns:1fr}}",
     ".aid-map-fig{min-width:0}.aid-map-svg{display:block;width:100%;max-width:680px;aspect-ratio:1;cursor:crosshair;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:12px;background-image:linear-gradient(var(--mui-palette-divider,rgba(128,128,128,.15)) 1px,transparent 1px),linear-gradient(90deg,var(--mui-palette-divider,rgba(128,128,128,.15)) 1px,transparent 1px);background-size:10% 10%}",
@@ -596,6 +601,8 @@
         h("div", { className: "aid-ptitle" }, GA.Chip ? h(GA.Chip, { label: "LIVE", size: "small", color: "success", variant: "outlined", sx: { height: 20, fontSize: 10.5, fontWeight: 700, letterSpacing: ".05em" } }) : h("span", { className: "aid-tag live" }, "live"), h("span", null, "Decide & compute"), h("span", { className: "aid-pmini", "data-aid": "mini" }, mini)),
         h("button", { type: "button", className: "aid-ibtn", "aria-label": panel.open ? "Close the panel" : "Open the panel", "aria-expanded": panel.open ? "true" : "false", "aria-controls": uid + "-body", "data-gui-inspector-control": "true", "data-aid": "panel-toggle", onClick: function () { updPanel(function (p) { p.open = !p.open; }); } }, h("span", { className: "aid-chev" + (panel.open ? " up" : "") }, ICON.chev))),
       panel.open ? h("div", { id: uid + "-body", "aria-busy": busy ? "true" : "false" },
+        h("div", { key: "kernel", className: "aid-kernel", "data-aid": "kernel" }, h("a", { href: "https://www.npmjs.com/package/this.me", target: "_blank", rel: "noopener", title: "this.me on npm" }, "this.me@" + ME_VERSION), " · TypeScript · Web Worker"),
+        h("div", { key: "qha", className: "aid-pqa", "data-aid": "panel-qa" }, h(Question), h(How), h(Answer)),
                 section("decision", "Decision", scen ? (SCEN.filter(function (x) { return x[0] === scen; })[0] || [0, ""])[1] : null, decisionBody),
         section("service", "Other scenarios · try a suspension", suspended ? suspended + " suspended" : null, serviceBody),
         section("wave", "This wave", Wv ? "k " + fmt(Wv.k) + " · " + ms(Wv.writeMs) : null, waveBody),
@@ -1010,12 +1017,12 @@
       h("div", { className: "aid-q" },
         h("div", { className: "aid-qk" }, "Question"),
         h("h2", { id: "aid-q" }, "If Madrid's buses came 10% more often, how much more service would the city get, and which routes would drop below the minimum safe headway?"),
-        h("div", { className: "aid-qs" }, "Headway = time between buses; the minimum safe headway here is 165 s. The dataset (GTFS-Madrid-Bench, generated) has supply only: no passengers, no traffic."),
+        h("div", { className: "aid-qs" }, "Headway = time between buses · minimum 165 s · supply data only (no passengers, no traffic)."),
         h("div", { className: "aid-qbtns" },
           Btn({ variant: "contained", color: "primary", "data-aid": "qa-apply", disabled: !ready || at10, onClick: function () { live.apply("ten").catch(function () {}); } },
             at10 ? "Applied: buses 10% more often" : f === 1 ? "Apply: buses 10% more often" : "Set to 10% (headway × 0.9)"),
           Btn({ variant: "outlined", color: "inherit", "data-aid": "qa-reset", disabled: !ready || f === 1, onClick: function () { live.apply("timetable").catch(function () {}); } }, "Back to the timetable"),
-          h("span", { className: "aid-kernel aid-qkern", "data-aid": "qa-kernel" }, h("a", { href: "https://www.npmjs.com/package/this.me", target: "_blank", rel: "noopener", title: "this.me on npm" }, "this.me@" + ME_VERSION), " · TypeScript · Web Worker"))));
+          null)));
   }
   function Answer() {
     var SYN = window.MeSyntax || null, me = function (t) { return h("code", { className: "me-code" }, SYN ? SYN.render(h, t) : t); };
@@ -1088,9 +1095,6 @@
     N("Box", "main", { component: "main", sx: { maxWidth: 1180, mx: "auto", px: { xs: 2, sm: 4 }, pt: { xs: 3, sm: 4.5 }, pb: 8 } }, [
       N("Typography", "kicker", { component: "p", sx: { fontSize: ".75rem", fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: "text.secondary", mb: 1 } }, ["Smart Cities · GTFS-Madrid-Bench"]),
       N("Typography", "title", { component: "h1", sx: { fontSize: "clamp(2rem, 5vw, 2.75rem)", fontWeight: 800, letterSpacing: "-.02em", lineHeight: 1.1, mb: 3 } }, ["AI decides, .me computes"]),
-      N("AIDQuestion", "question"),
-      N("AIDHow", "how"),
-      N("AIDAnswer", "answer"),
       N("AIDDashboard", "ai-decides"),
       N("AIDMap", "map"),
       N("AIDNotes", "notes"),
