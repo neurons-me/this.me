@@ -375,6 +375,7 @@
       return N("MeCodeBlock", { code, lang });
     }
     if (b.classList.contains("doc-cards")) return docCards(b);
+    if (b.classList.contains("doc-svg")) return N("Box", { component: "figure", className: "doc-svg", sx: { m: 0, mb: 2.5, color: "text.primary", overflowX: b.getAttribute("data-min") ? "auto" : undefined, "& svg": { display: "block", width: "100%", height: "auto", maxWidth: b.getAttribute("data-max") || "100%", minWidth: b.getAttribute("data-min") || 0 }, "& figure": { m: 0 }, "& figcaption": { fontSize: ".82rem", color: "text.secondary", mt: .75, lineHeight: 1.5 } }, dangerouslySetInnerHTML: { __html: b.innerHTML } });
     if (b.classList.contains("kernel-timeline") && window.KernelTimeline) return N("KernelTimeline", { src: b.getAttribute("data-src") });
     if (b.classList.contains("fanout-viz") && window.FanoutViz) return N("FanoutViz", { n: b.getAttribute("data-n"), caption: b.getAttribute("data-caption") });
     if (t === "div" || t === "section") return N("Box", { component: t }, blocks(b));

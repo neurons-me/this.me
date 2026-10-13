@@ -592,7 +592,7 @@
       h("div", { key: "f", className: "aid-formula" }, ["win.headway   = base * policy.factor", "win.perHour   = 3600 / headway", "win.tight     = headway < policy.minHeadway", "trip.live     = services[s].enabled == 1", "st[j].served  = trip.live",
         "trip.perHour  = (win[1].perHour + … + win[n].perHour) / n", "                * services[s].enabled", "route.perHour = trip 1 + … + trip n  (explicit sum)", "route.anyTight = win.tight || …", "city.perHour  = route 1 + … + route R"].join("\n")),
       h("div", { key: "d", className: "aid-note" }, h("span", { className: "aid-tag gen", style: { marginLeft: 0 } }, "generated data"), "GTFS-Madrid-Bench scale " + info.scale + ": " + fmt(counts.routes) + " routes, " + fmt(counts.trips) + " trips, " + fmt(counts.frequencies) + " frequency windows, " + fmt(counts.stop_times) + " stop_times, " + fmt(counts.calendar) + " services. ",
-        "Real: headway_secs, trips, stop_times, day flags. Added: policy.factor, policy.minHeadway = " + info.floor + " s, services[s].enabled. No fares, capacity or demand (not in the feed)."),
+        "From the feed: headway_secs, trips, stop_times, day flags · Set by this run: policy.factor, policy.minHeadway = " + info.floor + " s, services[s].enabled. No fares, capacity or demand (not in the feed)."),
       row("derived values", fmt(info.derived), "dv"), row("built in (worker)", ms(info.buildMs), "b"),
       h("div", { key: "sc", className: "aid-ctl", role: "group", "aria-label": "Data scale", style: { marginTop: 8 } },
         Btn({ "data-aid": "scale-1", active: lst.target === 1, "aria-pressed": lst.target === 1 ? "true" : "false", disabled: busy, onClick: function () { pick(1); } }, "Scale 1"),
@@ -1099,7 +1099,7 @@
     ["https://neurons-me.github.io/smart-cities/", "https://neurons-me.github.io/smart-cities/assets/SMART-CITIES-ME.jpg", "Smart Cities", "The other city demos on the same kernel."],
     ["https://neurons-me.github.io/robots/", "https://neurons-me.github.io/robots/assets/ROBOTS-CONTEXT-LAB.jpg", "Robots", "Robots that understand context: one object, four meanings, zero copies."]];
   var SYNTAX = [
-    ["https://neurons-me.github.io/.me/docs/Paths.html", 'me("routes.1.perHour")', "Paths", "How to read and write a path"],
+    ["https://neurons-me.github.io/.me/docs/Paths.html", 'me("routes.1.perHour")', "me.whatever(what)", "How to read and write a path"],
     ["https://neurons-me.github.io/.me/docs/Explain.html", 'me.explain(path)', "me.explain(path)", "Why a value is what it is: inputs and the last wave"]];
   function Syntax(p) {
     return h("section", { className: "aid-syn", "data-gui-node-id": p["data-gui-node-id"], "data-aid": "syntax", "aria-label": "Read the syntax" },

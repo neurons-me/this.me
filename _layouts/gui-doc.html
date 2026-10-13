@@ -15,9 +15,10 @@
   {% assign page_title = page.title | default: site.title | escape %}
   {% assign page_description = page.description | default: site.description | escape %}
   {% assign social_image = page.image | default: site.me_theme.social_image | default: site.image %}
-  {% assign page_url = page.url | absolute_url %}
+  {% assign page_url = page.canonical | default: page.url | absolute_url %}
   <title>{{ page_title }}</title>
   <meta name="description" content="{{ page_description }}" />
+  {% if page.canonical %}<link rel="canonical" href="{{ page.canonical }}" />{% endif %}
   <meta property="og:type" content="website" />
   <meta property="og:title" content="{{ page_title }}" />
   <meta property="og:description" content="{{ page_description }}" />
@@ -83,6 +84,6 @@
   </main>
 </div>
 {% for s in page.scripts %}<script src="{{ s | relative_url }}"></script>
-{% endfor %}<script src="{{ '/assets/landing-gui/landing-gui.js' | relative_url }}?v=13" onerror="document.documentElement.classList.remove('gui-boot')"></script>
+{% endfor %}<script src="{{ '/assets/landing-gui/landing-gui.js' | relative_url }}?v=14" onerror="document.documentElement.classList.remove('gui-boot')"></script>
 </body>
 </html>

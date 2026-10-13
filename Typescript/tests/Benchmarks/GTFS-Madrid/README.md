@@ -13,7 +13,18 @@ Uses a change-aware extension of **GTFS-Madrid-Bench** (Chaves-Fraga et al., 202
 - Resources: https://zenodo.org/records/14038823  
 - GTFS-Madrid-Bench: https://github.com/oeg-upm/gtfs-bench
 
-## Results at a glance (this.me 4.2.0, measured 2026-10-10)
+## Results at a glance: this.me 4.2.1 (measured 2026-10-13 UTC)
+
+Run line: `this.me@4.2.1` (published npm build, `dist/me.es.js` sha256 `0bd2cc60d15dfc9ff8942d390c075bbc22b4ae3a24d3cbfe581511ea84478757`), Node v22.23.3, same shared KVM VM as the 4.2.0 run. k is identical to 4.2.0 and 4.1.0 for every write.
+
+| scale | writes | k p50 / p95 / max | write p50 / p95 | CREATE p50 | DELETE p50 | load |
+|---|---:|---|---|---:|---:|---:|
+| 1 | 151 | 1 / 18.5 / 27 | 0.23 / 9.4 | 0.20 | 8.9 | 494 |
+| 10 | 1,304 | 1 / 18 / 27 | 0.21 / 122 | 0.20 | 119 | 4,244 |
+
+Skew (S1, scale 10, 22 runs): UPDATE apply ≈ 0.045 ms + 35.2 µs·k (r = 0.991; 4.2.0: 52 µs), trip DELETE ≈ 111 ms + 49 µs·k (4.2.0: 135 ms + 67 µs), worst DELETE 842 ms (4.2.0: 1.2 s), CREATE on the 14,378-member sum 95 ms (4.2.0: 151 ms). Bracket `[]` counts: CREATE p50 3.3 / 42 ms at scale 1 / 10, load 63 s at scale 10. Results: `results/v4.2.1/{explicit,bracket}/`, `results/skew/v4.2.1/explicit/`. Scale 100 not re-run (4.1.0 history).
+
+## Results at a glance (this.me 4.2.0, measured 2026-10-10; history)
 
 Run line (also recorded inside every results file): `this.me@4.2.0` (published npm build, `dist/me.es.js` sha256 `8cc94d52…`), Node v22.23.3, shared KVM VM (Intel Xeon, 8 vCPU, 16 GiB), Linux 6.12 x64. The 4.1.0 rows were re-run on the same machine the same day; the 2026-10-07 skew results and the scale-100 sweep are 4.1.0 history (sections below).
 
@@ -47,9 +58,11 @@ k is identical on 4.1.0 and 4.2.0 for every write; times are within run-to-run n
 | `run-env.ts` | the run line (kernel version via `ME_VERSION`, dist sha256, Node, CPU, memory, OS, aggregate style) |
 | `skew/generate-skew.ts`, `skew/sweep-skew.ts`, `skew/report-skew.ts` | S1 fan-out skew: generator, sweep, report |
 | `results/scale1-*`, `results/scale1-vs-scale10*-summary.*` | 4.1.0 history (earlier runs; scale 100 only exists here) |
+| `results/v4.2.1/{explicit,bracket}/scale{1,10}-base-seed0-sweep.*` | 4.2.1 sweeps, 2026-10-13 |
 | `results/v4.2.0/{explicit,bracket}/scale{1,10}-base-seed0-sweep.*` | 4.2.0 sweeps, 2026-10-10 |
 | `results/v4.1.0-same-machine/scale{1,10}-base-seed0-sweep.*` | 4.1.0 re-run on the same machine, 2026-10-10 |
 | `results/skew/scale10-fanout.json`, `results/skew/reference-madrid-seed-fanout.json` | fan-out of the generated variants and of the original Madrid seed (kernel-independent) |
+| `results/skew/v4.2.1/explicit/scale10-skew-sweep.{md,json,tsv}` | S1 on 4.2.1, 2026-10-13 |
 | `results/skew/v4.2.0/explicit/scale10-skew-sweep.{md,json,tsv}` | S1 on 4.2.0, 2026-10-10 |
 | `results/skew/v4.1.0/` | S1 on 4.1.0, 2026-10-07 (history), with `diagnostics/` (the `--trace-gc` rerun) |
 

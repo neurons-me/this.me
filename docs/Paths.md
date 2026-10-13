@@ -1,14 +1,17 @@
 ---
 layout: gui-doc
-title: "Paths: me.a.b(value) and me(\"a.b\")"
+title: "me.whatever(what)"
 description: "How a path is written and read in this.me 4.2.1: me.a.b(value) declares, me(\"a.b\") reads, chaining, bracket indexes, which names are kernel methods, and why me.a.b() with no argument is not a read. From the kernel source."
 mepath:
   - text: Docs
     url: https://neurons-me.github.io/.me/docs/
-crumb: Paths
+canonical: https://suign.github.io/MeWhateverWhat.html
+crumb: me.whatever(what)
 ---
 
-# Paths: me.a.b(value) and me("a.b")
+# me.whatever(what)
+
+Writing with `me.a.b(value)`, reading with `me("a.b")`.
 
 > Every property access on `me` extends a path. Calling it with a value declares; calling the root with the path string reads.
 
