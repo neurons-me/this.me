@@ -60,7 +60,7 @@ me("profile.name");          // resolve
 
 - [.me Operators](./Operators.html): `@`, `_`, `~`, `__` / `->`, `=`, `?`, `-`, one example each.
 - [.me Syntax](./Syntax.html): `.`, `[]` and `()`, selectors, any-language names.
-- [me.whatever(what)](./Paths.html): how a path is written and read, and why `me.a.b()` is not a read.
+- [me.whatever(what)](./me-whatever-what.html): how a path is written and read, and why `me.a.b()` is not a read.
 - [What is .me?](./me.html): the identity primitive and the self-semantic runtime.
 - [Axioms](./Axioms.html)
 

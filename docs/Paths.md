@@ -5,12 +5,14 @@ description: "How a path is written and read in this.me 4.2.1: me.a.b(value) dec
 mepath:
   - text: Docs
     url: https://neurons-me.github.io/.me/docs/
-canonical: https://suign.github.io/MeWhateverWhat.html
+canonical: https://neurons-me.github.io/.me/docs/me-whatever-what.html
+permalink: /docs/me-whatever-what.html
 crumb: me.whatever(what)
 image: https://neurons-me.github.io/.me/docs/assets/paths-og.jpg
 scripts:
   - /assets/me-kernel/me-kernel.js?v=1
   - /assets/me-run/me-run.js?v=2
+  - /assets/paths-live/paths-live.js?v=3
 ---
 
 # 𓂀 me.whatever(what)
@@ -76,6 +78,8 @@ me("colony.food");                             // → 57, recomputed
 {: .me-run}
 
 `["="]` declares a formula on a path; reading it is the same `me(path)`, and it follows its inputs.
+
+{% include paths-figure.html %}
 
 ## Why a path has its value
 

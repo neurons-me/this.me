@@ -410,7 +410,7 @@
   function Notes() {
     return h("section", { className: "ac-notes", "data-ac": "notes" }, h("h2", null, "How it works"),
       h("ul", null,
-        h("li", null, "The colony is one tree in the kernel: ", me("colony.chambers.<name>.depth / stock / capacity"), ", ", me("colony.trails.<n>.from / to / length / weight"), ", ", me("colony.ants.<n>.at / carry"), ". Paths: ", link("https://neurons-me.github.io/.me/docs/Paths.html", "me.whatever(what)"), "."),
+        h("li", null, "The colony is one tree in the kernel: ", me("colony.chambers.<name>.depth / stock / capacity"), ", ", me("colony.trails.<n>.from / to / length / weight"), ", ", me("colony.ants.<n>.at / carry"), ". Paths: ", link("https://neurons-me.github.io/.me/docs/me-whatever-what.html", "me.whatever(what)"), "."),
         h("li", null, "Each ant's ", me("home"), " is a pointer to a chamber, so ", me('me("colony.ants.3.home.depth")'), " reads the chamber's depth (", link("https://neurons-me.github.io/.me/docs/Pointer-Composition.html", "Pointer Composition"), ")."),
         h("li", null, me("colony.food"), ", ", me("colony.carried"), " and each store's ", me("free"), " are ", me('["="]'), " formulas; a stock write recomputes them (", link("https://neurons-me.github.io/.me/docs/Operators.html", "Operators"), ")."),
         h("li", null, "Each trail has ", me('["="]("strength", "weight + bias")'), " and ", me('["="]("cost", "length / (1 + strength)")'), ". Ants take the cheapest route by cost, so busy trails pull more traffic. Weight grows by +1 per food trip and +4 per scout bringing news, and evaporates ×0.93 every 2 s."),
@@ -419,7 +419,7 @@
         h("li", null, "The walk itself is animated by the page; the chamber and stock values on the canvas are read from the kernel every frame. Source: ", link(SRC_URL, "ant-city.js"), ".")));
   }
   var RELATED = [
-    ["https://neurons-me.github.io/.me/docs/Paths.html", "https://neurons-me.github.io/.me/docs/assets/card-paths.webp", "me.whatever(what)", "How a path is written and read, with the same ant colony as runnable examples."],
+    ["https://neurons-me.github.io/.me/docs/me-whatever-what.html", "https://neurons-me.github.io/.me/docs/assets/card-paths.webp", "me.whatever(what)", "How a path is written and read, with the same ant colony as runnable examples."],
     ["https://neurons-me.github.io/smart-cities/", "https://neurons-me.github.io/smart-cities/assets/SMART-CITIES-ME.jpg", "Smart Cities", "The other city demos on the same kernel."],
     ["https://neurons-me.github.io/.me/Demos/SmartCities/AI-Decides/", "https://neurons-me.github.io/.me/Demos/SmartCities/AI-Decides/assets/ai-decides-og.png", "AI decides, .me computes", "A policy decision stored as a fact; one write recomputes a city's bus network."],
     ["https://neurons-me.github.io/.me/Demos/Robots/Space/", "https://neurons-me.github.io/.me/Demos/Robots/Space/assets/space-robots-og-4.2.png", "Autonomous Robotics in Space", "Three spider robots on two small rocks, each with its own .me kernel."]];

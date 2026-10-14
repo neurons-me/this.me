@@ -26,7 +26,7 @@ Source: [`explain()` in derivation.ts](https://github.com/neurons-me/.me/blob/v4
 me.explain(path: string): MEExplainResult
 ```
 
-`path` is a dotted path string, the same form `me(path)` reads ([me.whatever(what)](./Paths.html)). It is also reachable on the runtime plane as `me["!"].explain(path)` ([proxy.ts](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/proxy.ts#L69-L75)). `explain` never writes.
+`path` is a dotted path string, the same form `me(path)` reads ([me.whatever(what)](./me-whatever-what.html)). It is also reachable on the runtime plane as `me["!"].explain(path)` ([proxy.ts](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/proxy.ts#L69-L75)). `explain` never writes.
 
 ## Example
 
@@ -122,4 +122,4 @@ me.explain("nope");
 
 ## See also
 
-[me.whatever(what): reading and writing](./Paths.html) · [Primitives](./Primitives.html) · [Extreme Fan-Out](./Extreme-Fan-Out.html) (k at scale) · [AI decides, .me computes](https://neurons-me.github.io/.me/Demos/SmartCities/AI-Decides/) (explain on every value of a real feed)
+[me.whatever(what): reading and writing](./me-whatever-what.html) · [Primitives](./Primitives.html) · [Extreme Fan-Out](./Extreme-Fan-Out.html) (k at scale) · [AI decides, .me computes](https://neurons-me.github.io/.me/Demos/SmartCities/AI-Decides/) (explain on every value of a real feed)

@@ -73,7 +73,7 @@ The graph has 1,002 derived values. The write to `a` recomputed two of them, `c`
 | `meta.changed` | The subset of `recomputed` whose value actually changed. A value that recomputes to the same result is not in it. |
 | `meta.sourcePath` | The write that started the wave. |
 
-Full return shape: [me.explain(path)](./Explain.html). How paths are written and read: [me.whatever(what)](./Paths.html).
+Full return shape: [me.explain(path)](./Explain.html). How paths are written and read: [me.whatever(what)](./me-whatever-what.html).
 
 ## What it does not say
 
@@ -96,7 +96,7 @@ Full return shape: [me.explain(path)](./Explain.html). How paths are written and
 ## See also
 
 - [me.explain(path)](./Explain.html): `meta.k`, `recomputed`, `changed`, `sourcePath`.
-- [me.whatever(what)](./Paths.html): writing and reading paths.
+- [me.whatever(what)](./me-whatever-what.html): writing and reading paths.
 - [Benchmarks](./Benchmarks/): O(k) scaling, fan-out, explain overhead.
 - [Extreme Fan-Out](./Extreme-Fan-Out.html): one write, 100,000 dependents.
 - [GTFS Madrid universe](https://neurons-me.github.io/.me/Tests/gtfs-madrid-universe.html): click a node for `me.explain(path)`, mutate to watch the wave.

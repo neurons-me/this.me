@@ -29,8 +29,8 @@
   "desc": "@ identity, _ secret scope, ~ noise reset, -> pointer, = derivation, ? query, - remove: one verified example each.",
   "img": "/.me/docs/assets/card-operators.webp"
  },
- "/.me/docs/Paths.html": {
-  "href": "https://neurons-me.github.io/.me/docs/Paths.html",
+ "/.me/docs/me-whatever-what.html": {
+  "href": "https://neurons-me.github.io/.me/docs/me-whatever-what.html",
   "title": "me.whatever(what)",
   "desc": "me.a.b(value) declares, me(\"a.b\") reads: chaining, indexes, and why me.a.b() is not a read.",
   "img": "/.me/docs/assets/card-paths.webp"

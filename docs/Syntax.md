@@ -22,7 +22,7 @@ Kernel: **this.me 4.2.1** ([npm](https://www.npmjs.com/package/this.me)) ⓘ
 Every example below was run against the published 4.2.1 build; the output shown is what it returned.
 {: .doc-kernel-more}
 
-How a single path is written and read in detail: [me.whatever(what)](./Paths.html).
+How a single path is written and read in detail: [me.whatever(what)](./me-whatever-what.html).
 
 ## Algebra first
 
@@ -156,7 +156,7 @@ me("sensors[temp >= 25].temp");     // { "2": 30 }
 
 ## See also
 
-- [me.whatever(what)](./Paths.html): how a path is written and read, and why `me.a.b()` is not a read.
+- [me.whatever(what)](./me-whatever-what.html): how a path is written and read, and why `me.a.b()` is not a read.
 - [me.explain(path)](./Explain.html): why a path has its value.
 - [What is O(k)?](./O-k.html): what one write recomputes.
 - [.me Operators](./Operators.html): every operator with one example.
