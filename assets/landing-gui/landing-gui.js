@@ -33,7 +33,8 @@
   // an <a class="strong"> reads as part of the sentence, only stronger: theme text.primary, bold
   const inline = (el) => [...el.childNodes].map((n) => n.nodeType === 1 && n.tagName === "A" ? N("Link", { href: n.getAttribute("href"), title: n.getAttribute("title") || undefined, underline: "hover",
       sx: n.classList.contains("strong") ? { color: "text.primary", fontWeight: 700 } : { color: "primary.main" } }, [n.textContent])
-    : n.nodeType === 1 && n.tagName === "CODE" ? N("Box", { component: "code", sx: { fontFamily: MONO, fontSize: ".85em", px: .5, py: .125, borderRadius: "4px", bgcolor: "action.hover", color: "text.primary" } }, [n.textContent])
+    // inline code that is a .me expression (me. / me( / me[) goes through the .me highlighter (window.MeSyntax), like on doc pages
+    : n.nodeType === 1 && n.tagName === "CODE" ? ((tx, isMe) => N("Box", { component: "code", className: isMe ? "me-code" : undefined, sx: { fontFamily: MONO, fontSize: ".85em", px: .5, py: .125, borderRadius: "4px", bgcolor: "action.hover", color: "text.primary", ...(isMe ? { whiteSpace: "nowrap" } : {}) } }, isMe ? window.MeSyntax.render(h, tx) : [tx]))(n.textContent, !!window.MeSyntax && /^me[.(\[]/.test(n.textContent))
     : n.textContent);
   const attrs = (img, names) => Object.fromEntries(names.map((k) => [k, img.getAttribute(k)]).filter(([, v]) => v != null));
   const docsIndex = SRC.dataset.layout === "docs-index", docPage = SRC.dataset.layout === "doc";
@@ -438,7 +439,7 @@
   });
   html.classList.add("gui-on");
   document.querySelectorAll("link[data-static-only]").forEach((l) => { l.disabled = true; });
-  if (docPage && SYN && SYN.watchTheme) SYN.watchTheme(); // re-measures the code colours whenever .GUI writes a new theme / mode
+  if ((docPage || docsIndex) && SYN && SYN.watchTheme) SYN.watchTheme(); // re-measures the code colours whenever .GUI writes a new theme / mode
   SRC.remove();
   }
 })();

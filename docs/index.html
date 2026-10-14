@@ -33,6 +33,9 @@
   <script src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/this.gui@4.2.0/dist/this.gui.umd.js" integrity="sha384-tAyskhiyJweQ9xXPVOSEJ0OQDE+lFsqRJvGRb8LVoqLbdNxYmJEhW21+fxcAYG0d" crossorigin="anonymous"></script>
+  <!-- .me syntax colours for the inline .me expressions in card descriptions (shared: /.me/assets/me-syntax/) -->
+  <link rel="stylesheet" href="/.me/assets/me-syntax/me-syntax.css">
+  <script src="/.me/assets/me-syntax/me-syntax.js"></script>
   <!-- Static page styles, off once .GUI has rendered (html.gui-on). -->
   <style>
     html:not(.gui-on) *, html:not(.gui-on) *::before, html:not(.gui-on) *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -124,6 +127,7 @@
       color: #51606d;
       line-height: 1.55;
     }
+    html:not(.gui-on) .card-desc code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .86em; padding: 1px 4px; border-radius: 4px; background: rgba(127,127,127,.12); }
 
     /* dark mode */
     @media (prefers-color-scheme: dark) {
@@ -233,7 +237,7 @@
           <img class="card-media" src="assets/card-paths.webp" width="640" height="280" alt="me.a.b(v) and me(&quot;a.b&quot;) in monospace on a dark grid" />
         </picture>
         <div class="card-title">me.whatever(what)</div>
-        <div class="card-desc">me.a.b(value) declares, me("a.b") reads: chaining, indexes, and why me.a.b() is not a read.</div>
+        <div class="card-desc"><code class="language-me">me.a.b(value)</code> declares, <code class="language-me">me("a.b")</code> reads: chaining, indexes, and why <code class="language-me">me.a.b()</code> is not a read.</div>
       </a>
 
       <a class="card" href="https://neurons-me.github.io/.me/docs/Explain.html">
@@ -394,7 +398,7 @@
           <img class="card-media" src="assets/card-semantic.webp" width="640" height="280" alt="Screenshot of the semantic graph with its mutation panel" />
         </picture>
         <div class="card-title">Semantic graph / reactive</div>
-        <div class="card-desc">GTFS Madrid typed nodes + = edges: click a node → me.explain(path), .me syntax and full explain JSON.</div>
+        <div class="card-desc">GTFS Madrid typed nodes + = edges: click a node → <code class="language-me">me.explain(path)</code>, .me syntax and full explain JSON.</div>
       </a>
 
       <a class="card" href="Tests/madrid-knowledge.html">
@@ -430,10 +434,11 @@
   </footer>
 </div>
 <div id="root"></div>
-<script src="/.me/assets/landing-gui/landing-gui.js?v=18" onerror="document.documentElement.classList.remove('gui-boot')"></script>
+<script src="/.me/assets/landing-gui/landing-gui.js?v=19" onerror="document.documentElement.classList.remove('gui-boot')"></script>
 <!-- Static fallback only: the standalone SearchBar bundle, loaded when .GUI did not render the page. -->
 <script>
   if (!document.documentElement.classList.contains("gui-on")) {
+    if (window.MeSyntax) MeSyntax.highlightAll(document.getElementById("static-landing"));
     var s = document.createElement("script"); s.src = "https://neurons-me.github.io/vendor/gui-searchbar.iife.js"; s.defer = true; document.body.appendChild(s);
   }
 </script>
