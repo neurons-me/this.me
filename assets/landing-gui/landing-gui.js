@@ -341,7 +341,78 @@
     }, [html, dark]);
     return h(Box, { component: inline ? "span" : "div", "data-gui-node-id": id, sx, dangerouslySetInnerHTML: { __html: out } });
   }
-  function DocCardCover({ src, alt, "data-gui-node-id": id }) {
+  // "See also" / "Related" at the end of a doc page: the links that have a docs-index card (window data from
+  // _data/doc_cards.json, written by the gui-doc layout) become compact cards with that card's image / SVG; the
+  // other links stay as a line of links under them. Without JS the page keeps its plain list.
+  function relatedCards(body) {
+    let idx = {}; try { idx = JSON.parse((document.getElementById("doc-card-index") || {}).textContent || "{}"); } catch (e) {}
+    const keyOf = (href) => { try { const u = new URL(href, location.href); if (u.host !== location.host && u.host !== "neurons-me.github.io") return u.href.replace(/#.*$/, "");
+      return u.pathname.replace(/index\.html$/, ""); } catch (e) { return ""; } };
+    const here = keyOf(location.href);
+    body.querySelectorAll(":scope > h2, :scope > h3").forEach((hd) => {
+      if (!/^(see also|related)$/i.test(txt(hd))) return;
+      const list = hd.nextElementSibling; if (!list || !/^(UL|P)$/.test(list.tagName)) return;
+      const links = [...list.querySelectorAll("a")], seen = new Set(), cards = [], rest = [];
+      links.forEach((a) => { const k = keyOf(a.getAttribute("href")), c = idx[k];
+        if (c && k !== here && !seen.has(k)) { seen.add(k); cards.push({ a, c }); } else if (!c) rest.push(a); });
+      if (!cards.length) return;
+      const box = document.createElement("div"); box.className = "doc-cards doc-related";
+      cards.forEach(({ a, c }) => { const el = document.createElement("a"); el.className = "card"; el.setAttribute("href", a.getAttribute("href"));
+        if (c.svg) { const f = document.createElement("span"); f.className = "card-svg"; f.innerHTML = c.svg; el.appendChild(f); }
+        else if (c.img) { const im = document.createElement("img"); im.setAttribute("src", c.img); im.setAttribute("alt", ""); el.appendChild(im); }
+        const t = document.createElement("span"); t.className = "card-title"; t.textContent = c.title; el.appendChild(t);
+        const d = document.createElement("span"); d.className = "card-desc"; d.textContent = c.desc; el.appendChild(d);
+        box.appendChild(el); });
+      list.replaceWith(box);
+      if (rest.length) { const p = document.createElement("p"); rest.forEach((a, i) => { if (i) p.appendChild(document.createTextNode(" · ")); p.appendChild(a); }); box.after(p); }
+    });
+    return body;
+  }
+  // Axiom-style blocks: a heading marked {: .doc-axiom} ("A1 | Title") and everything up to the next h2 / h3 / hr become
+  // one <section class="doc-axiom-block">, drawn as a compact block with a left accent, a small "Axiom A1" label and the title.
+  function axiomBlocks(body) {
+    body.querySelectorAll(":scope > .doc-axiom").forEach((hd) => {
+      const sec = document.createElement("section"); sec.className = "doc-axiom-block";
+      hd.before(sec);
+      let n = hd; while (n) { const next = n.nextElementSibling; sec.appendChild(n); n = next; if (!n || /^(H1|H2|H3|HR)$/.test(n.tagName)) break; }
+    });
+    return body;
+  }
+  // Kernel note: a paragraph marked {: .doc-kernel} ("Kernel: **this.me 4.2.1** ([npm](…)) ⓘ") stays visible as one short line
+  // with an ⓘ button; the paragraph right after it, marked {: .doc-kernel-more} (how the examples ran, source links), moves
+  // into the tooltip, shown on hover, focus or tap (Escape / outside tap closes). Without JS both paragraphs show.
+  function KernelBadge({ html, tip, "data-gui-node-id": id }) {
+    const [open, setOpen] = React.useState(false), [pin, setPin] = React.useState(false), ref = React.useRef(null);
+    React.useEffect(() => {
+      if (!pin) return undefined;
+      const off = (e) => { if (e.type === "keydown" ? e.key === "Escape" : !ref.current.contains(e.target)) { setPin(false); setOpen(false); } };
+      document.addEventListener("pointerdown", off); document.addEventListener("keydown", off);
+      return () => { document.removeEventListener("pointerdown", off); document.removeEventListener("keydown", off); };
+    }, [pin]);
+    const tipRef = React.useRef(null), [dx, setDx] = React.useState(0);
+    const show = !!tip && (open || pin), linkSx = { "& a": { color: "primary.main", textDecoration: "none", "&:hover": { textDecoration: "underline" } } };
+    // keep the tooltip inside the viewport (16px margin): measured when it opens
+    React.useLayoutEffect(() => {
+      if (!show || !tipRef.current) { if (dx) setDx(0); return; }
+      const r = tipRef.current.getBoundingClientRect(), vw = document.documentElement.clientWidth;
+      const over = r.right - (vw - 16), under = 16 - r.left;
+      if (over > 0) setDx((d) => d - over); else if (under > 0) setDx((d) => d + under);
+    }, [show]);
+    return h(Box, { component: "p", ref, "data-gui-node-id": id, className: "doc-kernel-badge", sx: { position: "relative", m: 0, mb: 2, fontSize: ".95rem", lineHeight: 1.7, color: "text.secondary", "& strong": { color: "text.primary" }, ...linkSx } },
+      h(Box, { component: "span", dangerouslySetInnerHTML: { __html: html } }),
+      tip && h(Box, { component: "span", sx: { display: "inline-block", position: "relative" }, onMouseEnter: () => setOpen(true), onMouseLeave: () => setOpen(false) },
+        h(Box, { component: "button", type: "button", "aria-label": "About this kernel", "aria-expanded": show, "aria-describedby": show ? "doc-kernel-tip" : undefined,
+          onClick: () => setPin((v) => !v), onFocus: () => setOpen(true), onBlur: () => { setOpen(false); },
+          sx: { ml: .75, p: "0 2px", border: 0, background: "none", cursor: "pointer", color: "primary.main", fontSize: "1rem", lineHeight: 1, verticalAlign: "baseline", borderRadius: "4px", "&:focus-visible": { outline: "2px solid", outlineColor: "primary.main" } } }, "ⓘ"),
+        show && h(Box, { ref: tipRef, id: "doc-kernel-tip", role: "tooltip", style: { transform: `translateX(${dx}px)` }, sx: { position: "absolute", zIndex: 20, top: "calc(100% + 6px)", left: "-12px", width: "max-content", maxWidth: "min(520px, calc(100vw - 32px))",
+            p: 1.5, borderRadius: "10px", border: 1, borderColor: "divider", bgcolor: "background.paper", boxShadow: 6, fontSize: ".84rem", lineHeight: 1.6, color: "text.secondary", whiteSpace: "normal",
+            "& code": { fontFamily: MONO, fontSize: ".9em" }, "& p": { m: 0 }, ...linkSx },
+          dangerouslySetInnerHTML: { __html: tip } })));
+  }
+  function DocCardCover({ src, svg, compact, alt, "data-gui-node-id": id }) {
+    const hh = compact ? 96 : 140;
+    if (svg) return h(Box, { "data-gui-node-id": id, role: "img", "aria-label": alt || undefined, sx: { display: "block", lineHeight: 0, height: hh, color: "text.primary", "& svg": { display: "block", width: "100%", height: "100%" } }, dangerouslySetInnerHTML: { __html: svg } });
+    if (compact) return h("img", { src, alt: alt || "", loading: "lazy", "data-gui-node-id": id, style: { display: "block", width: "100%", height: hh, objectFit: "cover" } });
     return h("img", { src, alt: alt || "", loading: "lazy", "data-gui-node-id": id, style: { display: "block", width: "100%", height: 140, objectFit: "cover" } });
   }
   const tagOf = (el) => el.tagName.toLowerCase();
@@ -368,24 +439,28 @@
         return N("Box", { component: tagOf(c), sx: { ...cellSx, textAlign: al, ...(tagOf(c) === "th" ? { fontWeight: 700, color: "text.secondary", fontSize: ".78rem", textTransform: "uppercase", letterSpacing: ".04em", whiteSpace: "nowrap", bgcolor: "action.hover" } : {}) } }, inl(c));
       })))))),
   ]);
-  const docCards = (el) => N("Box", { sx: { display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "16px", mb: 3, "@media (max-width:860px)": { gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }, "@media (max-width:520px)": { gridTemplateColumns: "minmax(0, 1fr)" } } },
+  const docCards = (el, compact = el.classList.contains("doc-related")) => N("Box", { sx: { display: "grid", gridTemplateColumns: compact ? "repeat(4, minmax(0, 1fr))" : "repeat(3, minmax(0, 1fr))", gap: compact ? "12px" : "16px", mb: 3, "@media (max-width:860px)": { gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }, "@media (max-width:520px)": { gridTemplateColumns: compact ? "repeat(2, minmax(0, 1fr))" : "minmax(0, 1fr)" } } },
     [...el.querySelectorAll("a.card")].map((a) => {
-      const img = a.querySelector("img"), kind = a.querySelector(".card-kind");
+      const img = a.querySelector("img"), svg = a.querySelector(".card-svg svg"), kind = a.querySelector(".card-kind");
       return N("Card", { component: "a", href: a.getAttribute("href"), variant: "outlined", sx: { ...cardSx, display: "flex", flexDirection: "column", overflow: "hidden", borderRadius: "12px",
           transition: "border-color .14s, box-shadow .14s, transform .14s", "&:hover": { borderColor: "primary.main", boxShadow: 3, transform: "translateY(-1px)", textDecoration: "none" } } }, [
-        img && N("DocCardCover", { src: img.getAttribute("src"), alt: img.getAttribute("alt") }),
-        N("Box", { sx: { display: "flex", flexDirection: "column", gap: .75, p: 2 } }, [
+        svg ? N("DocCardCover", { svg: svg.outerHTML, compact, alt: svg.getAttribute("aria-label") }) : img && N("DocCardCover", { src: img.getAttribute("src"), alt: img.getAttribute("alt"), compact }),
+        N("Box", { sx: { display: "flex", flexDirection: "column", gap: compact ? .5 : .75, p: compact ? 1.5 : 2 } }, [
           kind && T(txt(kind), { fontSize: ".7rem", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "primary.main" }),
-          T(txt(a.querySelector(".card-title")), { fontSize: "1rem", fontWeight: 700, lineHeight: 1.3, color: "text.primary" }),
-          a.querySelector(".card-desc") && T(inl(a.querySelector(".card-desc")), { fontSize: ".86rem", color: "text.secondary", lineHeight: 1.5 }),
+          T(txt(a.querySelector(".card-title")), { fontSize: compact ? ".92rem" : "1rem", fontWeight: 700, lineHeight: 1.3, color: "text.primary" }),
+          a.querySelector(".card-desc") && T(inl(a.querySelector(".card-desc")), { fontSize: compact ? ".8rem" : ".86rem", color: "text.secondary", lineHeight: 1.5 }),
         ].filter(Boolean)),
       ].filter(Boolean));
     }));
   const H = { h1: { fontSize: "clamp(2.2rem, 6vw, 3rem)", fontWeight: 800, letterSpacing: "-.02em", lineHeight: 1.1, mt: 0, mb: 2 },
     h2: { fontSize: "clamp(1.4rem, 3.6vw, 1.75rem)", fontWeight: 800, letterSpacing: "-.01em", lineHeight: 1.2, mt: 5, mb: 1.5 },
     h3: { fontSize: "1.15rem", fontWeight: 700, lineHeight: 1.3, mt: 3.5, mb: 1 }, h4: { fontSize: "1rem", fontWeight: 700, mt: 3, mb: 1 } };
+  let runN = 0;
   const blocks = (el) => [...el.children].map((b) => {
     const t = tagOf(b);
+    if (t === "p" && b.classList.contains("doc-kernel")) { const more = b.nextElementSibling && b.nextElementSibling.classList.contains("doc-kernel-more") ? b.nextElementSibling : null;
+      return N("KernelBadge", { html: b.innerHTML.replace(/\s*ⓘ\s*$/, ""), tip: more ? more.innerHTML : "" }); }
+    if (b.classList.contains("doc-kernel-more") && b.previousElementSibling && b.previousElementSibling.classList.contains("doc-kernel")) return null;
     if (H[t]) return T(inl(b), { ...H[t], scrollMarginTop: "64px" }, { component: t, id: b.id || undefined });
     if (t === "p") return T(inl(b), { fontSize: "1rem", lineHeight: 1.7, color: "text.primary", mb: 2 }, { component: "p" });
     if (t === "blockquote") return N("Box", { component: "blockquote", sx: { m: 0, mb: 2.5, pl: 2, py: .25, borderLeft: 3, borderColor: "primary.main", color: "text.secondary", "& p": { mb: 0, color: "text.secondary" } } }, blocks(b));
@@ -395,6 +470,8 @@
     if (t === "table") return b.querySelector("img, picture") ? N("ModeHtml", { sx: { mb: 2.5, overflowX: "auto", "& table": { border: 0, borderCollapse: "collapse" }, "& td, & th": { border: 0, p: 1, verticalAlign: "middle" }, "& img": { maxWidth: "100%", height: "auto" }, "& h2": { fontSize: "1.4rem", fontWeight: 800, m: 0 } }, html: b.outerHTML }) : tableNode(b);
     if (t === "picture" || t === "img") return N("ModeHtml", { html: b.outerHTML, sx: { mb: 2, "& img": { maxWidth: "100%", height: "auto", display: "block" } } });
     if (t === "hr") return N("Box", { component: "hr", sx: { border: 0, borderTop: 1, borderColor: "divider", my: 4 } });
+    // a fenced block marked {: .me-run} gets a Run button (assets/me-run, loaded by the page); numbered in page order
+    if (b.classList.contains("me-run") && window.MeRun) return N("MeRunBlock", { idx: runN++, code: (b.querySelector("code") || b).textContent.replace(/\n$/, "") });
     if (t === "pre" || b.classList.contains("highlighter-rouge")) {
       const lang = ((b.className.match(/language-(\w+)/) || [])[1]) || "", code = (b.querySelector("code") || b).textContent.replace(/\n$/, "");
       return N("MeCodeBlock", { code, lang });
@@ -403,12 +480,29 @@
     if (b.classList.contains("doc-svg")) return N("Box", { component: "figure", className: "doc-svg", sx: { m: 0, mb: 2.5, color: "text.primary", overflowX: b.getAttribute("data-min") ? "auto" : undefined, "& svg": { display: "block", width: "100%", height: "auto", maxWidth: b.getAttribute("data-max") || "100%", minWidth: b.getAttribute("data-min") || 0 }, "& figure": { m: 0 }, "& figcaption": { fontSize: ".82rem", color: "text.secondary", mt: .75, lineHeight: 1.5 } }, dangerouslySetInnerHTML: { __html: b.innerHTML } });
     if (b.classList.contains("kernel-timeline") && window.KernelTimeline) return N("KernelTimeline", { src: b.getAttribute("data-src") });
     if (b.classList.contains("fanout-viz") && window.FanoutViz) return N("FanoutViz", { n: b.getAttribute("data-n"), caption: b.getAttribute("data-caption") });
+    // live demonstrations (assets/axioms-live, loaded by the page): the snippet is the placeholder's own code text
+    if (b.classList.contains("axiom-proof") && window.AxiomsLive) return N("AxiomProof", { axiom: b.getAttribute("data-axiom"), code: b.textContent.replace(/^\n+|\s+$/g, "") });
+    if (b.classList.contains("axiom-kernel") && window.AxiomsLive) return N("AxiomKernel", {});
+    if (b.classList.contains("doc-axiom-block")) {
+      const hd = b.querySelector(":scope > .doc-axiom"), m = /^\s*(\S+)\s*\|\s*(.+)$/.exec(txt(hd)) || [null, "", txt(hd)];
+      return N("Box", { component: "section", sx: (th) => ({ mt: 4, mb: 3, pl: { xs: 2, sm: 2.5 }, pr: { xs: 1.5, sm: 2 }, pt: 1.75, pb: .5, borderLeft: "3px solid", borderColor: "primary.main", borderRadius: "0 10px 10px 0",
+          bgcolor: `color-mix(in srgb, ${th.palette.primary.main} 5%, transparent)`, "& > p:last-child": { mb: 1.5 } }) }, [
+        N("Box", { component: hd.tagName.toLowerCase(), id: hd.id || undefined, sx: { m: 0, mb: 1.5, scrollMarginTop: "64px" } }, [
+          m[1] && N("Box", { component: "span", sx: { display: "block", fontFamily: MONO, fontSize: ".72rem", fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", color: "primary.main", mb: .25 } }, ["Axiom " + m[1]]),
+          N("Box", { component: "span", sx: { display: "block", fontSize: "clamp(1.3rem, 3.2vw, 1.6rem)", fontWeight: 800, letterSpacing: "-.01em", lineHeight: 1.2, color: "text.primary" } }, [m[2]]),
+        ].filter(Boolean)),
+        ...[...b.children].filter((c) => c !== hd).map((c) => c.classList.contains("doc-axiom-test")
+          ? T(inl(c), { fontSize: ".82rem", color: "text.secondary", lineHeight: 1.6, mt: -.5, mb: 1.5 }, { component: "p" })
+          : c.classList.contains("doc-axiom-statement") ? T(inl(c), { fontSize: "1.05rem", lineHeight: 1.65, color: "text.primary", mb: 1.5, "& strong": { fontVariant: "small-caps", letterSpacing: ".04em" } }, { component: "p" })
+          : blocks({ children: [c] })[0]),
+      ]);
+    }
     if (t === "div" || t === "section") return N("Box", { component: t }, blocks(b));
     return N("Box", { component: t, sx: { mb: 2 } }, inl(b));
-  });
+  }).filter(Boolean);
   const docSpec = () => N("Box", { sx: { minHeight: "100vh", bgcolor: "background.default", color: "text.primary" } }, [
     N("LandingTopBar", {}),
-    N("Box", { component: "main", sx: { width: "min(860px, calc(100% - 40px))", mx: "auto", pt: 5, pb: 10, "@media (max-width:480px)": { pt: 3.5, width: "calc(100% - 32px)" } } }, blocks(page.body)),
+    N("Box", { component: "main", sx: { width: "min(860px, calc(100% - 40px))", mx: "auto", pt: 5, pb: 10, "@media (max-width:480px)": { pt: 3.5, width: "calc(100% - 32px)" } } }, blocks(axiomBlocks(relatedCards(page.body)))),
   ]);
   const spec = docPage ? docSpec() : docsIndex ? docsSpec() : demosIndex ? indexSpec() : N("Box", { sx: { minHeight: "100vh", bgcolor: "background.default", color: "text.primary", lineHeight: 1.6 } }, [
     N("LandingTopBar", {}),
@@ -434,7 +528,7 @@
   const FK = docPage && window.FanoutKernel && document.querySelector(".fanout-viz") ? window.FanoutKernel : null;
   G.mount(spec, ROOT, {
     ...(FK ? { me: FK } : {}),
-    gui: { ...G, ...(FK ? { render: undefined, RunMe: undefined } : {}), Theme: PageTheme, registry: { ...(G.Registry || G.registry), LandingTopBar, DocsCover, MeOrbMark, MeCodeBlock, DocCardCover, ModeHtml, ...(window.KernelTimeline ? { KernelTimeline: window.KernelTimeline } : {}), ...(window.FanoutViz ? { FanoutViz: window.FanoutViz } : {}) } },
+    gui: { ...G, ...(FK ? { render: undefined, RunMe: undefined } : {}), Theme: PageTheme, registry: { ...(G.Registry || G.registry), LandingTopBar, DocsCover, MeOrbMark, MeCodeBlock, DocCardCover, ModeHtml, ...(window.KernelTimeline ? { KernelTimeline: window.KernelTimeline } : {}), KernelBadge, ...(window.MeRun ? { MeRunBlock: window.MeRun.MeRunBlock } : {}), ...(window.AxiomsLive ? { AxiomProof: window.AxiomsLive.AxiomProof, AxiomKernel: window.AxiomsLive.AxiomKernel } : {}), ...(window.FanoutViz ? { FanoutViz: window.FanoutViz } : {}) } },
     devtools: { enabled: true, inspector: INSPECTOR_ON, adminView: false, inspectorToggleVisible: false },
   });
   html.classList.add("gui-on");

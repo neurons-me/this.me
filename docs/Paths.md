@@ -7,6 +7,9 @@ mepath:
     url: https://neurons-me.github.io/.me/docs/
 canonical: https://suign.github.io/MeWhateverWhat.html
 crumb: me.whatever(what)
+scripts:
+  - /assets/me-kernel/me-kernel.js?v=1
+  - /assets/me-run/me-run.js?v=1
 ---
 
 # me.whatever(what)
@@ -15,7 +18,11 @@ Writing with `me.a.b(value)`, reading with `me("a.b")`.
 
 > Every property access on `me` extends a path. Calling it with a value declares; calling the root with the path string reads.
 
-Kernel: **this.me 4.2.1** ([npm](https://www.npmjs.com/package/this.me)). Source: [`createProxy` in proxy.ts](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/proxy.ts#L256-L303), [`handleCall` in handleCall.ts](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/handleCall.ts#L87-L156), [`postulate` in core-write.ts](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/core-write.ts#L983).
+Kernel: **this.me 4.2.1** ([npm](https://www.npmjs.com/package/this.me)) ⓘ
+{: .doc-kernel}
+
+Source: [`createProxy` in proxy.ts](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/proxy.ts#L256-L303), [`handleCall` in handleCall.ts](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/handleCall.ts#L87-L156), [`postulate` in core-write.ts](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/core-write.ts#L983).
+{: .doc-kernel-more}
 
 ## Write and read
 
@@ -27,6 +34,7 @@ me.fleet.trucks[1].fuel(80);          // write: path fleet.trucks.1.fuel = 80
 me("fleet.trucks.1.fuel");            // read → 80
 me("fleet.trucks[1].fuel");           // read → 80 (same path)
 ```
+{: .me-run}
 
 - `me.a.b` builds the path `["a", "b"]`; nothing is read or written until it is called ([createProxy](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/proxy.ts#L256-L303)).
 - `me.a.b(value)` declares `value` at `a.b` (`postulate(path, value)`), recomputes what depends on it, and returns a proxy on the same path, so calls chain.
@@ -39,6 +47,7 @@ me.a.b(5);
 me.a.b();          // returns a proxy, and declares undefined at a.b
 me("a.b");         // → undefined
 ```
+{: .me-run}
 
 On a non-root path, `handleCall` passes the arguments to `postulate` whatever they are; with none, the expression is `undefined` ([handleCall.ts](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/handleCall.ts#L141-L155)). To read, use `me("a.b")`.
 
@@ -48,6 +57,7 @@ On a non-root path, `handleCall` passes the arguments to `postulate` whatever th
 me.d.e(2).f(3);    // d.e = 2, then d.e.f = 3
 me("d.e.f");       // → 3
 ```
+{: .me-run}
 
 A write returns a proxy on the path it wrote (an operator leaf returns its scope instead), so the next segment continues from there.
 
@@ -58,6 +68,7 @@ me.fleet["="]("total", "trucks[1].fuel + trucks[2].fuel");
 me("fleet.total");                    // the derived value, read like any path
 me.explain("fleet.total");            // its formula, inputs and last wave
 ```
+{: .me-run}
 
 `["="]` declares a formula on a path; reading it is the same `me(path)`. [me.explain(path)](./Explain.html) shows why it has its value.
 

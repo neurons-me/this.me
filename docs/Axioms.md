@@ -1,187 +1,205 @@
 ---
 layout: gui-doc
 title: "The Axioms of .me"
-description: "The invariants the .me kernel guarantees (A-struct-0, A0–A9), each with a short example and runtime proof."
+description: "The invariants the .me kernel must always respect (A-struct-0, A0–A9): each stated, then demonstrated live in the page on this.me 4.2.1."
 image: https://neurons-me.github.io/.me/docs/assets/card-axioms.webp
 mepath:
   - text: Docs
     url: https://neurons-me.github.io/.me/docs/
 crumb: Axioms
+scripts:
+  - /assets/me-kernel/me-kernel.js?v=1
+  - /assets/axioms-live/axioms-live.js?v=2
+related:
+  - Primitives.html
+  - Operators.html
+  - Syntax.html
+  - Pointer-Composition.html
 ---
 
 
 # 𓋹 The Axioms of .me
 
-In **.me**, axioms are the fundamental invariants of the kernel — the unbreakable rules that the runtime must always respect on top of its [Primitives](./Primitives.html).
+The axioms are the invariants the kernel must always respect on top of the [Primitives](./Primitives.html). Each one is stated, then demonstrated: the snippet under it runs in this page on this.me 4.2.1, and every line marked `//=` is checked against what the kernel returns.
 
-At its heart, **.me** is a **personal semantic kernel**: a single runtime value called `me` that acts simultaneously as a deeply navigable object and a callable function. This unified surface lets you store, organize, protect, query, link, and audit your digital identity and memory in a structured, consistent, and tamper-evident way.
-
-The **axioms together create something unique**: they turn a simple JavaScript object into a secure, auditable, self-consistent personal memory engine. You can safely mix public data, hidden subtrees, structural pointers, queries, and identity — while the entire system remains predictable and tamper-evident.
+<div class="axiom-kernel" markdown="0"></div>
 
 ### A-struct-0 | Unified Callable Surface
+{: .doc-axiom}
 
-**One runtime value can be both callable and infinitely chainable.**
+**Statement.** The kernel is one value that is at once a function and an object: every path reached from it is again callable, and a call on a path writes it.
+{: .doc-axiom-statement}
 
-This is the foundation that makes the entire `.me` experience feel natural and powerful.
-
-```ts
-const me = new ME() as any;
-
-console.log(typeof me);                    // "function"
-console.log(typeof me.profile.name);       // "function"
-
+<div class="axiom-proof" data-axiom="A-struct-0" markdown="0"><pre><code>typeof me                       //= "function"
+typeof me.profile.name          //= "function"
 me.profile.name("Abella");
-console.log(me("profile.name"));           // "Abella"
-```
+me("profile.name")              //= "Abella"</code></pre></div>
+
+Also checked by [A-struct-0](https://github.com/neurons-me/.me/blob/main/Typescript/tests/axioms.test.ts#L102) in `axioms.test.ts`.
+{: .doc-axiom-test}
 
 ### A0 | Secret Root Stealth
+{: .doc-axiom}
 
-A secret subtree can be fully readable by its complete path, while its root remains completely invisible.
+**Statement.** The root of a secret scope does not resolve. Its leaves resolve by their full path, and public paths are unaffected.
+{: .doc-axiom-statement}
 
-```ts
-const me = new ME() as any;
-
+<div class="axiom-proof" data-axiom="A0" markdown="0"><pre><code>me.ledger.host("localhost:8161");
 me.wallet["_"]("secret");
 me.wallet.income(100);
+me("ledger.host")               //= "localhost:8161"
+me("wallet")                    //= undefined
+me("wallet.income")             //= 100</code></pre></div>
 
-console.log(me("wallet"));        // undefined
-console.log(me("wallet.income")); // 100
-```
+Also checked by [A0](https://github.com/neurons-me/.me/blob/main/Typescript/tests/axioms.test.ts#L131) in `axioms.test.ts`.
+{: .doc-axiom-test}
 
 ### A1 | Identity Normalization (@)
+{: .doc-axiom}
 
-Identity claims are automatically normalized and validated before being committed.
+**Statement.** An identity claim is normalized before it is recorded at the root, and a claim that is not a valid name is refused.
+{: .doc-axiom-statement}
 
-```ts
-const me = new ME() as any;
-me["@"]("Abella");
+<div class="axiom-proof" data-axiom="A1" markdown="0"><pre><code>me["@"]("Abella");
+lastMemory().operator           //= "@"
+lastMemory().value.__id         //= "abella"
+throws(() =&gt; me["@"]("a b"))    //= true</code></pre></div>
 
-console.log(me.inspect({ last: 1 }).memories[0].operator); // "@"
-console.log(me.inspect({ last: 1 }).memories[0].value);    // { __id: "abella" }
-```
+Also checked by [A1](https://github.com/neurons-me/.me/blob/main/Typescript/tests/axioms.test.ts#L167) in `axioms.test.ts`.
+{: .doc-axiom-test}
 
 ### A2 | Path-Bound Secret Scopes (_)
+{: .doc-axiom}
 
-Secrecy is structural — bound to a specific path rather than a global toggle.
+**Statement.** Secrecy belongs to a path, not to the instance: declaring `_` on a path hides that path's root and leaves the rest of the tree as it was.
+{: .doc-axiom-statement}
 
-```ts
-const me = new ME() as any;
-
+<div class="axiom-proof" data-axiom="A2" markdown="0"><pre><code>me.profile.kind("public-profile");
 me.profile["_"]("alpha");
 me.profile.name("Abella");
+me("profile")                   //= undefined
+me("profile.name")              //= "Abella"</code></pre></div>
 
-console.log(me("profile"));       // undefined
-console.log(me("profile.name"));  // "Abella"
-```
+Also checked by [A2](https://github.com/neurons-me/.me/blob/main/Typescript/tests/axioms.test.ts#L205) in `axioms.test.ts`.
+{: .doc-axiom-test}
 
 ### A3 | Noise Reset (~)
+{: .doc-axiom}
 
-Secret derivation can be reset at any chosen boundary, making previous secrets discontinuous.
+**Statement.** `~` cuts secret inheritance at a path: a secret declared after it derives a different effective secret than the one before it.
+{: .doc-axiom-statement}
 
-```ts
-const me = new ME() as any;
-
-me.wallet["_"]("alpha");
+<div class="axiom-proof" data-axiom="A3" markdown="0"><pre><code>me.wallet["_"]("alpha");
 me.wallet.hidden.notes("alpha-note");
-
 me.wallet["~"]("noise");
-
 me.wallet["_"]("beta");
 me.wallet.hidden.seed("beta-seed");
+me("wallet")                    //= undefined
+me("wallet.hidden.seed")        //= "beta-seed"
+secretOf("wallet.hidden.notes") !== secretOf("wallet.hidden.seed")   //= true</code></pre></div>
 
-console.log(me("wallet.hidden.seed")); // "beta-seed"
-```
+Also checked by [A3](https://github.com/neurons-me/.me/blob/main/Typescript/tests/axioms.test.ts#L236) · [A3b](https://github.com/neurons-me/.me/blob/main/Typescript/tests/axioms.test.ts#L278) · [A3c](https://github.com/neurons-me/.me/blob/main/Typescript/tests/axioms.test.ts#L310) in `axioms.test.ts`.
+{: .doc-axiom-test}
 
 ### A4 | Structural Pointers (__ / ->)
+{: .doc-axiom}
 
-Pointers remain lightweight data objects. When traversed, they are automatically dereferenced structurally.
+**Statement.** A pointer is stored as data (`{ __ptr }`) and is followed when a path is read through it.
+{: .doc-axiom-statement}
 
-```ts
-const me = new ME() as any;
-
-me.wallet["_"]("secret");
+<div class="axiom-proof" data-axiom="A4" markdown="0"><pre><code>me.wallet["_"]("secret");
 me.wallet.income(1000);
+me.profile.cards.primary["__"]("wallet");
+me("profile.cards.primary")         //= { __ptr: "wallet" }
+me("profile.cards.primary.income")  //= 1000</code></pre></div>
 
-me.profile.card["__"]("wallet");
-
-console.log(me("profile.card"));           // { __ptr: "wallet" }
-console.log(me("profile.card.income"));    // 1000
-```
+Also checked by [A4](https://github.com/neurons-me/.me/blob/main/Typescript/tests/axioms.test.ts#L340) in `axioms.test.ts`.
+{: .doc-axiom-test}
 
 ### A5 | Query as Memory Event (?)
+{: .doc-axiom}
 
-Queries and calculations are recorded as first-class memory events.
+**Statement.** A query is recorded in memory as a `?` event, and it does not reveal the root of the secret scope it reads.
+{: .doc-axiom-statement}
 
-```ts
-const me = new ME() as any;
-
+<div class="axiom-proof" data-axiom="A5" markdown="0"><pre><code>me.profile["_"]("alpha");
 me.profile.name("Abella");
+me.profile.city("Veracruz");
 me.profile["?"]("name", "city");
+lastMemory().operator           //= "?"
+me("profile")                   //= undefined
+me("profile.name")              //= "Abella"</code></pre></div>
 
-console.log(me.inspect({ last: 1 }).memories[0].operator); // "?"
-```
+Also checked by [A5](https://github.com/neurons-me/.me/blob/main/Typescript/tests/axioms.test.ts#L372) in `axioms.test.ts`.
+{: .doc-axiom-test}
 
 ### A6 | Tombstone Remove (-)
+{: .doc-axiom}
 
-Deletion is auditable and irreversible at read time through tombstones.
+**Statement.** After `-`, a removed path no longer resolves to the value it had.
+{: .doc-axiom-statement}
 
-```ts
-const me = new ME() as any;
-
-me.wallet.hidden.notes("private");
+<div class="axiom-proof" data-axiom="A6" markdown="0"><pre><code>me.wallet["_"]("secret");
+me.wallet.hidden.notes("private note");
+me("wallet.hidden.notes")       //= "private note"
 me.wallet.hidden["-"]("notes");
+me("wallet.hidden.notes") !== "private note"   //= true</code></pre></div>
 
-console.log(me("wallet.hidden.notes")); // undefined or "-"
-```
+Also checked by [A6](https://github.com/neurons-me/.me/blob/main/Typescript/tests/axioms.test.ts#L405) in `axioms.test.ts`.
+{: .doc-axiom-test}
 
 ### A7 | Public + Secret Coexistence
+{: .doc-axiom}
 
-Private operations never leak into or corrupt the public deterministic view.
+**Statement.** Secret declarations and noise resets do not change what the public paths resolve to.
+{: .doc-axiom-statement}
 
-```ts
-const me = new ME() as any;
-
-me.ledger.host("localhost:8161");
+<div class="axiom-proof" data-axiom="A7" markdown="0"><pre><code>me.ledger.host("localhost:8161");
 me.profile["_"]("alpha");
 me.profile.name("Abella");
+me.profile["~"]("noise");
+me.profile["_"]("beta");
+me.profile.hidden.seed("beta-seed");
+me.ledger.status("ok");
+me("ledger.host")               //= "localhost:8161"
+me("ledger.status")             //= "ok"
+me("profile")                   //= undefined</code></pre></div>
 
-console.log(me("ledger.host"));   // "localhost:8161"
-console.log(me("profile"));       // undefined
-```
+Also checked by [A7](https://github.com/neurons-me/.me/blob/main/Typescript/tests/axioms.test.ts#L437) in `axioms.test.ts`.
+{: .doc-axiom-test}
 
 ### A8 | Hash Chain Integrity
+{: .doc-axiom}
 
-The full memory history is tamper-evident via an internal hash chain. The public surface is redacted when needed, while the internal forensic log (`_memories`) preserves complete integrity.
+**Statement.** Every memory links to the hash of the one before it, starting from an empty hash, and its own hash can be recomputed from its fields.
+{: .doc-axiom-statement}
 
-```ts
-const me = new ME() as any;
-me["@"]("jabellae");
-me.ledger.host("localhost:8161");
+<div class="axiom-proof" data-axiom="A8" markdown="0"><pre><code>me.ledger.host("localhost:8161");
+me.wallet["_"]("secret");
+me.wallet.balance(1000);
+memories()[0].prevHash ?? ""    //= ""
+memories().every((m, i) =&gt; (m.prevHash ?? "") === (i ? memories()[i - 1].hash : ""))   //= true
+memories().every((m) =&gt; m.hash === rehash(m))   //= true</code></pre></div>
 
-const m = me._memories;
-
-console.log(m[0].prevHash === "");
-console.log(m[1].prevHash === m[0].hash);
-```
+Also checked by [A8](https://github.com/neurons-me/.me/blob/main/Typescript/tests/axioms.test.ts#L474) in `axioms.test.ts`.
+{: .doc-axiom-test}
 
 ### A9 | Deterministic Conflict Resolution (LWW)
+{: .doc-axiom}
 
-When writes collide, the system always resolves to a single deterministic truth using `(timestamp asc, hash asc)`.
+**Statement.** When writes to one path collide, the last write wins by logical order (seq, then hash), not by the physical clock; the index and the read agree on the winner.
+{: .doc-axiom-statement}
 
-```ts
-const me = new ME() as any;
-const originalNow = Date.now;
+<div class="axiom-proof" data-axiom="A9" markdown="0"><pre><code>Date.now = () =&gt; 1000; me.wallet.balance(10);
+Date.now = () =&gt; 2000; me.wallet.balance(20);
+me("wallet.balance")            //= 20
+Date.now = () =&gt; 3000; me.wallet.balance(111);
+me.wallet.balance(222);
+me("wallet.balance")            //= 222
+me.index["wallet.balance"]      //= 222</code></pre></div>
 
-try {
-  (Date as any).now = () => 3000;
-  me.wallet.balance(111);
-  me.wallet.balance(222);
-} finally {
-  (Date as any).now = originalNow;
-}
-
-console.log(me("wallet.balance")); // always the same deterministic winner
-```
+Also checked by [A9](https://github.com/neurons-me/.me/blob/main/Typescript/tests/axioms.test.ts#L536) in `axioms.test.ts`.
+{: .doc-axiom-test}
 
 ---
 
@@ -197,15 +215,19 @@ Together, these axioms enable real-world use cases that traditional data structu
 
 In short, `.me` gives you a living, programmable personal memory that feels like a natural extension of yourself — flexible, private when needed, and provably consistent.
 
-### Practical Validation
+### How the demonstrations run
 
-Run the official fire test:
+Each snippet runs on a fresh `new ME()` from the unmodified [this.me 4.2.1](https://www.npmjs.com/package/this.me/v/4.2.1) (jsDelivr, unpkg fallback), whose sha256 is checked in the browser before it is imported. Statements run in order; a line `expression //= expected` is evaluated at that point and compared with `expected`. The helpers (`memories`, `lastMemory`, `secretOf`, `throws`, `rehash`) are listed in the kernel panel at the top. The runner is [axioms-live.js](https://github.com/neurons-me/.me/blob/main/assets/axioms-live/axioms-live.js).
+
+### The test suite
+
+The same axioms are checked in Node by [`Typescript/tests/axioms.test.ts`](https://github.com/neurons-me/.me/blob/main/Typescript/tests/axioms.test.ts): one case per axiom (A3 has two more, A3b and A3c, for nested secrets), each asserting its proofs as `expected` / `returned` pairs. From `Typescript/`, after `npm run build` (the test imports `../dist/index.js`), on Node ≥ 22.6:
 
 ```bash
 node tests/axioms.test.ts
 ```
 
-**Expected:** All axioms pass with `expected === returned` proofs.
+**Expected:** `AXIOMS SUMMARY: 13/13 passed`. Run against this.me 4.2.1 from npm: 13/13 passed, exit code 0.
 
 ---
 

@@ -54,6 +54,8 @@
     html:not(.gui-on) .doc-cards img{display:block;width:100%;height:120px;object-fit:cover;margin:0}
     html:not(.gui-on) .doc-cards .card-kind{padding:10px 14px 0;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.75}
     html:not(.gui-on) .doc-cards .card-title{padding:4px 14px 0;font-weight:700}
+    html:not(.gui-on) .doc-axiom{margin-top:2.2em;padding:.4em 0 .4em .8em;border-left:3px solid currentColor;font-size:1.4rem}
+    html:not(.gui-on) .doc-axiom-test{font-size:.85rem;opacity:.8}
     html:not(.gui-on) .doc-cards .card-desc{padding:4px 14px 14px;font-size:.88rem;opacity:.8}
   </style>
   <!-- Static (no-JS) page: the theme stylesheet; landing-gui.js switches it off once .GUI has rendered. -->
@@ -86,9 +88,15 @@
   </header>
   <main class="markdown-body doc">
     {{ content }}
+    {% if page.related %}{% comment %} front matter related: a list of docs pages ("Operators.html") or site paths; shown as cards with JS, as a list without {% endcomment %}
+    <h2 id="see-also">See also</h2>
+    <ul>{% for r in page.related %}{% if r contains "/" %}{% assign rk = r %}{% else %}{% assign rk = "/.me/docs/" | append: r %}{% endif %}{% assign rc = site.data.doc_cards[rk] %}
+      <li><a href="{{ rc.href | default: r }}">{{ rc.title | default: r }}</a>{% if rc.desc %}: {{ rc.desc }}{% endif %}</li>{% endfor %}
+    </ul>{% endif %}
   </main>
 </div>
+<script type="application/json" id="doc-card-index">{{ site.data.doc_cards | jsonify }}</script>
 {% for s in page.scripts %}<script src="{{ s | relative_url }}"></script>
-{% endfor %}<script src="{{ '/assets/landing-gui/landing-gui.js' | relative_url }}?v=19" onerror="document.documentElement.classList.remove('gui-boot')"></script>
+{% endfor %}<script src="{{ '/assets/landing-gui/landing-gui.js' | relative_url }}?v=21" onerror="document.documentElement.classList.remove('gui-boot')"></script>
 </body>
 </html>

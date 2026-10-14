@@ -7,13 +7,22 @@ mepath:
   - text: Docs
     url: https://neurons-me.github.io/.me/docs/
 crumb: Syntax
+scripts:
+  - /assets/me-kernel/me-kernel.js?v=1
+  - /assets/me-run/me-run.js?v=1
 ---
 
 # .me Syntax
 
 > A path is an address, a call is an operation on it. Meaning comes from the structure, not from the words.
 
-Kernel: **this.me 4.2.1** ([npm](https://www.npmjs.com/package/this.me)). Every example below was run against the published 4.2.1 build; the output shown is what it returned. How a single path is written and read in detail: [me.whatever(what)](./Paths.html).
+Kernel: **this.me 4.2.1** ([npm](https://www.npmjs.com/package/this.me)) ⓘ
+{: .doc-kernel}
+
+Every example below was run against the published 4.2.1 build; the output shown is what it returned.
+{: .doc-kernel-more}
+
+How a single path is written and read in detail: [me.whatever(what)](./Paths.html).
 
 ## Algebra first
 
@@ -34,6 +43,7 @@ me("ventas.clientes.total");     // 10
 me.売上.顧客.合計(10);
 me("売上.顧客.合計");              // 10
 ```
+{: .me-run}
 
 Same algebra, different vocabulary.
 
@@ -56,6 +66,7 @@ me.products[1].price(80);
 me("products[1].name");   // "Keyboard"
 me("products[1].price");  // 80
 ```
+{: .me-run}
 
 ## Any language
 
@@ -72,6 +83,7 @@ me.tienda.impuesto(0.16);
 me.tienda.articulos[1]["="]("total", "precio + (precio * tienda.impuesto)");
 me("tienda.articulos[1].total");    // 116
 ```
+{: .me-run}
 
 Paths written with non-Latin names (`me.売上.顧客.合計`) are written and read as above. In 4.2.1, formula text inside `["="]` that names such paths does not evaluate: `me.店舗.商品[1]["="]("合計", "価格 + (価格 * 店舗.税率)")` leaves `合計` `undefined`, and `explain()` reports `evaluation-failed`.
 
@@ -86,6 +98,7 @@ me.fleet.trucks[3].fuel(400);
 me.price_per_liter(2);
 me.fleet["trucks[i]"]["="]("cost", "fuel * price_per_liter");   // broadcast [i]
 ```
+{: .me-run}
 
 | Form | Example | Returns |
 |---|---|---|
@@ -106,6 +119,7 @@ me("fleet.trucks[].fuel");                              // 700
 me.fleet["="]("fuelX2", "fleet.trucks[].fuel * 2");     // collection path from the root
 me("fleet.fuelX2");                                     // 1400
 ```
+{: .me-run}
 
 - Computed over the public view (what `me.as(null)` sees), for every caller including the owner.
 - A member without the field, or with a non-numeric value, makes the sum `undefined` (never a partial sum). An empty collection is `undefined`, not `0`.
@@ -138,6 +152,7 @@ me.sensors[1].temp(21);
 me.sensors[2].temp(30);
 me("sensors[temp >= 25].temp");     // { "2": 30 }
 ```
+{: .me-run}
 
 ## See also
 

@@ -13,7 +13,11 @@ crumb: explain
 
 > Why does this path have this value? `me.explain(path)` answers from the kernel: the formula, its inputs as they are now, and the write that last recomputed it.
 
-Kernel: **this.me 4.2.1** ([npm](https://www.npmjs.com/package/this.me)). Source: [`explain()` in derivation.ts](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/derivation.ts#L140-L251), the method on the instance [me.ts](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/me.ts#L482-L484), the return type [`MEExplainResult` in types.ts](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/types.ts#L701-L747).
+Kernel: **this.me 4.2.1** ([npm](https://www.npmjs.com/package/this.me)) ⓘ
+{: .doc-kernel}
+
+Source: [`explain()` in derivation.ts](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/derivation.ts#L140-L251), the method on the instance [me.ts](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/me.ts#L482-L484), the return type [`MEExplainResult` in types.ts](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/types.ts#L701-L747).
+{: .doc-kernel-more}
 
 ## Signature
 

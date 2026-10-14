@@ -1,0 +1,176 @@
+{
+ "/.me/docs/Syntax.html": {
+  "href": "https://neurons-me.github.io/.me/docs/Syntax.html",
+  "title": ".me Syntax",
+  "desc": "Dot builds the path, [] selects members, () writes, reads or applies an operator. Names in any language.",
+  "img": "/.me/docs/assets/card-syntax-me.webp"
+ },
+ "/.me/Demos/": {
+  "href": "https://neurons-me.github.io/.me/Demos/",
+  "title": "Demos",
+  "desc": "Live examples of the .me kernel — Smart Cities, Robots, Social Graph, Wallet Split, Affinity, Shops.",
+  "img": "/.me/docs/assets/demos-cover.webp"
+ },
+ "/.me/docs/me.html": {
+  "href": "https://neurons-me.github.io/.me/docs/me.html",
+  "title": "What is .me?",
+  "desc": "The core identity primitive. One object, infinite derivations.",
+  "img": "/.me/docs/assets/card-me.webp"
+ },
+ "/.me/docs/Primitives.html": {
+  "href": "https://neurons-me.github.io/.me/docs/Primitives.html",
+  "title": "Primitives",
+  "desc": "The irreducible vocabulary of .me — the symbols you actually type.",
+  "svg": "<svg viewBox=\"0 0 640 280\" preserveAspectRatio=\"xMidYMid slice\" role=\"img\" aria-label=\"Line drawing of a hexagonal cube, the .me primitive mark\" xmlns=\"http://www.w3.org/2000/svg\"><g opacity=\".55\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"10\" stroke-linejoin=\"round\" stroke-linecap=\"round\"><path d=\"M320 20 L423.9 80 L423.9 200 L320 260 L216.1 200 L216.1 80 Z\"/><path d=\"M320 80 L372 110 L372 170 L320 200 L268 170 L268 110 Z\"/><path d=\"M320 20 V80 M423.9 80 L372 110 M423.9 200 L372 170 M320 260 V200 M216.1 200 L268 170 M216.1 80 L268 110\"/></g></svg>"
+ },
+ "/.me/docs/Operators.html": {
+  "href": "https://neurons-me.github.io/.me/docs/Operators.html",
+  "title": ".me Operators",
+  "desc": "@ identity, _ secret scope, ~ noise reset, -> pointer, = derivation, ? query, - remove: one verified example each.",
+  "img": "/.me/docs/assets/card-operators.webp"
+ },
+ "/.me/docs/Paths.html": {
+  "href": "https://neurons-me.github.io/.me/docs/Paths.html",
+  "title": "me.whatever(what)",
+  "desc": "me.a.b(value) declares, me(\"a.b\") reads: chaining, indexes, and why me.a.b() is not a read.",
+  "img": "/.me/docs/assets/card-paths.webp"
+ },
+ "/.me/docs/Explain.html": {
+  "href": "https://neurons-me.github.io/.me/docs/Explain.html",
+  "title": "me.explain(path)",
+  "desc": "Why a path has its value: formula, inputs, and the last wave (k, recomputed, changed, sourcePath).",
+  "img": "/.me/docs/assets/card-explain.webp"
+ },
+ "/.me/docs/O-k.html": {
+  "href": "https://neurons-me.github.io/.me/docs/O-k.html",
+  "title": "What is O(k)?",
+  "desc": "n is every value, k is what one write recomputes. The work follows k, read from explain(path).meta.",
+  "img": "/.me/docs/assets/card-ok.webp"
+ },
+ "/.me/docs/Seed.html": {
+  "href": "https://neurons-me.github.io/.me/docs/Seed.html",
+  "title": "SEED",
+  "desc": "The one root every .me identity grows from — what it is, what it derives, what it never protects.",
+  "img": "/.me/docs/assets/card-seed.webp"
+ },
+ "/.me/docs/Axioms.html": {
+  "href": "https://neurons-me.github.io/.me/docs/Axioms.html",
+  "title": "Axioms",
+  "desc": "The invariants the kernel guarantees, with runtime proof.",
+  "img": "/.me/docs/assets/card-axioms.webp"
+ },
+ "/.me/docs/Architecture.html": {
+  "href": "https://neurons-me.github.io/.me/docs/Architecture.html",
+  "title": "Architecture",
+  "desc": "What happens underneath a call: proxy path resolution, the dependency graph, lineage with explain(), and structural privacy.",
+  "img": "/.me/docs/assets/card-architecture.webp"
+ },
+ "/.me/docs/me-uri.html": {
+  "href": "https://neurons-me.github.io/.me/docs/me-uri.html",
+  "title": "me:// URI grammar",
+  "desc": "The me:// URI scheme and grammar specification for semantic paths.",
+  "img": "/.me/docs/assets/card-syntax.webp"
+ },
+ "/.me/docs/One-Line-That-Replaces-Five.html": {
+  "href": "https://neurons-me.github.io/.me/docs/One-Line-That-Replaces-Five.html",
+  "title": "One Line That Replaces Five",
+  "desc": "One assignment instead of a migration, a map, a filter, a trigger, and a validation hook — meaning lives in one place, not five.",
+  "img": "/.me/docs/assets/card-one-line.webp"
+ },
+ "/robots/": {
+  "href": "https://neurons-me.github.io/robots/",
+  "title": "Robots That Understand Context",
+  "desc": "The same object means different things depending on who is looking and where — the live demo, the human version, and the docs.",
+  "img": "/.me/docs/assets/card-robots.webp"
+ },
+ "/smart-cities/": {
+  "href": "https://neurons-me.github.io/smart-cities/",
+  "title": "Smart Cities",
+  "desc": "Evolving city data as live dependencies — syntax, Madrid GTFS, and human fares.",
+  "img": "/.me/docs/assets/card-smart-cities.webp"
+ },
+ "/.me/docs/Social-Graph.html": {
+  "href": "https://neurons-me.github.io/.me/docs/Social-Graph.html",
+  "title": "Social Graph",
+  "desc": "Relationships, policies, and privacy in one live graph — no query language, no joins.",
+  "img": "/.me/docs/assets/card-social-graph.webp"
+ },
+ "/.me/docs/Running-your-CoffeeShops.html": {
+  "href": "https://neurons-me.github.io/.me/docs/Running-your-CoffeeShops.html",
+  "title": "Running your CoffeeShops",
+  "desc": "Public menus, reactive pricing, and private ops — one graph, three shops, zero databases.",
+  "img": "/.me/docs/assets/card-coffeeshops.webp"
+ },
+ "/.me/docs/Splitting-your-Bill.html": {
+  "href": "https://neurons-me.github.io/.me/docs/Splitting-your-Bill.html",
+  "title": "Splitting your Bill",
+  "desc": "Shared expenses settle themselves — every balance updates the moment a payment lands.",
+  "img": "/.me/docs/assets/card-split-bill.webp"
+ },
+ "/.me/docs/Hemisphere-Scale.html": {
+  "href": "https://neurons-me.github.io/.me/docs/Hemisphere-Scale.html",
+  "title": "Hemisphere Scale",
+  "desc": "1 million nodes. One sensor flips. Six derivations cascade. Everything else stays cold.",
+  "img": "/.me/docs/assets/card-hemisphere.webp"
+ },
+ "/.me/docs/Extreme-Fan-Out.html": {
+  "href": "https://neurons-me.github.io/.me/docs/Extreme-Fan-Out.html",
+  "title": "Extreme Fan-Out",
+  "desc": "One write instantly updates 100,000 dependents — O(k) is honest when k is enormous.",
+  "img": "/.me/docs/assets/card-fan-out.webp"
+ },
+ "/.me/docs/Pointer-Composition.html": {
+  "href": "https://neurons-me.github.io/.me/docs/Pointer-Composition.html",
+  "title": "Pointer Composition",
+  "desc": "Chains compose, self-pointers aren't identity, and cycles of any length fail closed — documented and tested.",
+  "img": "/.me/docs/assets/card-pointer.webp"
+ },
+ "https://www.npmjs.com/package/this.me": {
+  "href": "https://www.npmjs.com/package/this.me",
+  "title": "npm",
+  "desc": "Install: npm install this.me",
+  "img": "/.me/docs/assets/card-npm.webp"
+ },
+ "https://crates.io/crates/this-me": {
+  "href": "https://crates.io/crates/this-me",
+  "title": "crates.io",
+  "desc": "Rust crate v0.3.3. Install: cargo add this-me",
+  "img": "/.me/docs/assets/card-crates.webp"
+ },
+ "https://docs.rs/this-me": {
+  "href": "https://docs.rs/this-me",
+  "title": "Rust API",
+  "desc": "Generated rustdoc reference for this-me v0.3.3.",
+  "img": "/.me/docs/assets/card-rust-api.webp"
+ },
+ "/.me/Tests/gtfs-madrid-universe.html": {
+  "href": "https://neurons-me.github.io/.me/Tests/gtfs-madrid-universe.html",
+  "title": "GTFS Madrid / k",
+  "desc": "Real GTFS → reactive dependencies. Mutate and watch k; benchmark n ~100× with k flat. Live interactive subset.",
+  "img": "/.me/docs/assets/card-gtfs.webp"
+ },
+ "/.me/docs/Tests/semantic-reactive.html": {
+  "href": "https://neurons-me.github.io/.me/docs/Tests/semantic-reactive.html",
+  "title": "Semantic graph / reactive",
+  "desc": "GTFS Madrid typed nodes + = edges: click a node → me.explain(path), .me syntax and full explain JSON.",
+  "img": "/.me/docs/assets/card-semantic.webp"
+ },
+ "/.me/docs/Tests/madrid-knowledge.html": {
+  "href": "https://neurons-me.github.io/.me/docs/Tests/madrid-knowledge.html",
+  "title": "Madrid knowledge",
+  "desc": "Same idea as GTFS / k, human story: fares, abono, Sol→Atocha. Mutate → dependents + explain().",
+  "img": "/.me/docs/assets/card-madrid.webp"
+ },
+ "/.me/docs/Tests/": {
+  "href": "https://neurons-me.github.io/.me/docs/Tests/",
+  "title": "Tests",
+  "desc": "Phases 0–8, reconstruction proof, secret contracts. 11/11 phases passed.",
+  "img": "/.me/docs/assets/card-tests.webp"
+ },
+ "/.me/docs/Benchmarks/": {
+  "href": "https://neurons-me.github.io/.me/docs/Benchmarks/",
+  "title": "Benchmarks",
+  "desc": "O(k) scaling, throughput, fan-out, cold/warm, explain overhead, secret-scope cost.",
+  "img": "/.me/docs/assets/card-benchmarks.webp"
+ }
+}

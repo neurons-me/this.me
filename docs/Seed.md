@@ -6,6 +6,11 @@ mepath:
   - text: Docs
     url: https://neurons-me.github.io/.me/docs/
 crumb: Seed
+related:
+  - me.html
+  - Primitives.html
+  - Axioms.html
+  - Architecture.html
 ---
 
 # 𓇗 SEED

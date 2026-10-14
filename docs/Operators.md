@@ -11,7 +11,13 @@ crumb: Operators
 
 # .me Operators
 
-Kernel: **this.me 4.2.1** ([npm](https://www.npmjs.com/package/this.me)). An operator is called as a bracketed key on a path: `me.path["op"](arg)`. Each example ran on 4.2.1 in a fresh `new ME()`; the result is what it returned. Selectors (`[i]`, filters, ranges, `x[]`) are path syntax, not operators: see [.me Syntax](./Syntax.html#selectors-).
+Kernel: **this.me 4.2.1** ([npm](https://www.npmjs.com/package/this.me)) ⓘ
+{: .doc-kernel}
+
+Each example ran on 4.2.1 in a fresh `new ME()`; the result is what it returned.
+{: .doc-kernel-more}
+
+An operator is called as a bracketed key on a path: `me.path["op"](arg)`. Selectors (`[i]`, filters, ranges, `x[]`) are path syntax, not operators: see [.me Syntax](./Syntax.html#selectors-).
 
 | Operator | Name | Example | Result on 4.2.1 | Details |
 |---|---|---|---|---|
