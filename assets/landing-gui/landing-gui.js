@@ -482,7 +482,8 @@
     if (b.classList.contains("fanout-viz") && window.FanoutViz) return N("FanoutViz", { n: b.getAttribute("data-n"), caption: b.getAttribute("data-caption") });
     // live demonstrations (assets/axioms-live, loaded by the page): the snippet is the placeholder's own code text
     if (b.classList.contains("axiom-proof") && window.AxiomsLive) return N("AxiomProof", { axiom: b.getAttribute("data-axiom"), code: b.textContent.replace(/^\n+|\s+$/g, "") });
-    if (b.classList.contains("axiom-kernel") && window.AxiomsLive) return N("AxiomKernel", {});
+    if (b.classList.contains("axiom-kernel") && window.AxiomsLive) return N("AxiomKernel", { items: [...page.body.querySelectorAll(".doc-axiom")].map((hd) => {
+      const m = /^\s*(\S+)\s*\|\s*(.+)$/.exec(txt(hd)) || [null, txt(hd), ""]; return { id: m[1], title: m[2], anchor: hd.id }; }) });
     if (b.classList.contains("doc-axiom-block")) {
       const hd = b.querySelector(":scope > .doc-axiom"), m = /^\s*(\S+)\s*\|\s*(.+)$/.exec(txt(hd)) || [null, "", txt(hd)];
       return N("Box", { component: "section", sx: (th) => ({ mt: 4, mb: 3, pl: { xs: 2, sm: 2.5 }, pr: { xs: 1.5, sm: 2 }, pt: 1.75, pb: .5, borderLeft: "3px solid", borderColor: "primary.main", borderRadius: "0 10px 10px 0",

@@ -87,21 +87,39 @@
       h("div", { style: { padding: "6px 12px 8px", borderTop: "1px solid " + C.line, font: "600 12px/1.5 " + MONO, color: col } }, foot));
   }
 
-  function AxiomKernel() {
-    var s = useSt(), k = s.kernel, ids = Object.keys(s.results), done = ids.filter(function (i) { return s.results[i].state === "done"; }),
-      qed = done.filter(function (i) { return s.results[i].ok; }).length;
+  // the kernel panel (collapsible: version, sha256, helpers, sources) and under it the index of the axioms: one row per
+  // axiom (label, title, live status), each a link to its section. items come from the page's headings (landing-gui.js).
+  function AxiomKernel(p) {
+    var s = useSt(), k = s.kernel, items = p.items || [];
     var a = function (href, t) { return h("a", { href: href, target: "_blank", rel: "noopener", style: { color: C.acc, textDecoration: "none" } }, t); };
-    var sum = k.state === "ok" ? [h("b", { key: "l" }, KERNEL.label), " · sha256 " + k.hash.slice(0, 12) + "… verified in this browser · ",
-        h("b", { key: "q", style: { color: done.length && qed === done.length ? C.ok : done.length ? C.bad : C.ink2 } }, qed + "/" + (ids.length || 11) + " axioms demonstrated")]
+    var sum = k.state === "ok" ? [h("b", { key: "l" }, KERNEL.label), " · sha256 " + k.hash.slice(0, 12) + "… verified in this browser"]
       : k.state === "error" ? [h("b", { key: "e", style: { color: C.bad } }, "Kernel not loaded: "), k.text] : ["Loading " + KERNEL.label + " and checking its sha256…"];
     var row = function (l, v) { return h("div", { key: l, style: { display: "grid", gridTemplateColumns: "70px minmax(0,1fr)", gap: 8, padding: "4px 0", borderTop: "1px solid " + C.line } }, h("span", { style: { color: C.ink2 } }, l), h("span", { style: { minWidth: 0, overflowWrap: "anywhere" } }, v)); };
-    return h("details", { className: "axiom-kernel-live", "data-kernel": k.state, style: { margin: "0 0 24px", border: "1px solid " + C.line, borderRadius: 10, padding: "8px 12px", font: "12px/1.5 " + MONO, color: C.ink } },
-      h("summary", { style: { cursor: "pointer", color: C.ink2 } }, h("span", { style: { color: C.ink2 } }, "Kernel · "), sum),
-      h("div", { style: { marginTop: 8 } },
-        row("kernel", h("span", null, a(KERNEL.npm, KERNEL.label), " · unmodified, from npm · ", k.url ? k.url : KERNEL.urls.join(" or "))),
-        row("sha256", KERNEL.sha256 + (k.state === "ok" ? " ✓" : "")),
-        row("helpers", h("pre", { style: { margin: 0, whiteSpace: "pre-wrap", font: "inherit" } }, syn(PRELUDE))),
-        row("source", h("span", null, a(RUNNER, "axioms-live.js"), " (this runner) · ", a(TEST, "axioms.test.ts"), " (the Node test)"))));
+    var status = function (id) {
+      var r = s.results[id];
+      if (!r || r.state === "running") return k.state === "error" ? ["–", C.bad, "not run"] : ["…", C.ink2, "pending"];
+      if (r.state === "error") return ["–", C.bad, "not run"];
+      return r.ok ? ["✓", C.ok, "passes"] : ["✗", C.bad, "fails"];
+    };
+    return h("div", { style: { margin: "0 0 24px" } },
+      h("details", { className: "axiom-kernel-live", "data-kernel": k.state, style: { border: "1px solid " + C.line, borderRadius: 10, padding: "8px 12px", font: "12px/1.5 " + MONO, color: C.ink } },
+        h("summary", { style: { cursor: "pointer", color: C.ink2 } }, h("span", { style: { color: C.ink2 } }, "Kernel · "), sum),
+        h("div", { style: { marginTop: 8 } },
+          row("kernel", h("span", null, a(KERNEL.npm, KERNEL.label), " · unmodified, from npm · ", k.url ? k.url : KERNEL.urls.join(" or "))),
+          row("sha256", KERNEL.sha256 + (k.state === "ok" ? " ✓" : "")),
+          row("helpers", h("pre", { style: { margin: 0, whiteSpace: "pre-wrap", font: "inherit" } }, syn(PRELUDE))),
+          row("source", h("span", null, a(RUNNER, "axioms-live.js"), " (this runner) · ", a(TEST, "axioms.test.ts"), " (the Node test)")))),
+      items.length ? h("nav", { className: "axiom-index", "aria-label": "Axioms", style: { marginTop: 10 } },
+        h("ol", { style: { listStyle: "none", margin: 0, padding: 0, display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 300px), 1fr))", columnGap: 16, rowGap: 2 } },
+          items.map(function (it) {
+            var st2 = status(it.id);
+            return h("li", { key: it.id, "data-axiom": it.id, "data-status": st2[2] },
+              h("a", { href: "#" + it.anchor, style: { display: "grid", gridTemplateColumns: "84px minmax(0,1fr) 18px", alignItems: "baseline", gap: 8, padding: "4px 8px", borderRadius: 6, textDecoration: "none", color: C.ink, font: "13px/1.4 " + MONO },
+                  onMouseEnter: function (e) { e.currentTarget.style.background = "color-mix(in srgb, " + C.acc + " 8%, transparent)"; }, onMouseLeave: function (e) { e.currentTarget.style.background = "transparent"; } },
+                h("span", { style: { color: C.acc, fontWeight: 700, fontSize: 11, letterSpacing: ".06em", textTransform: "uppercase" } }, it.id),
+                h("span", { style: { fontFamily: "var(--mui-typography-fontFamily, Roboto, \"Helvetica Neue\", Arial, sans-serif)", fontSize: 13.5, color: C.ink, minWidth: 0, overflowWrap: "anywhere" } }, it.title),
+                h("span", { title: st2[2], "aria-label": st2[2], style: { color: st2[1], fontWeight: 700, textAlign: "right" } }, st2[0])));
+          }))) : null);
   }
   window.AxiomsLive = { AxiomProof: AxiomProof, AxiomKernel: AxiomKernel, run: run, parse: parse, KERNEL: KERNEL };
 })();

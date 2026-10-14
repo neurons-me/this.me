@@ -9,7 +9,7 @@ mepath:
 crumb: Axioms
 scripts:
   - /assets/me-kernel/me-kernel.js?v=1
-  - /assets/axioms-live/axioms-live.js?v=2
+  - /assets/axioms-live/axioms-live.js?v=4
 related:
   - Primitives.html
   - Operators.html
@@ -20,7 +20,7 @@ related:
 
 # 𓋹 The Axioms of .me
 
-The axioms are the invariants the kernel must always respect on top of the [Primitives](./Primitives.html). Each one is stated, then demonstrated: the snippet under it runs in this page on this.me 4.2.1, and every line marked `//=` is checked against what the kernel returns.
+The axioms are the invariants the kernel must always respect on top of the [Primitives](./Primitives.html). Each one is stated, then demonstrated; every line marked `//=` is checked against what the kernel returns.
 
 <div class="axiom-kernel" markdown="0"></div>
 
