@@ -1,6 +1,11 @@
 ---
-layout: readme
-title: What is .me?
+layout: gui-doc
+title: "What is .me?"
+description: ".me is a personal semantic kernel: one value, me, that is both a navigable object and a callable function."
+mepath:
+  - text: Docs
+    url: https://neurons-me.github.io/.me/docs/
+crumb: me
 ---
 
 

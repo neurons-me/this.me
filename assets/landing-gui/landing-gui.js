@@ -39,7 +39,7 @@
   const docsIndex = SRC.dataset.layout === "docs-index", docPage = SRC.dataset.layout === "doc";
   const demosIndex = !docsIndex && !docPage && !!SRC.querySelector(".page .grid .card");
   const header = SRC.querySelector("header");
-  const page = docPage ? { path, docs: null, github: null, body: SRC.querySelector("main.doc") } : docsIndex ? (() => {
+  const page = docPage ? { path, docs: SRC.querySelector(".topnav a[data-topbar=docs]")?.getAttribute("href"), github: SRC.querySelector(".topnav a[href*='github.com']")?.getAttribute("href"), body: SRC.querySelector("main.doc") } : docsIndex ? (() => {
     const t = SRC.querySelector(".page-title"), mark = t.querySelector("img"), foot = SRC.querySelector("footer a");
     return {
       path, docs: null, github: SRC.querySelector(".topnav a[href*='github.com']")?.getAttribute("href"),
@@ -188,8 +188,8 @@
       h(Box, { ref: pathRef, sx: { display: "inline-flex", alignItems: "center", minWidth: 0, overflowX: "auto", whiteSpace: "nowrap", scrollbarWidth: "none", "&::-webkit-scrollbar": { display: "none" } } }, ...page.path.flatMap(seg)),
       h(Box, { sx: { ml: "auto", display: "inline-flex", alignItems: "center", gap: { xs: .25, sm: 1.25 }, flexShrink: 0 } },
         h(TopSearch),
-        page.docs && h(Link, { href: page.docs, underline: "hover", sx: { fontFamily: MONO, fontSize: 12, color: "text.secondary" } }, "Docs"),
-        page.github && h(Link, { href: page.github, underline: "none", target: "_blank", rel: "noopener", title: "GitHub · neurons-me/.me", "aria-label": "GitHub", sx: { display: "inline-flex", lineHeight: 0, color: "text.secondary", "&:hover": { color: "text.primary" } } }, h(Ico, { kind: "github", size: 18 })),
+        page.docs && h(Link, { href: page.docs, underline: "hover", sx: { fontFamily: MONO, fontSize: 12, color: "text.secondary", mx: { xs: 1, sm: 0 } } }, "Docs"),
+        page.github && h(Link, { href: page.github, underline: "none", target: "_blank", rel: "noopener", title: "GitHub · " + page.github.replace(/^https?:\/\/github\.com\//, ""), "aria-label": "GitHub", sx: { display: "inline-flex", lineHeight: 0, color: "text.secondary", "&:hover": { color: "text.primary" } } }, h(Ico, { kind: "github", size: 18 })),
         h(Box, { "data-gui-inspector-control": "true", sx: { display: "inline-flex", alignItems: "center", gap: .25 } }, h(ThemePicker), h(ModeToggle), h(SettingsMenu))));
   }
 
@@ -322,6 +322,22 @@
         bgcolor: `color-mix(in srgb, ${t.palette.text.primary} 4%, ${t.palette.background.paper})`, border: 1, borderColor: "divider", color: "text.primary" }) },
       h("code", { style: { fontFamily: "inherit", whiteSpace: "pre" } }, ...(me ? SYN.render(h, code) : [code])));
   }
+  // Raw image markup that follows the GUI light/dark mode: each <picture> becomes its <img>, with the
+  // prefers-color-scheme: dark <source> used in dark mode (the OS setting is not the page's mode).
+  function ModeHtml({ html, inline, sx, "data-gui-node-id": id }) {
+    const { mode } = G.useThemeContext(), dark = mode === "dark";
+    const out = React.useMemo(() => {
+      const box = document.createElement("div"); box.innerHTML = html;
+      box.querySelectorAll("picture").forEach((pic) => {
+        const img = pic.querySelector("img"); if (!img) { pic.remove(); return; }
+        const ds = pic.querySelector('source[media*="prefers-color-scheme: dark"]');
+        const im = img.cloneNode(true); if (dark && ds) im.setAttribute("src", ds.getAttribute("srcset").split(/\s+/)[0]);
+        pic.replaceWith(im);
+      });
+      return box.innerHTML;
+    }, [html, dark]);
+    return h(Box, { component: inline ? "span" : "div", "data-gui-node-id": id, sx, dangerouslySetInnerHTML: { __html: out } });
+  }
   function DocCardCover({ src, alt, "data-gui-node-id": id }) {
     return h("img", { src, alt: alt || "", loading: "lazy", "data-gui-node-id": id, style: { display: "block", width: "100%", height: 140, objectFit: "cover" } });
   }
@@ -337,6 +353,8 @@
     if (t === "strong" || t === "b") return N("Box", { component: "strong", sx: { fontWeight: 700, color: "text.primary" } }, inl(n));
     if (t === "em" || t === "i") return N("Box", { component: "em" }, inl(n));
     if (t === "br") return N("Box", { component: "br" });
+    // Images (and <picture> with its dark/light sources) keep their own markup.
+    if (t === "img" || t === "picture") return N("ModeHtml", { inline: true, html: n.outerHTML, sx: { display: "inline-block", maxWidth: "100%", "& img": { maxWidth: "100%", height: "auto", verticalAlign: "middle" } } });
     return N("Box", { component: "span" }, inl(n));
   }).filter((x) => x != null && x !== "");
   const cellSx = { textAlign: "left", verticalAlign: "top", px: 1.25, py: .75, borderBottom: 1, borderColor: "divider", fontSize: ".9rem", lineHeight: 1.5 };
@@ -370,7 +388,9 @@
     if (t === "blockquote") return N("Box", { component: "blockquote", sx: { m: 0, mb: 2.5, pl: 2, py: .25, borderLeft: 3, borderColor: "primary.main", color: "text.secondary", "& p": { mb: 0, color: "text.secondary" } } }, blocks(b));
     if (t === "ul" || t === "ol") return N("Box", { component: t, sx: { pl: 3, mt: 0, mb: 2.5, "& > li": { mb: .75, lineHeight: 1.65 }, "& > li p": { mb: .5 } } },
       [...b.children].map((li) => N("Box", { component: "li" }, li.querySelector(":scope > p, :scope > ul, :scope > ol, :scope > div") ? blocks(li) : inl(li))));
-    if (t === "table") return tableNode(b);
+    // a layout table that carries images (README-style hero) keeps its markup; data tables get the .GUI table
+    if (t === "table") return b.querySelector("img, picture") ? N("ModeHtml", { sx: { mb: 2.5, overflowX: "auto", "& table": { border: 0, borderCollapse: "collapse" }, "& td, & th": { border: 0, p: 1, verticalAlign: "middle" }, "& img": { maxWidth: "100%", height: "auto" }, "& h2": { fontSize: "1.4rem", fontWeight: 800, m: 0 } }, html: b.outerHTML }) : tableNode(b);
+    if (t === "picture" || t === "img") return N("ModeHtml", { html: b.outerHTML, sx: { mb: 2, "& img": { maxWidth: "100%", height: "auto", display: "block" } } });
     if (t === "hr") return N("Box", { component: "hr", sx: { border: 0, borderTop: 1, borderColor: "divider", my: 4 } });
     if (t === "pre" || b.classList.contains("highlighter-rouge")) {
       const lang = ((b.className.match(/language-(\w+)/) || [])[1]) || "", code = (b.querySelector("code") || b).textContent.replace(/\n$/, "");
@@ -411,7 +431,7 @@
   const FK = docPage && window.FanoutKernel && document.querySelector(".fanout-viz") ? window.FanoutKernel : null;
   G.mount(spec, ROOT, {
     ...(FK ? { me: FK } : {}),
-    gui: { ...G, ...(FK ? { render: undefined, RunMe: undefined } : {}), Theme: PageTheme, registry: { ...(G.Registry || G.registry), LandingTopBar, DocsCover, MeOrbMark, MeCodeBlock, DocCardCover, ...(window.KernelTimeline ? { KernelTimeline: window.KernelTimeline } : {}), ...(window.FanoutViz ? { FanoutViz: window.FanoutViz } : {}) } },
+    gui: { ...G, ...(FK ? { render: undefined, RunMe: undefined } : {}), Theme: PageTheme, registry: { ...(G.Registry || G.registry), LandingTopBar, DocsCover, MeOrbMark, MeCodeBlock, DocCardCover, ModeHtml, ...(window.KernelTimeline ? { KernelTimeline: window.KernelTimeline } : {}), ...(window.FanoutViz ? { FanoutViz: window.FanoutViz } : {}) } },
     devtools: { enabled: true, inspector: INSPECTOR_ON, adminView: false, inspectorToggleVisible: false },
   });
   html.classList.add("gui-on");

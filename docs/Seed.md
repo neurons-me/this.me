@@ -1,6 +1,11 @@
 ---
-layout: readme
-title: SEED — .me
+layout: gui-doc
+title: "SEED — .me"
+description: "The seed is the single root from which an entire .me identity grows."
+mepath:
+  - text: Docs
+    url: https://neurons-me.github.io/.me/docs/
+crumb: Seed
 ---
 
 # 𓇗 SEED

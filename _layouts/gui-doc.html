@@ -47,6 +47,7 @@
   </script>
   <style>.material-symbols-rounded,.material-symbols-outlined,.material-icons{display:none!important} .gui-boot #static-landing{display:none} html.gui-on body{margin:0}
     /* no-JS: the topbar path and the .doc-cards grid (the rest is the theme's me-theme.css) */
+    html:not(.gui-on) .topnav{display:flex;gap:12px;margin-left:16px;font:600 13px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
     html:not(.gui-on) .mepath{margin-left:auto;font:600 13px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
     html:not(.gui-on) .doc-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:0 0 24px}
     html:not(.gui-on) .doc-cards a.card{display:flex;flex-direction:column;border:1px solid rgba(127,127,127,.35);border-radius:12px;overflow:hidden;text-decoration:none;color:inherit}
@@ -74,8 +75,12 @@
         <img class="brand-logo" src="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1760629064/neurons.me_b50f6a.png" alt="neurons.me" width="28" height="28" />
       </a>
       <nav class="mepath" aria-label="me path">
-        <a href="https://neurons-me.github.io/.me/" title=".me">me://</a>
+        <a href="{{ page.root_url | default: site.gui_doc.root_url | default: 'https://neurons-me.github.io/.me/' }}" title="{{ page.root_title | default: site.gui_doc.root_title | default: '.me' }}">me://</a>
         {% for seg in page.mepath %}<a href="{{ seg.url }}">{{ seg.text }}</a> / {% endfor %}<span class="here">{{ page.crumb | default: page.title }}</span>
+      </nav>
+      <nav class="topnav" aria-label="links">
+        <a data-topbar="docs" href="{{ page.docs_url | default: site.gui_doc.docs_url | default: 'https://neurons-me.github.io/.me/docs/' }}">Docs</a>
+        <a class="gh" href="{{ page.github_url | default: site.gui_doc.github_url | default: 'https://github.com/neurons-me/.me' }}">GitHub</a>
       </nav>
     </div>
   </header>
@@ -84,6 +89,6 @@
   </main>
 </div>
 {% for s in page.scripts %}<script src="{{ s | relative_url }}"></script>
-{% endfor %}<script src="{{ '/assets/landing-gui/landing-gui.js' | relative_url }}?v=15" onerror="document.documentElement.classList.remove('gui-boot')"></script>
+{% endfor %}<script src="{{ '/assets/landing-gui/landing-gui.js' | relative_url }}?v=17" onerror="document.documentElement.classList.remove('gui-boot')"></script>
 </body>
 </html>
