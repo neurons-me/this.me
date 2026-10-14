@@ -9,7 +9,7 @@ mepath:
 crumb: Syntax
 scripts:
   - /assets/me-kernel/me-kernel.js?v=1
-  - /assets/me-run/me-run.js?v=1
+  - /assets/me-run/me-run.js?v=2
 ---
 
 # .me Syntax

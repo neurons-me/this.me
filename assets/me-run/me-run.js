@@ -17,7 +17,8 @@
   function strip(line) { return line.replace(/([;)\]])\s+\/\/.*$/, "$1").replace(/;\s*$/, "").trim(); }
   function show(v) {
     if (v === undefined) return "undefined"; if (typeof v === "function") return "[proxy]";
-    try { var s = JSON.stringify(v); return s.length > 400 ? s.slice(0, 400) + " …" : s; } catch (e) { return String(v); }
+    try { var s = JSON.stringify(v); if (s.length <= 120 || typeof v !== "object") return s.length > 400 ? s.slice(0, 400) + " …" : s;
+      s = JSON.stringify(v, null, 2); return s.length > 8000 ? s.slice(0, 8000) + "\n…" : s; } catch (e) { return String(v); }
   }
   function runLines(me, code, collect) {
     var out = [];
@@ -61,7 +62,8 @@
         res.out.length ? res.out.map(function (r, i) {
           return h("div", { key: i, style: { display: "flex", flexWrap: "wrap", columnGap: 10, padding: "1px 0" } },
             h("span", { className: "me-code" }, window.MeSyntax ? window.MeSyntax.render(h, r.src) : r.src),
-            h("span", { style: { color: r.error ? C.bad : C.ok, overflowWrap: "anywhere", minWidth: 0 } }, "→ ", r.error ? "error: " + r.error : r.value));
+            !r.error && /\n/.test(r.value) ? h("pre", { style: { margin: "2px 0 0", flexBasis: "100%", maxHeight: 340, overflow: "auto", font: "inherit", color: C.ok, whiteSpace: "pre" } }, r.value)
+              : h("span", { style: { color: r.error ? C.bad : C.ok, overflowWrap: "anywhere", minWidth: 0 } }, "→ ", r.error ? "error: " + r.error : r.value));
         }) : h("div", { style: { color: C.ink2 } }, "Ran without errors (this block has no reads).")));
     return h("div", { "data-me-run": "block", "data-run-idx": String(idx), style: { position: "relative", margin: "0 0 20px", border: "1px solid " + C.line, borderRadius: 10, overflow: "hidden", background: C.code } },
       btn,

@@ -9,10 +9,10 @@ canonical: https://suign.github.io/MeWhateverWhat.html
 crumb: me.whatever(what)
 scripts:
   - /assets/me-kernel/me-kernel.js?v=1
-  - /assets/me-run/me-run.js?v=1
+  - /assets/me-run/me-run.js?v=2
 ---
 
-# me.whatever(what)
+# 𓂀 me.whatever(what)
 
 Writing with `me.a.b(value)`, reading with `me("a.b")`.
 
@@ -66,11 +66,20 @@ A write returns a proxy on the path it wrote (an operator leaf returns its scope
 ```ts
 me.fleet["="]("total", "trucks[1].fuel + trucks[2].fuel");
 me("fleet.total");                    // the derived value, read like any path
-me.explain("fleet.total");            // its formula, inputs and last wave
 ```
 {: .me-run}
 
-`["="]` declares a formula on a path; reading it is the same `me(path)`. [me.explain(path)](./Explain.html) shows why it has its value.
+`["="]` declares a formula on a path; reading it is the same `me(path)`.
+
+## Why a path has its value
+
+```ts
+me.fleet.trucks[2].fuel(45);
+me.explain("fleet.total");            // formula, inputs and the last wave
+```
+{: .me-run}
+
+`me.explain(path)` is a kernel member, not a path: it returns the value with the formula, the inputs it read and the wave that last recomputed it ([more detail](./Explain.html)).
 
 ## Names that are not paths
 
@@ -89,4 +98,4 @@ Any other name is a path. There is no instance method called `subscribe`, for ex
 
 ## See also
 
-[me.explain(path)](./Explain.html) · [Primitives](./Primitives.html) (the two verbs: declare and resolve) · [me:// URI grammar](./me-uri.html) · [Syntax](./Syntax.html) · [Axioms](./Axioms.html) (A-struct-0: one callable, chainable value)
+[Robots That Understand Context](https://neurons-me.github.io/robots/) · [Primitives](./Primitives.html) (the two verbs: declare and resolve) · [me:// URI grammar](./me-uri.html) · [Syntax](./Syntax.html) · [Axioms](./Axioms.html) (A-struct-0: one callable, chainable value)
