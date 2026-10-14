@@ -20,7 +20,7 @@ related:
 
 # 𓋹 The Axioms of .me
 
-The axioms are the invariants the kernel must always respect on top of the [Primitives](./Primitives.html). Each one is stated, then demonstrated; every line marked `//=` is checked against what the kernel returns.
+Built on the [Primitives](./Primitives.html). Each axiom is stated, then demonstrated; every line marked `//=` is checked against what the kernel returns.
 
 <div class="axiom-kernel" markdown="0"></div>
 
