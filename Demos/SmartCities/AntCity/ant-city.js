@@ -15,77 +15,116 @@
 
   // ── the anthill: chamber layout (page drawing only) and tunnels; the state lives in the kernel ──
   var CH = {
-    field:   { x: 150, y: 46,  r: 0,  label: "Field",    depth: 0 },
-    entrance:{ x: 500, y: 96,  r: 22, label: "Entrance", depth: 2 },
+    entrance:{ x: 500, y: 100, r: 22, label: "Entrance", depth: 2 },
     hall:    { x: 500, y: 250, r: 30, label: "Hall",     depth: 9 },
     pantry:  { x: 230, y: 285, r: 44, label: "Pantry",   depth: 11, capacity: 60, stock: 24 },
     granary: { x: 780, y: 300, r: 40, label: "Granary",  depth: 12, capacity: 40, stock: 14 },
-    nursery: { x: 320, y: 480, r: 38, label: "Nursery",  depth: 19 },
-    queen:   { x: 660, y: 500, r: 40, label: "Queen",    depth: 20 },
+    nursery: { x: 320, y: 465, r: 42, label: "Nursery",  depth: 19 },
+    queen:   { x: 660, y: 478, r: 44, label: "Queen",    depth: 20 },
   };
-  var NAMES = Object.keys(CH);
-  var TUN = [["field", "entrance"], ["entrance", "hall"], ["hall", "pantry"], ["hall", "granary"], ["hall", "nursery"], ["hall", "queen"], ["pantry", "nursery"], ["granary", "queen"]];
-  var ANTS = 10, STORES = ["pantry", "granary"];
+  var NAMES = Object.keys(CH), SURF = 60, TOP = { x: 500, y: SURF };
+  var TUN = [["entrance", "hall"], ["hall", "pantry"], ["hall", "granary"], ["hall", "nursery"], ["hall", "queen"], ["pantry", "nursery"], ["granary", "queen"]];
+  // ants 1-8 workers (carry seeds in), 9-10 nurses (feed the larvae from the stores), 11-13 scouts (find food on the surface)
+  var ANTS = 13, ROLE = function (i) { return i <= 8 ? "worker" : i <= 10 ? "nurse" : "scout"; }, STORES = ["pantry", "granary"], MAX_SOURCES = 6;
   var adj = {}; NAMES.forEach(function (n) { adj[n] = []; }); TUN.forEach(function (t) { adj[t[0]].push(t[1]); adj[t[1]].push(t[0]); });
   function route(a, b) { var prev = {}, q = [a], seen = {}; seen[a] = 1;
     while (q.length) { var c = q.shift(); if (c === b) break; adj[c].forEach(function (n) { if (!seen[n]) { seen[n] = 1; prev[n] = c; q.push(n); } }); }
     var p = [b]; while (p[0] !== a) p.unshift(prev[p[0]]); return p; }
 
   // ── the kernel side: one ME per page ──
-  var K = { me: null, writes: 0, last: null, lastMs: 0, subs: [], status: "loading", ver: 0 };
+  var K = { me: null, writes: 0, last: null, lastMs: 0, subs: [], status: "loading", ver: 0, sources: 0 };
   function emit() { K.ver++; K.subs.forEach(function (f) { f(K.ver); }); }
   function write(path, v) { var t = performance.now(), segs = path.split("."), p = K.me; segs.forEach(function (s) { p = p[s]; }); p(v);
     K.writes++; K.lastMs = performance.now() - t; K.last = { path: path, value: v }; }
   function read(path) { return K.me(path); }
+  function add(path, d) { var v = read(path) || 0; write(path, v + d); return v + d; }
+  function fieldFormula() { var s = []; for (var n = 1; n <= K.sources; n++) s.push("sources[" + n + "].seeds"); K.me.colony.field["="]("seeds", s.join(" + ")); K.writes++; K.last = { path: "colony.field.seeds", value: '["="] ' + s.length + " sources" }; }
+  function addSource(x, seeds, by) { var n = ++K.sources, s = K.me.colony.field.sources[n]; s.x(Math.round(x)); s.seeds(seeds); s.foundBy(by); K.writes += 3; fieldFormula(); return n; }
   function seed(me) {
     me.colony.name("Ant City");
     NAMES.forEach(function (n) { var c = CH[n], s = me.colony.chambers[n]; s.depth(c.depth); if (c.capacity) { s.capacity(c.capacity); s.stock(c.stock); s["="]("free", "capacity - stock"); } });
     TUN.forEach(function (t, i) { me.colony.tunnels[i + 1].from(t[0]); me.colony.tunnels[i + 1].to(t[1]); });
-    for (var i = 1; i <= ANTS; i++) { var a = me.colony.ants[i]; a.carry(0); a.at("hall"); a.home["->"]("colony.chambers." + (i % 3 === 0 ? "queen" : "nursery")); }
+    var nu = me.colony.chambers.nursery; nu.eggs(4); nu.larvae(3); nu.fed(0); nu.born(0); nu["="]("brood", "eggs + larvae");
+    me.colony.queen.name("Queen"); me.colony.queen.eggsLaid(0); me.colony.queen.home["->"]("colony.chambers.queen");
+    for (var i = 1; i <= ANTS; i++) { var a = me.colony.ants[i], r = ROLE(i); a.role(r); a.isWorker(r === "worker" ? 1 : 0); a.isNurse(r === "nurse" ? 1 : 0); a.isScout(r === "scout" ? 1 : 0);
+      a.carry(0); a.at("hall"); a.home["->"]("colony.chambers." + (r === "nurse" ? "nursery" : i % 3 === 0 ? "queen" : "nursery")); if (r === "scout") a.found(0); }
+    var sum = function (f) { var s = []; for (var j = 1; j <= ANTS; j++) s.push("ants[" + j + "]." + f); return s.join(" + "); };
+    me.colony["="]("workers", sum("isWorker")); me.colony["="]("nurses", sum("isNurse")); me.colony["="]("scouts", sum("isScout")); me.colony["="]("carried", sum("carry"));
     me.colony["="]("food", "chambers.pantry.stock + chambers.granary.stock");
-    var sum = []; for (var j = 1; j <= ANTS; j++) sum.push("ants[" + j + "].carry"); me.colony["="]("carried", sum.join(" + "));
+    K.me = me; addSource(150, 40, 0);
   }
-  MK.load().then(function (ME) { K.me = new ME(); seed(K.me); K.status = "ok"; emit(); }, function (e) { K.status = "error"; K.error = String(e && e.message || e); emit(); });
+  MK.load().then(function (ME) { seed(new ME()); K.status = "ok"; emit(); }, function (e) { K.status = "error"; K.error = String(e && e.message || e); emit(); });
   window.AntCityKernel = { explain: function (p) { return K.me ? K.me.explain(p) : null; }, read: function (p) { return K.me ? K.me(p) : undefined; } };
 
-  // ── the walk (page side): each ant goes field → a store with free room → field …; arrivals are kernel writes ──
+  // ── the walk (page side). A path is a list of points; arriving somewhere is a kernel write ──
   var ants = [];
-  for (var i = 1; i <= ANTS; i++) ants.push({ id: i, at: "hall", path: null, seg: 0, t: 0, speed: 70 + (i * 37) % 40, wait: 0.3 + (i - 1) * 0.9, odo: 0 });
+  for (var i = 1; i <= ANTS; i++) ants.push({ id: i, role: ROLE(i), at: "hall", path: null, seg: 0, t: 0, speed: ROLE(i) === "scout" ? 95 : 70 + (i * 37) % 40, wait: 0.3 + (i - 1) * 0.7, odo: 0 });
+  var pt = function (n) { return { x: CH[n].x, y: CH[n].y }; };
+  var srcPt = function (n) { return { x: read("colony.field.sources." + n + ".x"), y: SURF - 2 }; };
+  function placeOf(a) { return typeof a.at === "string" ? pt(a.at) : a.at.x != null ? a.at : srcPt(a.at.src); }
+  function toChamber(a, n) { var pts = []; if (typeof a.at !== "string") { pts.push(placeOf(a), TOP); pts = pts.concat(route("entrance", n).map(pt)); } else pts = route(a.at, n).map(pt); return pts; }
+  function toSurface(a, p) { var pts = typeof a.at === "string" ? route(a.at, "entrance").map(pt).concat([TOP]) : [placeOf(a)]; pts.push(p); return pts; }
+  function go(a, pts, goal) { if (pts.length < 2) { a.goal = goal; return arrive(a, goal); } a.path = pts; a.seg = 0; a.t = 0; a.goal = goal; }
   function freeOf(n) { return read("colony.chambers." + n + ".free"); }
+  function bestSource() { var best = 0, bs = 0; for (var n = 1; n <= K.sources; n++) { var s = read("colony.field.sources." + n + ".seeds"); if (s > bs) { bs = s; best = n; } } return best; }
   function plan(a) {
-    var carry = read("colony.ants." + a.id + ".carry");
-    var pref = a.id % 2 ? STORES : STORES.slice().reverse(), dest = carry ? (pref.filter(function (s) { return freeOf(s) > 0; })[0] || null) : "field";
-    if (!dest) { a.wait = 1.5; return; }
-    if (dest === a.at) return arrive(a);
-    a.path = route(a.at, dest); a.seg = 0; a.t = 0;
+    var P = "colony.ants." + a.id, carry = read(P + ".carry");
+    if (a.role === "worker") {
+      if (carry) { var pref = a.id % 2 ? STORES : STORES.slice().reverse(), st = pref.filter(function (s) { return freeOf(s) > 0; })[0]; if (!st) { a.wait = 1.5; return; } return go(a, toChamber(a, st), { ch: st }); }
+      var src = bestSource(); if (!src) { a.wait = 2; return; }   // recruited to the richest source the scouts have found
+      return go(a, toSurface(a, srcPt(src)), { src: src });
+    }
+    if (a.role === "nurse") {
+      if (carry) return go(a, toChamber(a, "nursery"), { ch: "nursery" });
+      var full = STORES.slice().sort(function (x, y) { return read("colony.chambers." + y + ".stock") - read("colony.chambers." + x + ".stock"); })[0];
+      if (read("colony.chambers." + full + ".stock") <= 0) { a.wait = 2; return; } return go(a, toChamber(a, full), { ch: full });
+    }
+    // scout: roam the surface; a stretch of ground with no source yet may be a new one
+    var x = 40 + Math.random() * 920; return go(a, toSurface(a, { x: x, y: SURF - 2 }), { roam: { x: x, y: SURF - 2 } });
   }
-  function arrive(a) {
-    var p = "colony.ants." + a.id;
-    write(p + ".at", a.at); if (window.__acFx) window.__acFx(CH[a.at].x, CH[a.at].y);
-    if (a.at === "field" && !read(p + ".carry")) { write(p + ".carry", 1); a.wait = .6; }
-    else if (STORES.indexOf(a.at) >= 0 && read(p + ".carry")) { var sp = "colony.chambers." + a.at + ".stock"; write(sp, read(sp) + 1); write(p + ".carry", 0); a.wait = .5; }
-    else a.wait = .2;
+  var fxAt = function (p) { if (window.__acFx) window.__acFx(p.x, p.y); };
+  function arrive(a, g) {
+    var P = "colony.ants." + a.id; g = g || a.goal || {};
+    if (g.ch) { a.at = g.ch; write(P + ".at", g.ch); fxAt(pt(g.ch)); } else if (g.src) { a.at = { src: g.src }; write(P + ".at", "field.sources." + g.src); fxAt(srcPt(g.src)); } else if (g.roam) { a.at = g.roam; write(P + ".at", "surface"); }
+    var carry = read(P + ".carry");
+    if (a.role === "worker") {
+      if (g.src && !carry) { var sp = "colony.field.sources." + g.src + ".seeds"; if (read(sp) > 0) { add(sp, -1); write(P + ".carry", 1); } a.wait = .5; return; }
+      if (g.ch && STORES.indexOf(g.ch) >= 0 && carry) { add("colony.chambers." + g.ch + ".stock", 1); write(P + ".carry", 0); a.wait = .5; return; }
+    } else if (a.role === "nurse") {
+      if (g.ch && STORES.indexOf(g.ch) >= 0 && !carry) { var s2 = "colony.chambers." + g.ch + ".stock"; if (read(s2) > 0) { add(s2, -1); write(P + ".carry", 1); } a.wait = .5; return; }
+      if (g.ch === "nursery" && carry) { write(P + ".carry", 0); var fed = add("colony.chambers.nursery.fed", 1);
+        if (fed % 3 === 0 && read("colony.chambers.nursery.larvae") > 0) { add("colony.chambers.nursery.larvae", -1); add("colony.chambers.nursery.born", 1); }   // every third feed, a larva grows up
+        a.wait = 1; return; }
+    } else if (g.roam) {
+      var near = false; for (var n = 1; n <= K.sources; n++) if (Math.abs(read("colony.field.sources." + n + ".x") - g.roam.x) < 90) near = true;
+      if (!near && K.sources < MAX_SOURCES && performance.now() - lastFind > 9000) { lastFind = performance.now(); var ns = addSource(g.roam.x, 24 + Math.round(Math.random() * 12), a.id); add(P + ".found", 1); fxAt(srcPt(ns)); a.wait = 1.2; return; }
+      a.wait = .4 + Math.random(); return;
+    }
+    a.wait = .3;
   }
-  var eatT = 0, EAT_EVERY = 1.6;
-  function eat() {   // the colony eats one seed from the fullest store
-    var s = STORES.slice().sort(function (x, y) { return read("colony.chambers." + y + ".stock") - read("colony.chambers." + x + ".stock"); })[0], sp = "colony.chambers." + s + ".stock", v = read(sp);
-    if (v > 0) write(sp, v - 1);
+  var lastFind = performance.now() - 4000, eatT = 0, layT = 0, hatchT = 0;
+  function eat() {   // the adults eat one seed from the fullest store
+    var s = STORES.slice().sort(function (x, y) { return read("colony.chambers." + y + ".stock") - read("colony.chambers." + x + ".stock"); })[0], sp = "colony.chambers." + s + ".stock";
+    if (read(sp) > 0) add(sp, -1);
   }
   function step(dt) {
     if (!K.me) return;
     var w0 = K.writes;
     ants.forEach(function (a) {
-      if (a.path) { var A = CH[a.path[a.seg]], B = CH[a.path[a.seg + 1]], len = Math.hypot(B.x - A.x, B.y - A.y);
+      if (a.path) { var A = a.path[a.seg], B = a.path[a.seg + 1], len = Math.hypot(B.x - A.x, B.y - A.y) || 1;
         a.t += dt * a.speed / len; a.odo += dt * a.speed;
-        if (a.t >= 1) { a.seg++; a.t = 0; if (a.seg >= a.path.length - 1) { a.at = a.path[a.path.length - 1]; a.path = null; arrive(a); } }
+        if (a.t >= 1) { a.seg++; a.t = 0; if (a.seg >= a.path.length - 1) { a.path = null; arrive(a); } }
       } else if ((a.wait -= dt) <= 0) plan(a);
     });
-    if ((eatT += dt) >= EAT_EVERY) { eatT = 0; eat(); }
+    if ((eatT += dt) >= 3.5) { eatT = 0; eat(); }
+    if ((layT += dt) >= 7) { layT = 0; add("colony.chambers.nursery.eggs", 1); add("colony.queen.eggsLaid", 1); fxAt(pt("queen")); }   // the queen lays an egg; it is carried to the nursery
+    if ((hatchT += dt) >= 9) { hatchT = 0; if (read("colony.chambers.nursery.eggs") > 0) { add("colony.chambers.nursery.eggs", -1); add("colony.chambers.nursery.larvae", 1); } }
     if (K.writes !== w0) emit();
   }
-  function antXY(a) { if (!a.path) { var c = CH[a.at], k = a.id * 2.4; return { x: c.x + Math.cos(k) * (c.r ? c.r * .55 : 18), y: c.y + Math.sin(k) * (c.r ? c.r * .45 : 6) }; }
-    // two-way traffic: each direction keeps to its side of the tunnel, and ants on the same side spread over three lanes
-    var A = CH[a.path[a.seg]], B = CH[a.path[a.seg + 1]], dx = B.x - A.x, dy = B.y - A.y, L = Math.hypot(dx, dy) || 1, off = 5 + (a.id % 3) * 2.5, ease = Math.min(1, a.t * L / 18, (1 - a.t) * L / 18);
+  function antXY(a) { if (!a.path) { var c = placeOf(a), k = a.id * 2.4, r = typeof a.at === "string" ? CH[a.at].r : 0;
+      return r ? { x: c.x + Math.cos(k) * r * .6, y: c.y + Math.sin(k) * r * .45 } : { x: c.x + ((a.id * 7) % 15 - 7), y: c.y, ang: 0 }; }
+    // two-way traffic: each direction keeps to its side, and ants on the same side spread over three lanes
+    var A = a.path[a.seg], B = a.path[a.seg + 1], dx = B.x - A.x, dy = B.y - A.y, L = Math.hypot(dx, dy) || 1, off = 5 + (a.id % 3) * 2.5, ease = Math.min(1, a.t * L / 18, (1 - a.t) * L / 18);
     return { x: A.x + dx * a.t - dy / L * off * ease, y: A.y + dy * a.t + dx / L * off * ease, ang: Math.atan2(dy, dx) }; }
 
   // ── page CSS (theme tokens only) ──
@@ -134,7 +173,7 @@
         if (/^#/.test(bg)) { var n = parseInt(bg.slice(1, 7), 16); dark = ((n >> 16) + (n >> 8 & 255) + (n & 255)) / 3 < 128; } else if (m && m.length >= 3) dark = (+m[0] + +m[1] + +m[2]) / 3 < 128;
         var ink = css("--mui-palette-text-primary", dark ? "#e6edf3" : "#1f2328"), sun = css("--mui-palette-warning-main", "#d29922");
         return { dark: dark, bg: bg || (dark ? "#0d1117" : "#ffffff"), ink: ink, muted: css("--mui-palette-text-secondary", dark ? "#8b949e" : "#57606a"), faint: css("--mui-palette-text-disabled", dark ? "#6e7681" : "#8c959f"),
-          sun: sun, day: rgba(sun, dark ? .16 : .24), night: rgba(ink, dark ? .06 : .08), night2: rgba(ink, dark ? .1 : .12), link: css("--mui-palette-info-main", "#58a6ff"), accent: css("--mui-palette-primary-main", "#58a6ff") }; }
+          sun: sun, day: rgba(sun, dark ? .16 : .24), night: rgba(ink, dark ? .06 : .08), night2: rgba(ink, dark ? .1 : .12), ice: dark ? "#9fd8ff" : "#2a86c7", link: css("--mui-palette-info-main", "#58a6ff"), accent: css("--mui-palette-primary-main", "#58a6ff") }; }
       var fx = [];   // ripples where a write just happened (page-side, like the Space demo's "delivered" rings)
       window.__acFx = function (x, y) { fx.push({ x: x, y: y, t: performance.now() }); };
       function draw() {
@@ -150,46 +189,66 @@
         GRAINS.forEach(function (g) { ctx.fillStyle = P.night2; ctx.beginPath(); ctx.arc(g[0], g[1], g[2], 0, 7); ctx.fill(); });
         ctx.strokeStyle = P.faint; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, 70); ctx.lineTo(430, 70); ctx.quadraticCurveTo(500, 46, 570, 70); ctx.lineTo(W, 70); ctx.stroke();
         ctx.lineCap = "round";
-        TUN.forEach(function (t) { var a = CH[t[0]], b = CH[t[1]]; ctx.strokeStyle = P.night2; ctx.lineWidth = 22; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        [[CH.entrance, TOP]].concat(TUN.map(function (t) { return [CH[t[0]], CH[t[1]]]; })).forEach(function (t) { var a = t[0], b = t[1]; ctx.strokeStyle = P.night2; ctx.lineWidth = 22; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
           ctx.strokeStyle = P.link; ctx.globalAlpha = .3; ctx.lineWidth = 1; ctx.setLineDash([2, 6]); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; });
         NAMES.forEach(function (n) { var ch = CH[n], isSel = on && on.type === "chamber" && on.n === n;
-          if (!ch.r) { for (var q = 0; q < 9; q++) seedAt(ch.x - 40 + q * 10, ch.y + 12 - (q % 3) * 4, q, P); ctx.textAlign = "center"; mono(10.5, "FIELD", ch.x - 78 * Math.min(FS, 1.4), ch.y + 16, P.muted); return; }
           var rx = ch.r * 1.35, ry = ch.r;
           ctx.fillStyle = P.bg; ctx.beginPath(); ctx.ellipse(ch.x, ch.y, rx, ry, 0, 0, 7); ctx.fill();
           ctx.fillStyle = P.night; ctx.fill();
           if (ch.capacity && K.me) { var st = read("colony.chambers." + n + ".stock") || 0, f = Math.min(1, st / ch.capacity);
             ctx.save(); ctx.beginPath(); ctx.ellipse(ch.x, ch.y, rx, ry, 0, 0, 7); ctx.clip(); ctx.fillStyle = P.day; ctx.fillRect(ch.x - rx, ch.y + ry - 2 * ry * f, rx * 2, 2 * ry * f); ctx.restore();
             ital(12.5, st + " of " + ch.capacity, ch.x, ch.y + 5 * FS, P.ink); }
+          if (n === "nursery" && K.me) { var eg = read("colony.chambers.nursery.eggs") || 0, lv = read("colony.chambers.nursery.larvae") || 0;   // eggs: small ovals; larvae: curled grubs
+            ctx.lineWidth = 1; ctx.strokeStyle = P.ink;
+            for (var e1 = 0; e1 < Math.min(eg, 14); e1++) { var ex = ch.x - 34 + (e1 % 7) * 10, ey = ch.y - 14 + Math.floor(e1 / 7) * 9; ctx.fillStyle = P.bg; ctx.beginPath(); ctx.ellipse(ex, ey, 3, 4, .3, 0, 7); ctx.fill(); ctx.stroke(); }
+            for (var l1 = 0; l1 < Math.min(lv, 8); l1++) { var lx = ch.x - 30 + (l1 % 4) * 20, ly = ch.y + 12 + Math.floor(l1 / 4) * 13; ctx.beginPath(); ctx.arc(lx, ly, 5, .5, 5.2); ctx.lineWidth = 2.6; ctx.strokeStyle = P.ink; ctx.stroke(); ctx.lineWidth = 1.2; ctx.strokeStyle = P.bg; ctx.stroke(); }
+            ctx.lineWidth = 1; ital(11.5, eg + " eggs · " + lv + " larvae", ch.x, ch.y + ry + 16 * FS, P.muted); }
+          if (n === "queen") { var qsel = on && on.type === "queen"; drawAnt(ch.x, ch.y + 4, -0.35, 2.3 * Math.min(FS, 1.4), P.ink, Math.sin(now / 900) * .6, false, P, "queen");
+            if (qsel) { ctx.strokeStyle = P.accent; ctx.lineWidth = 1.4; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.arc(ch.x, ch.y + 4, 30 * Math.min(FS, 1.4), 0, 7); ctx.stroke(); ctx.setLineDash([]); }
+            K.me && ital(11.5, (read("colony.queen.eggsLaid") || 0) + " eggs laid", ch.x, ch.y + ry + 16 * FS, P.muted); }
           ctx.strokeStyle = P.faint; ctx.globalAlpha = .55; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(ch.x, ch.y, rx, ry, 0, 0, 7); ctx.stroke(); ctx.globalAlpha = 1;
           if (isSel) { ctx.strokeStyle = P.accent; ctx.lineWidth = 1.4; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.ellipse(ch.x, ch.y, rx + 7, ry + 7, 0, 0, 7); ctx.stroke(); ctx.setLineDash([]); }
           mono(10.5, ch.label.toUpperCase(), ch.x, ch.y - ry - 8, isSel ? P.accent : P.muted); });
+        if (K.me) for (var sn = 1; sn <= K.sources; sn++) { var sx = read("colony.field.sources." + sn + ".x"), sv = read("colony.field.sources." + sn + ".seeds") || 0, ssel = on && on.type === "path" && on.p === "colony.field.sources." + sn + ".seeds";
+          ctx.globalAlpha = sv > 0 ? 1 : .35; for (var q = 0; q < Math.max(1, Math.min(12, Math.ceil(sv / 3))); q++) seedAt(sx - 24 + (q % 6) * 9.5, SURF - 6 - Math.floor(q / 6) * 6 - (q % 2) * 2, q + sn, P);
+          ctx.globalAlpha = 1; mono(9.5, sv > 0 ? String(sv) : "EMPTY", sx, SURF - 22 * Math.min(FS, 1.5), ssel ? P.accent : P.muted);
+          if (ssel) { ctx.strokeStyle = P.accent; ctx.lineWidth = 1.4; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.arc(sx, SURF - 8, 26, 0, 7); ctx.stroke(); ctx.setLineDash([]); } }
         fx = fx.filter(function (e) { return now - e.t < 1400; });
         fx.forEach(function (e) { var age = (now - e.t) / 1000; ctx.strokeStyle = P.link; ctx.globalAlpha = Math.max(0, 1 - age / 1.4) * .7; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(e.x, e.y, 6 + age * 22, 0, 7); ctx.stroke(); }); ctx.globalAlpha = 1;
         ants.forEach(function (a) { var p = antXY(a), carry = K.me && read("colony.ants." + a.id + ".carry"), hl = on && on.type === "ant" && on.i === a.id, walking = !!a.path;
-          var ph = (a.odo || 0) * .35, s = 1.15 * Math.min(FS, 1.7);
-          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate((p.ang == null ? a.id * 1.3 : p.ang) + Math.PI / 2); ctx.scale(s, s);
-          ctx.strokeStyle = P.ink; ctx.lineWidth = 1.2 / s; ctx.lineCap = "round"; ctx.lineJoin = "round";
-          for (var sd = -1; sd <= 1; sd += 2) for (var l = 0; l < 3; l++) { var sw = walking ? Math.sin(ph + l * 2.1 + (sd > 0 ? Math.PI : 0)) * 2 : 0, by = -2 + l * 3;
-            ctx.beginPath(); ctx.moveTo(sd * 2, by); ctx.lineTo(sd * 6, by - 2 + sw * .5); ctx.lineTo(sd * 8.5, by + 1 + sw); ctx.stroke(); }
-          ctx.fillStyle = P.bg; [[0, 6, 3.4, 4.4], [0, 0.5, 2.2, 2.8], [0, -5, 2.8, 2.6]].forEach(function (b) { ctx.beginPath(); ctx.ellipse(b[0], b[1], b[2], b[3], 0, 0, 7); ctx.fill(); ctx.stroke(); });
-          ctx.beginPath(); ctx.moveTo(-1, -7.4); ctx.lineTo(-3, -11); ctx.moveTo(1, -7.4); ctx.lineTo(3, -11); ctx.stroke();
-          if (carry) seedAt(0, -10.5, a.id, P);
-          ctx.restore();
+          drawAnt(p.x, p.y, p.ang == null ? a.id * 1.3 : p.ang, 1.15 * Math.min(FS, 1.7), a.role === "scout" ? P.ice : P.ink, walking ? (a.odo || 0) * .35 : null, carry, P, a.role);
           if (hl) { ctx.strokeStyle = P.accent; ctx.lineWidth = 1.4; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.arc(p.x, p.y, 15 * Math.min(FS, 1.6), 0, 7); ctx.stroke(); ctx.setLineDash([]);
             mono(10, "ANT " + a.id, p.x, p.y - 20 * Math.min(FS, 1.6), P.accent); } });
-        mono(10.5, "COLONY · THIS.ME " + KV, W / 2, H - 14 * FS, P.muted);
+        if (FS < 1.3) mono(10.5, "COLONY · THIS.ME " + KV, W / 2, H - 14 * FS, P.muted);
+      }
+      // one ant in the Space line style: six legs that step while it walks, three body parts filled with the background,
+      // antennae; scouts are drawn in the ice colour, nurses carry a dot in the info colour, the queen is larger with wings
+      function drawAnt(x, y, ang, s, col, ph, carry, P, role) {
+        ctx.save(); ctx.translate(x, y); ctx.rotate(ang + Math.PI / 2); ctx.scale(s, s);
+        ctx.strokeStyle = col; ctx.lineWidth = 1.2 / s; ctx.lineCap = "round"; ctx.lineJoin = "round";
+        if (role === "queen") { ctx.globalAlpha = .45; ctx.beginPath(); ctx.ellipse(-5, 2, 3, 8, -.5, 0, 7); ctx.moveTo(10, 2); ctx.ellipse(5, 2, 3, 8, .5, 0, 7); ctx.stroke(); ctx.globalAlpha = 1; }
+        for (var sd = -1; sd <= 1; sd += 2) for (var l = 0; l < 3; l++) { var sw = ph != null ? Math.sin(ph + l * 2.1 + (sd > 0 ? Math.PI : 0)) * 2 : 0, by = -2 + l * 3;
+          ctx.beginPath(); ctx.moveTo(sd * 2, by); ctx.lineTo(sd * 6, by - 2 + sw * .5); ctx.lineTo(sd * 8.5, by + 1 + sw); ctx.stroke(); }
+        ctx.fillStyle = P.bg; [[0, role === "queen" ? 8 : 6, 3.4, role === "queen" ? 6.4 : 4.4], [0, 0.5, 2.2, 2.8], [0, -5, 2.8, 2.6]].forEach(function (b) { ctx.beginPath(); ctx.ellipse(b[0], b[1], b[2], b[3], 0, 0, 7); ctx.fill(); ctx.stroke(); });
+        ctx.beginPath(); ctx.moveTo(-1, -7.4); ctx.lineTo(-3, -11); ctx.moveTo(1, -7.4); ctx.lineTo(3, -11); ctx.stroke();
+        if (role === "nurse") { ctx.fillStyle = P.link; ctx.beginPath(); ctx.arc(0, 6, 1.8, 0, 7); ctx.fill(); }
+        if (role === "queen") { ctx.fillStyle = P.sun; ctx.beginPath(); ctx.arc(0, -5, 1.1, 0, 7); ctx.fill(); }
+        if (carry) seedAt(0, -10.5, 1, P);
+        ctx.restore();
       }
       function seedAt(x, y, k, P) { ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 4 + k * .3); ctx.fillStyle = P.sun; ctx.fillRect(-2.6, -2.6, 5.2, 5.2); ctx.restore(); }
       function frame(t) { var dt = Math.min(.1, (t - last) / 1000); last = t; if (running.on) step(dt); draw(); raf = requestAnimationFrame(frame); }
       raf = requestAnimationFrame(frame);
       function hit(e) { var r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * W, y = (e.clientY - r.top) / r.height * H, best = null, bd = 18;
         ants.forEach(function (a) { var p = antXY(a), d = Math.hypot(p.x - x, p.y - y); if (d < bd) { bd = d; best = { type: "ant", i: a.id }; } });
+        if (!best && Math.hypot(x - CH.queen.x, y - CH.queen.y - 4) < 26) best = { type: "queen" };
+        if (!best && K.me && y < 74) for (var n2 = 1; n2 <= K.sources; n2++) if (Math.abs(read("colony.field.sources." + n2 + ".x") - x) < 32) best = { type: "path", p: "colony.field.sources." + n2 + ".seeds" };
         if (!best) NAMES.forEach(function (n) { var c2 = CH[n]; if (c2.r && Math.hypot((x - c2.x) / 1.35, y - c2.y) < c2.r + 4) best = { type: "chamber", n: n }; });
         select(best); }
       c.addEventListener("click", hit); return function () { cancelAnimationFrame(raf); c.removeEventListener("click", hit); };
     }, []);
     return h("div", null, h("div", { className: "ac-fig" }, h("canvas", { ref: cv, width: 1000, height: 600, role: "img", "aria-label": "Cross-section of the anthill: chambers joined by tunnels, ants walking between them", "data-ac": "hill" })),
-      h("p", { className: "ac-cap" }, "Every ant arrival is a write to the kernel (", me("me.colony.ants[3].at(\"pantry\")"), "); the seed counts in the chambers are read back with ", me("me(path)"), " on " + KL + ". Click a chamber or an ant."));
+      h("p", { className: "ac-cap" }, "Every ant arrival is a write to the kernel (", me("me.colony.ants[3].at(\"pantry\")"), "); the seed counts in the chambers are read back with ", me("me(path)"), " on " + KL + ". Workers carry seeds in, nurses (blue dot) feed the larvae from the stores, scouts (light blue) find new food on the surface, the queen lays eggs. Click any of them."));
   }
 
   // ── the right panel ──
@@ -207,15 +266,22 @@
         for (var i = 1; i <= ANTS; i++) { var hp = R("colony.ants." + i + ".home"); if (hp && hp.__ptr === base) homes.push(i); }
         var here = ants.filter(function (a) { return !a.path && a.at === n; }).map(function (a) { return a.id; });
         detail = { title: c.label + " chamber", rows: [[base + ".depth", R(base + ".depth") + " cm"]].concat(c.capacity ? [[base + ".stock", R(base + ".stock")], [base + ".free", R(base + ".free")]] : [])
-          .concat([["ants here now", here.length ? here.join(", ") : "none"], ["home of ants", homes.length ? homes.join(", ") : "none"]]), ex: c.capacity ? base + ".free" : base + ".depth" }; }
-      else if (cur.type === "ant") { var p = "colony.ants." + cur.i;
-        detail = { title: "Ant " + cur.i, rows: [[p + ".at", R(p + ".at")], [p + ".carry", R(p + ".carry")], [p + ".home", R(p + ".home")], [p + ".home.depth", R(p + ".home.depth") + " cm"]], ex: p + ".home", ptr: true }; }
+          .concat(n === "nursery" ? [[base + ".eggs", R(base + ".eggs")], [base + ".larvae", R(base + ".larvae")], [base + ".fed", R(base + ".fed")], [base + ".born", R(base + ".born")]] : [])
+          .concat([["ants here now", here.length ? here.join(", ") : "none"], ["home of ants", homes.length ? homes.join(", ") : "none"]]), ex: c.capacity ? base + ".free" : n === "nursery" ? base + ".brood" : base + ".depth" }; }
+      else if (cur.type === "ant") { var p = "colony.ants." + cur.i, role = R(p + ".role");
+        detail = { title: "Ant " + cur.i + " · " + role, rows: [[p + ".role", role], [p + ".at", R(p + ".at")], [p + ".carry", R(p + ".carry")]].concat(role === "scout" ? [[p + ".found", R(p + ".found")], ["colony.field.seeds", R("colony.field.seeds")]] : [])
+          .concat([[p + ".home", R(p + ".home")], [p + ".home.depth", R(p + ".home.depth") + " cm"]]), ex: role === "scout" ? "colony.field.seeds" : role === "nurse" ? "colony.chambers.nursery.brood" : p + ".home", ptr: role !== "scout" && role !== "nurse" }; }
+      else if (cur.type === "queen") {
+        detail = { title: "The queen", rows: [["colony.queen.eggsLaid", R("colony.queen.eggsLaid")], ["colony.queen.home", R("colony.queen.home")], ["colony.queen.home.depth", R("colony.queen.home.depth") + " cm"],
+          ["colony.chambers.nursery.eggs", R("colony.chambers.nursery.eggs")], ["colony.chambers.nursery.larvae", R("colony.chambers.nursery.larvae")]], ex: "colony.chambers.nursery.brood", ptr: true }; }
     }
     var ex = detail && detail.ex ? K.me.explain(detail.ex) : null, st = MK.state;
     return h("aside", { className: "ac-panel", "data-ac": "panel", "aria-label": "Colony panel" },
       h("div", { className: "ac-sec" }, h("div", { className: "ac-h" }, "Colony · read on " + KL),
         h("div", { className: "ac-kpis" }, kpi("colony.food", "Food in store"), kpi("colony.carried", "Seeds being carried")),
-        h("div", { className: "ac-note" }, me('colony["="]("food", "chambers.pantry.stock + chambers.granary.stock")'), " recomputes on every stock write."),
+        h("div", { style: { marginTop: 8 } }, [["colony.workers", "workers"], ["colony.nurses", "nurses"], ["colony.scouts", "scouts"], ["colony.field.seeds", "seeds on the surface"], ["colony.chambers.nursery.brood", "brood (eggs + larvae)"], ["colony.chambers.nursery.born", "grown up"]].map(function (x) {
+          return h("div", { key: x[0], className: "ac-row", role: "button", tabIndex: 0, style: { cursor: "pointer" }, "data-ac": "count-" + x[1].split(" ")[0], onClick: function () { select({ type: "path", p: x[0] }); } }, h("span", null, x[1]), h("span", { className: "ac-num" }, v(R(x[0])))); })),
+        h("div", { className: "ac-note" }, me('colony["="]("food", "chambers.pantry.stock + chambers.granary.stock")'), " recomputes on every stock write; ", me("colony.scouts"), " and the other counts are sums of ", me("ants[n].isScout"), "-style flags."),
         h("div", { className: "ac-btns" },
           h("button", { type: "button", className: "ac-btn" + (run ? "" : " on"), "data-ac": "pause", onClick: function () { running.on = !running.on; setRun(running.on); } }, run ? "Pause" : "Resume"),
           h("button", { type: "button", className: "ac-btn", "data-ac": "rain", disabled: !ok, onClick: function () { var sp = "colony.chambers.granary.stock", cap = CH.granary.capacity; write(sp, Math.max(0, read(sp) - 10)); emit(); select({ type: "path", p: "colony.food" }); }, title: "Writes colony.chambers.granary.stock − 10" }, "Rain floods the granary (−10)"))),

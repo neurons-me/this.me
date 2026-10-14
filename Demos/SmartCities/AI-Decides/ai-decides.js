@@ -203,7 +203,7 @@
     ".aid-pqa .aid-how{margin:0}.aid-pqa .aid-how h2{font-size:13px;margin:0 0 6px}.aid-pqa .aid-how-flow{font-size:10.5px;gap:3px;margin:0 0 6px}.aid-pqa .aid-how-grid,.aid-pqa .aid-try-grid{grid-template-columns:1fr!important}.aid-pqa .aid-how-map li{grid-template-columns:minmax(0,1fr) 12px minmax(0,1.2fr)}",
     ".aid-pqa .aid-akpis{grid-template-columns:1fr;gap:6px}.aid-pqa .aid-akpi{padding:7px 9px}.aid-pqa .aid-akpi b{font-size:1.2rem}.aid-pqa .aid-akpi small,.aid-pqa .aid-akpi em{font-size:11px}.aid-pqa .aid-note{font-size:11px;line-height:1.4}",
     ".aid-pqa .aid-alist{gap:1px;margin-top:6px}.aid-pqa .aid-alist button{grid-template-columns:8px 56px minmax(24px,1fr) auto;gap:6px;padding:3px 4px;font-size:11.5px}.aid-pqa .aid-alist .ph{display:block;grid-column:2 / -1;font-size:10.5px;margin-top:-2px}.aid-pqa .aid-alist i{width:8px;height:8px}.aid-pqa .aid-qn{font-size:11px;padding:6px 8px}.aid-pqa .aid-map-card{font-size:11px;padding:8px}",
-    ".aid-syn{margin:18px 0 6px;min-width:0;max-width:100%}.aid-syn-l{display:block;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mui-palette-text-secondary,#8b949e);margin:0 0 6px}.aid-syn-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}@media (max-width:640px){.aid-syn-row{grid-template-columns:1fr}}.aid-syn-card{min-width:0;box-sizing:border-box;display:flex;align-items:center;gap:12px;min-height:64px;max-height:84px;padding:10px 12px;border:1px solid var(--mui-palette-divider,rgba(127,127,127,.3));border-radius:12px;background:var(--mui-palette-background-paper,transparent);color:inherit;text-decoration:none;transition:border-color .15s,transform .15s}.aid-syn-card:hover,.aid-syn-card:focus-visible{border-color:var(--mui-palette-primary-main,#58a6ff);transform:translateY(-1px)}.aid-syn-card code{flex:0 0 auto;max-width:48%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:12px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;padding:7px 9px;border-radius:8px;background:var(--mui-palette-action-hover,rgba(127,127,127,.12));color:var(--mui-palette-primary-main,#58a6ff)}.aid-syn-card .tx{display:flex;flex-direction:column;min-width:0}.aid-syn-card b{font-size:14px;font-weight:800}.aid-syn-card .tx small{font-size:12px;line-height:1.3;color:var(--mui-palette-text-secondary,#8b949e);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}",
+    ".aid-syn{margin:18px 0 6px;min-width:0;max-width:100%}.aid-syn-l{display:block;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mui-palette-text-secondary,#8b949e);margin:0 0 6px}.aid-syn-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}@media (max-width:640px){.aid-syn-row{grid-template-columns:1fr}}.aid-syn-card{min-width:0;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;padding:10px 12px;border:1px dashed var(--mui-palette-divider,rgba(127,127,127,.3));border-radius:10px;background:transparent;color:inherit;cursor:default}.aid-syn-h .me-code{font:600 13px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;background:none;padding:0}.aid-syn-p{margin:0;font-size:13px;line-height:1.45;color:var(--mui-palette-text-secondary,#8b949e);overflow-wrap:anywhere}.aid-syn-p .me-code{font:12px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;padding:1px 4px;border-radius:4px;background:var(--mui-palette-action-hover,rgba(127,127,127,.12))}.aid-syn-more{align-self:flex-start;font-size:12px;font-weight:600;color:var(--mui-palette-primary-main,#58a6ff);text-decoration:none}.aid-syn-more:hover,.aid-syn-more:focus-visible{text-decoration:underline}",
     ".aid-rel-cards{margin:32px 0 8px}.aid-doclink{color:var(--mui-palette-primary-main,#58a6ff)}.aid-rel-cards h2{margin:0 0 10px;font-size:1.35rem;font-weight:800}.aid-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}@media (max-width:900px){.aid-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (max-width:480px){.aid-cards{grid-template-columns:1fr}}",
     ".aid-card2{display:flex;flex-direction:column;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:14px;overflow:hidden;background:var(--mui-palette-background-paper,transparent);color:inherit;text-decoration:none;transition:transform .15s,border-color .15s,box-shadow .15s}.aid-card2:hover,.aid-card2:focus-visible{transform:translateY(-2px);border-color:var(--mui-palette-primary-main,#58a6ff);box-shadow:0 6px 18px rgba(0,0,0,.18)}",
     ".aid-card2 .img{display:block;aspect-ratio:1200/630;background:var(--mui-palette-action-hover,rgba(128,128,128,.12));overflow:hidden}.aid-card2 img{width:100%;height:100%;object-fit:cover;display:block}.aid-card2 .tx{display:flex;flex-direction:column;gap:3px;padding:10px 12px 12px}.aid-card2 b{font-size:14px;font-weight:800}.aid-card2 small{font-size:12px;line-height:1.4;color:var(--mui-palette-text-secondary,#8b949e)}",
@@ -295,6 +295,10 @@
     try { var v = JSON.parse(localStorage.getItem(PANEL_KEY) || "null"); if (v && typeof v === "object") { if (typeof v.open === "boolean") d.open = v.open; for (var k in v.sec) if (k in d.sec) d.sec[k] = !!v.sec[k]; } } catch (e) {}
     return d; }
 
+  // Route highlight shared by the answer list, the figure (route ring) and the map: hover = transient, click = pinned
+  var routeHi = { r: -1, subs: [] };
+  function hiRoute(r, pin) { routeHi.r = r; routeHi.subs.slice().forEach(function (f) { f(r, !!pin); }); }
+  function useRouteHi(onPin) { var st = useState(-1); useEffect(function () { var f = function (r, pin) { st[1](r); if (pin && onPin) onPin(r); }; routeHi.subs.push(f); return function () { routeHi.subs = routeHi.subs.filter(function (g) { return g !== f; }); }; }, []); return st[0]; }
   function Dashboard(props) {
     var rootId = props["data-gui-node-id"] || "ai-decides", nodeId = rootId + "/node";
     var ls = useState(live.state()), lst = ls[0], setLst = ls[1];
@@ -307,6 +311,7 @@
     var sp = useState(function () { try { return localStorage.getItem(SLOW_KEY) === "1"; } catch (e) { return false; } }), slow = sp[0], setSlow = sp[1];
     var discRef = useRef(null), baseRef = useRef(null), base2Ref = useRef(null), ringsRef = useRef(null), litRef = useRef(null), overRef = useRef(null), hitRef = useRef(null), markRef = useRef(null), kRef = useRef(null), vizColRef = useRef(null);
     var C = useRef({}).current; C.sel = sel; C.slow = slow; C.info = info;
+    var hovR = useRouteHi(function (r) { if (r >= 0 && C.select) C.select({ type: "route", r: r }, true); }); C.hov = hovR;
     var themeCtx = G.useThemeContext ? G.useThemeContext() : { mode: "dark" }, dark = themeCtx.mode !== "light", mode = dark ? "dark" : "light";
 
     // ── .GUI parts: the figure's centre, one part per route, the selected node, the panel and its sections ──
@@ -405,7 +410,12 @@
         run();
       }
       function drawOver() {
-        var ctx = octx; ctx.clearRect(0, 0, over.width, over.width); var s = C.sel; if (!s || !C.info) return;
+        var ctx = octx; ctx.clearRect(0, 0, over.width, over.width); var s = C.sel; if (!C.info) return;
+        if (C.hov >= 0 && C.hov < info.routes.length) { var hr = routeArc(C.hov), hc = "hsl(" + HUES[C.hov % HUES.length] + " 70% 52%)", hm = (hr[0] + hr[1]) / 2, hx = cx + Math.cos(hm) * (RAD.r0 + RAD.r1) / 2 * Rpx, hy = cx + Math.sin(hm) * (RAD.r0 + RAD.r1) / 2 * Rpx;
+          ctx.save(); ctx.globalAlpha = .5; ctx.fillStyle = hc; ctx.beginPath(); ring(ctx, hr[0], hr[1], RAD.r0, RAD.r1); ctx.fill(); ctx.globalAlpha = 1; ctx.strokeStyle = hc; ctx.lineWidth = 2.5 * dpr; ctx.beginPath(); ring(ctx, hr[0], hr[1], RAD.r0 - .012, RAD.r1 + .012); ctx.stroke();
+          ctx.font = "700 " + Math.round(12 * dpr) + "px ui-monospace,SFMono-Regular,Menlo,monospace"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; var lbl = "Route " + (C.hov + 1), tw = ctx.measureText(lbl).width + 10 * dpr;
+          ctx.fillStyle = "rgba(13,17,23,.85)"; ctx.fillRect(hx - tw / 2, hy - 10 * dpr, tw, 20 * dpr); ctx.fillStyle = "#fff"; ctx.fillText(lbl, hx, hy); ctx.restore(); }
+        if (!s) return;
         ctx.strokeStyle = col.sel; ctx.lineWidth = 1.6 * dpr; ctx.beginPath();
         if (s.type === "center") ctx.arc(cx, cx, (RAD.center + .02) * Rpx, 0, Math.PI * 2);
         else if (s.type === "route") { var ra = routeArc(s.r); ring(ctx, ra[0], ra[1], RAD.r0 - .008, RAD.r1 + .008); }
@@ -465,7 +475,8 @@
       return function () { job++; if (C.baseRaf) cancelAnimationFrame(C.baseRaf); if (first) cancelAnimationFrame(first); disc.removeEventListener("pointermove", onMove); disc.removeEventListener("pointerdown", onDown); if (raf) cancelAnimationFrame(raf); clearTimeout(fadeT); clearTimeout(rto); if (ro) ro.disconnect(); C.replay = null; C.drawOver = null; };
     }, [geo, S, Wv, mode]);
     useEffect(function () { C.ringsKey = null; }, [geo]);
-    useEffect(function () { if (C.drawOver) C.drawOver(); }, [sel]);
+    C.select = select;
+    useEffect(function () { if (C.drawOver) C.drawOver(); }, [sel, hovR]);
     var onHit = function (e) {   // clicks on the SVG parts (the node marker, a route wedge, the centre) select that part
       var g = e.target && e.target.closest && e.target.closest("[data-gui-node-id]"); if (!g || !hitRef.current || !hitRef.current.contains(g)) return;
       var store = nodeStore(), id = g.getAttribute("data-gui-node-id"); if (store) store.actions.selectNode(id);
@@ -882,6 +893,7 @@
       live.read(geo.paths).then(function (r) { if (alive) setVals({ v: r.values, ms: r.ms, seq: lst.waveSeq }); }, function () {});
       return function () { alive = false; }; }, [ready, geo, lst.waveSeq]);
     var sel = useState(null), pick = sel[0], setPick = sel[1];
+    var pinS = useState(-1), hovR = useRouteHi(function (r) { pinS[1](r); }); if (hovR < 0) hovR = pinS[0];
     var xs = useState(null), ex = xs[0], setEx = xs[1];
     var explainPath = function (target) { setPick(target); setEx(null);
       live.explain(target.path).then(function (x) { setEx({ path: target.path, x: x }); }, function (e) { setEx({ path: target.path, error: e.message }); }); };
@@ -932,7 +944,7 @@
     var metroFig = function () { var M = geo && geo.metro;
       if (geo && geo.error) return h("div", { className: "aid-map-fig" }, h("div", { className: "aid-warn" }, "Could not load the map data: " + geo.error));
       if (!M) return h("div", { className: "aid-map-fig" }, h("div", { className: "aid-note" }, "Loading the map…"));
-      var selStop = pick && pick.kind === "stop" ? pick.stop : -1, selR = pick && (pick.kind === "trip" || pick.kind === "seg") ? pick.r : -1, D = metroDots;
+      var selStop = pick && pick.kind === "stop" ? pick.stop : -1, selR = pick && (pick.kind === "trip" || pick.kind === "seg") ? pick.r : hovR, D = metroDots;
       return h("div", { className: "aid-map-fig" },
         h("div", { className: "aid-metro-wrap" },
           h("svg", { ref: metroRef, viewBox: "0 0 1000 " + M.H, className: "aid-metro-svg", role: "img", "data-aid": "metro-svg", onClick: onMetro,
@@ -992,7 +1004,7 @@
           h("h3", null, "Routes · departures/hour ", me("routes[r].perHour")),
           h("div", { className: "aid-map-routes", "data-aid": "map-routes" }, (geo && geo.m ? geo.m.routes : []).map(function (rt, ri) {
             return Btn({ key: ri, "data-aid": "map-route", "aria-pressed": pick && (pick.kind === "trip" || pick.kind === "seg") && pick.r === ri ? "true" : "false", onClick: function () { explainPath({ kind: "trip", r: ri, path: "routes." + (ri + 1) + ".perHour" }); } },
-              h("span", { className: "aid-map-rt" }, h("i", { style: { background: "hsl(" + HUES[ri % HUES.length] + " 70% 52%)" } }), (ri + 1) + " · " + (marks ? fmtN(marks.rph[ri]) : "…"))); })),
+              h("span", { className: "aid-map-rt" }, h("i", { style: { background: "hsl(" + HUES[ri % HUES.length] + " 70% 52%)" } }), "Route " + (ri + 1) + " · " + (marks ? fmtN(marks.rph[ri]) : "…"))); })),
           h("div", { className: "aid-note" }, "Click a stop or a line on the map, or a route here: the card is ", me("me.explain(path)"), " from the kernel (", h("a", { href: "https://neurons-me.github.io/.me/docs/Explain.html", target: "_blank", rel: "noopener", className: "aid-doclink" }, "docs"), ")."),
           h("div", { className: "aid-map-card", "data-aid": "map-card", "aria-live": "polite" },
             !pick ? h("div", { className: "aid-note" }, "Nothing selected.") :
@@ -1078,10 +1090,13 @@
               h("em", null, A.trips + " of " + A.nTrips + " running trips · " + A.wins + " of " + A.nWins + " time windows"))),
           !at10 && !A.off.length ? h("div", { className: "aid-note" }, (function () { var hs = A.routes.map(function (q) { return q.hw; }), lo = Math.min.apply(null, hs), hi = Math.max.apply(null, hs); return "Before: no window is below the 165 s minimum. Mean headway per route: " + (Math.round(lo) === Math.round(hi) ? "about " + r1(lo) : Math.round(lo) + "–" + Math.round(hi)) + " s."; })()) : null,
           down.length ? h("ul", { className: "aid-alist", "data-aid": "qa-routes" }, down.map(function (q) { return h("li", { key: q.r },
-            h("button", { type: "button", "data-aid": "qa-route", onClick: function () { explain("routes." + (q.r + 1) + ".anyTight", "Route " + (q.r + 1) + " · any window below the 165 s minimum"); } },
-              h("i", { style: { background: "hsl(" + HUES[q.r % HUES.length] + " 70% 52%)" } }), h("b", null, "Route " + (q.r + 1)),
-              h("span", { className: "bar" }, h("span", { style: { width: Math.round(q.wins / q.nWins * 100) + "%" } })),
-              h("span", null, q.wins + "/" + q.nWins + " windows · " + q.trips + "/" + q.nTrips + " trips with a window below 165 s"),
+            h("button", { type: "button", "data-aid": "qa-route", "data-route": q.r + 1,
+                "aria-label": "Route " + (q.r + 1) + ": " + q.wins + " of " + q.nWins + " time windows and " + q.trips + " of " + q.nTrips + " trips below 165 s. Headway " + Math.round(B.routes[q.r].hw) + " to " + Math.round(q.hw) + " s, " + r1(B.routes[q.r].ph) + " to " + r1(q.ph) + " departures per hour. Highlights the route in the figure and the map.",
+                onMouseEnter: function () { hiRoute(q.r); }, onFocus: function () { hiRoute(q.r); }, onMouseLeave: function () { hiRoute(-1); }, onBlur: function () { hiRoute(-1); },
+                onClick: function () { hiRoute(q.r, true); explain("routes." + (q.r + 1) + ".anyTight", "Route " + (q.r + 1) + " · any window below the 165 s minimum"); } },
+              h("i", { style: { background: "hsl(" + HUES[q.r % HUES.length] + " 70% 52%)" } }), " ", h("b", null, "Route " + (q.r + 1)), " ",
+              h("span", { className: "bar", title: q.wins + " of " + q.nWins + " windows below 165 s" }, h("span", { style: { width: Math.round(q.wins / q.nWins * 100) + "%" } })), " ",
+              h("span", { className: "ct" }, q.wins + " of " + q.nWins + " windows · " + q.trips + " of " + q.nTrips + " trips below 165 s"), " ",
               h("span", { className: "ph" }, "headway " + Math.round(B.routes[q.r].hw) + " → " + Math.round(q.hw) + " s · " + r1(B.routes[q.r].ph) + " → " + r1(q.ph) + " dep/h"))); })) : null,
           at10 ? h("div", { className: "aid-note", "data-aid": "qa-uniform" }, uniform ? "Departures/hour " + (uni[0] >= 0 ? "rise" : "fall") + " by the same " + Math.abs(uni[0]) + "% on every route: one factor for all lines (departures/hour = 3600 / headway), so the change is uniform. What differs is how close each route's published headways already were to 165 s." : "Change per route: " + uni.join("% · ") + "%.") : null,
           h("div", { className: "aid-note aid-rel" }, "How the values relate: ", me("headway = base × policy.factor"), " → ", me("perHour = 3600 / headway"), " → trip → route → city; ", me("tight = headway < 165"), " → route ", me("anyTight"), ". Read with ", me("me(path)"), " in the worker: ", fmt(plan.P.length), " paths in " + A.ms + " ms · click a card or a row for ", me("me.explain(path)"), " (", h("a", { href: "https://neurons-me.github.io/.me/docs/Explain.html", target: "_blank", rel: "noopener", className: "aid-doclink" }, "docs"), ")."),
@@ -1098,14 +1113,19 @@
     ["https://neurons-me.github.io/.me/docs/Benchmarks/GTFS/Madrid/", "https://suign.github.io/assets/imgs/MADRID-GRAPH-ME.jpg", "GTFS-Madrid benchmark", "The same feed measured at scale: build, write and read timings."],
     ["https://neurons-me.github.io/smart-cities/", "https://neurons-me.github.io/smart-cities/assets/SMART-CITIES-ME.jpg", "Smart Cities", "The other city demos on the same kernel."],
     ["https://neurons-me.github.io/robots/", "https://neurons-me.github.io/robots/assets/ROBOTS-CONTEXT-LAB.jpg", "Robots", "Robots that understand context: one object, four meanings, zero copies."]];
+  // Read the syntax: two explanatory notes (not buttons). Only "Learn more →" is a link. Examples checked on this.me 4.2.1.
   var SYNTAX = [
-    ["https://neurons-me.github.io/.me/docs/Paths.html", 'me("routes.1.perHour")', "me.whatever(what)", "How to read and write a path"],
-    ["https://neurons-me.github.io/.me/docs/Explain.html", 'me.explain(path)', "me.explain(path)", "Why a value is what it is: inputs and the last wave"]];
+    ["https://neurons-me.github.io/.me/docs/Paths.html", "me.whatever(what)", [["me", 'me("routes.1.perHour")'], " reads a path; writing it is ", ["me", "me.routes[1].perHour(value)"], "."], "Learn more about paths"],
+    ["https://neurons-me.github.io/.me/docs/Explain.html", "me.explain(path)", ["Shows the inputs and last change behind a value, like a route's headway: ", ["me", 'me.explain("routes.1.trips.1.win.1.headway")'], "."], "Learn more about explain"]];
   function Syntax(p) {
+    var SYN = window.MeSyntax || null;
+    var code = function (t, k) { return h("code", { key: k, className: "me-code aid-syn-c" }, !SYN ? t : SYN.tokenize ? SYN.tokenize(t).map(function (x, i) { return x.c ? h("span", { key: i, className: x.c }, x.v) : x.v; }) : SYN.render(h, t)); };
     return h("section", { className: "aid-syn", "data-gui-node-id": p["data-gui-node-id"], "data-aid": "syntax", "aria-label": "Read the syntax" },
       h("small", { className: "aid-syn-l" }, "Read the syntax"),
-      h("div", { className: "aid-syn-row" }, SYNTAX.map(function (c) { return h("a", { key: c[0], className: "aid-syn-card", href: c[0], "data-aid": "syntax-card" },
-        h("code", null, c[1]), h("span", { className: "tx" }, h("b", null, c[2]), h("small", null, c[3]))); })));
+      h("div", { className: "aid-syn-row" }, SYNTAX.map(function (c) { return h("div", { key: c[0], className: "aid-syn-card", "data-aid": "syntax-card" },
+        h("div", { className: "aid-syn-h" }, code(c[1], "h")),
+        h("p", { className: "aid-syn-p" }, c[2].map(function (x, i) { return typeof x === "string" ? x : code(x[1], i); })),
+        h("a", { className: "aid-syn-more", href: c[0], "aria-label": c[3] }, "Learn more \u2192")); })));
   }
   function Related(p) {
     return h("section", { className: "aid-rel-cards", "data-gui-node-id": p["data-gui-node-id"], "data-aid": "related", "aria-labelledby": "aid-rel-h" },
