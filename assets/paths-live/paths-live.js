@@ -21,6 +21,7 @@
     ".pl code{font-size:.82rem}.pl .row>span:not(.k):not(.st){flex:1 1 0;min-width:0;font-size:.82rem}.pl .row>code{flex:1 1 0;min-width:0;white-space:nowrap;overflow-x:auto;scrollbar-width:thin}@media (max-width:600px){.pl .row>code{font-size:.72rem}.pl .k{min-width:72px}}"+".pl .pth{font-weight:600;color:var(--acc)}.pl .st{display:inline-flex;align-items:center;gap:4px}",
     ".pl .st button{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:600 16px/1 inherit;cursor:pointer}.pl .st button:focus-visible{outline:2px solid var(--acc)}",
     ".pl .st input{width:64px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);text-align:center;font:500 .9rem ui-monospace,monospace}",
+    ".pl .ins{display:flex;flex-direction:column;gap:2px}.pl .ins code{white-space:nowrap;overflow-x:auto}.pl code.me-code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:none;padding:0}.pl .row code.me-code{white-space:nowrap!important;overflow-wrap:normal!important;word-break:normal!important}.pl .row code wbr{display:none}@media (max-width:600px){.pl .ins code{font-size:.72rem}}.pl pre.pl-json{white-space:pre;overflow:auto}.pl .pl-json .mes-path{font-weight:500}",
     ".pl pre{margin:6px 0 0;max-height:220px;overflow:auto;font-size:.74rem;line-height:1.45;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg)}",
     ".pl .ks{font-size:.72rem;color:var(--mut);text-align:center;margin-top:2px}.pl .hint{color:var(--mut);font-size:.8rem}",
     "@media (prefers-reduced-motion:reduce){.pl .dd,.pl .dd.burst{animation:none}.pl .ring.go{animation:none;opacity:.6}}"
@@ -32,6 +33,18 @@
     if (mem && mem.operator === "=" && ex && ex.expr) { var i = path.lastIndexOf("."); return "me." + path.slice(0, i) + '["="]("' + path.slice(i + 1) + '", "' + ex.expr + '")'; }
     return "me." + path + "(" + JSON.stringify(mem ? mem.value : undefined) + ")";
   }
+
+  // the site's .me highlighter (assets/me-syntax, same tokens and theme colours as the code blocks); plain text if it is missing
+  function hc(code, parent) { var c = el("code", { class: "me-code", text: code }, parent); if (window.MeSyntax) try { window.MeSyntax.highlight(c); } catch (e) {} return c; }
+  // explain() JSON with the same token classes: keys as paths, strings, numbers, booleans, null; strings that name a path read as paths
+  function jsonPre(v, parent) {
+    var pre = el("pre", { class: "me-code pl-json" }, parent), src = JSON.stringify(v, null, 1), re = /("(?:[^"\\]|\\.)*")(\s*:)?|(-?\d+(?:\.\d+)?(?:e[+-]?\d+)?)|\b(true|false|null)\b|([{}\[\],])/g, last = 0, m;
+    var span = function (c, t) { if (!t) return; var n = el("span", c ? { class: c } : {}, pre); n.textContent = t; };
+    while ((m = re.exec(src))) { span(null, src.slice(last, m.index)); last = re.lastIndex;
+      if (m[1] && m[2]) { span("mes-punct", '"'); span("mes-key", m[1].slice(1, -1)); span("mes-punct", '"'); span("mes-punct", m[2]); }
+      else if (m[1]) { var inner = m[1].slice(1, -1); if (/^[A-Za-z_$][\w$]*(\.[\w$]+)+$/.test(inner)) { span("mes-quote", '"'); span("mes-key mes-path", inner); span("mes-quote", '"'); } else span("mes-str", m[1]); }
+      else if (m[3]) span("mes-num", m[3]); else if (m[4]) span("mes-" + m[4], m[4]); else span("mes-punct", m[5]); }
+    span(null, src.slice(last)); return pre; }
 
   function mount(host) {
     if (!document.getElementById("pl-css")) el("style", { id: "pl-css", text: CSS }, document.head);
@@ -92,24 +105,24 @@
     function panel(all, idx, last) {
       box.textContent = ""; var n = all[sel], v = idx[sel], ex = v !== undefined ? me.explain(sel) : null, m = last[sel];
       var row = function (k) { var r = el("div", { class: "row" }, box); el("span", { class: "k", text: k }, r); return r; };
-      el("code", { class: "pth", text: "me." + sel }, row("path"));
+      hc("me." + sel, row("path"));
       if (v === undefined) {
         el("span", { text: "branch · " + n.kids.map(function (c) { return c.name; }).join(", ") }, row("children"));
-        el("code", { text: 'me("' + sel + '") → undefined' }, row("read")); el("div", { class: "hint", text: "A branch exists because deeper paths were written; it holds no value of its own. Select a leaf to edit it." }, box); return;
+        hc('me("' + sel + '") → undefined', row("read")); el("div", { class: "hint", text: "A branch exists because deeper paths were written; it holds no value of its own. Select a leaf to edit it." }, box); return;
       }
-      el("code", { text: callFor(sel, m, ex) }, row("written by"));
+      hc(callFor(sel, m, ex), row("written by"));
       var rr = row("value");
-      if (m && m.operator === "=") el("code", { text: String(v) }, rr);
+      if (m && m.operator === "=") hc(String(v), rr);
       else { var st = el("span", { class: "st" }, rr), minus = el("button", { type: "button", "aria-label": "decrease " + sel, text: "−" }, st),
           inp = el("input", { type: "number", value: v, "aria-label": "value of " + sel, inputmode: "numeric" }, st), plus = el("button", { type: "button", "aria-label": "increase " + sel, text: "+" }, st);
         var set = function (nv) { if (!isFinite(nv)) return; write(sel, nv); };
         minus.onclick = function () { set(Number(inp.value) - 1); }; plus.onclick = function () { set(Number(inp.value) + 1); };
         inp.onchange = function () { set(Number(inp.value)); }; }
-      el("code", { text: 'me("' + sel + '") → ' + JSON.stringify(me(sel)) }, row("read"));
+      hc('me("' + sel + '") → ' + JSON.stringify(me(sel)), row("read"));
       var dependents = deps.filter(function (d) { return d.src === sel; }).map(function (d) { return d.dst; });
-      if (ex && ex.derivation) { el("code", { text: ex.expr }, row("expr")); el("span", { text: ex.derivation.inputs.map(function (i) { return i.path + " = " + i.value; }).join(" · ") }, row("inputs")); }
+      if (ex && ex.derivation) { hc(ex.expr, row("expr")); var ir = row("inputs"), iw = el("span", { class: "ins" }, ir); ex.derivation.inputs.forEach(function (i) { hc(i.path + " → " + JSON.stringify(i.value), iw); }); }
       el("span", { text: dependents.length ? dependents.join(", ") : "none" }, row("dependents"));
-      el("code", { text: "me.explain(\"" + sel + "\")" }, row("explain")); el("pre", { text: JSON.stringify(ex, null, 1) }, box);
+      hc("me.explain(\"" + sel + "\")", row("explain")); jsonPre(ex, box);
     }
 
     function write(path, val) {

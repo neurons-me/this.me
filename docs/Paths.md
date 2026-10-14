@@ -12,7 +12,7 @@ image: https://neurons-me.github.io/.me/docs/assets/paths-og.jpg
 scripts:
   - /assets/me-kernel/me-kernel.js?v=1
   - /assets/me-run/me-run.js?v=2
-  - /assets/paths-live/paths-live.js?v=3
+  - /assets/paths-live/paths-live.js?v=6
 ---
 
 # 𓂀 me.whatever(what)
@@ -88,13 +88,15 @@ me.explain("colony.food");                     // value, formula, inputs and the
 ```
 {: .me-run}
 
-`me.explain(path)` is a kernel member, not a path: it returns the value with the formula, the inputs it read and the wave that last recomputed it ([more detail](./Explain.html)).
+`me.explain(path)` is a kernel member, not a path: it returns the value with the formula, the inputs it read and the wave that last recomputed it (see [`me.explain()`](./Explain.html)).
 
 ## Names that are not paths
 
-The proxy first checks whether the property exists on the kernel instance ([proxy.ts](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/proxy.ts#L285-L295)): if it does, you get that member, not a path. Public examples: `me.explain`, `me.inspect`, `me.execute`, `me.exportSnapshot`, `me.hydrate`, `me.setRecomputeMode`, `me.getRecomputeMode`, `me.prove`, `me.learn`. Inherited object names (`toString`, `constructor`) are also members. `me["!"]` enters the runtime plane.
+The proxy first checks whether the property exists on the kernel instance ([Proxy calls](https://neurons-me.github.io/.me/Typescript/typedocs/Proxy-Calls.html "TypeScript docs · source: proxy.ts L285–295"), source: [proxy.ts](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/proxy.ts#L285-L295)): if it does, you get that member, not a path. Public examples: `me.explain`, `me.inspect`, `me.execute`, `me.exportSnapshot`, `me.hydrate`, `me.setRecomputeMode`, `me.getRecomputeMode`, `me.prove`, `me.learn`. Inherited object names (`toString`, `constructor`) are also members. `me["!"]` enters the runtime plane.
 
-Any other name is a path. There is no instance method called `subscribe`, for example: `me.subscribe("x")` writes the fact `subscribe = "x"`.
+Any other name is a path.
+
+Rust has no proxy: members are methods on `Kernel` and a path is always an argument, so a path can never be mistaken for a member. Write with `kernel.postulate("a.b", v)`, read with `kernel.read("a.b")`, explain with `kernel.explain("a.b")`; strings become paths through `IntoPath` ([Rust API](https://neurons-me.github.io/.me/Rust/docs/API.html#paths-and-plural-selectors "Rust docs · source: path.rs L118–145, mod.rs L633–858 at rust-v0.3.3"), source: [path.rs](https://github.com/neurons-me/.me/blob/rust-v0.3.3/Rust/src/kernel/path.rs#L118-L145)).
 
 ## Root calls
 

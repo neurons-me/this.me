@@ -227,7 +227,7 @@ The same axioms are checked in Node by [`Typescript/tests/axioms.test.ts`](https
 node tests/axioms.test.ts
 ```
 
-**Expected:** `AXIOMS SUMMARY: 13/13 passed`. Run against this.me 4.2.1 from npm: 13/13 passed, exit code 0.
+**Expected:** `AXIOMS SUMMARY: 13/13 passed`. Run against this.me 4.2.1 from npm: 13/13 passed, exit code 0. Case-by-case: [TypeScript validation](https://neurons-me.github.io/.me/Typescript/typedocs/Axioms.html).
 
 ---
 
