@@ -1,166 +1,83 @@
-# .me Engine: Scaling Intelligence to O(k) Complexity ​
+# Kernel Core
 
-Core Architecture [​](#core-architecture)**Infinite Semantic Proxy with Incremental Dependency Graph**
+How a write in `this.me` reaches only the values that depend on it. Every link and number on this page is **this.me 4.2.1** (tag [`v4.2.1`](https://github.com/neurons-me/.me/tree/v4.2.1/Typescript/src); the npm 4.2.1 `dist` is built from the same `src`).
 
-## Executive Summary ​
+Concept first: [O(k)](https://neurons-me.github.io/.me/docs/O-k.html) · [me.explain(path)](https://neurons-me.github.io/.me/docs/Explain.html) · [Extreme Fan-Out](https://neurons-me.github.io/.me/docs/Extreme-Fan-Out.html). How a call becomes a path: [Proxy calls](../Proxy-Calls).
 
-The `.me` Kernel is a deterministic, declarative state engine that bridges the gap between unstructured semantic data and high-performance reactive logic. By replacing global re-renders with a **Directed Acyclic Graph (DAG)** of dependencies, the kernel achieves **O(k)** update complexity, where:
+## Cost model
 
-- `k` = number of affected nodes
-- Independent of total dataset size `n`
+`k` is the number of derived values one write recomputes; `n` is everything else in the tree. A write costs O(k), and `explain(path).meta.k` reports `k` for the last wave.
 
----
+| Piece | Source (v4.2.1) |
+|---|---|
+| Derivation state: `derivations`, `refSubscribers`, `refVersions`, `derivationRefVersions`, `staleDerivations`, `recomputeMode` | [kernel-state.ts L102–108](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/kernel-state.ts#L102-L108) |
+| `registerDerivation`: parse refs, subscribe source → target | [derivation.ts L577–608](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/derivation.ts#L577-L608) |
+| `extractExpressionRefs` | [derivation.ts L289–299](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/derivation.ts#L289-L299) |
+| `subscribe` (the inverted index) | [derivation.ts L484](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/derivation.ts#L484) |
+| `invalidateFromPaths`: walk subscribers, eager wave or stale marks | [derivation.ts L824–961](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/derivation.ts#L824-L961) |
+| `recomputeTarget` (early cutoff) | [derivation.ts L705–710](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/derivation.ts#L705-L710) |
+| `ensureTargetFresh` (lazy read) | [derivation.ts L757–812](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/derivation.ts#L757-L812) |
+| `unregisterDerivation` | [derivation.ts L551–559](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/derivation.ts#L551-L559) |
+| Cycles: `failCycle` | [derivation.ts L712–719](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/derivation.ts#L712-L719) |
 
-# 1. Computational Performance — From O(n) to O(k) ​
+## Inverted index
 
-Traditional state managers (and early `.me` prototypes) relied on **broadcast logic**. To update a fleet of 1,200 trucks, the system iterated through every member.
+On `["="]` the kernel extracts the formula's references and records `source path → [target paths]` in `refSubscribers`. A write to a source walks only that entry:
 
-### Legacy Approach — O(n) ​
-
-Changing one global variable forced a full scan of the collection.
-
-### Kernel v1.0 Approach — O(k) ​
-
-#### Phase 8 — Dependency Mapping ​
-
-Upon formula assignment (`=`), the kernel:
-
-- Parses the expression
-- Builds an **Inverted Index**:
-
-```
-source_path -> [target_paths]
-```
-
-#### Targeted Invalidation ​
-
-When a leaf (e.g., `fuel_price`) changes:
-
-- The kernel queries the inverted index
-- Only re-executes formulas subscribed to that leaf
-
-### Benchmark ​
-
-In a 1,200-node stress test:
-
-- Global setup: ~10 seconds
-- Local mutation resolution: **< 15 ms**
-
----
-
-# 2. The Execution Engine — Hermetic Sandbox (Phase C) ​
-
-To ensure absolute security and determinism, the kernel uses a custom-built **Arithmetic / Logic Evaluator**, replacing unsafe `eval()` and `new Function()` patterns.
-
-### Evaluation Pipeline ​
-
-```
-Tokenize → Shunting-yard → RPN (Reverse Polish Notation)
+```txt
+write(source) → invalidateFromPaths([source])
+              → refSubscribers[source] → targets
+              → eager: recomputeTarget(target), then its own subscribers
+              → lazy:  mark stale; ensureTargetFresh(target) on read
 ```
 
-### Safety Model ​
+`recomputeTarget` returns whether the value changed. Dependents of an unchanged value are not recomputed (early cutoff, `explain().meta.changed`).
 
-The engine is physically incapable of executing arbitrary JavaScript. It only recognizes a strict grammar of:
+## Measured on 4.2.1
 
-#### Operators ​
+1,200 trucks, one `[i]` formula, eager mode (default). Run with `node` on npm this.me 4.2.1; box: Intel Xeon, 8 vCPU, Node v20.19.2, 2026-10-14, p50 of 30.
 
-```
-+  -  *  /  %
->  >=  <  <=  ==  !=
-&&  ||  !
-```
+```ts
+import ME from "this.me";
+const me = new ME();
+me.finance.fuel_price(24.5);
+for (let i = 1; i <= 1200; i++) me.fleet.trucks[i].fuel(100 + (i % 50));
+me.fleet["trucks[i]"]["="]("cost", "fuel * finance.fuel_price");
 
-#### Resolvers ​
-
-- Only allows paths validated by the Kernel’s internal `readPath()`
-
-### Impact ​
-
-- Zero surface area for injection attacks
-- Deterministic execution
-- Hermetic evaluation environment
-
----
-
-# 3. Observability & Forensic Traceability ​
-
-The kernel implements **Native Provenance**. Every derived value is not merely a result — it is a traceable conclusion.
-
-### me.explain(path) ​
-
-Returns a full derivation tree.
-
-### Stealth-Root Integration ​
-
-The kernel distinguishes between:
-
-- Public origins
-- Stealth origins Secrets (Phase 0):
-- Participate in calculations
-- Appear masked (`●●●●`) in traces
-
-### Result: Auditable Privacy ​
-
-You can prove how a number was calculated **without revealing sensitive keys** used in the computation.
-
----
-
-# 4. Persistence & Portability (Phase 7A / 7B) ​
-
-The kernel maintains a dual-plane state model:
-
-## Semantic Plane ​
-
-- Current values of all nodes
-
-## Cryptographic Plane ​
-
-- Encrypted branches
-- Local noise scopes
-
-### Atomic Snapshot ​
-
-Exports the entire kernel into a single portable blob, including:
-
-- Memory log
-- Dependency definitions
-- Secret scopes
-
-### Rehydration ​
-
-A new kernel instance can ingest a snapshot and resume operations with:
-
-- Perfect behavioral equivalence
-- Preserved reactivity
-- Preserved secret scopes
-
----
-
-# 5. Technical Constraints & Guarantees ​
-
-## Immutability ​
-
-Every state change is recorded as a **Memory**.
-
-## Cycle Protection ​
-
-The dependency engine detects and halts circular references. Example:
-
-```
-A = B
-B = A
+me.finance.fuel_price(99);
+me.explain("fleet.trucks.600.cost").meta.k; // 1200
+me.fleet.trucks[600].fuel(1);
+me.explain("fleet.trucks.600.cost").meta.k; // 1
+me("fleet.trucks.600.cost");               // 99
 ```
 
-## Memory Efficiency ​
+| Measure | 4.2.1 |
+|---|---:|
+| Setup (1,200 writes + formula + first read) | 149–187 ms |
+| Global write `finance.fuel_price` + read, k = 1,200 | 32–34 ms |
+| Local write `trucks[600].fuel` + read, k = 1 | 0.12 ms |
 
-`unregisterDerivation()` ensures:
+Larger sweeps: [Kernel benchmarks](./Benchmarks).
 
-- Deleted nodes remove their subscriptions
-- Inverted index remains clean
-- No memory leaks in long-running processes
+## Evaluator
 
----
+Formulas run in a small evaluator, not `eval` or `new Function`: tokenize, precedence (shunting-yard) to RPN, evaluate. Source: [`tokenizeEvalExpression` L47–151](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/evaluator.ts#L47-L151), [`compileUncached` L228–322](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/evaluator.ts#L228-L322), [`tryEvaluateAssignExpression` L324–429](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/evaluator.ts#L324-L429). Details and outputs: [Intelligence](./Intelligence#evaluator).
 
-# Final Verdict ​
+## explain() and secrets
 
-The `.me` Kernel is a **High-Density Logic Container**. It allows developers to write code as if it were a simple JSON object — while executing it as a complex, reactive, secured computational graph.
+`explain(path)` ([derivation.ts L140–251](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/derivation.ts#L140-L251)) returns the expression, every input with its path, origin and status, and `meta` (`dependsOn`, `k`, `recomputed`, `changed`). Inputs read from a secret branch are returned as `●●●●` with `masked: true` ([L214–215](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/derivation.ts#L214-L215)). Example output: [Intelligence](./Intelligence#explain).
+
+## Snapshots
+
+[`exportSnapshot` L44–57](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/core-snapshot.ts#L44-L57) emits the memory log and the secret planes (`localSecrets`, `localNoises`, `encryptedBranches`, `keySpaces`, …). [`hydrate` L73–111](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/core-snapshot.ts#L73-L111) rebuilds from them and resets `derivations` (L95). Values come back; live formulas do not (see [Intelligence](./Intelligence#snapshots)).
+
+## Guarantees and limits in 4.2.1
+
+- **Memories.** Every write is appended to the memory log ([Memory](../Memory)).
+- **Cycles.** `a = b + 1`, `b = a + 1` does not overflow: both values are `undefined` and `explain().meta.unresolved` is `{ reason: "cycle", cycle: [...] }`.
+- **Cleanup.** Redefining a target ([L584](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/derivation.ts#L584)) or removing a subtree ([`clearDerivationsByPrefix` L1052–1066](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/derivation.ts#L1052-L1066)) calls `unregisterDerivation`, which drops its subscriptions.
+- **Log growth.** Recomputed values are appended too, so a long eager stream grows the log ([#5](./Benchmarks#_5-sustained-mutation)).
+
+## Related
+
+[Intelligence](./Intelligence) · [Benchmarks](./Benchmarks) · [Proxy calls](../Proxy-Calls) · [Axioms](../Axioms) · [O(k)](https://neurons-me.github.io/.me/docs/O-k.html) · [me.explain(path)](https://neurons-me.github.io/.me/docs/Explain.html)
