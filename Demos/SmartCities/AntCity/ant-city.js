@@ -68,6 +68,10 @@
     C["="]("workers", sum("isWorker")); C["="]("nurses", sum("isNurse")); C["="]("scouts", sum("isScout")); C["="]("carried", sum("carry")); C["="]("recruited", sum("recruited"));
     C["="]("food", "chambers.pantry.stock + chambers.granary.stock + chambers.cellar.stock");
     C["="]("treesKnown", "trees[1].known + trees[2].known + trees[3].known");
+    // readable group paths: colony.ants.workers / .nurses / .scouts / .recruited and colony.trees.known, each a ["="] sum of the per-member flags
+    var abs = function (f) { var s = []; for (var j = 1; j <= ANTS; j++) s.push("colony.ants[" + j + "]." + f); return s.join(" + "); };
+    C.ants["="]("workers", abs("isWorker")); C.ants["="]("nurses", abs("isNurse")); C.ants["="]("scouts", abs("isScout")); C.ants["="]("recruited", abs("recruited"));
+    C.trees["="]("known", "colony.trees[1].known + colony.trees[2].known + colony.trees[3].known");
     C.recruit.tree(0); C.recruit.wave(0);
     K.me = me; declareRoute(1, route("mouth", "tree1", true));
   }
@@ -195,7 +199,7 @@
     ".ac-sec{padding:10px 12px;border-top:1px solid var(--mui-palette-divider,rgba(128,128,128,.25))}.ac-sec:first-child{border-top:0}.ac-h{margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--mui-palette-text-secondary,#8b949e)}",
     ".ac-kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px}.ac-kpi{all:unset;box-sizing:border-box;display:flex;flex-direction:column;gap:1px;padding:8px 10px;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:10px;cursor:pointer}.ac-kpi:hover,.ac-kpi:focus-visible,.ac-kpi[aria-pressed=true]{border-color:var(--mui-palette-primary-main,#58a6ff)}",
     ".ac-kpi b{font-size:1.5rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.15}.ac-kpi small{font-size:11.5px;color:var(--mui-palette-text-secondary,#8b949e)}.ac-kpi code{font:11px " + MONO + ";color:var(--mui-palette-text-secondary,#8b949e)}",
-    ".ac-row{display:flex;justify-content:space-between;gap:10px;line-height:1.65}.ac-row>span:first-child{color:var(--mui-palette-text-secondary,#8b949e)}.ac-num{font-family:" + MONO + ";font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
+    ".ac-row{display:flex;justify-content:space-between;gap:10px;line-height:1.65}.ac-row>span:first-child{color:var(--mui-palette-text-secondary,#8b949e)}.ac-grp{cursor:pointer;border-radius:6px;padding:0 6px;margin:0 -6px}.ac-grp:hover,.ac-grp:focus-visible{background:var(--mui-palette-action-hover,rgba(127,127,127,.12));outline:none}.ac-grp.on{background:var(--mui-palette-action-selected,rgba(88,166,255,.16))}.ac-grp.on>span:first-child{color:var(--mui-palette-primary-main,#58a6ff)}.ac-path{display:block;font-family:" + MONO + ";font-size:10.5px;opacity:.7;margin-left:17px;line-height:1.2;padding-bottom:3px}.ac-sw{display:inline-block;width:9px;height:9px;border:1.5px solid;border-radius:50%;margin-right:8px;vertical-align:0}.ac-sw-trees,.ac-sw-broodNeed,.ac-sw-brood{border-radius:2px}.ac-sw-waves{border-radius:0;border-width:0 0 2px;border-style:dashed;width:12px;height:6px}.ac-num{font-family:" + MONO + ";font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
     ".ac-note{margin-top:6px;font-size:12px;line-height:1.5;color:var(--mui-palette-text-secondary,#8b949e)}.ac-note a,.ac-k a,.ac-notes a{color:var(--mui-palette-primary-main,#58a6ff);text-decoration:none}.ac-note a:hover,.ac-k a:hover,.ac-notes a:hover{text-decoration:underline}",
     ".ac-json{margin:6px 0 0;padding:8px;max-height:260px;overflow:auto;border-radius:8px;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));font:11px/1.5 " + MONO + ";white-space:pre;color:var(--mui-palette-text-primary,inherit)}",
     ".ac-btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.ac-btn{font:inherit;font-size:12.5px;font-weight:600;padding:4px 10px;border-radius:8px;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.4));background:transparent;color:inherit;cursor:pointer}.ac-btn:hover{border-color:var(--mui-palette-primary-main,#58a6ff)}.ac-btn.on{color:var(--mui-palette-primary-main,#58a6ff);border-color:currentColor}",
@@ -230,10 +234,16 @@
         if (/^#/.test(bg)) { var n = parseInt(bg.slice(1, 7), 16); dark = ((n >> 16) + (n >> 8 & 255) + (n & 255)) / 3 < 128; } else if (m && m.length >= 3) dark = (+m[0] + +m[1] + +m[2]) / 3 < 128;
         var ink = css("--mui-palette-text-primary", dark ? "#e6edf3" : "#1f2328"), sun = css("--mui-palette-warning-main", "#d29922");
         return { dark: dark, bg: bg || (dark ? "#0d1117" : "#ffffff"), ink: ink, muted: css("--mui-palette-text-secondary", dark ? "#8b949e" : "#57606a"), faint: css("--mui-palette-text-disabled", dark ? "#6e7681" : "#8c959f"),
-          sun: sun, day: rgba(sun, dark ? .16 : .24), night: rgba(ink, dark ? .05 : .07), night2: rgba(ink, dark ? .09 : .11), ice: dark ? "#9fd8ff" : "#2a86c7", link: css("--mui-palette-info-main", "#58a6ff"), accent: css("--mui-palette-primary-main", "#58a6ff") }; }
+          sun: sun, day: rgba(sun, dark ? .16 : .24), night: rgba(ink, dark ? .05 : .07), night2: rgba(ink, dark ? .09 : .11), ice: dark ? "#9fd8ff" : "#2a86c7", nurse: dark ? "#7ee2a8" : "#1a7f37", link: css("--mui-palette-info-main", "#58a6ff"), accent: css("--mui-palette-primary-main", "#58a6ff") }; }
+      // a panel row selects a group; membership is always asked of the kernel (role flags, known, recruited, the wave tree's route)
+      function ok0() { return !!K.me; }
+      function grpOf(on) { return K.hov || (on && on.g) || null; }
+      function antIn(g, id) { var p = "colony.ants." + id + ".";
+        return g === "workers" ? !!read(p + "isWorker") : g === "nurses" ? !!read(p + "isNurse") : g === "scouts" ? !!read(p + "isScout") : g === "recruited" ? !!read(p + "recruited") : g === "waves" ? !!read(p + "recruited") && read(p + "recruitedTo") === read("colony.recruit.tree") : false; }
+      function waveEdges() { var t = read("colony.recruit.tree"), r = t ? String(read("colony.trees." + t + ".route") || "") : ""; return r ? r.split(",").map(Number) : []; }
       function draw() {
         if (!pal || performance.now() - palT > 500) { pal = palette(); palT = performance.now(); }
-        var P = pal, FS = Math.max(1, Math.min(2.6, 720 / (c.clientWidth || W))), now = performance.now(), on = sel.v, ok = !!K.me;
+        K.pal = pal; var P = pal, G = ok0() ? grpOf(sel.v) : null, WE = G === "waves" ? waveEdges() : [], FS = Math.max(1, Math.min(2.6, 720 / (c.clientWidth || W))), now = performance.now(), on = sel.v, ok = !!K.me;
         var mono = function (sz, t, x, y, col) { ctx.font = "500 " + (sz * FS).toFixed(1) + "px " + MONO; ctx.fillStyle = col; ctx.textAlign = "center"; if (ctx.letterSpacing !== undefined) ctx.letterSpacing = (.12 * sz * FS).toFixed(1) + "px"; ctx.fillText(t, x, y); if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px"; };
         var ital = function (sz, t, x, y, col) { ctx.font = "italic " + (sz * FS).toFixed(1) + "px " + SERIF; ctx.fillStyle = col; ctx.textAlign = "center"; ctx.fillText(t, x, y); };
         var ring = function (x, y, r, col) { ctx.strokeStyle = col; ctx.lineWidth = 1.4; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.stroke(); ctx.setLineDash([]); };
@@ -256,14 +266,16 @@
             ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke(); ctx.restore(); }
           if (isSel) { ctx.strokeStyle = P.accent; ctx.lineWidth = 2; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke(); ctx.setLineDash([]);
             mono(10, "TRAIL " + e.id, (A.x + B.x) / 2, (A.y + B.y) / 2 - 10, P.accent); } });
+        if (WE.length) { ctx.save(); ctx.strokeStyle = P.accent; ctx.lineWidth = 3; ctx.shadowColor = P.accent; ctx.shadowBlur = 10; ctx.setLineDash([8, 6]); ctx.lineDashOffset = -now / 40;
+          WE.forEach(function (id) { var e = EDGES[id - 1]; if (!e) return; var A = NODES[e[0]], B = NODES[e[1]]; ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke(); }); ctx.restore(); }
         // trees: a line drawing; fruit in the sun colour, as many as the kernel says it has; unknown trees stay faint
         TREES.forEach(function (n) { var s = SN[treeNode(n)], known = ok && read("colony.trees." + n + ".known"), seeds = ok ? read("colony.trees." + n + ".seeds") : 0, isSel = on && on.type === "tree" && on.n === n;
-          ctx.globalAlpha = known ? 1 : .22; ctx.strokeStyle = P.ink; ctx.lineWidth = 1.2;
+          ctx.globalAlpha = (known ? 1 : .22) * (G && G !== "trees" ? .35 : 1); ctx.strokeStyle = P.ink; ctx.lineWidth = 1.2;
           ctx.beginPath(); ctx.moveTo(s.x, s.y + 30); ctx.lineTo(s.x, s.y + 4); ctx.moveTo(s.x, s.y + 14); ctx.lineTo(s.x - 9, s.y + 4); ctx.moveTo(s.x, s.y + 12); ctx.lineTo(s.x + 8, s.y + 2); ctx.stroke();
           ctx.fillStyle = P.bg; [[-10, -2, 11], [9, -4, 12], [0, -14, 13]].forEach(function (q) { ctx.beginPath(); ctx.arc(s.x + q[0], s.y + q[1], q[2], 0, 7); ctx.fill(); ctx.stroke(); });
           if (known) for (var q = 0; q < Math.min(14, Math.ceil(seeds / 12)); q++) seedAt(s.x - 14 + (q * 7.3) % 28, s.y - 18 + ((q * 11) % 20), q, P);
           ctx.globalAlpha = 1; mono(9.5, known ? "TREE " + n + " · " + seeds : "TREE " + n + " · ?", Math.max(52 * FS, Math.min(W - 52 * FS, s.x)), s.y + 44 * Math.min(FS, 1.3), isSel ? P.accent : known ? P.muted : P.faint);
-          if (isSel) ring(s.x, s.y, 34, P.accent); });
+          if (isSel || (G === "trees" && known) || (G === "waves" && read("colony.recruit.tree") === n)) ring(s.x, s.y, 34, P.accent); });
         NAMES.forEach(function (n) { var ch = CH[n], isSel = on && on.type === "chamber" && on.n === n, rx = ch.r * 1.35, ry = ch.r;
           ctx.fillStyle = P.bg; ctx.beginPath(); ctx.ellipse(ch.x, ch.y, rx, ry, 0, 0, 7); ctx.fill(); ctx.fillStyle = P.night; ctx.fill();
           if (ch.capacity && ok) { var st = read("colony.chambers." + n + ".stock") || 0, f = Math.min(1, st / ch.capacity);
@@ -279,14 +291,19 @@
             ok && ital(11, "influence " + read("colony.queen.influence") + " · " + (read("colony.queen.eggsLaid") || 0) + " eggs laid", ch.x, ch.y + ry + 15 * FS, P.muted); }
           ctx.strokeStyle = P.faint; ctx.globalAlpha = .55; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(ch.x, ch.y, rx, ry, 0, 0, 7); ctx.stroke(); ctx.globalAlpha = 1;
           if (isSel) { ctx.strokeStyle = P.accent; ctx.lineWidth = 1.4; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.ellipse(ch.x, ch.y, rx + 7, ry + 7, 0, 0, 7); ctx.stroke(); ctx.setLineDash([]); }
-          mono(10, ch.label.toUpperCase(), ch.x, ch.y - ry - 7, isSel ? P.accent : P.muted); });
+          var gHit = (G === "brood" && n === "nursery") || (G === "broodNeed" && (n === "queen" || n === "nursery"));
+          if (gHit) { ctx.save(); ctx.strokeStyle = P.accent; ctx.lineWidth = 2; ctx.shadowColor = P.accent; ctx.shadowBlur = 8; ctx.beginPath(); ctx.ellipse(ch.x, ch.y, rx + 6, ry + 6, 0, 0, 7); ctx.stroke(); ctx.restore(); }
+          mono(10, ch.label.toUpperCase(), ch.x, ch.y - ry - 7, isSel || gHit ? P.accent : P.muted); });
         // events: writes (thin rings), discoveries (warm), recruitment hand-offs (link, filled pulse), the wave start (wide ring)
         fx = fx.filter(function (e) { return now - e.t < 1800; });
         fx.forEach(function (e) { var age = (now - e.t) / 1000, o = Math.max(0, 1 - age / 1.8), col = e.kind === "find" ? P.sun : P.link, r = e.kind === "wave" ? 10 + age * 120 : e.kind === "find" ? 8 + age * 50 : 5 + age * 20;
           ctx.globalAlpha = o * (e.kind === "write" ? .5 : .85); ctx.strokeStyle = col; ctx.lineWidth = e.kind === "write" ? 1 : 1.6; ctx.beginPath(); ctx.arc(e.x, e.y, r, 0, 7); ctx.stroke();
           if (e.kind === "recruit") { ctx.fillStyle = col; ctx.globalAlpha = o * .25; ctx.beginPath(); ctx.arc(e.x, e.y, 9, 0, 7); ctx.fill(); } }); ctx.globalAlpha = 1;
         ants.forEach(function (a) { var p = antXY(a), carry = ok && read("colony.ants." + a.id + ".carry"), rec = ok && read("colony.ants." + a.id + ".recruitedTo"), hl = on && on.type === "ant" && on.i === a.id;
-          drawAnt(p.x, p.y, p.ang == null ? a.id * 1.3 : p.ang, 1.1 * Math.min(FS, 1.8), a.role === "scout" ? P.ice : P.ink, a.path ? (a.odo || 0) * .35 : null, carry, P, a.role, rec ? P.link : null, a.news ? P.sun : null);
+          var mem = G && antIn(G, a.id); ctx.globalAlpha = G && !mem ? .16 : 1;
+          if (mem) { ctx.save(); ctx.fillStyle = rgba(P.accent, .18); ctx.strokeStyle = P.accent; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(p.x, p.y, 11 * Math.min(FS, 1.6), 0, 7); ctx.fill(); ctx.stroke(); ctx.restore(); }
+          drawAnt(p.x, p.y, p.ang == null ? a.id * 1.3 : p.ang, 1.1 * Math.min(FS, 1.8), a.role === "scout" ? P.ice : a.role === "nurse" ? P.nurse : P.ink, a.path ? (a.odo || 0) * .35 : null, carry, P, a.role, rec ? P.link : null, a.news ? P.sun : null);
+          ctx.globalAlpha = 1;
           if (hl) { ring(p.x, p.y, 15 * Math.min(FS, 1.6), P.accent); mono(10, "ANT " + a.id, p.x, p.y - 20 * Math.min(FS, 1.6), P.accent); } });
         if (ok && K.wave) mono(10, "RECRUITMENT WAVE " + K.wave + " · TREE " + read("colony.recruit.tree") + " · " + read("colony.recruited") + " ANTS", W / 2, 18 * FS, P.link);
         if (FS < 1.3) mono(10, "COLONY · THIS.ME " + KV, W / 2, H - 12, P.muted);
@@ -302,7 +319,8 @@
         ctx.fillStyle = P.bg; [[0, role === "queen" ? 8 : 6, 3.4, role === "queen" ? 6.4 : 4.4], [0, 0.5, 2.2, 2.8], [0, -5, 2.8, 2.6]].forEach(function (b) { ctx.beginPath(); ctx.ellipse(b[0], b[1], b[2], b[3], 0, 0, 7); ctx.fill(); ctx.stroke(); });
         ctx.beginPath(); ctx.moveTo(-1, -7.4); ctx.quadraticCurveTo(-2.4, -9.5, -3.4, -11); ctx.moveTo(1, -7.4); ctx.quadraticCurveTo(2.4, -9.5, 3.4, -11); ctx.stroke();
         if (recCol) { ctx.fillStyle = recCol; ctx.beginPath(); ctx.arc(-3.4, -11, 1.3, 0, 7); ctx.arc(3.4, -11, 1.3, 0, 7); ctx.fill(); }
-        if (role === "nurse") { ctx.fillStyle = P.link; ctx.beginPath(); ctx.arc(0, 6, 1.8, 0, 7); ctx.fill(); }
+        if (role === "nurse") { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, 6, 2.2, 0, 7); ctx.fill(); }
+        if (role === "scout") { ctx.beginPath(); ctx.moveTo(-3, -11); ctx.lineTo(0, -14); ctx.lineTo(3, -11); ctx.stroke(); }
         if (role === "queen") { ctx.fillStyle = P.sun; ctx.beginPath(); ctx.arc(0, -5, 1.1, 0, 7); ctx.fill(); }
         if (carry) seedAt(0, -10.5, 1, P);
         ctx.restore();
@@ -334,7 +352,9 @@
         h("small", null, label), h("b", null, v(R(path))), h("code", null, path)); };
     var detail = null;
     if (ok && cur) {
-      if (cur.type === "path") detail = { title: cur.p, rows: [], ex: cur.p };
+      if (cur.type === "path") { var GQ = { workers: "isWorker", nurses: "isNurse", scouts: "isScout", recruited: "recruited" }[cur.g], ids = [];
+        if (GQ) for (var gi = 1; gi <= ANTS; gi++) if (R("colony.ants." + gi + "." + GQ)) ids.push(gi);
+        detail = { title: cur.p, rows: GQ ? [["ants[n]." + GQ + " = 1", ids.length ? ids.join(", ") : "none"]] : [], ex: cur.p, note: cur.g ? "Highlighted on the map. Click the row again (or Esc) to clear." : null }; }
       else if (cur.type === "chamber") { var n = cur.n, c = CH[n], base = "colony.chambers." + n, homes = [];
         for (var i = 1; i <= ANTS; i++) { var hp = R("colony.ants." + i + ".home"); if (hp && hp.__ptr === base) homes.push(i); }
         var here = ants.filter(function (a) { return !a.path && a.at === n; }).map(function (a) { return a.id; });
@@ -360,9 +380,13 @@
     return h("aside", { className: "ac-panel", "data-ac": "panel", "aria-label": "Colony panel" },
       h("div", { className: "ac-sec" }, h("div", { className: "ac-h" }, "Colony · read on " + KL),
         h("div", { className: "ac-kpis" }, kpi("colony.food", "Food in store"), kpi("colony.carried", "Seeds being carried")),
-        h("div", { style: { marginTop: 8 } }, [["colony.workers", "workers"], ["colony.nurses", "nurses"], ["colony.scouts", "scouts"], ["colony.treesKnown", "trees known"], ["colony.recruited", "recruited ants"], ["colony.recruit.wave", "recruitment waves"], ["colony.broodNeed", "brood need (queen)"], ["colony.chambers.nursery.brood", "brood (eggs + larvae)"]].map(function (x) {
-          return h("div", { key: x[0], className: "ac-row", role: "button", tabIndex: 0, style: { cursor: "pointer" }, "data-ac": "count-" + x[1].split(" ")[0], onClick: function () { select({ type: "path", p: x[0] }); } }, h("span", null, x[1]), h("span", { className: "ac-num" }, v(R(x[0])))); })),
-        h("div", { className: "ac-note" }, me('colony["="]("food", "chambers.pantry.stock + chambers.granary.stock + chambers.cellar.stock")'), " recomputes on every stock write; the counts are sums of per-ant flags such as ", me("ants[n].recruited"), "."),
+        h("div", { style: { marginTop: 8 } }, [["colony.ants.workers", "workers", "workers", "ink"], ["colony.ants.nurses", "nurses", "nurses", "nurse"], ["colony.ants.scouts", "scouts", "scouts", "ice"], ["colony.trees.known", "trees known", "trees", "sun"], ["colony.ants.recruited", "recruited ants", "recruited", "link"], ["colony.recruit.wave", "recruitment waves", "waves", "accent"], ["colony.broodNeed", "brood need (queen)", "broodNeed", "sun"], ["colony.chambers.nursery.brood", "brood (eggs + larvae)", "brood", "nurse"]].map(function (x) {
+          var act = cur && cur.g === x[2], tog = function () { K.hov = null; select(act ? null : { type: "path", p: x[0], g: x[2] }); }, P0 = K.pal || {};
+          return h("div", { key: x[0], className: "ac-row ac-grp" + (act ? " on" : ""), role: "button", tabIndex: 0, "aria-pressed": act ? "true" : "false", "aria-label": "Highlight " + x[1] + " on the map", "data-ac": "count-" + x[2],
+            onClick: tog, onKeyDown: function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); tog(); } else if (ev.key === "Escape") { select(null); } },
+            onMouseEnter: function () { K.hov = x[2]; }, onMouseLeave: function () { K.hov = null; }, onFocus: function () { K.hov = x[2]; }, onBlur: function () { K.hov = null; } },
+            h("span", { className: "ac-lab" }, h("i", { className: "ac-sw ac-sw-" + x[2], style: { borderColor: P0[x[3]], background: /workers|nurses|scouts|recruited/.test(x[2]) ? P0[x[3]] : "transparent" }, "aria-hidden": "true" }), x[1], h("code", { className: "ac-path" }, x[0].replace(/^colony\./, "colony."))), h("span", { className: "ac-num" }, v(R(x[0])))); })),
+        h("div", { className: "ac-note" }, me('colony["="]("food", "chambers.pantry.stock + chambers.granary.stock + chambers.cellar.stock")'), " recomputes on every stock write. Each group is a [\"=\"] sum of per-ant flags, e.g. ", me('colony.ants["="]("scouts", "colony.ants[1].isScout + …")'), ". Click a row to highlight its members on the map (asked of ", me("ants[n].isScout"), " etc.) and explain the count; click again or Esc to clear."),
         h("div", { className: "ac-btns" },
           h("button", { type: "button", className: "ac-btn" + (run ? "" : " on"), "data-ac": "pause", onClick: function () { running.on = !running.on; setRun(running.on); } }, run ? "Pause" : "Resume"),
           h("button", { type: "button", className: "ac-btn", "data-ac": "rain", disabled: !ok, onClick: function () { var sp = "colony.chambers.granary.stock", cap = CH.granary.capacity; write(sp, Math.max(0, read(sp) - 10)); emit(); select({ type: "path", p: "colony.food" }); }, title: "Writes colony.chambers.granary.stock − 10" }, "Rain floods the granary (−10)"))),

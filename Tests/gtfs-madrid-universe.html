@@ -235,6 +235,26 @@
       .wave-steps li.done { background: rgba(244,63,94,0.16); color: #fda4af; }
       .wave-steps li.current { background: rgba(244,63,94,0.28); color: #fecdd3; border-color: rgba(251,113,133,0.6); }
     }
+
+    /* Related cards — same pattern as the Smart Cities demo grid */
+    .related { margin-top: 32px; padding-top: 24px; border-top: 1px solid rgba(15,23,32,0.10); }
+    .related h2 { border: 0; margin: 0 0 14px; }
+    .rel-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+    @media (min-width: 640px) { .rel-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    .rel-item { display: flex; flex-direction: column; padding: 12px 12px 16px; border: 1px solid rgba(15,23,32,0.10); border-radius: 14px; background: #fff; color: inherit; text-decoration: none; transition: border-color .15s, background .15s; }
+    .rel-item:hover, .rel-item:focus-visible { border-color: rgba(15,106,120,.45); background: rgba(15,106,120,.04); }
+    .rel-media { display: block; width: 100%; aspect-ratio: 16 / 9; height: auto; object-fit: cover; border-radius: 10px; margin-bottom: 12px; border: 1px solid rgba(15,23,32,0.10); }
+    .rel-title { font-weight: 600; font-size: 1.02rem; }
+    .rel-desc { color: #51606d; font-size: .9rem; margin-top: 4px; line-height: 1.45; }
+    .rel-tag { margin-top: auto; padding-top: 10px; font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; color: #0f6a78; }
+    @media (prefers-color-scheme: dark) {
+      .related { border-color: rgba(232,237,237,0.08); }
+      .rel-item { background: #111a1f; border-color: rgba(232,237,237,0.08); }
+      .rel-item:hover, .rel-item:focus-visible { border-color: rgba(79,209,197,.35); background: rgba(79,209,197,.06); }
+      .rel-media { border-color: rgba(232,237,237,0.08); }
+      .rel-desc { color: #98a7b3; }
+      .rel-tag { color: #4fd1c5; }
+    }
   </style>
 </head>
 <body>
@@ -410,6 +430,30 @@
       Same adapter conceptually as <code>Typescript/tests/Benchmarks/GTFS-Madrid/</code> on main.
       Full mutation sweeps stay in Node; this page is the interactive subset.
     </p>
+
+    <section class="related" aria-labelledby="related-h">
+      <h2 id="related-h">Related</h2>
+      <div class="rel-grid">
+        <a class="rel-item" href="https://neurons-me.github.io/.me/Demos/SmartCities/AI-Decides/">
+          <img class="rel-media" src="https://neurons-me.github.io/.me/Demos/SmartCities/AI-Decides/assets/ai-decides-og.png" width="1200" height="630" loading="lazy" alt="A headway decision on GTFS-Madrid-Bench: routes, trips and frequency windows next to the decision card" />
+          <div class="rel-title">AI decides, .me computes</div>
+          <div class="rel-desc">If Madrid's buses came 10% more often, which routes would get too tight? .me recomputes only what the change touches.</div>
+          <span class="rel-tag">Decisions · Madrid</span>
+        </a>
+        <a class="rel-item" href="https://neurons-me.github.io/.me/Demos/SmartCities/Veracruz.Port/">
+          <img class="rel-media" src="https://neurons-me.github.io/.me/docs/assets/VERACRUZ-PORT-ME.png" width="1440" height="920" loading="lazy" alt="Port of Veracruz live operations in .me" />
+          <div class="rel-title">Port of Veracruz — live operations</div>
+          <div class="rel-desc">3 ships, 1 train and 500 trucks on a real OSM map.</div>
+          <span class="rel-tag">Operations · Veracruz</span>
+        </a>
+        <a class="rel-item" href="https://neurons-me.github.io/.me/docs/Tests/madrid-knowledge.html">
+          <img class="rel-media" src="https://neurons-me.github.io/.me/docs/assets/card-madrid.webp" loading="lazy" alt="Madrid knowledge: fares, abono and Sol to Atocha in .me" />
+          <div class="rel-title">Madrid knowledge</div>
+          <div class="rel-desc">The same idea told as a human story: fares, abono, Sol → Atocha. Mutate and watch dependents with explain().</div>
+          <span class="rel-tag">Human · Madrid</span>
+        </a>
+      </div>
+    </section>
   </div>
 
 <script type="module">

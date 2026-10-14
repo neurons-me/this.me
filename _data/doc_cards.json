@@ -176,7 +176,7 @@
  "/.me/Demos/SmartCities/AntCity/": {
   "href": "https://neurons-me.github.io/.me/Demos/SmartCities/AntCity/",
   "title": "Ant City",
-  "desc": "Scouts find trees, lay trails home and recruit ant to ant. Trail weights and the queen live in .me.",
+  "desc": "Scouts find trees and start recruitment waves; trail weights propagate through .me.",
   "img": "https://neurons-me.github.io/.me/Demos/SmartCities/AntCity/assets/ant-city-card.webp"
  }
 }
