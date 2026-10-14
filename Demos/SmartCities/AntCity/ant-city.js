@@ -1,0 +1,356 @@
+/*! Ant City 0.1.0 · an anthill held in a this.me 4.2.1 kernel · MIT · neurons.me
+ * The kernel (this.me 4.2.1 from npm, sha256 checked in the browser by /.me/assets/me-kernel/me-kernel.js) holds the
+ * colony: chambers (depth, stock, capacity), tunnels (from/to), ants (at, carry, home -> chamber). The canvas only
+ * animates the walk between chambers; every arrival is a write to the kernel, and every number on the page is read back
+ * from it with me(path). colony.food and colony.carried are ["="] derived values; click a chamber, an ant or a number
+ * for me.explain(path).
+ */
+(function () {
+  var G = window.GUI, React = window.React, ROOT = document.getElementById("root"), MK = window.MeKernel;
+  if (!G || !React || !window.ReactDOM || typeof G.mount !== "function" || !ROOT || !MK) return;
+  var h = React.createElement, useState = React.useState, useEffect = React.useEffect, useRef = React.useRef;
+  var MONO = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace", KV = MK.KERNEL.version, KL = "this.me " + KV;
+  var params = new URLSearchParams(location.search);
+  var SRC_URL = "https://github.com/neurons-me/.me/blob/main/Demos/SmartCities/AntCity/ant-city.js";
+
+  // ── the anthill: chamber layout (page drawing only) and tunnels; the state lives in the kernel ──
+  var CH = {
+    field:   { x: 150, y: 46,  r: 0,  label: "Field",    depth: 0 },
+    entrance:{ x: 500, y: 96,  r: 22, label: "Entrance", depth: 2 },
+    hall:    { x: 500, y: 250, r: 30, label: "Hall",     depth: 9 },
+    pantry:  { x: 230, y: 285, r: 44, label: "Pantry",   depth: 11, capacity: 60, stock: 24 },
+    granary: { x: 780, y: 300, r: 40, label: "Granary",  depth: 12, capacity: 40, stock: 14 },
+    nursery: { x: 320, y: 480, r: 38, label: "Nursery",  depth: 19 },
+    queen:   { x: 660, y: 500, r: 40, label: "Queen",    depth: 20 },
+  };
+  var NAMES = Object.keys(CH);
+  var TUN = [["field", "entrance"], ["entrance", "hall"], ["hall", "pantry"], ["hall", "granary"], ["hall", "nursery"], ["hall", "queen"], ["pantry", "nursery"], ["granary", "queen"]];
+  var ANTS = 10, STORES = ["pantry", "granary"];
+  var adj = {}; NAMES.forEach(function (n) { adj[n] = []; }); TUN.forEach(function (t) { adj[t[0]].push(t[1]); adj[t[1]].push(t[0]); });
+  function route(a, b) { var prev = {}, q = [a], seen = {}; seen[a] = 1;
+    while (q.length) { var c = q.shift(); if (c === b) break; adj[c].forEach(function (n) { if (!seen[n]) { seen[n] = 1; prev[n] = c; q.push(n); } }); }
+    var p = [b]; while (p[0] !== a) p.unshift(prev[p[0]]); return p; }
+
+  // ── the kernel side: one ME per page ──
+  var K = { me: null, writes: 0, last: null, lastMs: 0, subs: [], status: "loading", ver: 0 };
+  function emit() { K.ver++; K.subs.forEach(function (f) { f(K.ver); }); }
+  function write(path, v) { var t = performance.now(), segs = path.split("."), p = K.me; segs.forEach(function (s) { p = p[s]; }); p(v);
+    K.writes++; K.lastMs = performance.now() - t; K.last = { path: path, value: v }; }
+  function read(path) { return K.me(path); }
+  function seed(me) {
+    me.colony.name("Ant City");
+    NAMES.forEach(function (n) { var c = CH[n], s = me.colony.chambers[n]; s.depth(c.depth); if (c.capacity) { s.capacity(c.capacity); s.stock(c.stock); s["="]("free", "capacity - stock"); } });
+    TUN.forEach(function (t, i) { me.colony.tunnels[i + 1].from(t[0]); me.colony.tunnels[i + 1].to(t[1]); });
+    for (var i = 1; i <= ANTS; i++) { var a = me.colony.ants[i]; a.carry(0); a.at("hall"); a.home["->"]("colony.chambers." + (i % 3 === 0 ? "queen" : "nursery")); }
+    me.colony["="]("food", "chambers.pantry.stock + chambers.granary.stock");
+    var sum = []; for (var j = 1; j <= ANTS; j++) sum.push("ants[" + j + "].carry"); me.colony["="]("carried", sum.join(" + "));
+  }
+  MK.load().then(function (ME) { K.me = new ME(); seed(K.me); K.status = "ok"; emit(); }, function (e) { K.status = "error"; K.error = String(e && e.message || e); emit(); });
+  window.AntCityKernel = { explain: function (p) { return K.me ? K.me.explain(p) : null; }, read: function (p) { return K.me ? K.me(p) : undefined; } };
+
+  // ── the walk (page side): each ant goes field → a store with free room → field …; arrivals are kernel writes ──
+  var ants = [];
+  for (var i = 1; i <= ANTS; i++) ants.push({ id: i, at: "hall", path: null, seg: 0, t: 0, speed: 70 + (i * 37) % 40, wait: 0.3 + (i - 1) * 0.9, odo: 0 });
+  function freeOf(n) { return read("colony.chambers." + n + ".free"); }
+  function plan(a) {
+    var carry = read("colony.ants." + a.id + ".carry");
+    var pref = a.id % 2 ? STORES : STORES.slice().reverse(), dest = carry ? (pref.filter(function (s) { return freeOf(s) > 0; })[0] || null) : "field";
+    if (!dest) { a.wait = 1.5; return; }
+    if (dest === a.at) return arrive(a);
+    a.path = route(a.at, dest); a.seg = 0; a.t = 0;
+  }
+  function arrive(a) {
+    var p = "colony.ants." + a.id;
+    write(p + ".at", a.at); if (window.__acFx) window.__acFx(CH[a.at].x, CH[a.at].y);
+    if (a.at === "field" && !read(p + ".carry")) { write(p + ".carry", 1); a.wait = .6; }
+    else if (STORES.indexOf(a.at) >= 0 && read(p + ".carry")) { var sp = "colony.chambers." + a.at + ".stock"; write(sp, read(sp) + 1); write(p + ".carry", 0); a.wait = .5; }
+    else a.wait = .2;
+  }
+  var eatT = 0, EAT_EVERY = 1.6;
+  function eat() {   // the colony eats one seed from the fullest store
+    var s = STORES.slice().sort(function (x, y) { return read("colony.chambers." + y + ".stock") - read("colony.chambers." + x + ".stock"); })[0], sp = "colony.chambers." + s + ".stock", v = read(sp);
+    if (v > 0) write(sp, v - 1);
+  }
+  function step(dt) {
+    if (!K.me) return;
+    var w0 = K.writes;
+    ants.forEach(function (a) {
+      if (a.path) { var A = CH[a.path[a.seg]], B = CH[a.path[a.seg + 1]], len = Math.hypot(B.x - A.x, B.y - A.y);
+        a.t += dt * a.speed / len; a.odo += dt * a.speed;
+        if (a.t >= 1) { a.seg++; a.t = 0; if (a.seg >= a.path.length - 1) { a.at = a.path[a.path.length - 1]; a.path = null; arrive(a); } }
+      } else if ((a.wait -= dt) <= 0) plan(a);
+    });
+    if ((eatT += dt) >= EAT_EVERY) { eatT = 0; eat(); }
+    if (K.writes !== w0) emit();
+  }
+  function antXY(a) { if (!a.path) { var c = CH[a.at], k = a.id * 2.4; return { x: c.x + Math.cos(k) * (c.r ? c.r * .55 : 18), y: c.y + Math.sin(k) * (c.r ? c.r * .45 : 6) }; }
+    // two-way traffic: each direction keeps to its side of the tunnel, and ants on the same side spread over three lanes
+    var A = CH[a.path[a.seg]], B = CH[a.path[a.seg + 1]], dx = B.x - A.x, dy = B.y - A.y, L = Math.hypot(dx, dy) || 1, off = 5 + (a.id % 3) * 2.5, ease = Math.min(1, a.t * L / 18, (1 - a.t) * L / 18);
+    return { x: A.x + dx * a.t - dy / L * off * ease, y: A.y + dy * a.t + dx / L * off * ease, ang: Math.atan2(dy, dx) }; }
+
+  // ── page CSS (theme tokens only) ──
+  var CSS = [
+    ".ac-dash{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:start}@media (min-width:900px){.ac-dash{grid-template-columns:minmax(0,1fr) 340px}.ac-panel{position:sticky;top:60px}}",
+    ".ac-fig{position:relative;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:14px;overflow:hidden;background:var(--mui-palette-background-default,transparent)}.ac-fig canvas{display:block;width:100%;height:auto;cursor:pointer;touch-action:manipulation}",
+    ".ac-cap{margin:8px 2px 0;font-size:12.5px;line-height:1.5;color:var(--mui-palette-text-secondary,#8b949e)}",
+    ".ac-panel{border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:12px;background:var(--mui-palette-background-paper,transparent);font-size:13px;overflow:hidden}",
+    ".ac-sec{padding:10px 12px;border-top:1px solid var(--mui-palette-divider,rgba(128,128,128,.25))}.ac-sec:first-child{border-top:0}.ac-h{margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--mui-palette-text-secondary,#8b949e)}",
+    ".ac-kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px}.ac-kpi{all:unset;box-sizing:border-box;display:flex;flex-direction:column;gap:1px;padding:8px 10px;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:10px;cursor:pointer}.ac-kpi:hover,.ac-kpi:focus-visible,.ac-kpi[aria-pressed=true]{border-color:var(--mui-palette-primary-main,#58a6ff)}",
+    ".ac-kpi b{font-size:1.5rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.15}.ac-kpi small{font-size:11.5px;color:var(--mui-palette-text-secondary,#8b949e)}.ac-kpi code{font:11px " + MONO + ";color:var(--mui-palette-text-secondary,#8b949e)}",
+    ".ac-row{display:flex;justify-content:space-between;gap:10px;line-height:1.65}.ac-row>span:first-child{color:var(--mui-palette-text-secondary,#8b949e)}.ac-num{font-family:" + MONO + ";font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
+    ".ac-note{margin-top:6px;font-size:12px;line-height:1.5;color:var(--mui-palette-text-secondary,#8b949e)}.ac-note a,.ac-k a,.ac-notes a{color:var(--mui-palette-primary-main,#58a6ff);text-decoration:none}.ac-note a:hover,.ac-k a:hover,.ac-notes a:hover{text-decoration:underline}",
+    ".ac-json{margin:6px 0 0;padding:8px;max-height:260px;overflow:auto;border-radius:8px;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));font:11px/1.5 " + MONO + ";white-space:pre;color:var(--mui-palette-text-primary,inherit)}",
+    ".ac-btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.ac-btn{font:inherit;font-size:12.5px;font-weight:600;padding:4px 10px;border-radius:8px;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.4));background:transparent;color:inherit;cursor:pointer}.ac-btn:hover{border-color:var(--mui-palette-primary-main,#58a6ff)}.ac-btn.on{color:var(--mui-palette-primary-main,#58a6ff);border-color:currentColor}",
+    ".ac-k summary{cursor:pointer;list-style:none;font:11.5px/1.5 " + MONO + ";color:var(--mui-palette-text-secondary,#8b949e)}.ac-k summary::-webkit-details-marker{display:none}.ac-k summary::before{content:'▸ ';}.ac-k[open] summary::before{content:'▾ '}.ac-k .ok{color:var(--mui-palette-success-main,#2e9d6e)}.ac-k .bad{color:var(--mui-palette-error-main,#e5534b)}.ac-k div{font:11px/1.6 " + MONO + ";color:var(--mui-palette-text-secondary,#8b949e);overflow-wrap:anywhere}",
+    ".ac-me{font-family:" + MONO + ";font-size:12px}.ac-notes{margin:28px 0 0;max-width:760px;font-size:14px;line-height:1.65}.ac-notes h2,.ac-rel h2{margin:0 0 10px;font-size:1.35rem;font-weight:800}.ac-notes ul{margin:0;padding-left:20px}.ac-notes li{margin-bottom:6px}.ac-notes code{font-family:" + MONO + ";font-size:12.5px}",
+    ".ac-rel{margin:32px 0 8px}.ac-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}@media (max-width:900px){.ac-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (max-width:480px){.ac-cards{grid-template-columns:1fr}}",
+    ".ac-card{display:flex;flex-direction:column;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:14px;overflow:hidden;background:var(--mui-palette-background-paper,transparent);color:inherit;text-decoration:none;transition:transform .15s,border-color .15s}.ac-card:hover{transform:translateY(-2px);border-color:var(--mui-palette-primary-main,#58a6ff)}",
+    ".ac-card .img{display:block;aspect-ratio:1200/630;background:var(--mui-palette-action-hover,rgba(128,128,128,.12));overflow:hidden}.ac-card img{width:100%;height:100%;object-fit:cover;display:block}.ac-card .tx{display:flex;flex-direction:column;gap:3px;padding:10px 12px 12px}.ac-card b{font-size:14px;font-weight:800}.ac-card small{font-size:12px;line-height:1.4;color:var(--mui-palette-text-secondary,#8b949e)}",
+  ].join("\n");
+  (function () { var s = document.createElement("style"); s.id = "ac-css"; s.textContent = CSS; document.head.appendChild(s); })();
+  var SYN = window.MeSyntax;
+  var me = function (t) { return h("code", { className: "me-code ac-me" }, SYN ? SYN.render(h, t) : t); };
+  var link = function (href, text) { return h("a", { href: href, target: href.indexOf("http") === 0 ? "_blank" : undefined, rel: "noopener" }, text); };
+  function useKernel() { var s = useState(K.ver), set = s[1]; useEffect(function () { var f = function (v) { set(v); }; K.subs.push(f); return function () { K.subs = K.subs.filter(function (g) { return g !== f; }); }; }, []); return K; }
+  var sel = { v: null, subs: [] }; function select(x) { sel.v = x; sel.subs.forEach(function (f) { f(x); }); }
+  function useSel() { var s = useState(sel.v), set = s[1]; useEffect(function () { sel.subs.push(set); return function () { sel.subs = sel.subs.filter(function (g) { return g !== set; }); }; }, []); return s[0]; }
+  var running = { on: params.get("paused") !== "1" };
+
+  // ── the figure: cross-section of the anthill ──
+  function Hill() {
+    var cv = useRef(null), k = useKernel(), cur = useSel();
+    useEffect(function () {
+      var c = cv.current, ctx = c.getContext("2d"), W = 1000, H = 600, raf = 0, last = performance.now(), pal = null, palT = 0;
+      var dpr = Math.min(2, window.devicePixelRatio || 1); c.width = W * dpr; c.height = H * dpr; ctx.scale(dpr, dpr);
+      var css = function (n, d) { var v = getComputedStyle(document.documentElement).getPropertyValue(n).trim() || getComputedStyle(document.body).getPropertyValue(n).trim(); return v || d; };
+      // visual language of Robots in Space: the page background, faint ink stars, the Sun's warm glow, bodies in a
+      // faint ink wash with a warm "lit" part, 1.2px ink line figures, mono caps labels, italic serif notes, dashed rings
+      var SERIF = '"Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif';
+      var STARS = []; for (var s0 = 0; s0 < 46; s0++) { var a0 = Math.sin(s0 * 12.9898) * 43758.5453, b0 = Math.sin(s0 * 78.233) * 12543.123; STARS.push([((a0 % 1) + 1) % 1 * W, ((b0 % 1) + 1) % 1 * 60, .5 + ((s0 * 7) % 5) / 8, .15 + ((s0 * 3) % 7) / 25]); }
+      var GRAINS = []; for (var g0 = 0; g0 < 90; g0++) GRAINS.push([((Math.sin(g0 * 3.7) * 9999) % 1 + 1) % 1 * W, 80 + ((Math.sin(g0 * 7.1) * 9999) % 1 + 1) % 1 * (H - 90), .6 + (g0 % 4) * .3]);
+      function rgba(col, al) { var m = String(col).match(/^#([0-9a-f]{6})$/i); if (m) { var n = parseInt(m[1], 16); return "rgba(" + (n >> 16) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + al + ")"; }
+        m = String(col).match(/rgba?\(([^)]+)\)/); if (m) { var p = m[1].split(",").slice(0, 3).join(","); return "rgba(" + p + "," + al + ")"; } return col; }
+      function palette() { var bg = css("--mui-palette-background-default", ""), dark = true, m = bg.match(/\d+/g);
+        if (/^#/.test(bg)) { var n = parseInt(bg.slice(1, 7), 16); dark = ((n >> 16) + (n >> 8 & 255) + (n & 255)) / 3 < 128; } else if (m && m.length >= 3) dark = (+m[0] + +m[1] + +m[2]) / 3 < 128;
+        var ink = css("--mui-palette-text-primary", dark ? "#e6edf3" : "#1f2328"), sun = css("--mui-palette-warning-main", "#d29922");
+        return { dark: dark, bg: bg || (dark ? "#0d1117" : "#ffffff"), ink: ink, muted: css("--mui-palette-text-secondary", dark ? "#8b949e" : "#57606a"), faint: css("--mui-palette-text-disabled", dark ? "#6e7681" : "#8c959f"),
+          sun: sun, day: rgba(sun, dark ? .16 : .24), night: rgba(ink, dark ? .06 : .08), night2: rgba(ink, dark ? .1 : .12), link: css("--mui-palette-info-main", "#58a6ff"), accent: css("--mui-palette-primary-main", "#58a6ff") }; }
+      var fx = [];   // ripples where a write just happened (page-side, like the Space demo's "delivered" rings)
+      window.__acFx = function (x, y) { fx.push({ x: x, y: y, t: performance.now() }); };
+      function draw() {
+        if (!pal || performance.now() - palT > 500) { pal = palette(); palT = performance.now(); }
+        var P = pal, FS = Math.max(1, Math.min(2.4, 620 / (c.clientWidth || 1000))), now = performance.now(), on = sel.v;
+        var mono = function (sz, t, x, y, col) { ctx.font = "500 " + (sz * FS).toFixed(1) + "px " + MONO; ctx.fillStyle = col; ctx.textAlign = "center"; if (ctx.letterSpacing !== undefined) ctx.letterSpacing = (.14 * sz * FS).toFixed(1) + "px"; ctx.fillText(t, x, y); if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px"; };
+        var ital = function (sz, t, x, y, col) { ctx.font = "italic " + (sz * FS).toFixed(1) + "px " + SERIF; ctx.fillStyle = col; ctx.textAlign = "center"; ctx.fillText(t, x, y); };
+        ctx.fillStyle = P.bg; ctx.fillRect(0, 0, W, H);
+        STARS.forEach(function (s) { ctx.globalAlpha = s[3]; ctx.fillStyle = P.ink; ctx.beginPath(); ctx.arc(s[0], s[1], s[2], 0, 7); ctx.fill(); }); ctx.globalAlpha = 1;
+        var gl = ctx.createRadialGradient(880, -10, 0, 880, -10, 150); gl.addColorStop(0, rgba(P.sun, .5)); gl.addColorStop(1, rgba(P.sun, 0)); ctx.fillStyle = gl; ctx.fillRect(700, 0, 300, 160);
+        ctx.globalAlpha = .85; ctx.fillStyle = P.sun; ctx.beginPath(); ctx.arc(880, -10, 42, 0, 7); ctx.fill(); ctx.globalAlpha = 1;
+        ctx.fillStyle = P.night; ctx.fillRect(0, 70, W, H - 70);
+        GRAINS.forEach(function (g) { ctx.fillStyle = P.night2; ctx.beginPath(); ctx.arc(g[0], g[1], g[2], 0, 7); ctx.fill(); });
+        ctx.strokeStyle = P.faint; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, 70); ctx.lineTo(430, 70); ctx.quadraticCurveTo(500, 46, 570, 70); ctx.lineTo(W, 70); ctx.stroke();
+        ctx.lineCap = "round";
+        TUN.forEach(function (t) { var a = CH[t[0]], b = CH[t[1]]; ctx.strokeStyle = P.night2; ctx.lineWidth = 22; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+          ctx.strokeStyle = P.link; ctx.globalAlpha = .3; ctx.lineWidth = 1; ctx.setLineDash([2, 6]); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; });
+        NAMES.forEach(function (n) { var ch = CH[n], isSel = on && on.type === "chamber" && on.n === n;
+          if (!ch.r) { for (var q = 0; q < 9; q++) seedAt(ch.x - 40 + q * 10, ch.y + 12 - (q % 3) * 4, q, P); ctx.textAlign = "center"; mono(10.5, "FIELD", ch.x - 78 * Math.min(FS, 1.4), ch.y + 16, P.muted); return; }
+          var rx = ch.r * 1.35, ry = ch.r;
+          ctx.fillStyle = P.bg; ctx.beginPath(); ctx.ellipse(ch.x, ch.y, rx, ry, 0, 0, 7); ctx.fill();
+          ctx.fillStyle = P.night; ctx.fill();
+          if (ch.capacity && K.me) { var st = read("colony.chambers." + n + ".stock") || 0, f = Math.min(1, st / ch.capacity);
+            ctx.save(); ctx.beginPath(); ctx.ellipse(ch.x, ch.y, rx, ry, 0, 0, 7); ctx.clip(); ctx.fillStyle = P.day; ctx.fillRect(ch.x - rx, ch.y + ry - 2 * ry * f, rx * 2, 2 * ry * f); ctx.restore();
+            ital(12.5, st + " of " + ch.capacity, ch.x, ch.y + 5 * FS, P.ink); }
+          ctx.strokeStyle = P.faint; ctx.globalAlpha = .55; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(ch.x, ch.y, rx, ry, 0, 0, 7); ctx.stroke(); ctx.globalAlpha = 1;
+          if (isSel) { ctx.strokeStyle = P.accent; ctx.lineWidth = 1.4; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.ellipse(ch.x, ch.y, rx + 7, ry + 7, 0, 0, 7); ctx.stroke(); ctx.setLineDash([]); }
+          mono(10.5, ch.label.toUpperCase(), ch.x, ch.y - ry - 8, isSel ? P.accent : P.muted); });
+        fx = fx.filter(function (e) { return now - e.t < 1400; });
+        fx.forEach(function (e) { var age = (now - e.t) / 1000; ctx.strokeStyle = P.link; ctx.globalAlpha = Math.max(0, 1 - age / 1.4) * .7; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(e.x, e.y, 6 + age * 22, 0, 7); ctx.stroke(); }); ctx.globalAlpha = 1;
+        ants.forEach(function (a) { var p = antXY(a), carry = K.me && read("colony.ants." + a.id + ".carry"), hl = on && on.type === "ant" && on.i === a.id, walking = !!a.path;
+          var ph = (a.odo || 0) * .35, s = 1.15 * Math.min(FS, 1.7);
+          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate((p.ang == null ? a.id * 1.3 : p.ang) + Math.PI / 2); ctx.scale(s, s);
+          ctx.strokeStyle = P.ink; ctx.lineWidth = 1.2 / s; ctx.lineCap = "round"; ctx.lineJoin = "round";
+          for (var sd = -1; sd <= 1; sd += 2) for (var l = 0; l < 3; l++) { var sw = walking ? Math.sin(ph + l * 2.1 + (sd > 0 ? Math.PI : 0)) * 2 : 0, by = -2 + l * 3;
+            ctx.beginPath(); ctx.moveTo(sd * 2, by); ctx.lineTo(sd * 6, by - 2 + sw * .5); ctx.lineTo(sd * 8.5, by + 1 + sw); ctx.stroke(); }
+          ctx.fillStyle = P.bg; [[0, 6, 3.4, 4.4], [0, 0.5, 2.2, 2.8], [0, -5, 2.8, 2.6]].forEach(function (b) { ctx.beginPath(); ctx.ellipse(b[0], b[1], b[2], b[3], 0, 0, 7); ctx.fill(); ctx.stroke(); });
+          ctx.beginPath(); ctx.moveTo(-1, -7.4); ctx.lineTo(-3, -11); ctx.moveTo(1, -7.4); ctx.lineTo(3, -11); ctx.stroke();
+          if (carry) seedAt(0, -10.5, a.id, P);
+          ctx.restore();
+          if (hl) { ctx.strokeStyle = P.accent; ctx.lineWidth = 1.4; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.arc(p.x, p.y, 15 * Math.min(FS, 1.6), 0, 7); ctx.stroke(); ctx.setLineDash([]);
+            mono(10, "ANT " + a.id, p.x, p.y - 20 * Math.min(FS, 1.6), P.accent); } });
+        mono(10.5, "COLONY · THIS.ME " + KV, W / 2, H - 14 * FS, P.muted);
+      }
+      function seedAt(x, y, k, P) { ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 4 + k * .3); ctx.fillStyle = P.sun; ctx.fillRect(-2.6, -2.6, 5.2, 5.2); ctx.restore(); }
+      function frame(t) { var dt = Math.min(.1, (t - last) / 1000); last = t; if (running.on) step(dt); draw(); raf = requestAnimationFrame(frame); }
+      raf = requestAnimationFrame(frame);
+      function hit(e) { var r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * W, y = (e.clientY - r.top) / r.height * H, best = null, bd = 18;
+        ants.forEach(function (a) { var p = antXY(a), d = Math.hypot(p.x - x, p.y - y); if (d < bd) { bd = d; best = { type: "ant", i: a.id }; } });
+        if (!best) NAMES.forEach(function (n) { var c2 = CH[n]; if (c2.r && Math.hypot((x - c2.x) / 1.35, y - c2.y) < c2.r + 4) best = { type: "chamber", n: n }; });
+        select(best); }
+      c.addEventListener("click", hit); return function () { cancelAnimationFrame(raf); c.removeEventListener("click", hit); };
+    }, []);
+    return h("div", null, h("div", { className: "ac-fig" }, h("canvas", { ref: cv, width: 1000, height: 600, role: "img", "aria-label": "Cross-section of the anthill: chambers joined by tunnels, ants walking between them", "data-ac": "hill" })),
+      h("p", { className: "ac-cap" }, "Every ant arrival is a write to the kernel (", me("me.colony.ants[3].at(\"pantry\")"), "); the seed counts in the chambers are read back with ", me("me(path)"), " on " + KL + ". Click a chamber or an ant."));
+  }
+
+  // ── the right panel ──
+  var fmtJ = function (o) { try { return JSON.stringify(o, function (k2, v) { return k2 === "lastComputedAt" || k2 === "recomputedAt" ? undefined : v; }, 2); } catch (e) { return String(o); } };
+  function Panel() {
+    var k = useKernel(), cur = useSel(), rs = useState(running.on), run = rs[0], setRun = rs[1];
+    var ok = k.status === "ok", R = function (p) { return ok ? read(p) : undefined; }, v = function (x) { return x === undefined ? "–" : typeof x === "object" ? JSON.stringify(x) : String(x); };
+    var kpi = function (path, label) { var on = cur && cur.type === "path" && cur.p === path;
+      return h("button", { type: "button", className: "ac-kpi", "aria-pressed": on ? "true" : "false", "data-ac": "kpi-" + path.split(".").pop(), onClick: function () { select({ type: "path", p: path }); } },
+        h("small", null, label), h("b", null, v(R(path))), h("code", null, path)); };
+    var detail = null;
+    if (ok && cur) {
+      if (cur.type === "path") detail = { title: cur.p, rows: [], ex: cur.p };
+      else if (cur.type === "chamber") { var n = cur.n, c = CH[n], base = "colony.chambers." + n, homes = [];
+        for (var i = 1; i <= ANTS; i++) { var hp = R("colony.ants." + i + ".home"); if (hp && hp.__ptr === base) homes.push(i); }
+        var here = ants.filter(function (a) { return !a.path && a.at === n; }).map(function (a) { return a.id; });
+        detail = { title: c.label + " chamber", rows: [[base + ".depth", R(base + ".depth") + " cm"]].concat(c.capacity ? [[base + ".stock", R(base + ".stock")], [base + ".free", R(base + ".free")]] : [])
+          .concat([["ants here now", here.length ? here.join(", ") : "none"], ["home of ants", homes.length ? homes.join(", ") : "none"]]), ex: c.capacity ? base + ".free" : base + ".depth" }; }
+      else if (cur.type === "ant") { var p = "colony.ants." + cur.i;
+        detail = { title: "Ant " + cur.i, rows: [[p + ".at", R(p + ".at")], [p + ".carry", R(p + ".carry")], [p + ".home", R(p + ".home")], [p + ".home.depth", R(p + ".home.depth") + " cm"]], ex: p + ".home", ptr: true }; }
+    }
+    var ex = detail && detail.ex ? K.me.explain(detail.ex) : null, st = MK.state;
+    return h("aside", { className: "ac-panel", "data-ac": "panel", "aria-label": "Colony panel" },
+      h("div", { className: "ac-sec" }, h("div", { className: "ac-h" }, "Colony · read on " + KL),
+        h("div", { className: "ac-kpis" }, kpi("colony.food", "Food in store"), kpi("colony.carried", "Seeds being carried")),
+        h("div", { className: "ac-note" }, me('colony["="]("food", "chambers.pantry.stock + chambers.granary.stock")'), " recomputes on every stock write."),
+        h("div", { className: "ac-btns" },
+          h("button", { type: "button", className: "ac-btn" + (run ? "" : " on"), "data-ac": "pause", onClick: function () { running.on = !running.on; setRun(running.on); } }, run ? "Pause" : "Resume"),
+          h("button", { type: "button", className: "ac-btn", "data-ac": "rain", disabled: !ok, onClick: function () { var sp = "colony.chambers.granary.stock", cap = CH.granary.capacity; write(sp, Math.max(0, read(sp) - 10)); emit(); select({ type: "path", p: "colony.food" }); }, title: "Writes colony.chambers.granary.stock − 10" }, "Rain floods the granary (−10)"))),
+      h("div", { className: "ac-sec", "data-ac": "writes" }, h("div", { className: "ac-h" }, "Writes · " + KL),
+        h("div", { className: "ac-row" }, h("span", null, "writes so far"), h("span", { className: "ac-num" }, ok ? String(k.writes) : "–")),
+        h("div", { className: "ac-row" }, h("span", null, "last"), h("span", { className: "ac-num", title: k.last ? k.last.path : "" }, k.last ? k.last.path.replace("colony.", "") + " = " + v(k.last.value) : "–")),
+        h("div", { className: "ac-row" }, h("span", null, "write + recompute"), h("span", { className: "ac-num" }, ok ? k.lastMs.toFixed(3) + " ms" : "–"))),
+      h("div", { className: "ac-sec", "data-ac": "detail" }, h("div", { className: "ac-h" }, detail ? detail.title : "Explain"),
+        !detail ? h("div", { className: "ac-note" }, "Click a chamber, an ant or a number to see its paths and ", me("me.explain(path)"), " (", link("https://neurons-me.github.io/.me/docs/Explain.html", "docs"), ").") :
+        h(React.Fragment, null, detail.rows.map(function (r) { return h("div", { key: r[0], className: "ac-row" }, h("span", { className: "ac-num", style: { color: "inherit" } }, r[0].replace("colony.", "")), h("span", { className: "ac-num" }, v(r[1]))); }),
+          detail.ptr ? h("div", { className: "ac-note" }, "home is a pointer (", me('home["->"]("colony.chambers.…")'), "): reading ", me("home.depth"), " goes through it. ", link("https://neurons-me.github.io/.me/docs/Pointer-Composition.html", "Pointers")) : null,
+          h("div", { className: "ac-note" }, me('me.explain("' + detail.ex + '")'), " · " + KL),
+          h("pre", { className: "ac-json", "data-ac": "explain" }, fmtJ(ex)))),
+      h("div", { className: "ac-sec" }, h("details", { className: "ac-k", "data-ac": "kernel" },
+        h("summary", null, "Kernel · ", link(MK.KERNEL.npm, "this.me@" + KV), " · ", st.state === "ok" ? h("span", { className: "ok" }, "sha256 verified") : st.state === "error" ? h("span", { className: "bad" }, "failed") : "loading…"),
+        st.state === "ok" ? [h("div", { key: "h" }, "sha256 " + st.hash), h("div", { key: "u" }, "from ", link(st.url, st.url.replace("https://", ""))), h("div", { key: "s" }, "page source: ", link(SRC_URL, "ant-city.js"))] : st.state === "error" ? h("div", null, st.text) : null)));
+  }
+
+  function Notes() {
+    return h("section", { className: "ac-notes", "data-ac": "notes" }, h("h2", null, "How it works"),
+      h("ul", null,
+        h("li", null, "The colony is one tree in the kernel: ", me("colony.chambers.<name>.depth / stock / capacity"), ", ", me("colony.tunnels.<n>.from / to"), ", ", me("colony.ants.<n>.at / carry"), ". Paths: ", link("https://neurons-me.github.io/.me/docs/Paths.html", "me.whatever(what)"), "."),
+        h("li", null, "Each ant's ", me("home"), " is a pointer to a chamber, so ", me('me("colony.ants.3.home.depth")'), " reads the chamber's depth (", link("https://neurons-me.github.io/.me/docs/Pointer-Composition.html", "Pointer Composition"), ")."),
+        h("li", null, me("colony.food"), ", ", me("colony.carried"), " and each store's ", me("free"), " are ", me('["="]'), " formulas; a stock write recomputes them (", link("https://neurons-me.github.io/.me/docs/Operators.html", "Operators"), ")."),
+        h("li", null, "The walk itself is animated by the page; the chamber and stock values on the canvas are read from the kernel every frame. Source: ", link(SRC_URL, "ant-city.js"), ".")));
+  }
+  var RELATED = [
+    ["https://neurons-me.github.io/.me/docs/Paths.html", "https://neurons-me.github.io/.me/docs/assets/card-paths.webp", "me.whatever(what)", "How a path is written and read, with the same ant colony as runnable examples."],
+    ["https://neurons-me.github.io/smart-cities/", "https://neurons-me.github.io/smart-cities/assets/SMART-CITIES-ME.jpg", "Smart Cities", "The other city demos on the same kernel."],
+    ["https://neurons-me.github.io/.me/Demos/SmartCities/AI-Decides/", "https://neurons-me.github.io/.me/Demos/SmartCities/AI-Decides/assets/ai-decides-og.png", "AI decides, .me computes", "A policy decision stored as a fact; one write recomputes a city's bus network."],
+    ["https://neurons-me.github.io/.me/Demos/Robots/Space/", "https://neurons-me.github.io/.me/Demos/Robots/Space/assets/space-robots-og-4.2.png", "Autonomous Robotics in Space", "Three spider robots on two small rocks, each with its own .me kernel."]];
+  function Related() {
+    return h("section", { className: "ac-rel", "data-ac": "related" }, h("h2", null, "Related"),
+      h("div", { className: "ac-cards" }, RELATED.map(function (c) { return h("a", { key: c[0], className: "ac-card", href: c[0] },
+        h("span", { className: "img" }, h("img", { src: c[1], alt: "", loading: "lazy" })), h("span", { className: "tx" }, h("b", null, c[2]), h("small", null, c[3]))); })));
+  }
+  function Dashboard() { return h("div", { className: "ac-dash" }, h(Hill), h(Panel)); }
+
+  var LOGO = "https://res.cloudinary.com/dkwnxf6gm/image/upload/v1760629064/neurons.me_b50f6a.png";
+  var PATH = [{ text: "me://", href: "https://neurons-me.github.io/.me/", title: ".me" }, { text: "Demos", href: "https://neurons-me.github.io/.me/Demos/", title: ".me demos" },
+    { text: "SmartCities", href: "https://neurons-me.github.io/smart-cities/", title: "Smart Cities" }, { text: "AntCity", href: null, title: "This page" }];
+  var IC = {
+    github: "M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z",
+    settings: "M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z",
+    code: "M9.4 16.6 4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0 4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z",
+    grid: "M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM8 20H4v-4h4v4zm0-6H4v-4h4v4zm0-6H4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4z",
+    palette: "M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z",
+    moon: "M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z",
+    sun: "M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z",
+    search: "M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z",
+    down: "M16.59 8.59 12 13.17 7.41 8.59 6 10l6 6 6-6z",
+  };
+  var Ico = function (p) { return h("svg", { viewBox: p.kind === "github" ? "0 0 16 16" : "0 0 24 24", width: p.size || 18, height: p.size || 18, fill: "currentColor", "aria-hidden": "true", focusable: "false", style: { display: "block", flex: "none" } }, h("path", { d: IC[p.kind] }), p.off ? h("path", { d: "M3 3 21 21", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" }) : null); };
+  var A = G.Atoms, Mo = G.Molecules, SEARCH_SRC = "https://neurons-me.github.io/index.json";
+  var searchSkin = function (t) { var P = t.palette, I = function (v) { return v + " !important"; }, shadow = (t.shadows && t.shadows[8]) || "none";
+    return { "& > div > div:first-of-type": { background: I(P.background.paper), borderColor: I(P.divider), color: I(P.text.primary), padding: I("6px 12px") }, "& > div > div:first-of-type:focus-within": { borderColor: I(P.primary.main) },
+      "& input": { color: I(P.text.primary), caretColor: P.primary.main }, "& input::placeholder": { color: P.text.secondary, opacity: 1 }, "& [role=listbox]": { background: I(P.background.paper), borderColor: I(P.divider), boxShadow: I(shadow), color: P.text.primary },
+      "& [role=listbox] > div": { color: I(P.text.secondary) }, "& [role=option]": { color: I(P.text.primary), borderColor: I(P.divider) }, "& [role=option]:hover, & [role=option][aria-selected=true]": { background: I(P.action.hover) },
+      "& [role=option] > span:nth-of-type(2) > span:nth-of-type(2), & [role=option] > span:nth-of-type(3)": { color: I(P.text.secondary) } }; };
+  function TopSearch() {
+    var SB = G.Components && G.Components.SearchBar, os = useState(false), open = os[0], setOpen = os[1], box = useRef(null), btn = useRef(null);
+    useEffect(function () { if (open) { var i = box.current && box.current.querySelector("input"); if (i) i.focus(); } }, [open]);
+    useEffect(function () { if (open) return undefined; var k = function (e) { var t = e.target; if (e.key === "/" && !e.metaKey && !e.ctrlKey && !(t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable))) { e.preventDefault(); setOpen(true); } };
+      window.addEventListener("keydown", k); return function () { window.removeEventListener("keydown", k); }; }, [open]);
+    if (!SB) return null;
+    var close = function (refocus) { setOpen(false); if (refocus) setTimeout(function () { if (btn.current) btn.current.focus(); }, 0); };
+    if (!open) return h(A.IconButton, { ref: btn, id: "site-search-open", size: "small", "aria-label": "Search", title: "Search (/)", onClick: function () { setOpen(true); }, sx: { color: "text.secondary", p: { xs: .5, sm: .625 } } }, h(Ico, { kind: "search" }));
+    return h(A.Box, { ref: box, id: "site-search", role: "search", onKeyDown: function (e) { if (e.key === "Escape") { e.preventDefault(); close(true); } },
+      onBlur: function (e) { var nx = e.relatedTarget; if (nx && box.current && box.current.contains(nx)) return; var i = box.current && box.current.querySelector("input"); if (!i || !i.value.trim()) close(false); },
+      sx: function (t) { var o = { zIndex: 1200, width: 300, minWidth: 0, flexShrink: 1, "& > div": { maxWidth: "none !important" } }; o[t.breakpoints.down("sm")] = { position: "absolute", left: 8, right: 8, top: "50%", transform: "translateY(-50%)", width: "auto" }; return Object.assign(o, searchSkin(t)); } },
+      h(SB, { src: SEARCH_SRC, placeholder: "Search in All.This", themeMode: "auto", enableSlashShortcut: false }));
+  }
+  function ThemePicker() {
+    var as = useState(null), anchor = as[0], setAnchor = as[1], themeId = G.useThemeContext().themeId, close = function () { setAnchor(null); };
+    return h(React.Fragment, null,
+      h(A.Button, { id: "theme-picker", size: "small", variant: "outlined", "aria-label": "Theme: " + themeId, "aria-haspopup": "true", "aria-expanded": anchor ? "true" : "false", onClick: function (e) { setAnchor(e.currentTarget); },
+        sx: { minWidth: 0, py: { xs: .5, sm: .25 }, px: { xs: .5, sm: .75 }, gap: .5, fontFamily: MONO, fontSize: 11, textTransform: "none", color: "text.secondary", borderColor: { xs: "transparent", sm: "divider" }, whiteSpace: "nowrap", "& .lbl": { display: { xs: "none", sm: "inline" } } } },
+        h(Ico, { kind: "palette", size: 15 }), h(A.Box, { component: "span", className: "lbl" }, themeId), h(A.Box, { component: "span", className: "lbl" }, h(Ico, { kind: "down", size: 14 }))),
+      h(Mo.Menu, { id: "theme-menu", anchorEl: anchor, open: !!anchor, onClose: close, anchorOrigin: { vertical: "bottom", horizontal: "right" }, transformOrigin: { vertical: "top", horizontal: "right" }, "data-gui-inspector-control": "true", slotProps: { list: { "aria-label": "Themes", dense: true }, paper: { sx: { width: 220, p: .5, mt: .5 } } } },
+        h(G.ThemesCatalog, { sidebarView: "expanded", onThemeSelect: close })));
+  }
+  function ModeToggle() { var t = G.useThemeContext(), dark = t.mode === "dark";
+    return h(A.IconButton, { id: "theme-mode-toggle", size: "small", onClick: function () { t.toggleMode(); }, "aria-label": dark ? "Switch to light mode" : "Switch to dark mode", title: dark ? "Light mode" : "Dark mode", sx: { color: "text.secondary", p: { xs: .5, sm: .625 } } }, h(Ico, { kind: dark ? "moon" : "sun" })); }
+  function SettingsMenu() {
+    var sel = G.useOptionalSelection ? G.useOptionalSelection() : null, as = useState(null), anchor = as[0], setAnchor = as[1], close = function () { setAnchor(null); };
+    useEffect(function () { if (sel && params.get("grid") === "1" && !sel.gridEnabled) sel.setGridEnabled(true); }, []);
+    var insp = Boolean(G.getInspectorEnabled()), grid = Boolean(sel && sel.gridEnabled);
+    var items = [{ key: "inspector", label: insp ? "Inspector · ON" : "Inspector · OFF", icon: h(Ico, { kind: "code", off: !insp }), onClick: function () { G.toggleInspector(); } },
+      sel && { key: "grid", label: grid ? "Grid Layout · ON" : "Grid Layout · OFF", icon: h(Ico, { kind: "grid", off: !grid }), onClick: function () { sel.setGridEnabled(!grid); } }].filter(Boolean);
+    return h(React.Fragment, null,
+      h(A.IconButton, { id: "gui-settings", "aria-label": "GUI settings", title: "GUI settings", size: "small", onClick: function (e) { setAnchor(e.currentTarget); }, sx: { color: "text.secondary", p: { xs: .5, sm: .625 } } }, h(Ico, { kind: "settings" })),
+      h(Mo.Menu, { id: "settings-menu", anchorEl: anchor, open: !!anchor, onClose: close, "data-gui-inspector-control": "true", anchorOrigin: { vertical: "bottom", horizontal: "right" }, transformOrigin: { vertical: "top", horizontal: "right" } },
+        items.map(function (it) { return h(Mo.MenuItem, { key: it.key, "data-settings-item": it.key, onClick: function () { close(); it.onClick(); } }, h(Mo.ListItemIcon, null, it.icon), h(Mo.ListItemText, null, it.label)); })));
+  }
+  function TopBar(p) {
+    // when the path doesn't fit, the middle segments collapse to "…" (a link to the parent), so the page's own name always shows in full
+    var cst = useState("measure"), mode = cst[0], setMode = cst[1], col = mode === "col", pathRef = useRef(null), last = PATH.length - 1;
+    useEffect(function () { var re = function () { setMode("measure"); }; window.addEventListener("resize", re); if (document.fonts && document.fonts.ready) document.fonts.ready.then(re);
+      return function () { window.removeEventListener("resize", re); }; }, []);
+    useEffect(function () { var b = pathRef.current; if (mode === "measure" && b) setMode(b.scrollWidth > b.clientWidth + 1 ? "col" : "full"); }, [mode]);   // measured expanded, after commit
+    var mids = PATH.slice(1, last).map(function (x) { return x.text; }).join(" / ");
+    var seg = function (s, i) { var hide = col && i > 0 && i < last;
+      return [i > 0 && !PATH[i - 1].text.endsWith("://") && !hide && !(col && i === last) ? h(A.Box, { component: "span", key: "sep" + i, sx: { color: "text.disabled", mx: .15 } }, "/") : null,
+      col && i === last && last > 1 ? h(A.Link, { key: "ell", href: PATH[last - 1].href, underline: "hover", title: mids, "aria-label": mids, sx: { color: "primary.main", fontFamily: MONO, fontSize: { xs: 12, sm: 13 } } }, "…") : null,
+      col && i === last && last > 1 ? h(A.Box, { component: "span", key: "ellsep", sx: { color: "text.disabled", mx: .15 } }, "/") : null,
+      hide ? null : s.href ? h(A.Link, { key: s.text, href: s.href, underline: "hover", title: s.title, sx: { color: "primary.main", fontFamily: MONO, fontSize: { xs: 12, sm: 13 } } }, s.text)
+        : h(A.Box, { component: "span", key: s.text, "aria-current": "page", sx: { color: "text.primary", fontFamily: MONO, fontSize: { xs: 12, sm: 13 }, fontWeight: 600, flexShrink: 0 } }, s.text)]; };
+    return h(A.Box, { component: "nav", "aria-label": "me path", "data-gui-node-id": p["data-gui-node-id"], sx: { position: "sticky", top: 0, zIndex: 100, display: "flex", alignItems: "center", gap: { xs: .5, sm: 1.25 }, px: { xs: .75, sm: 2.5 }, minHeight: 48, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper" } },
+      h(A.Link, { href: "https://neurons-me.github.io/", title: "neurons.me", underline: "none", sx: { display: "inline-flex", lineHeight: 0, flexShrink: 0 } }, h("img", { src: LOGO, alt: "neurons.me", width: 28, height: 28, style: { display: "block", objectFit: "contain" } })),
+      h(A.Box, { ref: pathRef, "data-aid": "mepath", sx: { display: "inline-flex", alignItems: "center", minWidth: 0, overflowX: "auto", whiteSpace: "nowrap", scrollbarWidth: "none", "&::-webkit-scrollbar": { display: "none" } } }, [].concat.apply([], PATH.map(seg))),
+      h(A.Box, { sx: { ml: "auto", display: "inline-flex", alignItems: "center", gap: { xs: .25, sm: 1.25 }, flexShrink: 0 } }, h(TopSearch),
+        h(A.Link, { href: "https://neurons-me.github.io/.me/docs/", underline: "hover", sx: { fontFamily: MONO, fontSize: 12, color: "text.secondary", mx: { xs: .5, sm: 0 } } }, "Docs"),
+        h(A.Link, { href: "https://github.com/neurons-me/.me", underline: "none", target: "_blank", rel: "noopener", title: "GitHub · neurons-me/.me", "aria-label": "GitHub", sx: { display: "inline-flex", lineHeight: 0, color: "text.secondary", "&:hover": { color: "text.primary" } } }, h(Ico, { kind: "github", size: 18 })),
+        h(A.Box, { "data-gui-inspector-control": "true", sx: { display: "inline-flex", alignItems: "center", gap: .25 } }, h(ThemePicker), h(ModeToggle), h(SettingsMenu))));
+  }
+
+  var N = function (type, id, props, children) { return Object.assign({ type: type, props: Object.assign({}, props || {}, { "data-gui-node-id": id }) }, children ? { children: children } : {}); };
+  var spec = N("Box", "page", { sx: { minHeight: "100vh", bgcolor: "background.default", color: "text.primary" } }, [
+    N("ACTopBar", "topbar"),
+    N("Box", "main", { component: "main", sx: { maxWidth: 1180, mx: "auto", px: { xs: 2, sm: 4 }, pt: { xs: 3, sm: 4.5 }, pb: 8 } }, [
+      N("Typography", "kicker", { component: "p", sx: { fontSize: ".75rem", fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: "text.secondary", mb: 1 } }, ["Smart Cities · " + KL]),
+      N("Typography", "title", { component: "h1", sx: { fontSize: "clamp(2rem, 5vw, 2.75rem)", fontWeight: 800, letterSpacing: "-.02em", lineHeight: 1.1, mb: 1 } }, ["Ant City"]),
+      N("Typography", "lede", { component: "p", sx: { color: "text.secondary", mb: 3, maxWidth: 720 } }, ["Ants carry seeds through the tunnels to the pantry and the granary. The colony lives in .me: every arrival is a write, and the food total recomputes with it."]),
+      N("ACDashboard", "colony"),
+      N("ACNotes", "notes"),
+      N("ACRelated", "related"),
+    ]),
+  ]);
+  var scope = window.__thisGuiThemeScope || {};
+  var mode = "dark"; try { mode = params.get("mode") || localStorage.getItem(scope.themeModeKey) || "dark"; } catch (e) {}
+  var PageTheme = function (p) { return h(G.Theme, { initialThemeId: "neurons.me", initialMode: mode }, p.children); };
+  if (G.getInspectorEnabled()) G.setInspectorEnabled(false);
+  var pageType = function (Comp) { return { type: "x", resolve: function (s) { var p = Object.assign({}, s.props || {}); delete p.key; return h(Comp, p); } }; };
+  var reg = Object.assign({}, G.Registry || G.registry); [["ACTopBar", TopBar], ["ACDashboard", Dashboard], ["ACNotes", Notes], ["ACRelated", Related]].forEach(function (x) { reg[x[0]] = pageType(x[1]); reg[x[0]].type = x[0]; });
+  G.mount(spec, ROOT, { me: window.AntCityKernel, gui: Object.assign({}, G, { render: undefined, RunMe: undefined, Theme: PageTheme, registry: reg }), devtools: { enabled: true, inspector: false, adminView: false, inspectorToggleVisible: false } });
+  document.documentElement.classList.add("gui-on");
+  window.__ac = { K: K, ants: ants, select: select };
+})();

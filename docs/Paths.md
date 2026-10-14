@@ -102,4 +102,4 @@ Any other name is a path. There is no instance method called `subscribe`, for ex
 
 ## See also
 
-[Robots That Understand Context](https://neurons-me.github.io/robots/) · [Primitives](./Primitives.html) (the two verbs: declare and resolve) · [me:// URI grammar](./me-uri.html) · [Syntax](./Syntax.html) · [Axioms](./Axioms.html) (A-struct-0: one callable, chainable value)
+[Robots That Understand Context](https://neurons-me.github.io/robots/) · [Ant City](https://neurons-me.github.io/.me/Demos/SmartCities/AntCity/) (the colony as a live demo) · [Primitives](./Primitives.html) (the two verbs: declare and resolve) · [me:// URI grammar](./me-uri.html) · [Syntax](./Syntax.html) · [Axioms](./Axioms.html) (A-struct-0: one callable, chainable value)

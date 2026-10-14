@@ -172,5 +172,11 @@
   "title": "Benchmarks",
   "desc": "O(k) scaling, throughput, fan-out, cold/warm, explain overhead, secret-scope cost.",
   "img": "/.me/docs/assets/card-benchmarks.webp"
+ },
+ "/.me/Demos/SmartCities/AntCity/": {
+  "href": "https://neurons-me.github.io/.me/Demos/SmartCities/AntCity/",
+  "title": "Ant City",
+  "desc": "An anthill whose state lives in .me: every seed carried is a write, colony food recomputes, click to see why.",
+  "img": "https://neurons-me.github.io/.me/Demos/SmartCities/AntCity/assets/ant-city-card.webp"
  }
 }
