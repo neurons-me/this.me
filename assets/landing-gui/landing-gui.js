@@ -48,8 +48,8 @@
       mark: mark && attrs(mark, ["src", "alt"]),
       langs: [...SRC.querySelectorAll(".lang-nav a")].map((a) => ({ text: txt(a), href: a.getAttribute("href") })),
       cards: [...SRC.querySelectorAll(".grid > a.card")].map((a) => {
-        const img = a.querySelector("img.card-media");
-        return { href: a.getAttribute("href"), title: txt(a.querySelector(".card-title")), desc: inline(a.querySelector(".card-desc")),
+        const img = a.querySelector("img.card-media"), svg = a.querySelector("svg.card-media");
+        return { svg: svg && svg.outerHTML, href: a.getAttribute("href"), title: txt(a.querySelector(".card-title")), desc: inline(a.querySelector(".card-desc")),
           sources: [...a.querySelectorAll("picture > source")].map((s) => attrs(s, ["srcset", "type"])),
           img: img && attrs(img, ["src", "width", "height", "alt"]) };
       }),
@@ -232,6 +232,8 @@
   }
   function DocsCover(p) {
     const c = page.cards[p.card], im = c.img;
+    // an inline <svg class="card-media"> cover (theme-following, currentColor) is kept as is, in the same 140px band
+    if (c.svg) return h(Box, { "data-gui-node-id": p["data-gui-node-id"], sx: { display: "block", flexShrink: 0, lineHeight: 0, height: 140, color: "text.primary", "& svg": { display: "block", width: "100%", height: "100%" } }, dangerouslySetInnerHTML: { __html: c.svg } });
     return h(Box, { component: "picture", "data-gui-node-id": p["data-gui-node-id"], sx: { display: "block", flexShrink: 0, lineHeight: 0 } },
       ...c.sources.map((s, k) => h("source", { key: k, srcSet: s.srcset, type: s.type })),
       h("img", { key: "img", src: im.src, width: im.width, height: im.height, alt: im.alt, style: { display: "block", width: "100%", height: 140, objectFit: "cover" } }));
@@ -292,7 +294,7 @@
   // /.me/docs/ index: cover image on top of every card (140px, cropped), title, text; 3 / 2 / 1 columns as the static page
   const docsCard = (c, i) => N("Card", { component: "a", href: c.href, variant: "outlined", sx: { ...cardSx, display: "flex", flexDirection: "column", overflow: "hidden", borderRadius: "12px",
       transition: "border-color .14s, box-shadow .14s, transform .14s", "&:hover": { borderColor: "primary.main", boxShadow: 3, transform: "translateY(-1px)", textDecoration: "none" } } }, [
-    c.img && N("DocsCover", { card: i }),
+    (c.img || c.svg) && N("DocsCover", { card: i }),
     N("Box", { sx: { display: "flex", flexDirection: "column", gap: 1.25, p: 2.5 } }, [
       T(c.title, { fontSize: "1rem", fontWeight: 700, lineHeight: 1.3, color: "text.primary" }),
       T(c.desc, { fontSize: ".875rem", color: "text.secondary", lineHeight: 1.55 }),

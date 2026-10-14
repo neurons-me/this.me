@@ -12,6 +12,8 @@ crumb: Primitives
 
 # 𓂀 The Primitives of .me
 
+{% include primitives-figure.html %}
+
 Primitives are the vocabulary `.me` is built from: the symbols you write. [Axioms](./Axioms.html) are the guarantees the kernel keeps about them. `_` is a primitive; "a secret scope's root is invisible while its leaves stay readable" is the axiom built on it (A0/A2).
 
 ## Distinction: the primitive beneath .me
