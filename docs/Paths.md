@@ -30,52 +30,56 @@ Source: [`createProxy` in proxy.ts](https://github.com/neurons-me/.me/blob/v4.2.
 import { ME } from "this.me";
 const me = new ME() as any;
 
-me.fleet.trucks[1].fuel(80);          // write: path fleet.trucks.1.fuel = 80
-me("fleet.trucks.1.fuel");            // read → 80
-me("fleet.trucks[1].fuel");           // read → 80 (same path)
+me.colony.ants.workers[1].carry(3);   // write: colony.ants.workers.1.carry = 3
+me("colony.ants.workers.1.carry");    // read → 3
+me("colony.ants.workers[1].carry");   // read → 3 (same path)
 ```
 {: .me-run}
 
 - `me.a.b` builds the path `["a", "b"]`; nothing is read or written until it is called ([createProxy](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/proxy.ts#L256-L303)).
 - `me.a.b(value)` declares `value` at `a.b` (`postulate(path, value)`), recomputes what depends on it, and returns a proxy on the same path, so calls chain.
-- `me("a.b")` reads. At the root, a single string that is a dotted path, a single label, or starts with `_`, `~` or `@` is routed to the read ([handleCall](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/handleCall.ts#L88-L111)). `trucks[1]` and `trucks.1` name the same segment.
+- `me("a.b")` reads. At the root, a single string that is a dotted path, a single label, or starts with `_`, `~` or `@` is routed to the read ([handleCall](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/handleCall.ts#L88-L111)). `workers[1]` and `workers.1` name the same segment.
 
-## A call with no argument is not a read
-
-```ts
-me.a.b(5);
-me.a.b();          // returns a proxy, and declares undefined at a.b
-me("a.b");         // → undefined
-```
-{: .me-run}
-
-On a non-root path, `handleCall` passes the arguments to `postulate` whatever they are; with none, the expression is `undefined` ([handleCall.ts](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/handleCall.ts#L141-L155)). To read, use `me("a.b")`.
+A call with no argument is not a read: `me.a.b()` writes `undefined` at `a.b` ([handleCall.ts](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/handleCall.ts#L141-L155)). To read, always use `me("a.b")`.
 
 ## Chaining
 
 ```ts
-me.d.e(2).f(3);    // d.e = 2, then d.e.f = 3
-me("d.e.f");       // → 3
+me.colony.chambers.nursery("warm").depth(4);   // nursery = "warm", then nursery.depth = 4
+me("colony.chambers.nursery");                 // → "warm"
+me("colony.chambers.nursery.depth");           // → 4
 ```
 {: .me-run}
 
 A write returns a proxy on the path it wrote (an operator leaf returns its scope instead), so the next segment continues from there.
 
-## Derived values
+A path can also point to another path. Reads go through the pointer ([more on pointers](./Pointer-Composition.html)):
 
 ```ts
-me.fleet["="]("total", "trucks[1].fuel + trucks[2].fuel");
-me("fleet.total");                    // the derived value, read like any path
+me.colony.ants.workers[1].home["->"]("colony.chambers.nursery");
+me("colony.ants.workers.1.home");              // → { "__ptr": "colony.chambers.nursery" }
+me("colony.ants.workers.1.home.depth");        // → 4, read through the pointer
 ```
 {: .me-run}
 
-`["="]` declares a formula on a path; reading it is the same `me(path)`.
+## Derived values
+
+```ts
+me.colony.pantry.seeds(40);
+me.colony.pantry.honey(12);
+me.colony["="]("food", "pantry.seeds + pantry.honey");
+me("colony.food");                             // → 52
+me.colony.pantry.seeds(45);                    // more seeds arrive
+me("colony.food");                             // → 57, recomputed
+```
+{: .me-run}
+
+`["="]` declares a formula on a path; reading it is the same `me(path)`, and it follows its inputs.
 
 ## Why a path has its value
 
 ```ts
-me.fleet.trucks[2].fuel(45);
-me.explain("fleet.total");            // formula, inputs and the last wave
+me.explain("colony.food");                     // value, formula, inputs and the last wave
 ```
 {: .me-run}
 
