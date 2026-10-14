@@ -1,4 +1,5 @@
 ---
+image: https://neurons-me.github.io/.me/docs/assets/og-seed.jpg
 layout: gui-doc
 title: "SEED — .me"
 description: "The seed is the single root from which an entire .me identity grows."

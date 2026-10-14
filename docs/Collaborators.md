@@ -1,4 +1,5 @@
 ---
+image: https://neurons-me.github.io/.me/docs/assets/me-og.jpg
 layout: readme
 title: Collaborators
 ---

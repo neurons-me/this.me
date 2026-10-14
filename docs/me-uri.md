@@ -1,4 +1,5 @@
 ---
+image: https://neurons-me.github.io/.me/docs/assets/og-syntax.jpg
 layout: readme
 title: me:// URI Scheme — Grammar Specification
 ---

@@ -1,4 +1,5 @@
 ---
+image: https://neurons-me.github.io/.me/docs/assets/og-me.jpg
 layout: gui-doc
 title: "What is .me?"
 description: ".me is a personal semantic kernel: one value, me, that is both a navigable object and a callable function."

@@ -7,6 +7,7 @@ mepath:
     url: https://neurons-me.github.io/.me/docs/
 canonical: https://suign.github.io/MeWhateverWhat.html
 crumb: me.whatever(what)
+image: https://neurons-me.github.io/.me/docs/assets/paths-og.jpg
 scripts:
   - /assets/me-kernel/me-kernel.js?v=1
   - /assets/me-run/me-run.js?v=2

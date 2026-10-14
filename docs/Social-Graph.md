@@ -1,4 +1,5 @@
 ---
+image: https://neurons-me.github.io/.me/docs/assets/og-social-graph.jpg
 layout: readme
 title: Social Graph
 ---

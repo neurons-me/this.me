@@ -42,7 +42,7 @@ defaults:
 me_theme:
   brand: .me
   favicon: "https://res.cloudinary.com/dkwnxf6gm/image/upload/v1760629064/neurons.me_b50f6a.png?v=brain"   # same neurons brain as https://neurons-me.github.io/ (?v= cache-bust)
-  social_image: "https://neurons-me.github.io/docs/assets/img/me.png"
+  social_image: "https://neurons-me.github.io/.me/docs/assets/me-og.jpg"
   nav:   # no Docs / Github items: the topbars carry neither (logo, me:// path, search, theme, gear)
     - label: All.This
       url: https://neurons-me.github.io/all.this/

@@ -1,4 +1,5 @@
 ---
+image: https://neurons-me.github.io/.me/docs/assets/og-coffeeshops.jpg
 layout: readme
 title: Running your CoffeeShops
 ---

@@ -1,4 +1,5 @@
 ---
+image: https://neurons-me.github.io/.me/docs/assets/og-explain.jpg
 layout: gui-doc
 title: me.explain(path)
 description: "me.explain(path) in this.me 4.2.1: the value at a path, its formula, every input with its current value, and the last wave that recomputed it (k, recomputed, changed, sourcePath). Return shape and behaviour from the kernel source."
