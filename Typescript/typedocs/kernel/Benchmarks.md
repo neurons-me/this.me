@@ -4,7 +4,7 @@ The claim under test: a write costs O(k), where `k` is the number of derived val
 
 Concept first: [O(k)](https://neurons-me.github.io/.me/docs/O-k.html) · [Extreme Fan-Out](https://neurons-me.github.io/.me/docs/Extreme-Fan-Out.html) · [Benchmarks across kernel versions](https://neurons-me.github.io/.me/docs/Benchmarks/benchmarks.html). Data structures: [Core](./Core).
 
-## Runs on this.me 4.2.1
+## Runs on this.me 4.2.1 (Linux box)
 
 Every number in this section is **this.me 4.2.1**: the benchmark files at tag `v4.2.1`, run with `tsx` against the npm 4.2.1 `dist`. Box: Intel Xeon, 8 vCPU, 16 GB, Linux, Node v20.19.2, 2026-10-14. **One run per benchmark** (not a median of rounds); shared-box noise shows most in #9 and #11.
 
@@ -125,20 +125,49 @@ Correctness runs at small sizes, same box and kernel:
 | [Phase.3.0.search-exact](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/tests/Phases/Phase.3.0.search-exact.test.ts) | 4,112 × 256-d, 17 chunks, cold 1,174 ms, warm p50 3.08 ms / p95 4.99 ms, recall 1.0. PASS |
 | [Phase.3.1.ivf](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/tests/Phases/Phase.3.1.ivf.test.ts) | 4,096 × 256-d, build 946 ms, p50 0.63 ms / p95 1.76 ms, recall@10 1.000, 2 chunks/query. PASS |
 
-## Archived: phase closures on kernel 3.6.4
+## Large phases on a Mac (4.2.1)
 
-**Not re-run on 4.2.1.** These numbers were recorded on **this.me 3.6.4** (published 2026-04-19). Their machine is not recorded. The runs take a 1 GB+ heap and 100k-vector corpora that do not fit this box, and the heap-ceiling numbers depend on the machine.
+Every number in this section is **this.me 4.2.1**. Machine: Apple M2 MacBook Air, 8 GB, Node v24.13.1, V8 heap limit 2,240 MB. The run used a worktree at tag `v4.2.1` with the npm 4.2.1 `dist` (sha256 of `me.es.js` and `index.js` verified), on 2026-10-14. One run each, from log `me-4.2.1-phases-20261014-1402.log`. Times are wall clock; memory figures are from `/usr/bin/time -l`.
 
-| Phase | Closed | Signal (3.6.4) |
+| Phase | Script (v4.2.1) | Result |
 |---|---|---|
-| 1 | batch writes + light journal | 14–20 ms per 100-item batch; ceiling ~137,300 items at ~1,660 MB heap |
-| 2 | columnar secret vector corpus | 100k encrypted vectors in 0.9 min, 1,886 vps, ~122 MB post-GC heap |
-| 3 | exact search + IVF sidecar | 100k vectors, see below |
+| 1 | [Phase.1GB.js](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/tests/Phases/Phase.1GB.js) | **Limit reached.** Stress test meant to find the ceiling: heap limit hit after 43.65 s, below the 170,869 items planned (1536 dims, chunks of 100) |
+| 2 | [benchmark-100.ts](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/tests/Benchmarks/benchmark-100.ts) | 100,000 encrypted vectors, one leaf write each: 117.0 min, **14 vps**, 4.8 MB heap after GC |
+| 3 | [benchmark.ivf-vs-exact.ts](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/tests/Benchmarks/benchmark.ivf-vs-exact.ts) | 100,000 vectors, two layouts, below |
 
-| Corpus (100k, 3.6.4) | Exact p95 | IVF p95 | Recall@10 | Chunks / query | Speedup |
-|---|---:|---:|---:|---:|---:|
-| `chunk_coherent` | 77,129 ms | 3,318 ms | 1.000 | 18.4 | 23.2× |
-| `legacy_fragmented` | 166,604 ms | 19,353 ms | 1.000 | 97.6 | 8.6× |
+### Phase 1: 1 GB batch write
+
+| real | user | sys | max RSS | peak footprint |
+|---:|---:|---:|---:|---:|
+| 43.65 s | 87.21 s | 13.75 s | 1,845 MB | 1,959 MB |
+
+Phase 1 is built to find the ceiling, and it did: the run hit the 2,240 MB V8 heap limit on the 8 GB M2 after 43.65 s and stopped with a heap out-of-memory error. The ceiling is below the 170,869 planned items. The log did not record the exact item count at the failure.
+
+### Phase 2: 100k encrypted leaf writes
+
+| real | vps | heap after GC | max RSS | peak footprint |
+|---:|---:|---:|---:|---:|
+| 7,029.82 s | 14 | 4.8 MB | 430 MB | 992 MB |
+
+Memory stays low (writes are disk-backed), but one encrypted leaf write at a time is slow: 14 vectors/s. Batched columnar ingest in Phase 3 reaches about 1,200 vps on the same machine.
+
+### Phase 3: IVF vs exact search, 100k
+
+Settings: `SIZES=100000`, batch 256, 1536 dims, 3 queries, K = 10, nprobe 3, 4 chunk representatives, sigma 0.05, scope `memory.episodic`. Both layouts used IVF k = 316 lists and 391 columnar writes.
+
+| Layout | Ingest | Build | Exact p50 / p95 | IVF p50 / p95 | Coarse p95 | Recall@10 | Chunks / query | Speedup (p95) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| `chunk_coherent` | 82.19 s, 1,217 vps | 204.9 s | 82,057 / 88,205 ms | 1,186 / 1,420 ms | 1.66 ms | **1.000** | 6.33 | 62× |
+| `legacy_fragmented` | 83.31 s, 1,200 vps | 203.8 s | 81,945 / 85,250 ms | 2,047 / 2,154 ms | 1.77 ms | **0.133** | 12.00 | 40× |
+
+| Layout | Heap after ingest / search | RSS | real | Peak footprint |
+|---|---:|---:|---:|---:|
+| `chunk_coherent` | 134.5 / 189.0 MB | 333.3 MB | 540.80 s | 686 MB |
+| `legacy_fragmented` | 134.4 / 189.0 MB | 315.0 MB | 542.47 s | 688 MB |
+
+- On the chunk-coherent layout, IVF returns the same top 10 as exact search (recall 1.000) about 62× faster at p95.
+- On the fragmented layout, IVF is 40× faster but finds only **13% of the true top 10 (recall@10 = 0.133)** with nprobe 3. That speed comes from missing most of the right answers; it is not a usable result for this layout at these settings.
+- Building the index takes about 3.4 minutes for 100k vectors on either layout.
 
 The Apple M2 medians for #5–#11 are on build `2a173b7` (4.0.2 + the reference fix, 2026-09-26). The per-version timeline is on [Benchmarks across kernel versions](https://neurons-me.github.io/.me/docs/Benchmarks/benchmarks.html).
 
