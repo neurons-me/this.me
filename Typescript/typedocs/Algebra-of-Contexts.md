@@ -1,186 +1,83 @@
-# Algebra of Contexts ​
+# Algebra of Contexts
 
-Set Law Applied to Context [​](#set-law-applied-to-context)`.me` thinks in **spaces**. Not schemas. Not tables. Not object classes. A **space** is a region of meaning **(context)** that can contain other spaces. Everything else follows from set laws.
+Where the algebra of spaces (path, refinement, plural, derivation, secret audience) lives in the **v4.2.1** TypeScript source, which test proves each part, and what npm this.me 4.2.1 returns. Concept: [Syntax: Algebra first](https://neurons-me.github.io/.me/docs/Syntax.html#algebra-first). The theory notes are external: [Digital Space Algebra](https://suign.github.io/DigitalSpaceAlgebra.html) and [Encrypted Audiences](https://suign.github.io/EncryptedAudiences.html).
 
-## Core Rule ​
+## Map
 
-A space can contain spaces.
+| Concept | Source (v4.2.1) | Test (v4.2.1) |
+|---|---|---|
+| Space ⊇ subspace: a path is a list of segments | [proxy.ts `createProxy` L256–303](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/proxy.ts#L256-L303), [core.ts `readPath` L289–393](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/core.ts#L289-L393) | [dsl.contract L37–45](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/tests/contracts/dsl.contract.test.mjs#L37-L45) |
+| Selected subspace `x[pred]` | [core-read.ts `evaluateFilterPath` L247–272](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/core-read.ts#L247-L272) | [dsl.contract L223–236](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/tests/contracts/dsl.contract.test.mjs#L223-L236) |
+| Plural `x[]` (count) and `x[].f` (sum) | [aggregate.ts `evaluateAggregate` L110–197](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/aggregate.ts#L110-L197) | [aggregate-path.test.ts](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/tests/aggregate-path.test.ts) |
+| Derivation `=` over members `[i]` | [derivation.ts `registerDerivation` L577–608](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/derivation.ts#L577-L608) | [derivation-wave.test.ts](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/tests/derivation-wave.test.ts) |
+| Secret scope: readable audience `{self}` | [secret-context.ts `resolveBranchScope` L232–265](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/secret-context.ts#L232-L265), [me.ts `as` L1581–1589](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/me.ts#L1581-L1589) | [axioms.test.ts A0/A2](./Axioms) |
+| Explain with masked secret inputs | [derivation.ts `explain` L140–251](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/derivation.ts#L140-L251), mask L214–215 | [dsl.contract L325–348](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/tests/contracts/dsl.contract.test.mjs#L325-L348) |
+| Deriving from a secret: no keyless leak | same plus [core-write.ts `postulate` L983–1101](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/core-write.ts#L983-L1101) | [derived-from-secret.test.ts L185–216](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/tests/Security/derived-from-secret.test.ts#L185-L216) |
+| Audiences: OR / AND coalitions, minus, reseal | [audience.ts `canonicalize` L86–89](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/audience.ts#L86-L89), [`minus` L101–107](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/audience.ts#L101-L107), [`sealAudience` L207–226](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/audience.ts#L207-L226), [`openAudience` L229–247](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/audience.ts#L229-L247) | [audience-algebra.test.ts L77–207](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/tests/Security/audience-algebra.test.ts#L77-L207) |
+| Namespace: `me://handle.space[selector]/path` | [me-uri.ts `parseMeUri` L284–332](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/me-uri.ts#L284-L332) | [me-uri.test.ts](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/tests/me-uri.test.ts) |
 
-```txt
-space ⊇ subspace ⊇ subspace ⊇ subspace
-```
+## Outputs on npm 4.2.1
 
-Examples:
-
-- `profile` is a space
-- `profile.contact` is a subspace of `profile`
-- `wallet.hidden` is a subspace of `wallet`
-- `friends[age > 18]` is a selected subspace of `friends`
-
-In `.me`, paths are how we navigate nested spaces:
+`node` against the npm this.me 4.2.1 `dist`, 2026-10-14.
 
 ```ts
-me.profile.name("Abella");
+import ME, { parseMeUri } from "this.me";
+const me = new ME();
+
 me.profile.contact.email("abella@neurons.me");
+me("profile.contact.email");          // "abella@neurons.me"
+
+me.friends[1].age(17); me.friends[2].age(34); me.friends[3].age(21);
+me("friends[age > 18].age");          // { "2": 34, "3": 21 }
+me("friends[]");                      // 3
+me("friends[].age");                  // 72
+
+me.friends["[i]"]["="]("adult", "age >= 18");
+me("friends[1].adult");               // false
+me.friends[1].age(19);
+me("friends[1].adult");               // true
+me.explain("friends.1.adult").meta.k; // 1
+
 me.wallet["_"]("vault-key");
 me.wallet.hidden.note("private");
+me("wallet");                         // undefined
+me("wallet.hidden.note");             // "private"
+me.as(null)("wallet.hidden.note");    // undefined  (guest)
+
+me.wallet.balance(500);
+me["="]("budget", "wallet.balance * 0.1");
+me.explain("budget").value;           // 50
+me.explain("budget").derivation.inputs;
+// [{ path: "wallet.balance", value: "●●●●", origin: "stealth", masked: true, … }]
+
+parseMeUri("me://suign.neurons.me[macbook]/profile.name");
+// { href: "me://suign.neurons.me[surface:macbook]/profile.name",
+//   handle: "suign", space: "neurons.me",
+//   selector: { kind: "surface", value: "surface:macbook" },
+//   path: "profile.name", segments: ["profile", "name"] }
 ```
 
-## Namespace ​
+## Test runs on 4.2.1
 
-A **namespace** is a named space.
+| Test (v4.2.1) | Runs against | Result |
+|---|---|---|
+| `tests/contracts/dsl.contract.test.mjs` | npm 4.2.1 `dist` | Phase 6 contract suite passed |
+| `tests/aggregate-path.test.ts` | npm 4.2.1 `dist` | 165 passed, 0 failed |
+| `tests/derivation-wave.test.ts` | npm 4.2.1 `dist` | all wave cases passed |
+| `tests/Security/derived-from-secret.test.ts` | npm 4.2.1 `dist` | 11 passed, 0 failed |
+| `tests/me-uri.test.ts` | v4.2.1 `src/me-uri.ts` | passed |
+| `tests/Security/audience-algebra.test.ts` | v4.2.1 `src/audience.ts` | 16 passed, 0 failed (laws L1–L9 plus AND/OR cases) |
 
-Examples:
+`audience.ts` is in the v4.2.1 source but not exported by the npm 4.2.1 package, so audiences are only reachable from source.
 
-- `self`
-- `kernel`
-- `ana`
-- `family.photos`
-
-**In protocol form:**
+Derived-from-secret, the cases that matter here:
 
 ```txt
-me://self:read/profile
-me://kernel:export/snapshot
-me://family.photos:read/2026.vacation.cover
+✅ 5. GUARANTEE: a keyless party declaring a derivation over the secret gets nothing computed from it
+✅ 6. GUARANTEE: mixing the secret with a public value (price * fuel) reveals nothing to a keyless party
+✅ 8. GUARANTEE: an owner-declared derivation produces no new secret-derived values once the key is gone
 ```
 
-So:
+## Related
 
-- `namespace` names the space
-- `selector` states the operation
-- `path` identifies the subspace
-
-## Set View ​
-
-We can describe a space by the sets that act on it:
-
-- `A` = audience set
-- `T` = topology set
-- `C` = capability set
-- `P` = path / subspace set
-
-These are not different ontologies. They are different views of the same space.
-
-## Space Predicates ​
-
-The common adjectives are just set statements:
-
-- **public space**: the readable audience is broadly open
-- **private space**: the audience is tightly bounded, often `{self}`
-- **shared space**: the audience contains more than one principal
-- **encrypted space**: readable membership is enforced cryptographically
-- **replicated space**: the topology has multiple carriers
-
-Examples:
-
-- `wallet` may be a **private encrypted space**
-- `family.photos` may be a **shared replicated encrypted space**
-- `profile.public` may be a **public space**
-
-No new noun is required beyond `space`.
-
-## Anchored vs. Derived Shared Spaces ​
-
-A shared space (`|A| > 1` — "group" in everyday language) can hold its identity two ways:
-
-- **anchored**: `P` is chosen once and stays stable. `A` is a mutable set inside it — members
-  join or leave without changing what the space is or where it lives.
-- **derived**: `P` is a function of `A` itself, computed from the exact member set. Change the
-  set, and the space's own identity changes with it.
-
-```txt
-anchored:  P is stable; A varies inside P
-derived:   P = f(A)
-```
-
-Anchored is the model already running here and in cleaker's own `groups.<key>.*` convention (a
-claimed namespace holding `members[]`, `admins[]`, `invites[]`) — the same shape netget's
-owner/admin ledger uses. Derived has no namespace primitive in this kernel; it is what NRP's
-concrete syntax calls `surface[a+b]` — the space's own address is the hash of its sorted member
-seeds, so removing one seed leaves nothing to derive back to, no separate `revoke` needed. Both
-modes, spelled out in that grammar (`group:name` vs `surface[a+b]`) with their current
-implementation status, live in
-[NRP Chemistry](https://neurons-me.github.io/monad/Typescript/typedocs/architecture/nrp-chemistry.html).
-
-## Refinement ​
-
-More specific spaces are subsets of less specific spaces.
-
-```txt
-profile.contact.email ⊆ profile.contact ⊆ profile
-wallet.hidden ⊆ wallet
-```
-
-This same law appears across the system:
-
-- deeper path -> smaller semantic region
-- tighter audience -> smaller readable set
-- tighter context -> smaller resolution set
-- tighter capability -> smaller action set
-
-## Plurality As Grammar ​
-
-`[]` extends this same refinement law to members of a space, not just nested subspaces:
-
-```txt
-Whatever[1] ⊆ Whatever[] ⊆ Whatever        (notation, not executable syntax)
-```
-
-> **Notation, not executable syntax.** Here `Whatever[]` and `|Whatever[]|` denote the plural and its
-> cardinality. They are not `me()` path strings. In .me 4.2.0
-> the executable form `me("x[]")` reads the count of members and `me("x[].f")` a sum; `|x[]|` is not valid
-> there. See [Plurality Is Grammar](./Plurality-Is-Grammar.md).
-
-`Whatever[]` says a space has members — grammar, not a data type. What kind of plural it is
-(bounded, ordered, evicting) is described as algebraic constraints over that plural
-(`|Whatever[]| <= 128`, `Whatever[n].slot = n mod 128`), never as a named category like
-`kind: "buffer"` — the same discipline `A`/`T`/`C` already follow: `.me` describes the shape,
-something else (a GUI, a daemon) interprets it. Full treatment in
-[Plurality Is Grammar](./Plurality-Is-Grammar.md).
-
-## Encryption As Membership ​
-
-Encryption does not create a different universe. It creates a stricter readable membership over a space.
-
-Examples:
-
-- a private space may have `A = {self}`
-- a shared encrypted space may have `A = {me ∪ wife}` The topology can be large while the readable audience stays small:
-
-```txt
-T = {home-daemon, office-daemon, phone}
-A = {me, wife}
-```
-
-That means the same space may be replicated widely without becoming readable widely.
-
-## Why This Matters ​
-
-This gives `.me` one ontology instead of many.
-
-- `.me` declares, creates, and navigates spaces
-- `cleaker` records, routes, and transports spaces
-- `monad.ai` serves, resolves, and persists spaces The system stays unified because everything still reduces to:
-
-```txt
-space inside space inside space
-```
-
-And all of it follows set law.
-
-## Where This Runs Outside the Kernel ​
-
-`A` (audience) is enforced cryptographically here, inside `.me` itself, via scope-secret
-key-wrapping. The first place that same `A`/`C` separation was extended to a real piece of
-infrastructure *outside* the kernel is netget's gateway — see
-[Gateway Capability Model](https://neurons-me.github.io/netget/Typescript/typedocs/GatewayCapabilityModel.html),
-which proves, with a live executable test suite, that a signed capability (`C`) is never inferred
-from audience or role membership (`A`), even for an authenticated admin identity. It does not yet
-use this kernel's real key-wrapped `A` — that adoption is still future work, tracked in that doc's
-own scope notes — but the capability-separation half of the model is already running against a
-live gateway, not just declared here.
-
-For the theory this and the gateway work both trace back to, see
-[The Algebra of Encrypted Audiences](https://suign.github.io/EncryptedAudiences.html) and
-[Digital Space Algebra](https://suign.github.io/DigitalSpaceAlgebra.html).
+[Proxy calls](./Proxy-Calls) · [Axioms: TypeScript validation](./Axioms) · [Kernel Core](./kernel/Core) · [Plurality Is Grammar](./Plurality-Is-Grammar) · [Syntax](https://neurons-me.github.io/.me/docs/Syntax.html) · [me.explain(path)](https://neurons-me.github.io/.me/docs/Explain.html)
