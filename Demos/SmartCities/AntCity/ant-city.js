@@ -212,6 +212,7 @@
   ].join("\n");
   (function () { var s = document.createElement("style"); s.id = "ac-css"; s.textContent = CSS; document.head.appendChild(s); })();
   var SYN = window.MeSyntax;
+  if (SYN && SYN.watchTheme) SYN.watchTheme(); // measures the active .GUI theme and writes --me-syn-* (same colours as the other pages); re-runs on theme / mode change
   var me = function (t) { return h("code", { className: "me-code ac-me" }, SYN ? SYN.render(h, t) : t); };
   var link = function (href, text) { return h("a", { href: href, target: href.indexOf("http") === 0 ? "_blank" : undefined, rel: "noopener" }, text); };
   function useKernel() { var s = useState(K.ver), set = s[1]; useEffect(function () { var f = function (v) { set(v); }; K.subs.push(f); return function () { K.subs = K.subs.filter(function (g) { return g !== f; }); }; }, []); return K; }
@@ -344,13 +345,14 @@
   }
 
   // ── the right panel ──
+  var synJ = function (t) { return SYN ? SYN.render(h, t) : t; };
   var fmtJ = function (o) { try { return JSON.stringify(o, function (k2, v) { return k2 === "lastComputedAt" || k2 === "recomputedAt" ? undefined : v; }, 2); } catch (e) { return String(o); } };
   function Panel() {
     var k = useKernel(), cur = useSel(), rs = useState(running.on), run = rs[0], setRun = rs[1];
     var ok = k.status === "ok", R = function (p) { return ok ? read(p) : undefined; }, v = function (x) { return x === undefined ? "–" : typeof x === "object" ? JSON.stringify(x) : String(x); };
     var kpi = function (path, label) { var on = cur && cur.type === "path" && cur.p === path;
       return h("button", { type: "button", className: "ac-kpi", "aria-pressed": on ? "true" : "false", "data-ac": "kpi-" + path.split(".").pop(), onClick: function () { select({ type: "path", p: path }); } },
-        h("small", null, label), h("b", null, v(R(path))), h("code", null, path)); };
+        h("small", null, label), h("b", null, v(R(path))), h("code", { className: "me-code" }, synJ(path))); };
     var detail = null;
     if (ok && cur) {
       if (cur.type === "path") { var GQ = { workers: "isWorker", nurses: "isNurse", scouts: "isScout", recruited: "recruited" }[cur.g], ids = [];
@@ -386,7 +388,7 @@
           return h("div", { key: x[0], className: "ac-row ac-grp" + (act ? " on" : ""), role: "button", tabIndex: 0, "aria-pressed": act ? "true" : "false", "aria-label": "Highlight " + x[1] + " on the map", "data-ac": "count-" + x[2],
             onClick: tog, onKeyDown: function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); tog(); } else if (ev.key === "Escape") { select(null); } },
             onMouseEnter: function () { K.hov = x[2]; }, onMouseLeave: function () { K.hov = null; }, onFocus: function () { K.hov = x[2]; }, onBlur: function () { K.hov = null; } },
-            h("span", { className: "ac-lab" }, h("i", { className: "ac-sw ac-sw-" + x[2], style: { borderColor: P0[x[3]], background: /workers|nurses|scouts|recruited/.test(x[2]) ? P0[x[3]] : "transparent" }, "aria-hidden": "true" }), x[1], h("code", { className: "ac-path" }, x[0].replace(/^colony\./, "colony."))), h("span", { className: "ac-num" }, v(R(x[0])))); })),
+            h("span", { className: "ac-lab" }, h("i", { className: "ac-sw ac-sw-" + x[2], style: { borderColor: P0[x[3]], background: /workers|nurses|scouts|recruited/.test(x[2]) ? P0[x[3]] : "transparent" }, "aria-hidden": "true" }), x[1], h("code", { className: "ac-path me-code" }, synJ(x[0]))), h("span", { className: "ac-num" }, v(R(x[0])))); })),
         h("div", { className: "ac-note" }, me('colony["="]("food", "chambers.pantry.stock + chambers.granary.stock + chambers.cellar.stock")'), " recomputes on every stock write. Each group is a [\"=\"] sum of per-ant flags, e.g. ", me('colony.ants["="]("scouts", "colony.ants[1].isScout + …")'), ". Click a row to highlight its members on the map (asked of ", me("ants[n].isScout"), " etc.) and explain the count; click again or Esc to clear."),
         h("div", { className: "ac-btns" },
           h("button", { type: "button", className: "ac-btn" + (run ? "" : " on"), "data-ac": "pause", onClick: function () { running.on = !running.on; setRun(running.on); } }, run ? "Pause" : "Resume"),
@@ -398,11 +400,11 @@
         h("div", { className: "ac-row" }, h("span", null, "write + recompute"), h("span", { className: "ac-num" }, ok ? k.lastMs.toFixed(3) + " ms" : "–"))),
       h("div", { className: "ac-sec", "data-ac": "detail" }, h("div", { className: "ac-h" }, detail ? detail.title : "Explain"),
         !detail ? h("div", { className: "ac-note" }, "Click a chamber, an ant or a number to see its paths and ", me("me.explain(path)"), " (", link("https://neurons-me.github.io/.me/docs/Explain.html", "docs"), ").") :
-        h(React.Fragment, null, detail.rows.map(function (r) { return h("div", { key: r[0], className: "ac-row" }, h("span", { className: "ac-num", style: { color: "inherit" } }, r[0].replace("colony.", "")), h("span", { className: "ac-num" }, v(r[1]))); }),
+        h(React.Fragment, null, detail.rows.map(function (r) { return h("div", { key: r[0], className: "ac-row" }, h("span", { className: "ac-num me-code", style: { color: "inherit" } }, /^colony\./.test(r[0]) ? synJ(r[0].replace("colony.", "")) : r[0]), h("span", { className: "ac-num" }, v(r[1]))); }),
           detail.ptr ? h("div", { className: "ac-note" }, "home is a pointer (", me('home["->"]("colony.chambers.…")'), "): reading ", me("home.depth"), " goes through it. ", link("https://neurons-me.github.io/.me/docs/Pointer-Composition.html", "Pointers")) : null,
           detail.note ? h("div", { className: "ac-note" }, detail.note) : null,
           h("div", { className: "ac-note" }, me('me.explain("' + detail.ex + '")'), " · " + KL),
-          h("pre", { className: "ac-json", "data-ac": "explain" }, fmtJ(ex)))),
+          h("pre", { className: "ac-json me-code", "data-ac": "explain" }, synJ(fmtJ(ex))))),
       h("div", { className: "ac-sec" }, h("details", { className: "ac-k", "data-ac": "kernel" },
         h("summary", null, "Kernel · ", link(MK.KERNEL.npm, "this.me@" + KV), " · ", st.state === "ok" ? h("span", { className: "ok" }, "sha256 verified") : st.state === "error" ? h("span", { className: "bad" }, "failed") : "loading…"),
         st.state === "ok" ? [h("div", { key: "h" }, "sha256 " + st.hash), h("div", { key: "u" }, "from ", link(st.url, st.url.replace("https://", ""))), h("div", { key: "s" }, "page source: ", link(SRC_URL, "ant-city.js"))] : st.state === "error" ? h("div", null, st.text) : null)));
@@ -437,7 +439,7 @@
       h("div", { className: "ac-stepbody", role: "tabpanel", "data-ac": "stepbody" },
         h("p", null, S.body()),
         h("div", { className: "ac-note" }, me('me.explain("' + path + '")'), " · " + KL + (ok ? " · live" : " · loading…")),
-        h("pre", { className: "ac-json", "data-ac": "step-explain" }, ok ? fmtJ(ex) : "…"),
+        h("pre", { className: "ac-json me-code", "data-ac": "step-explain" }, ok ? synJ(fmtJ(ex)) : "…"),
         h("div", { className: "ac-btns" },
           h("button", { type: "button", className: "ac-btn", "data-ac": "prev", onClick: function () { setAuto(false); go(i - 1); } }, "← Prev"),
           h("button", { type: "button", className: "ac-btn", "data-ac": "next", onClick: function () { setAuto(false); go(i + 1); } }, "Next →"),
