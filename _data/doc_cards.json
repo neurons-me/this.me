@@ -196,5 +196,35 @@
   "title": "Algebra of Contexts: TypeScript",
   "desc": "Source map at v4.2.1, the tests that prove each part, real outputs on npm 4.2.1.",
   "img": "/.me/docs/assets/card-tests.webp"
+ },
+ "/.me/docs/Audiences.html": {
+  "href": "https://neurons-me.github.io/.me/docs/Audiences.html",
+  "title": "Audiences",
+  "desc": "Who can open a value: OR, AND (XOR shares), minus. Status per implementation.",
+  "img": "/.me/docs/assets/card-seed.webp"
+ },
+ "/.me/docs/Vector-Index.html": {
+  "href": "https://neurons-me.github.io/.me/docs/Vector-Index.html",
+  "title": "Vector Index",
+  "desc": "Exact vs IVF over encrypted chunks: nprobe, recall, and why layout decides.",
+  "img": "/.me/docs/assets/card-explain.webp"
+ },
+ "https://neurons-me.github.io/encrypted-audiences/": {
+  "href": "https://neurons-me.github.io/encrypted-audiences/",
+  "title": "Encrypted Audiences",
+  "desc": "Theory: two islands, one shared space.",
+  "img": "/.me/docs/assets/card-semantic.webp"
+ },
+ "https://suign.github.io/SetChemistry.html": {
+  "href": "https://suign.github.io/SetChemistry.html",
+  "title": "Cryptographic Set-Chemistry",
+  "desc": "Theory: union, intersection and difference over encrypted audiences.",
+  "img": "/.me/docs/assets/card-axioms.webp"
+ },
+ "https://neurons-me.github.io/mlearning.studio/": {
+  "href": "https://neurons-me.github.io/mlearning.studio/",
+  "title": "mlearning.studio",
+  "desc": "Datasets and benchmark results (GTFS, BigDaMa).",
+  "img": "/.me/docs/assets/card-gtfs.webp"
  }
 }
