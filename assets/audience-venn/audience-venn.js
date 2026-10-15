@@ -21,12 +21,14 @@
     ".av-btn[aria-pressed=true]{border-color:" + P + ";background:color-mix(in srgb," + P + " 14%,transparent)}" +
     ".av-k{text-align:center;font:12.5px " + MONO + ";color:" + TX2 + ";margin:2px 0 8px}.av-k b{color:" + TXT + "}" +
     ".av-log{margin:0 auto;max-width:680px;padding:10px 12px;border-radius:8px;border:1px solid " + DIV + ";font:12px/1.6 " + MONO + ";white-space:pre-wrap;word-break:break-all;color:" + TXT + ";background:color-mix(in srgb," + TXT + " 4%,transparent)}" +
+    ".av-compact .av-btn{font-size:11.5px;padding:3px 10px}.av-more summary{list-style:none}.av-more summary::-webkit-details-marker{display:none}" +
     ".av-log .ok{color:var(--mui-palette-success-main,#2e9d6e)}.av-log .no{color:" + ERR + "}.av-log .dim{color:" + TX2 + "}";
   var NAMES = ["ana", "bob", "eve"], POS = { ana: [190, 130], bob: [330, 130], eve: [260, 245] }, R = 100;
   var short = function (s) { return s.length > 14 ? s.slice(0, 8) + "…" + s.slice(-4) : s; };
   function randomKey() { var b = new Uint8Array(16); crypto.getRandomValues(b); return "k_" + Array.from(b, function (x) { return x.toString(16).padStart(2, "0"); }).join(""); }
 
-  function AudienceVenn() {
+  function AudienceVenn(props) {
+    var compact = !!(props && props.compact);
     var _s = useState({ ana: true, bob: true, eve: false }), sel = _s[0], setSel = _s[1];
     var _r = useState(null), res = _r[0], setRes = _r[1];
     var _st = useState("loading this.me 4.2.1…"), st = _st[0], setSt = _st[1];
@@ -85,11 +87,12 @@
       h("path", { d: "M6 14 V9 a8 8 0 0 1 16 0 V14", fill: "none", stroke: any ? P : TX2, strokeWidth: 3 }),
       h("rect", { x: 1, y: 14, width: 26, height: 20, rx: 4, fill: any ? P : TX2 }),
       h("circle", { cx: 14, cy: 23, r: 2.6, fill: "var(--mui-palette-background-paper, #fff)" }));
-    return h("figure", { className: "av", style: { margin: "0 0 28px" } },
-      h("svg", { viewBox: "40 10 440 330", role: "group", "aria-label": "OR audience: click a circle to add or remove that identity" }, circles, lock, labels),
+    var log = h("pre", { className: "av-log", "aria-live": "polite" }, res ? [h("span", { key: "h", className: "dim" }, st + "\n")].concat(res.log.map(function (l, i) { return h("span", { key: i, className: l.c }, l.t + "\n"); })) : st);
+    return h("figure", { className: "av" + (compact ? " av-compact" : ""), "data-compact": compact ? "1" : null, style: { margin: compact ? "0 0 12px" : "0 0 28px" } },
+      h("svg", { style: compact ? { maxWidth: 300 } : null, viewBox: "40 10 440 330", role: "group", "aria-label": "OR audience: click a circle to add or remove that identity" }, circles, lock, labels),
       h("div", { className: "av-bar" }, NAMES.map(function (n) { return h("button", { key: n, type: "button", className: "av-btn", "aria-pressed": !!sel[n], onClick: function () { toggle(n); } }, (sel[n] ? "✓ " : "+ ") + n); })),
       h("div", { className: "av-k" }, res ? h(React.Fragment, null, "K = ", h("b", null, short(res.K)), " · audience { " + res.members.join(", ") + " } · " + res.ms.toFixed(1) + " ms") : st),
-      h("pre", { className: "av-log", "aria-live": "polite" }, res ? [h("span", { key: "h", className: "dim" }, st + "\n")].concat(res.log.map(function (l, i) { return h("span", { key: i, className: l.c }, l.t + "\n"); })) : st));
+      compact ? h("details", { className: "av-more" }, h("summary", { className: "av-k", style: { cursor: "pointer" } }, "kernel log"), log) : log);
   }
   root.AudienceVenn = AudienceVenn;
 })(window);

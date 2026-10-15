@@ -46,7 +46,13 @@
       return { out: out, pre: pre, ms: performance.now() - t0, before: before, shared: true };
     });
   }
-  function runUpTo(idx) {
+  // solo: this block alone on its own fresh new ME() (self-contained snippets, e.g. the .me landing's intro views)
+  function runSolo(idx) {
+    return MK.load().then(function (ME) { var me = new ME(), t0 = performance.now(), out = runLines(me, codes[idx], true);
+      return { out: out, pre: [], ms: performance.now() - t0, before: 0, solo: true }; });
+  }
+  function runUpTo(idx, solo) {
+    if (solo) return runSolo(idx);
     if (window.MeRunShared) return runShared(idx);
     return MK.load().then(function (ME) {
       var me = new ME(), t0 = performance.now(), pre = [], out;
@@ -60,7 +66,7 @@
     codes[idx] = code;
     var st = React.useState(null), res = st[0], setRes = st[1], o = React.useState(true), open = o[0], setOpen = o[1];
     var ks = React.useSyncExternalStore(MK.subscribe, function () { return MK.state; });
-    var run = function () { setRes({ running: true }); setOpen(true); runUpTo(idx).then(setRes, function (e) { setRes({ fail: String(e && e.message || e) }); }); };
+    var run = function () { setRes({ running: true }); setOpen(true); runUpTo(idx, p.solo).then(setRes, function (e) { setRes({ fail: String(e && e.message || e) }); }); };
     var errs = res && res.out ? res.out.filter(function (r) { return r.error; }).length + res.pre.length : 0;
     var btn = h("button", { type: "button", onClick: run, disabled: !!(res && res.running), "data-me-run": "button", "aria-label": "Run this code on this.me 4.2.1",
         style: { position: "absolute", top: 8, right: 8, font: "600 11px/1 " + MONO, padding: "5px 9px", borderRadius: 6, cursor: "pointer", color: C.acc,
@@ -71,7 +77,7 @@
       h("summary", { style: { cursor: "pointer", color: res.fail || errs ? C.bad : C.ink2 } },
         res.fail ? "Kernel not loaded: " + res.fail
           : "Output · " + res.out.filter(function (r) { return !r.error; }).length + " read" + (res.out.length === 1 ? "" : "s") + (errs ? " · " + errs + " error" + (errs > 1 ? "s" : "") : "") +
-            (res.shared ? " · shared new ME(), this.me " + MK.KERNEL.version + (res.before ? " · ran " + res.before + " earlier block" + (res.before > 1 ? "s" : "") + " first" : "") : " · fresh new ME(), this.me " + MK.KERNEL.version + (res.before ? " · after the " + res.before + " block" + (res.before > 1 ? "s" : "") + " above" : "")) + " · " + res.ms.toFixed(1) + " ms"),
+            (res.solo ? " · own new ME(), this.me " + MK.KERNEL.version : res.shared ? " · shared new ME(), this.me " + MK.KERNEL.version + (res.before ? " · ran " + res.before + " earlier block" + (res.before > 1 ? "s" : "") + " first" : "") : " · fresh new ME(), this.me " + MK.KERNEL.version + (res.before ? " · after the " + res.before + " block" + (res.before > 1 ? "s" : "") + " above" : "")) + " · " + res.ms.toFixed(1) + " ms"),
       res.out && h("div", { style: { marginTop: 6 } },
         res.pre.map(function (r, i) { return h("div", { key: "p" + i, style: { color: C.bad } }, "an earlier block failed: " + r.src + " → " + r.error); }),
         res.out.length ? res.out.map(function (r, i) {
@@ -80,9 +86,9 @@
             !r.error && /\n/.test(r.value) ? h("pre", { style: { margin: "2px 0 0", flexBasis: "100%", maxHeight: 340, overflow: "auto", font: "inherit", color: C.ok, whiteSpace: "pre" } }, r.value)
               : h("span", { style: { color: r.error ? C.bad : C.ok, overflowWrap: "anywhere", minWidth: 0 } }, "→ ", r.error ? "error: " + r.error : r.value));
         }) : h("div", { style: { color: C.ink2 } }, "Ran without errors (this block has no reads).")));
-    return h("div", { "data-me-run": "block", "data-run-idx": String(idx), style: { position: "relative", margin: "0 0 20px", border: "1px solid " + C.line, borderRadius: 10, overflow: "hidden", background: C.code } },
+    return h("div", { "data-me-run": "block", "data-run-idx": String(idx), style: { position: "relative", margin: p.compact ? "0 0 12px" : "0 0 20px", border: "1px solid " + C.line, borderRadius: 10, overflow: "hidden", background: C.code } },
       btn,
-      h("pre", { className: "me-code", style: { margin: 0, padding: "12px 16px", paddingRight: 100, overflowX: "auto", font: "13px/1.6 " + MONO, color: C.ink } },
+      h("pre", { className: "me-code", style: { margin: 0, padding: p.compact ? "10px 14px" : "12px 16px", paddingRight: 100, overflowX: "auto", font: (p.compact ? "12.5px" : "13px") + "/1.6 " + MONO, color: C.ink } },
         h("code", { style: { fontFamily: "inherit", whiteSpace: "pre" } }, window.MeSyntax ? window.MeSyntax.render(h, code) : code)),
       panel);
   }

@@ -63,8 +63,12 @@ me("profile.name")
 ```ts
 me["@"]("jabellae");
 me.wallet["_"]("wallet-key");
+me.wallet.balance(120);
+me.users.ana.age(22);
 me.friends.ana["->"]("users.ana");
-me.friends["[i]"]["="]("isAdult", "age >= 18");
+me.users["[i]"]["="]("isAdult", "age >= 18");
+me("friends.ana.isAdult");          // true   (the rule lives on users, read through the link)
+me.as(null)("wallet.balance");      // undefined (guest)
 ```
 
 Full grammar, the operator table, and a how-to: **<a href="https://neurons-me.github.io/me.whatever.what.html" target="_blank" rel="noopener noreferrer">me.whatever(what)</a>**.
@@ -334,7 +338,7 @@ me.as("keyB")("shared.note")          // wrong audience, even through the pointe
 { owner: "only A can read this", keyB: undefined }
 ```
 
-`_` = audience, not policy — a key derives the value or it doesn't. `T ⊥ A`: topology and audience are orthogonal, so crossing branches never expands who's allowed to read (<a href="https://suign.github.io/EncryptedIsland.html" target="_blank" rel="noopener noreferrer">The Encrypted Island</a>). `manifest(p | o) ≠ value(p)`: the same read returns a different reality per observer `o` (<a href="https://suign.github.io/SpaceStructure.html" target="_blank" rel="noopener noreferrer">Space Structure</a>). That's 2 of 5 operators — full breakdown: **<a href="https://neurons-me.github.io/.me/Typescript/typedocs/Operators.html" target="_blank" rel="noopener noreferrer">Operators & Logic</a>**.
+`_` = audience, not policy — a key derives the value or it doesn't. `T ⊥ A`: topology and audience are orthogonal, so crossing branches never expands who's allowed to read (<a href="https://suign.github.io/EncryptedIsland.html" target="_blank" rel="noopener noreferrer">The Encrypted Island</a>). `manifest(p | o) ≠ value(p)`: the same read returns a different reality per observer `o` (<a href="https://suign.github.io/SpaceStructure.html" target="_blank" rel="noopener noreferrer">Space Structure</a>). That's 2 of 5 operators — full breakdown: **<a href="https://neurons-me.github.io/.me/docs/Operators.html" target="_blank" rel="noopener noreferrer">Operators & Logic</a>**.
 
 Developers may *recognize the idea* more quickly written like this:
 
@@ -383,10 +387,13 @@ Three languages, three developers, one identical node. **Meaning is structure, n
 
 ```ts
 me.explain("robots.surgeon.canProceed")
+// ->
 {
+  path: "robots.surgeon.canProceed",
   value: true,
   expr: "canLift && softGripReady && !needsHumanReview",
-  dependsOn: [...]
+  derivation: { expression: "…", inputs: [{ label: "canLift", path: "robots.surgeon.canLift", value: true, origin: "public", masked: false, … }, …] },
+  meta: { dependsOn: ["robots.surgeon.canLift", "robots.surgeon.softGripReady", "robots.surgeon.needsHumanReview"], lastComputedAt: … }
 }
 ```
 

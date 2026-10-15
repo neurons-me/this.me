@@ -513,7 +513,7 @@
     if (t === "picture" || t === "img") return N("ModeHtml", { html: b.outerHTML, sx: { mb: 2, "& img": { maxWidth: "100%", height: "auto", display: "block" } } });
     if (t === "hr") return N("Box", { component: "hr", sx: { border: 0, borderTop: 1, borderColor: "divider", my: 4 } });
     // a fenced block marked {: .me-run} gets a Run button (assets/me-run, loaded by the page); numbered in page order
-    if (b.classList.contains("me-run") && window.MeRun) return N("MeRunBlock", { idx: runN++, code: (b.querySelector("code") || b).textContent.replace(/\n$/, "") });
+    if (b.classList.contains("me-run") && window.MeRun) return N("MeRunBlock", { idx: runN++, solo: b.classList.contains("me-solo"), compact: !!b.closest(".me-intro"), code: (b.querySelector("code") || b).textContent.replace(/\n$/, "") });
     if (t === "pre" || b.classList.contains("highlighter-rouge")) {
       const lang = ((b.className.match(/language-(\w+)/) || [])[1]) || "", code = (b.querySelector("code") || b).textContent.replace(/\n$/, "");
       return N("MeCodeBlock", { code, lang });
@@ -521,7 +521,15 @@
     if (b.classList.contains("doc-cards")) return docCards(b);
     if (b.classList.contains("doc-svg")) return N("Box", { component: "figure", className: "doc-svg", sx: { m: 0, mb: 2.5, color: "text.primary", overflowX: b.getAttribute("data-min") ? "auto" : undefined, "& svg": { display: "block", width: "100%", height: "auto", maxWidth: b.getAttribute("data-max") || "100%", minWidth: b.getAttribute("data-min") || 0 }, "& figure": { m: 0 }, "& figcaption": { fontSize: ".82rem", color: "text.secondary", mt: .75, lineHeight: 1.5 } }, dangerouslySetInnerHTML: { __html: b.innerHTML } });
     if (b.classList.contains("kernel-timeline") && window.KernelTimeline) return N("KernelTimeline", { src: b.getAttribute("data-src") });
-    if (b.classList.contains("audience-venn") && window.AudienceVenn) return N("AudienceVenn", {});
+    if (b.classList.contains("audience-venn") && window.AudienceVenn) return N("AudienceVenn", { compact: b.classList.contains("compact") });
+    // the .me landing's intro views (index.md: <section class="me-intro">): a compact card per README section, heading,
+    // one or two lines, a live embed (Run block / AudienceVenn) and a "Read more →" link (p.me-intro-more) to its full page
+    if (b.classList.contains("me-intro-grid")) return N("Box", { component: "div", sx: { display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "14px", mt: 2, mb: 3, "@media (max-width:860px)": { gridTemplateColumns: "minmax(0, 1fr)" } } }, blocks(b));
+    if (b.classList.contains("me-intro")) return N("Card", { component: "section", variant: "outlined", sx: { ...cardSx, p: 2, pb: 1.25, borderRadius: "12px", minWidth: 0, display: "flex", flexDirection: "column", gridColumn: b.classList.contains("wide") ? "1 / -1" : undefined,
+        "& h2, & h3": { mt: 0, mb: .75, fontSize: "1.05rem", fontWeight: 800, lineHeight: 1.3 }, "& p": { fontSize: ".9rem", lineHeight: 1.6, mb: 1.25, color: "text.secondary" } } },
+      [...b.children].map((c) => c.classList.contains("me-intro-more")
+        ? N("Box", { sx: { mt: "auto", pt: .25, textAlign: "right", fontSize: ".86rem", fontWeight: 700, "& a": { fontWeight: 700 } } }, inl(c))
+        : blocks({ children: [c] })[0]).filter(Boolean));
     if (b.classList.contains("social-graph-live") && window.SocialGraphLive) return N("SocialGraphLive", {});
     if (b.classList.contains("fanout-viz") && window.FanoutViz) return N("FanoutViz", { n: b.getAttribute("data-n"), caption: b.getAttribute("data-caption") });
     // live demonstrations (assets/axioms-live, loaded by the page): the snippet is the placeholder's own code text
