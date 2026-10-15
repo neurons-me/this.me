@@ -1,6 +1,6 @@
 # Algebra of Contexts
 
-Where the algebra of spaces (path, refinement, plural, derivation, secret audience) lives in the **v4.2.1** TypeScript source, which test proves each part, and what npm this.me 4.2.1 returns. Concept: [Syntax: Algebra first](https://neurons-me.github.io/.me/docs/Syntax.html#algebra-first). The theory notes are external: [Digital Space Algebra](https://suign.github.io/DigitalSpaceAlgebra.html) and [Encrypted Audiences](https://suign.github.io/EncryptedAudiences.html).
+Where the algebra of spaces (path, refinement, plural, derivation, secret audience) lives in the [v4.2.1 TypeScript source](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/package.json), which test proves each part, and what npm this.me 4.2.1 returns. Concept: [Algebra of Contexts](https://neurons-me.github.io/.me/docs/Algebra-of-Contexts.html) (also [Syntax: Algebra first](https://neurons-me.github.io/.me/docs/Syntax.html#algebra-first)). Theory: [Digital Space Algebra](https://neurons-me.github.io/digital-space-algebra/), [Encrypted Audiences](https://suign.github.io/EncryptedAudiences.html).
 
 ## Map
 
@@ -80,4 +80,4 @@ Derived-from-secret, the cases that matter here:
 
 ## Related
 
-[Proxy calls](./Proxy-Calls) · [Axioms: TypeScript validation](./Axioms) · [Kernel Core](./kernel/Core) · [Plurality Is Grammar](./Plurality-Is-Grammar) · [Syntax](https://neurons-me.github.io/.me/docs/Syntax.html) · [me.explain(path)](https://neurons-me.github.io/.me/docs/Explain.html)
+[Algebra of Contexts (concept)](https://neurons-me.github.io/.me/docs/Algebra-of-Contexts.html) · [Digital Space Algebra](https://neurons-me.github.io/digital-space-algebra/) · [Proxy calls](./Proxy-Calls) · [Axioms: TypeScript validation](./Axioms) · [Kernel Core](./kernel/Core) · [Plurality Is Grammar](./Plurality-Is-Grammar) · [Syntax](https://neurons-me.github.io/.me/docs/Syntax.html) · [me.explain(path)](https://neurons-me.github.io/.me/docs/Explain.html)

@@ -201,7 +201,7 @@
   // faint halo, gentle float, ring at 80% of the orb and morphing with it, dot at 22% of the ring. It keeps the old
   // image's 5em box and margin; the orb is 44% of the box (its ring ≈ the drawn ring of assets/me.png) and is drawn at
   // its real pixel size (no CSS scaling), so it stays crisp. Without the widget the image stays.
-  function MeOrbMark({ src, alt }) {
+  function MeOrbMark({ src, alt, big }) {
     const Monad = (G.Widgets && G.Widgets.Monad) || G.Monad;
     const ref = React.useRef(null), [px, setPx] = React.useState(0);
     React.useEffect(() => {
@@ -210,9 +210,10 @@
       const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(set) : null; if (ro) ro.observe(el);
       return () => ro && ro.disconnect();
     }, []);
-    const boxSx = { display: "inline-flex", alignItems: "center", justifyContent: "center", width: "5em", height: "5em", verticalAlign: "middle", mr: "-1.5em" };
+    const boxSx = big ? { display: "flex", alignItems: "center", justifyContent: "center", width: big, height: big, mx: "auto" }
+      : { display: "inline-flex", alignItems: "center", justifyContent: "center", width: "5em", height: "5em", verticalAlign: "middle", mr: "-1.5em" };
     if (!Monad) return h(Box, { component: "img", src, alt, sx: { ...boxSx, display: "inline-block", width: "auto" } });
-    const orb = Math.max(24, Math.round(px * 0.44)), f = orb / 48;   // f: scale against the index's 48px orb
+    const orb = Math.max(24, Math.round(px * (big ? 0.8 : 0.44))), f = orb / 48;   // f: scale against the index's 48px orb
     const blob = { "0%,100%": "50%", "25%": "55% 45% 60% 40% / 60% 55% 45% 40%", "50%": "50% 60% 40% 55% / 55% 40% 60% 45%", "75%": "45% 55% 40% 60% / 40% 60% 55% 50%" };
     const lift = { "0%,100%": [0, 1], "25%": [-2, 1.02], "50%": [-3, 1.04], "75%": [-2, 1.02] };
     const px1 = (v) => `${Math.round(v * f * 10) / 10}px`;
@@ -230,6 +231,31 @@
           "& div[aria-hidden=true] > div:last-of-type": { width: "22% !important", height: "22% !important", boxShadow: dark ? `0 0 ${px1(3)} rgba(234,252,250,0.35) !important` : `0 0 ${px1(3)} rgba(0,90,122,0.3) !important` } };
       } },
       px ? h(Box, null, h(Monad, { variant: "identity", kind: "me", seed: "jabellae", mode: "contained", size: Math.round(orb * 34 / 60) })) : null);
+  }
+  // The .me landing hero (index.md: <div class="me-landing-hero"> around _includes/interactive-hero.html): the same
+  // live keccak-256 identity demo as the static include, with the Docs-card orb (MeOrbMark) drawn large, centered and
+  // floating in place of the old image. Mirrors me.ts: compoundSeed = keccak256("me.seed/compound:v1::" + who + "::" + secret),
+  // identityHash = keccak256("this.me/identity:v1::" + seed); namespace is display only, never hashed; secret never leaves the input.
+  function MeLandingHero({ tag, seedHref, seedTitle, docsHref }) {
+    const [who, setWho] = React.useState(""), [secret, setSecret] = React.useState(""), [ns, setNs] = React.useState("");
+    const k = window.keccak256, name = who || ".me";
+    const hash = k ? k("this.me/identity:v1::" + (secret ? k("me.seed/compound:v1::" + name + "::" + secret) : name)) : "";
+    const field = (value, set, ph, label, type, sx) => h(Box, { component: "input", type, value, placeholder: ph, "aria-label": label, spellCheck: false, autoComplete: "off",
+      onChange: (e) => set(e.target.value), sx: { font: "inherit", fontFamily: MONO, color: "inherit", bgcolor: "transparent", border: 0, borderBottom: "2px solid", borderColor: "divider",
+        outline: "none", px: .25, width: `${(value || ph).length + 1}ch`, maxWidth: "100%", textAlign: "center", "&:focus": { borderColor: "primary.main" }, ...sx } });
+    const mono = { fontFamily: MONO, letterSpacing: ".02em" };
+    return h(Box, { component: "section", sx: { textAlign: "center", pt: { xs: 1, sm: 2 }, pb: { xs: 4, sm: 6 }, mb: 2, borderBottom: 1, borderColor: "divider" } },
+      h(MeOrbMark, { alt: ".me as a coordinate", big: "clamp(180px, 42vw, 280px)" }),
+      h(Box, { title: hash ? "ID Hash: " + hash : "ID Hash", sx: { ...mono, mt: 2, fontSize: ".78rem", color: "text.secondary" } }, hash ? hash.slice(0, 8) + "…" + hash.slice(-6) : "…"),
+      h(Link, { href: seedHref, title: seedTitle, underline: "always", sx: { ...mono, display: "inline-block", mt: .25, fontSize: ".72rem", color: "primary.main" } }, "keccak-256"),
+      h(Box, { title: "Where, not what generates the hash", sx: { ...mono, mt: 1, fontSize: ".74rem", color: "primary.main" } }, ns ? name + "." + ns : name),
+      h(Box, { component: "h1", sx: { fontSize: "clamp(2rem, 6vw, 2.8rem)", fontWeight: 800, letterSpacing: "-.02em", lineHeight: 1.15, mt: 3, mb: 1 } },
+        "Hello, I am ", field(who, setWho, ".me", "Type your own name", "text", { fontWeight: 800, borderColor: "text.primary" })),
+      h(Box, { sx: { fontSize: "1.15rem", color: "text.secondary", display: "flex", flexDirection: "column", alignItems: "center", gap: .75 } },
+        field(secret, setSecret, "<secret>", "Secret — feeds the hash, stays local, never a URL", "password", {}),
+        field(ns, setNs, "<namespace>", "Namespace — where, not what generates the hash", "text", {})),
+      tag ? h(Box, { sx: { ...mono, mt: 2.5, fontSize: ".7rem", textTransform: "uppercase", letterSpacing: ".08em", color: "text.secondary" } }, tag) : null,
+      h(Button, { href: docsHref, variant: "outlined", sx: { mt: 2.5, borderRadius: "999px", textTransform: "none", fontWeight: 700, px: 2.5 } }, "⌬ Docs"));
   }
   function DocsCover(p) {
     const c = page.cards[p.card], im = c.img;
@@ -456,8 +482,13 @@
     h2: { fontSize: "clamp(1.4rem, 3.6vw, 1.75rem)", fontWeight: 800, letterSpacing: "-.01em", lineHeight: 1.2, mt: 5, mb: 1.5 },
     h3: { fontSize: "1.15rem", fontWeight: 700, lineHeight: 1.3, mt: 3.5, mb: 1 }, h4: { fontSize: "1rem", fontWeight: 700, mt: 3, mb: 1 } };
   let runN = 0;
+  const landing = docPage && page.body && page.body.querySelector(".me-landing-hero");
   const blocks = (el) => [...el.children].map((b) => {
     const t = tagOf(b);
+    if (t === "script" || t === "style") return null;
+    if (landing && b === landing) { const a = b.querySelector("a[href*='Seed']"), d = b.querySelector("a[href$='/docs'], a[href$='/docs/']");
+      return N("MeLandingHero", { tag: txt(b.querySelector(".me-hero-tag")), seedHref: a && a.getAttribute("href"), seedTitle: a && a.getAttribute("title"), docsHref: d && d.getAttribute("href") }); }
+    if (landing && (b.classList.contains("static-hero") || b.classList.contains("readme-intro"))) return null;
     if (t === "p" && b.classList.contains("doc-kernel")) { const more = b.nextElementSibling && b.nextElementSibling.classList.contains("doc-kernel-more") ? b.nextElementSibling : null;
       return N("KernelBadge", { html: b.innerHTML.replace(/\s*ⓘ\s*$/, ""), tip: more ? more.innerHTML : "" }); }
     if (b.classList.contains("doc-kernel-more") && b.previousElementSibling && b.previousElementSibling.classList.contains("doc-kernel")) return null;
@@ -529,7 +560,7 @@
   const FK = docPage && window.FanoutKernel && document.querySelector(".fanout-viz") ? window.FanoutKernel : null;
   G.mount(spec, ROOT, {
     ...(FK ? { me: FK } : {}),
-    gui: { ...G, ...(FK ? { render: undefined, RunMe: undefined } : {}), Theme: PageTheme, registry: { ...(G.Registry || G.registry), LandingTopBar, DocsCover, MeOrbMark, MeCodeBlock, DocCardCover, ModeHtml, ...(window.KernelTimeline ? { KernelTimeline: window.KernelTimeline } : {}), KernelBadge, ...(window.MeRun ? { MeRunBlock: window.MeRun.MeRunBlock } : {}), ...(window.AxiomsLive ? { AxiomProof: window.AxiomsLive.AxiomProof, AxiomKernel: window.AxiomsLive.AxiomKernel } : {}), ...(window.FanoutViz ? { FanoutViz: window.FanoutViz } : {}) } },
+    gui: { ...G, ...(FK ? { render: undefined, RunMe: undefined } : {}), Theme: PageTheme, registry: { ...(G.Registry || G.registry), LandingTopBar, DocsCover, MeOrbMark, MeLandingHero, MeCodeBlock, DocCardCover, ModeHtml, ...(window.KernelTimeline ? { KernelTimeline: window.KernelTimeline } : {}), KernelBadge, ...(window.MeRun ? { MeRunBlock: window.MeRun.MeRunBlock } : {}), ...(window.AxiomsLive ? { AxiomProof: window.AxiomsLive.AxiomProof, AxiomKernel: window.AxiomsLive.AxiomKernel } : {}), ...(window.FanoutViz ? { FanoutViz: window.FanoutViz } : {}) } },
     devtools: { enabled: true, inspector: INSPECTOR_ON, adminView: false, inspectorToggleVisible: false },
   });
   html.classList.add("gui-on");
