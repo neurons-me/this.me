@@ -12,6 +12,7 @@ image: https://neurons-me.github.io/.me/docs/assets/me-og.jpg
 scripts:
   - /assets/me-kernel/me-kernel.js?v=1
   - /assets/me-run/me-run.js?v=2
+  - /assets/audience-venn/audience-venn.js?v=1
 related:
   - Algebra-of-Contexts.html
   - Seed.html
@@ -81,6 +82,18 @@ await ME.unwrapSecretV1(Wa, out.privateKey, "utf8");  // throws OperationError
 ```
 
 Run on Node with npm this.me 4.2.1; the outputs above are the real ones. Each wrap is `{ version, class, kid, publicKey, encryption, policy }`. P-256 key pairs are generated randomly, not derived from the seed. Getting each member's public key to the sender is not solved by the kernel.
+
+### Live: choose the audience
+
+Click a circle to add or remove that identity. Each change wraps a fresh content key `K` for every member with `ME.wrapSecretV1`, then every party tries `ME.unwrapSecretV1`, here, on this.me 4.2.1 from npm. Members get `K`; the others get the kernel's real error.
+
+<div class="audience-venn"></div>
+
+## AND and minus
+
+Not exported by npm 4.2.1, so not run here. They live in the 4.2.1 source, [audience.ts](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/audience.ts), tested by [audience-algebra.test.ts](https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/tests/Security/audience-algebra.test.ts) (16/16).
+
+<div class="doc-svg" data-max="560px" markdown="0"><svg viewBox="0 0 560 150" role="img" aria-label="AND: the key is split into XOR shares, one per member, all needed. Minus: the member is dropped at seal time." xmlns="http://www.w3.org/2000/svg" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" fill="currentColor"><g fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="70" cy="70" r="42"/><circle cx="125" cy="70" r="42"/><circle cx="380" cy="60" r="34"/><circle cx="425" cy="60" r="34"/><circle cx="402" cy="98" r="34" stroke-dasharray="5 5" opacity=".55"/></g><path d="M97.5 38 a42 42 0 0 1 0 64 a42 42 0 0 1 0 -64z" fill="currentColor" opacity=".22"/><text x="52" y="74" text-anchor="middle">ana</text><text x="143" y="74" text-anchor="middle">bob</text><text x="98" y="132" text-anchor="middle">K = s_ana ⊕ s_bob</text><text x="98" y="147" text-anchor="middle" opacity=".7">all shares needed</text><text x="362" y="56" text-anchor="middle">ana</text><text x="443" y="56" text-anchor="middle">bob</text><text x="402" y="114" text-anchor="middle" opacity=".55">eve</text><line x1="384" y1="110" x2="420" y2="110" stroke="currentColor" stroke-width="2"/><text x="402" y="147" text-anchor="middle">{ana, bob, eve} \ eve</text></svg><figcaption>AND: each member wraps only a share; all of them together rebuild <code>K</code> (<a href="https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/audience.ts#L297">splitXor</a>). Minus: drops every coalition containing the member, once, when sealing (<a href="https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/audience.ts#L101-L107">minus L101–107</a>); seal and open: <a href="https://github.com/neurons-me/.me/blob/v4.2.1/Typescript/src/audience.ts#L207-L247">L207–247</a>.</figcaption></div>
 
 ## Status by implementation
 

@@ -521,6 +521,7 @@
     if (b.classList.contains("doc-cards")) return docCards(b);
     if (b.classList.contains("doc-svg")) return N("Box", { component: "figure", className: "doc-svg", sx: { m: 0, mb: 2.5, color: "text.primary", overflowX: b.getAttribute("data-min") ? "auto" : undefined, "& svg": { display: "block", width: "100%", height: "auto", maxWidth: b.getAttribute("data-max") || "100%", minWidth: b.getAttribute("data-min") || 0 }, "& figure": { m: 0 }, "& figcaption": { fontSize: ".82rem", color: "text.secondary", mt: .75, lineHeight: 1.5 } }, dangerouslySetInnerHTML: { __html: b.innerHTML } });
     if (b.classList.contains("kernel-timeline") && window.KernelTimeline) return N("KernelTimeline", { src: b.getAttribute("data-src") });
+    if (b.classList.contains("audience-venn") && window.AudienceVenn) return N("AudienceVenn", {});
     if (b.classList.contains("fanout-viz") && window.FanoutViz) return N("FanoutViz", { n: b.getAttribute("data-n"), caption: b.getAttribute("data-caption") });
     // live demonstrations (assets/axioms-live, loaded by the page): the snippet is the placeholder's own code text
     if (b.classList.contains("axiom-proof") && window.AxiomsLive) return N("AxiomProof", { axiom: b.getAttribute("data-axiom"), code: b.textContent.replace(/^\n+|\s+$/g, "") });
@@ -571,7 +572,7 @@
   const FK = docPage && window.FanoutKernel && document.querySelector(".fanout-viz") ? window.FanoutKernel : null;
   G.mount(spec, ROOT, {
     ...(FK ? { me: FK } : {}),
-    gui: { ...G, ...(FK ? { render: undefined, RunMe: undefined } : {}), Theme: PageTheme, registry: { ...(G.Registry || G.registry), LandingTopBar, DocsCover, MeOrbMark, MeLandingHero, MeCodeBlock, DocCardCover, ModeHtml, ...(window.KernelTimeline ? { KernelTimeline: window.KernelTimeline } : {}), KernelBadge, ...(window.MeRun ? { MeRunBlock: window.MeRun.MeRunBlock } : {}), ...(window.AxiomsLive ? { AxiomProof: window.AxiomsLive.AxiomProof, AxiomKernel: window.AxiomsLive.AxiomKernel } : {}), ...(window.FanoutViz ? { FanoutViz: window.FanoutViz } : {}) } },
+    gui: { ...G, ...(FK ? { render: undefined, RunMe: undefined } : {}), Theme: PageTheme, registry: { ...(G.Registry || G.registry), LandingTopBar, DocsCover, MeOrbMark, MeLandingHero, MeCodeBlock, DocCardCover, ModeHtml, ...(window.KernelTimeline ? { KernelTimeline: window.KernelTimeline } : {}), KernelBadge, ...(window.MeRun ? { MeRunBlock: window.MeRun.MeRunBlock } : {}), ...(window.AxiomsLive ? { AxiomProof: window.AxiomsLive.AxiomProof, AxiomKernel: window.AxiomsLive.AxiomKernel } : {}), ...(window.FanoutViz ? { FanoutViz: window.FanoutViz } : {}), ...(window.AudienceVenn ? { AudienceVenn: window.AudienceVenn } : {}) } },
     devtools: { enabled: true, inspector: INSPECTOR_ON, adminView: false, inspectorToggleVisible: false },
   });
   html.classList.add("gui-on");
