@@ -24,7 +24,7 @@ Built on the [Primitives](./Primitives.html). Each axiom is stated, then demonst
 
 <div class="axiom-kernel" markdown="0"></div>
 
-### A-struct-0 | Unified Callable Surface
+## A-struct-0 | Unified Callable Surface
 {: .doc-axiom}
 
 **Statement.** The kernel is one value that is at once a function and an object: every path reached from it is again callable, and a call on a path writes it.
@@ -38,7 +38,7 @@ me("profile.name")              //= "Abella"</code></pre></div>
 Also checked by [A-struct-0](https://github.com/neurons-me/.me/blob/main/Typescript/tests/axioms.test.ts#L102) in `axioms.test.ts`.
 {: .doc-axiom-test}
 
-### A0 | Secret Root Stealth
+## A0 | Secret Root Stealth
 {: .doc-axiom}
 
 **Statement.** The root of a secret scope does not resolve. Its leaves resolve by their full path, and public paths are unaffected.
@@ -54,7 +54,7 @@ me("wallet.income")             //= 100</code></pre></div>
 Also checked by [A0](https://github.com/neurons-me/.me/blob/main/Typescript/tests/axioms.test.ts#L131) in `axioms.test.ts`.
 {: .doc-axiom-test}
 
-### A1 | Identity Normalization (@)
+## A1 | Identity Normalization (@)
 {: .doc-axiom}
 
 **Statement.** An identity claim is normalized before it is recorded at the root, and a claim that is not a valid name is refused.
@@ -68,7 +68,7 @@ throws(() =&gt; me["@"]("a b"))    //= true</code></pre></div>
 Also checked by [A1](https://github.com/neurons-me/.me/blob/main/Typescript/tests/axioms.test.ts#L167) in `axioms.test.ts`.
 {: .doc-axiom-test}
 
-### A2 | Path-Bound Secret Scopes (_)
+## A2 | Path-Bound Secret Scopes (_)
 {: .doc-axiom}
 
 **Statement.** Secrecy belongs to a path, not to the instance: declaring `_` on a path hides that path's root and leaves the rest of the tree as it was.
@@ -83,7 +83,7 @@ me("profile.name")              //= "Abella"</code></pre></div>
 Also checked by [A2](https://github.com/neurons-me/.me/blob/main/Typescript/tests/axioms.test.ts#L205) in `axioms.test.ts`.
 {: .doc-axiom-test}
 
-### A3 | Noise Reset (~)
+## A3 | Noise Reset (~)
 {: .doc-axiom}
 
 **Statement.** `~` cuts secret inheritance at a path: a secret declared after it derives a different effective secret than the one before it.
@@ -101,7 +101,7 @@ secretOf("wallet.hidden.notes") !== secretOf("wallet.hidden.seed")   //= true</c
 Also checked by [A3](https://github.com/neurons-me/.me/blob/main/Typescript/tests/axioms.test.ts#L236) · [A3b](https://github.com/neurons-me/.me/blob/main/Typescript/tests/axioms.test.ts#L278) · [A3c](https://github.com/neurons-me/.me/blob/main/Typescript/tests/axioms.test.ts#L310) in `axioms.test.ts`.
 {: .doc-axiom-test}
 
-### A4 | Structural Pointers (__ / ->)
+## A4 | Structural Pointers (__ / ->)
 {: .doc-axiom}
 
 **Statement.** A pointer is stored as data (`{ __ptr }`) and is followed when a path is read through it.
@@ -116,7 +116,7 @@ me("profile.cards.primary.income")  //= 1000</code></pre></div>
 Also checked by [A4](https://github.com/neurons-me/.me/blob/main/Typescript/tests/axioms.test.ts#L340) in `axioms.test.ts`.
 {: .doc-axiom-test}
 
-### A5 | Query as Memory Event (?)
+## A5 | Query as Memory Event (?)
 {: .doc-axiom}
 
 **Statement.** A query is recorded in memory as a `?` event, and it does not reveal the root of the secret scope it reads.
@@ -133,7 +133,7 @@ me("profile.name")              //= "Abella"</code></pre></div>
 Also checked by [A5](https://github.com/neurons-me/.me/blob/main/Typescript/tests/axioms.test.ts#L372) in `axioms.test.ts`.
 {: .doc-axiom-test}
 
-### A6 | Tombstone Remove (-)
+## A6 | Tombstone Remove (-)
 {: .doc-axiom}
 
 **Statement.** After `-`, a removed path no longer resolves to the value it had.
@@ -148,7 +148,7 @@ me("wallet.hidden.notes") !== "private note"   //= true</code></pre></div>
 Also checked by [A6](https://github.com/neurons-me/.me/blob/main/Typescript/tests/axioms.test.ts#L405) in `axioms.test.ts`.
 {: .doc-axiom-test}
 
-### A7 | Public + Secret Coexistence
+## A7 | Public + Secret Coexistence
 {: .doc-axiom}
 
 **Statement.** Secret declarations and noise resets do not change what the public paths resolve to.
@@ -168,7 +168,7 @@ me("profile")                   //= undefined</code></pre></div>
 Also checked by [A7](https://github.com/neurons-me/.me/blob/main/Typescript/tests/axioms.test.ts#L437) in `axioms.test.ts`.
 {: .doc-axiom-test}
 
-### A8 | Hash Chain Integrity
+## A8 | Hash Chain Integrity
 {: .doc-axiom}
 
 **Statement.** Every memory links to the hash of the one before it, starting from an empty hash, and its own hash can be recomputed from its fields.
@@ -184,7 +184,7 @@ memories().every((m) =&gt; m.hash === rehash(m))   //= true</code></pre></div>
 Also checked by [A8](https://github.com/neurons-me/.me/blob/main/Typescript/tests/axioms.test.ts#L474) in `axioms.test.ts`.
 {: .doc-axiom-test}
 
-### A9 | Deterministic Conflict Resolution (LWW)
+## A9 | Deterministic Conflict Resolution (LWW)
 {: .doc-axiom}
 
 **Statement.** When writes to one path collide, the last write wins by logical order (seq, then hash), not by the physical clock; the index and the read agree on the winner.
