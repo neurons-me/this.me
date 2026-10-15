@@ -12,7 +12,7 @@
   var C = { ink: "var(--mui-palette-text-primary, inherit)", ink2: "var(--mui-palette-text-secondary, #888)", line: "var(--mui-palette-divider, rgba(128,128,128,.3))",
     ok: "var(--mui-palette-success-main, #2e9d6e)", bad: "var(--mui-palette-error-main, #e5534b)", acc: "var(--mui-palette-primary-main, #58a6ff)",
     code: "color-mix(in srgb, var(--mui-palette-text-primary, #888) 4%, var(--mui-palette-background-paper, transparent))" };
-  var SKIP = /^\s*(import\s|const\s+me\s*=\s*new\s+ME\b)/, READ = /^\s*me(\(|\.explain\(|\.inspect\()/;
+  var SKIP = /^\s*(import\s|const\s+me\s*=\s*new\s+ME\b)/, READ = /^\s*me(\(|\.explain\(|\.inspect\(|\.as\()/;
   // a trailing // comment after code (the line's own expected value) is not part of the statement
   function strip(line) { return line.replace(/([;)\]])\s+\/\/.*$/, "$1").replace(/;\s*$/, "").trim(); }
   function show(v) {
@@ -32,7 +32,22 @@
     });
     return out;
   }
+  // Shared mode (a page sets window.MeRunShared = true): one new ME() for the whole page. Run executes the earlier
+  // blocks that have not run yet, once, then this block, on that same instance; each run fires "me-run" on window
+  // with { me, idx } so a live figure can redraw from the kernel.
+  var shared = null, ran = {};
+  function runShared(idx) {
+    return MK.load().then(function (ME) {
+      if (!shared) shared = new ME();
+      var t0 = performance.now(), pre = [], before = 0, out;
+      for (var i = 0; i < idx; i++) if (!ran[i] && codes[i] != null) { before++; ran[i] = 1; runLines(shared, codes[i], false).forEach(function (r) { if (r.error) pre.push(r); }); }
+      out = runLines(shared, codes[idx], true); ran[idx] = 1;
+      try { window.dispatchEvent(new CustomEvent("me-run", { detail: { me: shared, idx: idx, ran: Object.keys(ran).map(Number) } })); } catch (e) {}
+      return { out: out, pre: pre, ms: performance.now() - t0, before: before, shared: true };
+    });
+  }
   function runUpTo(idx) {
+    if (window.MeRunShared) return runShared(idx);
     return MK.load().then(function (ME) {
       var me = new ME(), t0 = performance.now(), pre = [], out;
       for (var i = 0; i < idx; i++) runLines(me, codes[i], false).forEach(function (r) { if (r.error) pre.push(r); });
@@ -56,7 +71,7 @@
       h("summary", { style: { cursor: "pointer", color: res.fail || errs ? C.bad : C.ink2 } },
         res.fail ? "Kernel not loaded: " + res.fail
           : "Output · " + res.out.filter(function (r) { return !r.error; }).length + " read" + (res.out.length === 1 ? "" : "s") + (errs ? " · " + errs + " error" + (errs > 1 ? "s" : "") : "") +
-            " · fresh new ME(), this.me " + MK.KERNEL.version + (res.before ? " · after the " + res.before + " block" + (res.before > 1 ? "s" : "") + " above" : "") + " · " + res.ms.toFixed(1) + " ms"),
+            (res.shared ? " · shared new ME(), this.me " + MK.KERNEL.version + (res.before ? " · ran " + res.before + " earlier block" + (res.before > 1 ? "s" : "") + " first" : "") : " · fresh new ME(), this.me " + MK.KERNEL.version + (res.before ? " · after the " + res.before + " block" + (res.before > 1 ? "s" : "") + " above" : "")) + " · " + res.ms.toFixed(1) + " ms"),
       res.out && h("div", { style: { marginTop: 6 } },
         res.pre.map(function (r, i) { return h("div", { key: "p" + i, style: { color: C.bad } }, "an earlier block failed: " + r.src + " → " + r.error); }),
         res.out.length ? res.out.map(function (r, i) {
@@ -71,5 +86,5 @@
         h("code", { style: { fontFamily: "inherit", whiteSpace: "pre" } }, window.MeSyntax ? window.MeSyntax.render(h, code) : code)),
       panel);
   }
-  window.MeRun = { MeRunBlock: MeRunBlock, runUpTo: runUpTo, codes: codes };
+  window.MeRun = { MeRunBlock: MeRunBlock, runUpTo: runUpTo, codes: codes, shared: function () { return shared; } };
 })();

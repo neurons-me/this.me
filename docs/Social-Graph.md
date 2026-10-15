@@ -1,37 +1,38 @@
 ---
+layout: gui-doc
+title: "Social Graph"
+description: "Identity, trust and relationships as paths in one graph: a 5-step walkthrough of Social_Graph.ts, runnable on this page on this.me 4.2.1, with a live graph figure (owner and guest views)."
+mepath:
+  - text: Docs
+    url: https://neurons-me.github.io/.me/docs/
+canonical: https://neurons-me.github.io/.me/docs/Social-Graph.html
+permalink: /docs/Social-Graph.html
+crumb: Social Graph
 image: https://neurons-me.github.io/.me/docs/assets/og-social-graph.jpg
-layout: readme
-title: Social Graph
+scripts:
+  - /assets/me-kernel/me-kernel.js?v=1
+  - /assets/me-run/me-run.js?v=3
+  - /assets/social-graph-live/social-graph-live.js?v=1
+related:
+  - me-whatever-what.html
+  - Pointer-Composition.html
+  - Audiences.html
+  - https://neurons-me.github.io/social-graphs/
 ---
 
+# 𓀠 Social Graph
 
-# Social Graph
-
-This demo teaches one simple idea:
 > Relationships, policies, and privacy are not separate systems. They are paths in the same graph.
 
-A person has a profile. A person has friends. Some friends can be invited to things. Some contacts are private. The same graph handles all of it — and every derived value stays live.
+Kernel: **this.me 4.2.1** ([npm](https://www.npmjs.com/package/this.me)) ⓘ
+{: .doc-kernel}
 
-[`.me Docs`](https://neurons-me.github.io/.me) · [Social Graph Source Code](https://github.com/neurons-me/.me/blob/main/Typescript/tests/Demos/Social_Graph.ts)
+Every ▶ Run below executes the code shown, on **one shared `new ME()`** on this page (this.me 4.2.1 from jsDelivr, sha256-checked). Running a step first runs any earlier step that has not run yet. Source: [Social_Graph.ts](https://github.com/neurons-me/.me/blob/main/Typescript/tests/Demos/Social_Graph.ts).
+{: .doc-kernel-more}
 
----
+<div class="social-graph-live"></div>
 
 ## The Tiny Mental Model
-
-A social graph in `.me` has three layers living in the same structure:
-
-```ts
-me["@"]("jabellae")          // identity anchor — who owns this graph
-me.profile.name("J. Abella") // public facts about the owner
-me.users.ana.name("Ana")     // other people in the graph
-me.friends.ana["->"]("users.ana") // relationships as pointers
-```
-
-No schema. No ORM. No join tables. Paths are the model.
-
----
-
-## What The Demo Builds
 
 | Layer | Example | What it means |
 |---|---|---|
@@ -42,168 +43,96 @@ No schema. No ORM. No join tables. Paths are the model.
 | Friends | `friends.ana["->"]("users.ana")` | Relationships as live pointers |
 | Contacts | `contacts.ana["_"](key)` | Private data, structurally invisible |
 
----
+No schema, no ORM, no join tables: paths are the model.
 
-## Step 1: Seed the Graph
-
-Start with the owner and the people around them:
+## Step 1: Seed
 
 ```ts
 me["@"]("jabellae")
 me.profile.name("J. Abella")
 me.profile.age(28)
 me.profile.city("Veracruz")
-
 me.users.ana.name("Ana")
 me.users.ana.age(22)
-
 me.users.pablo.name("Pablo")
 me.users.pablo.age(17)
-
 me.users.luisa.name("Luisa")
 me.users.luisa.age(31)
+me("users.pablo.age")   // 17
 ```
+{: .me-run}
 
-Just facts. Nothing smart yet.
-
----
-
-## Step 2: Add Policies Across All Users
-
-Apply rules to every user at once with `[i]`:
+## Step 2: Policies with [i]
 
 ```ts
 me.users["[i]"]["="]("isAdult", "age >= 18")
 me.users["[i]"]["="]("ageGapVsOwner", "age - profile.age")
 me.users["[i]"]["="]("canInvite", "isAdult && age < 30")
+me("users.ana.canInvite")      // true
+me("users.pablo.isAdult")      // false
+me("users.luisa.ageGapVsOwner") // 3
 ```
+{: .me-run}
 
-`[i]` means: for every node under `users`, derive this value. The derivation reads `profile.age` — the owner's own data. Every user's `ageGapVsOwner` is computed relative to whoever owns the graph.
+`[i]` derives the value for every node under `users`. `profile.age` is the owner's own age, so the gap is relative to whoever owns the graph.
 
----
-
-## Step 3: Define Relationships
-
-Relationships are pointers, not copies:
+## Step 3: Friends are pointers
 
 ```ts
 me.friends.ana["->"]("users.ana")
 me.friends.pablo["->"]("users.pablo")
 me.friends.luisa["->"]("users.luisa")
-```
-
-Now you can traverse the graph through the relationship:
-
-```ts
-me("friends.ana.name")              // "Ana"
-me("friends.ana.ageGapVsOwner")     // -6
-me("friends[isAdult == true].name") // { ana: "Ana", luisa: "Luisa" }
+me("friends.ana.name")                // "Ana"
+me("friends.ana.ageGapVsOwner")       // -6
+me("friends[isAdult == true].name")   // { ana: "Ana", luisa: "Luisa" }
 me("friends[canInvite == true].name") // { ana: "Ana" }
 ```
+{: .me-run}
 
-The filter runs over the live derived values. No query language. No extra step.
+The filter runs over live derived values, read through the pointers ([Pointer Composition](Pointer-Composition.html)).
 
----
-
-## Step 4: Watch It React
-
-Change a fact. The graph updates:
+## Step 4: React: pablo.age(18)
 
 ```ts
 me.users.pablo.age(18)
-
-me("friends[isAdult == true].name")
-// → { ana: "Ana", pablo: "Pablo", luisa: "Luisa" }
+me("friends[isAdult == true].name")   // { ana: "Ana", pablo: "Pablo", luisa: "Luisa" }
+me("friends[canInvite == true].name") // { ana: "Ana", pablo: "Pablo" }
 ```
+{: .me-run}
 
-Pablo crossed the threshold. No imperative update. No event listener. The derivation already knew what depended on `age`.
+One write; the kernel already knew what depended on `age`.
 
----
-
-## Step 5: Private Contacts
-
-Not everything is public. Some data should be invisible to outsiders:
+## Step 5: Private contacts
 
 ```ts
-me.contacts.ana["_"]("thread-ana-key")  // marks this scope as stealth
+me.contacts.ana["_"]("thread-ana-key")
 me.contacts.ana.lastSeenDays(3)
 me.contacts.ana.priority(0.9)
 me.contacts.ana["="]("needsReply", "lastSeenDays > 2")
+me("contacts.ana.needsReply")          // true
+me.as(null)("contacts.ana")            // undefined
+me.as(null)("contacts.ana.needsReply") // undefined
 ```
+{: .me-run}
 
-From the owner's perspective:
+For a guest the scope is not "access denied": it is absent. Switch the figure above to **guest** to see it.
 
-```ts
-me("contacts.ana.needsReply")   // true
-```
-
-From a guest (no key):
-
-```ts
-me.as(null)("contacts.ana")            // undefined — stealth
-me.as(null)("contacts.ana.needsReply") // undefined — stealth
-```
-
-The structure itself is invisible. Not "access denied" — structurally absent.
-
----
-
-## Explainability
-
-Any derived value can be traced:
+## Step 6: Explain
 
 ```ts
 me.explain("users.pablo.isAdult")
-// → {
-//     path: "users.pablo.isAdult",
-//     value: true,
-//     expression: "age >= 18",
-//     dependsOn: ["users.pablo.age"]
-//   }
+me.explain("contacts.ana.needsReply")
 ```
+{: .me-run}
 
-For private derivations, masked inputs show as `"●●●●"` — the system acknowledges the dependency without leaking the value.
+Real output on 4.2.1 (trimmed): `{ path: "users.pablo.isAdult", value: true, expr: "age >= 18", derivation: { expression: "age >= 18", inputs: [{ label: "age", path: "users.pablo.age", value: 18, origin: "public", masked: false, status: "resolved" }] }, meta: { dependsOn: ["users.pablo.age"], k: 3, recomputed: [...], ... } }`. For the private `needsReply`, the stealth input comes back as `value: "●●●●", origin: "stealth", masked: true, status: "masked"`: the dependency is acknowledged without leaking the value. See [me.explain()](Explain.html).
 
----
-
-## Why This Is Different
-
-A typical social graph stores relationships in a database, runs queries to fetch filtered sets, and rebuilds derived views on every read.
-
-In `.me`:
-
-- Policies are written once and live in the graph
-- Relationships are pointers, not foreign keys
-- Privacy is structural, not a permission check
-- Every derived value knows its own dependencies
-- The graph explains any decision on demand
-
----
-
-## Build It Yourself
+## Run it in Node
 
 ```bash
-cd npm
-npm install
+cd Typescript && npm install
 node tests/Demos/Social_Graph.ts
-```
-
-To run every demo:
-
-```bash
 npm run test:demos:run-all
 ```
 
----
-
-## The Big Idea
-
-A social graph is not a table of people. It is a living system of meaning — who knows whom, what that relationship implies, what is shared, what is private, and how everything updates when anything changes.
-
-`.me` models that directly:
-
-```text
-identity + relationships + policies + privacy = one graph
-```
-
----
+`identity + relationships + policies + privacy = one graph`
