@@ -192,8 +192,8 @@
 
   // ── page CSS (theme tokens only) ──
   var CSS = [
-    ".ac-dash{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:start}@media (min-width:900px){.ac-dash{grid-template-columns:minmax(0,1fr) 340px}.ac-panel{position:sticky;top:60px}}",
-    ".ac-fig{position:relative;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:14px;overflow:hidden;background:var(--mui-palette-background-default,transparent)}.ac-fig canvas{display:block;width:100%;height:auto;cursor:pointer;touch-action:manipulation}",
+    ".ac-dash{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:start}@media (min-width:900px){.ac-dash{grid-template-columns:minmax(0,1fr) 340px}.ac-panel{position:sticky;top:60px;grid-column:2;grid-row:1 / span 2}.ac-dash{grid-template-rows:auto 1fr}.ac-dash>.ac-notes{grid-column:1;grid-row:2;margin-top:12px}}",
+    ".ac-fig{scroll-margin-top:60px;position:relative;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:14px;overflow:hidden;background:var(--mui-palette-background-default,transparent)}.ac-fig canvas{display:block;width:100%;height:auto;cursor:pointer;touch-action:manipulation}",
     ".ac-cap{margin:8px 2px 0;font-size:12.5px;line-height:1.5;color:var(--mui-palette-text-secondary,#8b949e)}",
     ".ac-panel{border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:12px;background:var(--mui-palette-background-paper,transparent);font-size:13px;overflow:hidden}",
     ".ac-sec{padding:10px 12px;border-top:1px solid var(--mui-palette-divider,rgba(128,128,128,.25))}.ac-sec:first-child{border-top:0}.ac-h{margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--mui-palette-text-secondary,#8b949e)}",
@@ -204,6 +204,7 @@
     ".ac-json{margin:6px 0 0;padding:8px;max-height:260px;overflow:auto;border-radius:8px;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));font:11px/1.5 " + MONO + ";white-space:pre;color:var(--mui-palette-text-primary,inherit)}",
     ".ac-btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.ac-btn{font:inherit;font-size:12.5px;font-weight:600;padding:4px 10px;border-radius:8px;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.4));background:transparent;color:inherit;cursor:pointer}.ac-btn:hover{border-color:var(--mui-palette-primary-main,#58a6ff)}.ac-btn.on{color:var(--mui-palette-primary-main,#58a6ff);border-color:currentColor}",
     ".ac-k summary{cursor:pointer;list-style:none;font:11.5px/1.5 " + MONO + ";color:var(--mui-palette-text-secondary,#8b949e)}.ac-k summary::-webkit-details-marker{display:none}.ac-k summary::before{content:'▸ ';}.ac-k[open] summary::before{content:'▾ '}.ac-k .ok{color:var(--mui-palette-success-main,#2e9d6e)}.ac-k .bad{color:var(--mui-palette-error-main,#e5534b)}.ac-k div{font:11px/1.6 " + MONO + ";color:var(--mui-palette-text-secondary,#8b949e);overflow-wrap:anywhere}",
+    ".ac-steps{list-style:none;margin:0 0 10px;padding:0;display:flex;flex-wrap:wrap;gap:6px}.ac-steps li{margin:0}.ac-step{font:inherit;font-size:12.5px;cursor:pointer;padding:4px 10px;border-radius:999px;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));background:transparent;color:var(--mui-palette-text-secondary,#8b949e)}.ac-step b{font-weight:700;margin-right:2px}.ac-step.on{color:var(--mui-palette-text-primary,inherit);border-color:var(--mui-palette-primary-main,#58a6ff);background:var(--mui-palette-action-selected,rgba(88,166,255,.12))}.ac-how:focus-visible{outline:2px solid var(--mui-palette-primary-main,#58a6ff);outline-offset:4px;border-radius:8px}.ac-stepbody{padding:12px 14px;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:12px;background:var(--mui-palette-background-paper,transparent)}.ac-stepbody>p{margin:0 0 4px}.ac-stepbody .ac-json{max-height:200px}.ac-stepn{align-self:center;margin-left:auto;font-size:12px;color:var(--mui-palette-text-secondary,#8b949e)}"+
     ".ac-me{font-family:" + MONO + ";font-size:12px}.ac-notes{margin:28px 0 0;max-width:760px;font-size:14px;line-height:1.65}.ac-notes h2,.ac-rel h2{margin:0 0 10px;font-size:1.35rem;font-weight:800}.ac-notes ul{margin:0;padding-left:20px}.ac-notes li{margin-bottom:6px}.ac-notes code{font-family:" + MONO + ";font-size:12.5px}",
     ".ac-rel{margin:32px 0 8px}.ac-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}@media (max-width:900px){.ac-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (max-width:480px){.ac-cards{grid-template-columns:1fr}}",
     ".ac-card{display:flex;flex-direction:column;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:14px;overflow:hidden;background:var(--mui-palette-background-paper,transparent);color:inherit;text-decoration:none;transition:transform .15s,border-color .15s}.ac-card:hover{transform:translateY(-2px);border-color:var(--mui-palette-primary-main,#58a6ff)}",
@@ -407,16 +408,41 @@
         st.state === "ok" ? [h("div", { key: "h" }, "sha256 " + st.hash), h("div", { key: "u" }, "from ", link(st.url, st.url.replace("https://", ""))), h("div", { key: "s" }, "page source: ", link(SRC_URL, "ant-city.js"))] : st.state === "error" ? h("div", null, st.text) : null)));
   }
 
+  // ── How it works: a narrated stepper; each step selects on the live map and explains one path on the running kernel ──
+  var L_PATHS = "https://neurons-me.github.io/.me/docs/me-whatever-what.html", L_PTR = "https://neurons-me.github.io/.me/docs/Pointer-Composition.html", L_OPS = "https://neurons-me.github.io/.me/docs/Operators.html";
+  var STEPS = [
+    { t: "One tree of paths", sel: { type: "chamber", n: "pantry" }, ex: "colony.chambers.pantry.depth",
+      body: function () { return ["The whole colony is one tree in the kernel: chambers, tunnels (trails) and ants are paths like ", me("colony.chambers.pantry.depth"), " or ", me("colony.trails.<n>.length"), ". See ", link(L_PATHS, "me.whatever(what)"), "."]; } },
+    { t: "Home is a pointer", sel: { type: "ant", i: 3 }, ex: "colony.ants.3.home.depth",
+      body: function () { return ["Each ant's ", me("home"), " points to a chamber, so ", me('me("colony.ants.3.home.depth")'), " reads that chamber's depth. See ", link(L_PTR, "Pointer Composition"), "."]; } },
+    { t: "Food is a formula", sel: { type: "path", p: "colony.food" }, ex: "colony.food",
+      body: function () { return [me("colony.food"), " is a ", me('["="]'), " sum of the three stores. Any stock write recomputes it, and each store's ", me("free"), ". See ", link(L_OPS, "Operators"), "."]; } },
+    { t: "Trails and the cost rule", sel: { type: "edge", id: 8 }, ex: "colony.trails.8.cost",
+      body: function () { return ["A trail's ", me('["="]("cost", "length / (1 + strength)")'), " drops as ants walk it (+1 per food trip, +4 per scout with news; ×0.93 every 2 s). Ants take the cheapest route."]; } },
+    { t: "Roles are counts", sel: { type: "path", p: "colony.ants.scouts", g: "scouts" }, ex: "colony.ants.scouts",
+      body: function () { return ["Each group is a ", me('["="]'), " sum of per-ant flags, e.g. ", me("ants[n].isScout"), ". The highlighted ants are the ones the kernel says are scouts."]; } },
+    { t: "The queen biases routes", sel: { type: "queen" }, ex: "colony.broodNeed",
+      body: function () { return ["Her ", me("influence"), " adds ", me("bias = queen.influence * 0.6"), " to her trails, and ", me("broodNeed = larvae * influence"), " sends food to the pantry when it reaches 40."]; } },
+    { t: "Trees and recruitment", sel: { type: "tree", n: 1 }, ex: function () { return read("colony.trees.1.attract") === undefined ? "colony.trees.1.known" : "colony.trees.1.attract"; },
+      body: function () { return ["A found tree gets ", me("attract = seeds * (1 + trail) / dist"), ". Recruited ants pass the news to workers on a weaker tree (", me("ants.<n>.recruitedTo / hop"), "). The walk is animated by the page; every number is read from the kernel. Source: ", link(SRC_URL, "ant-city.js"), "."]; } }];
   function Notes() {
-    return h("section", { className: "ac-notes", "data-ac": "notes" }, h("h2", null, "How it works"),
-      h("ul", null,
-        h("li", null, "The colony is one tree in the kernel: ", me("colony.chambers.<name>.depth / stock / capacity"), ", ", me("colony.trails.<n>.from / to / length / weight"), ", ", me("colony.ants.<n>.at / carry"), ". Paths: ", link("https://neurons-me.github.io/.me/docs/me-whatever-what.html", "me.whatever(what)"), "."),
-        h("li", null, "Each ant's ", me("home"), " is a pointer to a chamber, so ", me('me("colony.ants.3.home.depth")'), " reads the chamber's depth (", link("https://neurons-me.github.io/.me/docs/Pointer-Composition.html", "Pointer Composition"), ")."),
-        h("li", null, me("colony.food"), ", ", me("colony.carried"), " and each store's ", me("free"), " are ", me('["="]'), " formulas; a stock write recomputes them (", link("https://neurons-me.github.io/.me/docs/Operators.html", "Operators"), ")."),
-        h("li", null, "Each trail has ", me('["="]("strength", "weight + bias")'), " and ", me('["="]("cost", "length / (1 + strength)")'), ". Ants take the cheapest route by cost, so busy trails pull more traffic. Weight grows by +1 per food trip and +4 per scout bringing news, and evaporates ×0.93 every 2 s."),
-        h("li", null, "The queen's ", me("influence"), " (10) sets ", me('bias = colony.queen.influence * 0.6'), " on her routes, and ", me('broodNeed = chambers.nursery.larvae * queen.influence'), " sends deliveries to the pantry next to the nursery when it reaches 40."),
-        h("li", null, "A tree's ", me('attract = seeds * (1 + trail) / dist'), " is declared when a scout finds it, with ", me("trail"), " summing the strength of every trail on its route. Recruitment passes from ant to ant when a recruited ant meets a worker following a less attractive tree (", me("ants.<n>.recruitedTo / hop"), ")."),
-        h("li", null, "The walk itself is animated by the page; the chamber and stock values on the canvas are read from the kernel every frame. Source: ", link(SRC_URL, "ant-city.js"), ".")));
+    var k = useKernel(), ss = useState(0), i = ss[0], setI = ss[1], ap = useState(false), auto = ap[0], setAuto = ap[1], ok = k.status === "ok";
+    var toMap = function () { if (window.innerWidth >= 900) return; var f = document.querySelector(".ac-fig"); if (f) f.scrollIntoView({ behavior: "smooth", block: "start" }); };
+    var go = function (n) { var j = (n + STEPS.length) % STEPS.length; setI(j); K.hov = null; select(STEPS[j].sel); toMap(); };
+    useEffect(function () { if (!auto) return; var t = setInterval(function () { setI(function (x) { var j = (x + 1) % STEPS.length; select(STEPS[j].sel); return j; }); }, 6000); return function () { clearInterval(t); }; }, [auto]);
+    var S = STEPS[i], path = typeof S.ex === "function" ? (ok ? S.ex() : "") : S.ex, ex = ok && path ? K.me.explain(path) : null;
+    var key = function (ev) { if (ev.target.tagName === "A") return; if (ev.key === "ArrowRight") { ev.preventDefault(); setAuto(false); go(i + 1); } else if (ev.key === "ArrowLeft") { ev.preventDefault(); setAuto(false); go(i - 1); } };
+    return h("section", { className: "ac-notes ac-how", "data-ac": "notes", tabIndex: 0, onKeyDown: key, "aria-label": "How it works, step by step (arrow keys move)" }, h("h2", null, "How it works"),
+      h("ol", { className: "ac-steps", role: "tablist" }, STEPS.map(function (x, j) { return h("li", { key: j }, h("button", { type: "button", role: "tab", "aria-selected": j === i ? "true" : "false", className: "ac-step" + (j === i ? " on" : ""), "data-ac": "step-" + (j + 1), onClick: function () { setAuto(false); go(j); } }, h("b", null, j + 1), " ", x.t)); })),
+      h("div", { className: "ac-stepbody", role: "tabpanel", "data-ac": "stepbody" },
+        h("p", null, S.body()),
+        h("div", { className: "ac-note" }, me('me.explain("' + path + '")'), " · " + KL + (ok ? " · live" : " · loading…")),
+        h("pre", { className: "ac-json", "data-ac": "step-explain" }, ok ? fmtJ(ex) : "…"),
+        h("div", { className: "ac-btns" },
+          h("button", { type: "button", className: "ac-btn", "data-ac": "prev", onClick: function () { setAuto(false); go(i - 1); } }, "← Prev"),
+          h("button", { type: "button", className: "ac-btn", "data-ac": "next", onClick: function () { setAuto(false); go(i + 1); } }, "Next →"),
+          h("button", { type: "button", className: "ac-btn" + (auto ? " on" : ""), "aria-pressed": auto ? "true" : "false", "data-ac": "autoplay", onClick: function () { if (!auto) go(i); setAuto(!auto); } }, auto ? "Stop" : "Autoplay"),
+          h("span", { className: "ac-stepn" }, (i + 1) + " / " + STEPS.length + " · ← → keys"))));
   }
   var RELATED = [
     ["https://neurons-me.github.io/.me/docs/me-whatever-what.html", "https://neurons-me.github.io/.me/docs/assets/card-paths.webp", "me.whatever(what)", "How a path is written and read, with the same ant colony as runnable examples."],
@@ -428,7 +454,7 @@
       h("div", { className: "ac-cards" }, RELATED.map(function (c) { return h("a", { key: c[0], className: "ac-card", href: c[0] },
         h("span", { className: "img" }, h("img", { src: c[1], alt: "", loading: "lazy" })), h("span", { className: "tx" }, h("b", null, c[2]), h("small", null, c[3]))); })));
   }
-  function Dashboard() { return h("div", { className: "ac-dash" }, h(Hill), h(Panel)); }
+  function Dashboard() { return h("div", { className: "ac-dash" }, h(Hill), h(Panel), h(Notes)); }
 
   var LOGO = "https://res.cloudinary.com/dkwnxf6gm/image/upload/v1760629064/neurons.me_b50f6a.png";
   var PATH = [{ text: "me://", href: "https://neurons-me.github.io/.me/", title: ".me" }, { text: "Demos", href: "https://neurons-me.github.io/.me/Demos/", title: ".me demos" },
@@ -516,7 +542,6 @@
       N("Typography", "title", { component: "h1", sx: { fontSize: "clamp(2rem, 5vw, 2.75rem)", fontWeight: 800, letterSpacing: "-.02em", lineHeight: 1.1, mb: 1 } }, ["Ant City"]),
       N("Typography", "lede", { component: "p", sx: { color: "text.secondary", mb: 3, maxWidth: 720 } }, ["Scouts search the surface for trees; a find becomes a trail home and a recruitment wave that spreads ant to ant. The colony lives in .me: trail weights, routes and the queen's influence are kernel values, and every arrival is a write."]),
       N("ACDashboard", "colony"),
-      N("ACNotes", "notes"),
       N("ACRelated", "related"),
     ]),
   ]);
