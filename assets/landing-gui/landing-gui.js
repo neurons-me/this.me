@@ -488,7 +488,18 @@
     if (t === "script" || t === "style") return null;
     if (landing && b === landing) { const a = b.querySelector("a[href*='Seed']"), d = b.querySelector("a[href$='/docs'], a[href$='/docs/']");
       return N("MeLandingHero", { tag: txt(b.querySelector(".me-hero-tag")), seedHref: a && a.getAttribute("href"), seedTitle: a && a.getAttribute("title"), docsHref: d && d.getAttribute("href") }); }
-    if (landing && (b.classList.contains("static-hero") || b.classList.contains("readme-intro"))) return null;
+    if (landing && (b.classList.contains("static-hero") || b.classList.contains("readme-intro") || b.classList.contains("readme-demos"))) return null;
+    // the landing's demo grid (index.md): emoji title, one line, a 1-2 line .me example (.me highlighter), whole card links
+    if (b.classList.contains("me-demo-cards")) return N("Box", { sx: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: "14px", mt: 1, mb: 2 } },
+      [...b.querySelectorAll("a.card")].map((a) => { const c = txt(a.querySelector(".card-code"));
+        return N("Card", { component: "a", href: a.getAttribute("href"), variant: "outlined", sx: { display: "flex", flexDirection: "column", gap: .75, p: 2, borderRadius: "12px", textDecoration: "none",
+            transition: "border-color .14s, box-shadow .14s, transform .14s", "&:hover": { borderColor: "primary.main", boxShadow: 3, transform: "translateY(-1px)", textDecoration: "none" } } }, [
+          T(txt(a.querySelector(".card-title")), { fontSize: "1rem", fontWeight: 700, lineHeight: 1.3, color: "text.primary" }),
+          T(txt(a.querySelector(".card-desc")), { fontSize: ".86rem", color: "text.secondary", lineHeight: 1.5 }),
+          N("Box", { component: "code", className: "me-code", sx: { mt: "auto", display: "block", fontFamily: MONO, fontSize: ".76rem", lineHeight: 1.55, p: 1, borderRadius: "8px", bgcolor: "action.hover", color: "text.primary", overflowX: "auto", whiteSpace: "pre" } },
+            window.MeSyntax ? window.MeSyntax.render(h, c) : [c]),
+        ]); }));
+    if (b.classList.contains("me-demo-all")) return T(inl(b), { fontSize: ".9rem", mb: 4, textAlign: "center", "& a": { fontWeight: 700 } }, { component: "p" });
     if (t === "p" && b.classList.contains("doc-kernel")) { const more = b.nextElementSibling && b.nextElementSibling.classList.contains("doc-kernel-more") ? b.nextElementSibling : null;
       return N("KernelBadge", { html: b.innerHTML.replace(/\s*ⓘ\s*$/, ""), tip: more ? more.innerHTML : "" }); }
     if (b.classList.contains("doc-kernel-more") && b.previousElementSibling && b.previousElementSibling.classList.contains("doc-kernel")) return null;

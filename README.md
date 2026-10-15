@@ -69,6 +69,8 @@ me.friends["[i]"]["="]("isAdult", "age >= 18");
 
 Full grammar, the operator table, and a how-to: **<a href="https://neurons-me.github.io/me.whatever.what.html" target="_blank" rel="noopener noreferrer">me.whatever(what)</a>**.
 
+<div class="readme-demos" markdown="1">
+
 # ⚡ Get .me started!
 
 Clone the repo, pick a runtime:<br>
@@ -302,6 +304,8 @@ PER-NODE    ~213μs
 See **<a href="https://suign.github.io/WhatIsOK.html" target="_blank" rel="noopener noreferrer">What is O(k)?</a>** for the full, verified benchmark table. **<a href="https://neurons-me.github.io/.me/docs/Extreme-Fan-Out.html" target="_blank" rel="noopener noreferrer">Trace Extreme Fan-Out.</a>**
 
 **<a href="https://github.com/neurons-me/.me/tree/main/Typescript/tests/Demos" target="_blank" rel="noopener noreferrer">⌬ ⊚ View all demos →</a>**
+
+</div>
 
 **Data that thinks. Logic that explains itself.**
 
