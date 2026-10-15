@@ -16,7 +16,7 @@ related:
   - https://neurons-me.github.io/mlearning.studio/
 ---
 
-# ⌖ Vector Index
+# ≈ Vector Index
 
 Find the nearest, open the least.
 

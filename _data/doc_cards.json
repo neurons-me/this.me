@@ -201,13 +201,13 @@
   "href": "https://neurons-me.github.io/.me/docs/Audiences.html",
   "title": "Audiences",
   "desc": "Who can open a value: OR, AND (XOR shares), minus. Status per implementation.",
-  "img": "/.me/docs/assets/card-seed.webp"
+  "img": "/.me/docs/assets/card-audiences.webp"
  },
  "/.me/docs/Vector-Index.html": {
   "href": "https://neurons-me.github.io/.me/docs/Vector-Index.html",
   "title": "Vector Index",
   "desc": "Exact vs IVF over encrypted chunks: nprobe, recall, and why layout decides.",
-  "img": "/.me/docs/assets/card-explain.webp"
+  "img": "/.me/docs/assets/card-vector-index.webp"
  },
  "https://neurons-me.github.io/encrypted-audiences/": {
   "href": "https://neurons-me.github.io/encrypted-audiences/",
