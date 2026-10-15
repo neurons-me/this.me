@@ -12,7 +12,7 @@ image: https://neurons-me.github.io/.me/docs/assets/og-social-graph.jpg
 scripts:
   - /assets/me-kernel/me-kernel.js?v=1
   - /assets/me-run/me-run.js?v=3
-  - /assets/social-graph-live/social-graph-live.js?v=1
+  - /assets/social-graph-live/social-graph-live.js?v=3
 related:
   - me-whatever-what.html
   - Pointer-Composition.html
@@ -30,7 +30,7 @@ Kernel: **this.me 4.2.1** ([npm](https://www.npmjs.com/package/this.me)) ⓘ
 Every ▶ Run below executes the code shown, on **one shared `new ME()`** on this page (this.me 4.2.1 from jsDelivr, sha256-checked). Running a step first runs any earlier step that has not run yet. Source: [Social_Graph.ts](https://github.com/neurons-me/.me/blob/main/Typescript/tests/Demos/Social_Graph.ts).
 {: .doc-kernel-more}
 
-<div class="social-graph-live"></div>
+<div class="doc-sidebar" markdown="0"><div class="social-graph-live"></div></div>
 
 ## The Tiny Mental Model
 
@@ -115,7 +115,7 @@ me.as(null)("contacts.ana.needsReply") // undefined
 ```
 {: .me-run}
 
-For a guest the scope is not "access denied": it is absent. Switch the figure above to **guest** to see it.
+For a guest the scope is not "access denied": it is absent. Switch the live graph to **guest** to see it.
 
 ## Step 6: Explain
 

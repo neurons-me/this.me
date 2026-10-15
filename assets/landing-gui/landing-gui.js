@@ -27,6 +27,9 @@
   const WIDE = "@media (min-width:640px)";
   const N = (type, props, children) => ({ type, props: props || {}, ...(children ? { children } : {}) });
   const txt = (el) => (el ? el.textContent.trim() : "");
+  // inline code that is .me: starts with me. / me( / me[, or is a relative path with a .me operator call
+  // (users["[i]"]["="](…), friends.ana["->"](…), contacts.ana["_"](key)); both go through window.MeSyntax
+  const isMeCode = (tx) => /^me[.(\[]/.test(tx) || /^\["(?:@|_|__|->|=|\[i\]|~|\?|-|!)"\]$/.test(tx) || /^[\p{L}_$][\p{L}\p{N}_$]*(\.[\p{L}\p{N}_$]+|\[\d+\])*\["(?:@|_|__|->|=|\[i\]|~|\?|-|!)"\]/u.test(tx);
 
   // ── read the static page ──
   const path = [...SRC.querySelectorAll(".mepath > a, .mepath > .here")].map((e) => ({ text: txt(e), href: e.getAttribute("href"), title: e.getAttribute("title") || txt(e) }));
@@ -34,7 +37,7 @@
   const inline = (el) => [...el.childNodes].map((n) => n.nodeType === 1 && n.tagName === "A" ? N("Link", { href: n.getAttribute("href"), title: n.getAttribute("title") || undefined, underline: "hover",
       sx: n.classList.contains("strong") ? { color: "text.primary", fontWeight: 700 } : { color: "primary.main" } }, [n.textContent])
     // inline code that is a .me expression (me. / me( / me[) goes through the .me highlighter (window.MeSyntax), like on doc pages
-    : n.nodeType === 1 && n.tagName === "CODE" ? ((tx, isMe) => N("Box", { component: "code", className: isMe ? "me-code" : undefined, sx: { fontFamily: MONO, fontSize: ".85em", px: .5, py: .125, borderRadius: "4px", bgcolor: "action.hover", color: "text.primary", ...(isMe ? { whiteSpace: "nowrap" } : {}) } }, isMe ? window.MeSyntax.render(h, tx) : [tx]))(n.textContent, !!window.MeSyntax && /^me[.(\[]/.test(n.textContent))
+    : n.nodeType === 1 && n.tagName === "CODE" ? ((tx, isMe) => N("Box", { component: "code", className: isMe ? "me-code" : undefined, sx: { fontFamily: MONO, fontSize: ".85em", px: .5, py: .125, borderRadius: "4px", bgcolor: "action.hover", color: "text.primary", ...(isMe ? { whiteSpace: "nowrap" } : {}) } }, isMe ? window.MeSyntax.render(h, tx) : [tx]))(n.textContent, !!window.MeSyntax && isMeCode(n.textContent))
     : n.textContent);
   const attrs = (img, names) => Object.fromEntries(names.map((k) => [k, img.getAttribute(k)]).filter(([, v]) => v != null));
   const docsIndex = SRC.dataset.layout === "docs-index", docPage = SRC.dataset.layout === "doc";
@@ -448,7 +451,7 @@
     const t = tagOf(n);
     if (t === "a") return N("Link", { href: n.getAttribute("href"), underline: "hover", sx: { color: "primary.main", fontWeight: "inherit" } }, inl(n));
     // Inline code that is .me code (starts with me. / me( / me[) goes through the .me highlighter too.
-    if (t === "code") { const tx = n.textContent, isMe = SYN && /^me[.(\[]/.test(tx);
+    if (t === "code") { const tx = n.textContent, isMe = SYN && (isMeCode(tx) || (meTable && /^[\p{L}_$][\p{L}\p{N}_$]*(\.[\p{L}\p{N}_$]+|\[\d+\])+$/u.test(tx)));
       return N("Box", { component: "code", className: isMe ? "me-code" : undefined, sx: { fontFamily: MONO, fontSize: ".86em", px: .5, py: .125, borderRadius: "4px", bgcolor: "action.hover", color: "text.primary", overflowWrap: "anywhere" } }, isMe ? SYN.render(h, tx) : [tx]); }
     if (t === "strong" || t === "b") return N("Box", { component: "strong", sx: { fontWeight: 700, color: "text.primary" } }, inl(n));
     if (t === "em" || t === "i") return N("Box", { component: "em" }, inl(n));
@@ -458,7 +461,10 @@
     return N("Box", { component: "span" }, inl(n));
   }).filter((x) => x != null && x !== "");
   const cellSx = { textAlign: "left", verticalAlign: "top", px: 1.25, py: .75, borderBottom: 1, borderColor: "divider", fontSize: ".9rem", lineHeight: 1.5 };
-  const tableNode = (el) => N("Box", { sx: { overflowX: "auto", mb: 2.5, border: 1, borderColor: "divider", borderRadius: "10px" } }, [
+  // in a table that already shows .me code, bare paths in code cells (profile.name, users.ana) are .me paths too
+  let meTable = false;
+  const tableNode = (el) => { meTable = !!SYN && [...el.querySelectorAll("code")].some((c) => isMeCode(c.textContent)); try { return tableNode0(el); } finally { meTable = false; } };
+  const tableNode0 = (el) => N("Box", { sx: { overflowX: "auto", mb: 2.5, border: 1, borderColor: "divider", borderRadius: "10px" } }, [
     N("Box", { component: "table", sx: { width: "100%", borderCollapse: "collapse", "& tr:last-of-type > td": { borderBottom: 0 } } },
       [...el.children].map((sec) => N("Box", { component: tagOf(sec) }, [...sec.children].map((tr) => N("Box", { component: "tr" }, [...tr.children].map((c) => {
         const al = c.getAttribute("style") && /right/.test(c.getAttribute("style")) ? "right" : "left";
@@ -550,12 +556,21 @@
           : blocks({ children: [c] })[0]),
       ]);
     }
+    // <div class="doc-sidebar">: a sticky right-hand panel beside the page (docSpec widens the page into two columns)
+    if (b.classList.contains("doc-sidebar")) return N("Box", { component: "div", "data-doc-sidebar": "1" }, blocks(b));
     if (t === "div" || t === "section") return N("Box", { component: t }, blocks(b));
     return N("Box", { component: t, sx: { mb: 2 } }, inl(b));
   }).filter(Boolean);
   const docSpec = () => N("Box", { sx: { minHeight: "100vh", bgcolor: "background.default", color: "text.primary" } }, [
     N("LandingTopBar", {}),
-    N("Box", { component: "main", sx: { width: "min(860px, calc(100% - 40px))", mx: "auto", pt: 5, pb: 10, "@media (max-width:480px)": { pt: 3.5, width: "calc(100% - 32px)" } } }, blocks(axiomBlocks(relatedCards(page.body)))),
+    // a page with a top-level .doc-sidebar (e.g. Social-Graph's live figure): steps on the left, the panel sticky on the
+    // right from 1000px, as on the Smart Cities demos; narrower, one column and the panel stays where it is in the text
+    page.body.querySelector(":scope > .doc-sidebar")
+      ? N("Box", { component: "main", sx: { width: "min(1240px, calc(100% - 40px))", mx: "auto", pt: 5, pb: 10, "@media (max-width:480px)": { pt: 3.5, width: "calc(100% - 32px)" },
+          "@media (min-width:1000px)": { display: "grid", gridTemplateColumns: "minmax(0, 1fr) 380px", columnGap: "28px", alignItems: "start", "& > *": { gridColumn: 1, minWidth: 0 },
+            "& > [data-doc-sidebar]": { gridColumn: 2, gridRow: "1 / span 400", alignSelf: "stretch" },
+            "& > [data-doc-sidebar] > *": { position: "sticky", top: "60px", maxHeight: "calc(100vh - 72px)", overflowY: "auto", overscrollBehavior: "contain" } } } }, blocks(axiomBlocks(relatedCards(page.body))))
+      : N("Box", { component: "main", sx: { width: "min(860px, calc(100% - 40px))", mx: "auto", pt: 5, pb: 10, "@media (max-width:480px)": { pt: 3.5, width: "calc(100% - 32px)" } } }, blocks(axiomBlocks(relatedCards(page.body)))),
   ]);
   const spec = docPage ? docSpec() : docsIndex ? docsSpec() : demosIndex ? indexSpec() : N("Box", { sx: { minHeight: "100vh", bgcolor: "background.default", color: "text.primary", lineHeight: 1.6 } }, [
     N("LandingTopBar", {}),
@@ -586,7 +601,7 @@
   });
   html.classList.add("gui-on");
   document.querySelectorAll("link[data-static-only]").forEach((l) => { l.disabled = true; });
-  if ((docPage || docsIndex) && SYN && SYN.watchTheme) SYN.watchTheme(); // re-measures the code colours whenever .GUI writes a new theme / mode
+  if (SYN && SYN.watchTheme) SYN.watchTheme(); // re-measures the code colours whenever .GUI writes a new theme / mode
   SRC.remove();
   }
 })();
