@@ -205,6 +205,7 @@
     ".ac-btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.ac-btn{font:inherit;font-size:12.5px;font-weight:600;padding:4px 10px;border-radius:8px;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.4));background:transparent;color:inherit;cursor:pointer}.ac-btn:hover{border-color:var(--mui-palette-primary-main,#58a6ff)}.ac-btn.on{color:var(--mui-palette-primary-main,#58a6ff);border-color:currentColor}",
     ".ac-k summary{cursor:pointer;list-style:none;font:11.5px/1.5 " + MONO + ";color:var(--mui-palette-text-secondary,#8b949e)}.ac-k summary::-webkit-details-marker{display:none}.ac-k summary::before{content:'▸ ';}.ac-k[open] summary::before{content:'▾ '}.ac-k .ok{color:var(--mui-palette-success-main,#2e9d6e)}.ac-k .bad{color:var(--mui-palette-error-main,#e5534b)}.ac-k div{font:11px/1.6 " + MONO + ";color:var(--mui-palette-text-secondary,#8b949e);overflow-wrap:anywhere}",
     ".ac-steps{list-style:none;margin:0 0 10px;padding:0;display:flex;flex-wrap:wrap;gap:6px}.ac-steps li{margin:0}.ac-step{font:inherit;font-size:12.5px;cursor:pointer;padding:4px 10px;border-radius:999px;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));background:transparent;color:var(--mui-palette-text-secondary,#8b949e)}.ac-step b{font-weight:700;margin-right:2px}.ac-step.on{color:var(--mui-palette-text-primary,inherit);border-color:var(--mui-palette-primary-main,#58a6ff);background:var(--mui-palette-action-selected,rgba(88,166,255,.12))}.ac-how:focus-visible{outline:2px solid var(--mui-palette-primary-main,#58a6ff);outline-offset:4px;border-radius:8px}.ac-stepbody{padding:12px 14px;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:12px;background:var(--mui-palette-background-paper,transparent)}.ac-stepbody>p{margin:0 0 4px}.ac-stepbody .ac-json{max-height:200px}.ac-stepn{align-self:center;margin-left:auto;font-size:12px;color:var(--mui-palette-text-secondary,#8b949e)}"+
+    ".ac-reads{all:unset;cursor:pointer;color:var(--mui-palette-primary-main,#58a6ff);border-bottom:1px dashed var(--mui-palette-primary-main,#58a6ff)}.ac-reads:hover,.ac-reads:focus-visible{border-bottom-style:solid}.ac-reads-out{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:8px}.ac-reads-h{width:100%;font-size:12.5px}.ac-reads-chip{border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:6px;padding:1px 6px;line-height:1.5}.ac-reads-more{all:unset;cursor:pointer;font-size:12px;color:var(--mui-palette-primary-main,#58a6ff);padding:0 4px}",
     ".ac-me{font-family:" + MONO + ";font-size:12px}.ac-notes{margin:28px 0 0;max-width:760px;font-size:14px;line-height:1.65}.ac-notes h2,.ac-rel h2{margin:0 0 10px;font-size:1.35rem;font-weight:800}.ac-notes ul{margin:0;padding-left:20px}.ac-notes li{margin-bottom:6px}.ac-notes code{font-family:" + MONO + ";font-size:12.5px}",
     ".ac-rel{margin:32px 0 8px}.ac-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}@media (max-width:900px){.ac-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (max-width:480px){.ac-cards{grid-template-columns:1fr}}",
     ".ac-card{display:flex;flex-direction:column;border:1px solid var(--mui-palette-divider,rgba(128,128,128,.3));border-radius:14px;overflow:hidden;background:var(--mui-palette-background-paper,transparent);color:inherit;text-decoration:none;transition:transform .15s,border-color .15s}.ac-card:hover{transform:translateY(-2px);border-color:var(--mui-palette-primary-main,#58a6ff)}",
@@ -392,7 +393,7 @@
         h("div", { className: "ac-note" }, me('colony["="]("food", "chambers.pantry.stock + chambers.granary.stock + chambers.cellar.stock")'), " recomputes on every stock write. Each group is a [\"=\"] sum of per-ant flags, e.g. ", me('colony.ants["="]("scouts", "colony.ants[1].isScout + …")'), ". Click a row to highlight its members on the map (asked of ", me("ants[n].isScout"), " etc.) and explain the count; click again or Esc to clear."),
         h("div", { className: "ac-btns" },
           h("button", { type: "button", className: "ac-btn" + (run ? "" : " on"), "data-ac": "pause", onClick: function () { running.on = !running.on; setRun(running.on); } }, run ? "Pause" : "Resume"),
-          h("button", { type: "button", className: "ac-btn", "data-ac": "rain", disabled: !ok, onClick: function () { var sp = "colony.chambers.granary.stock", cap = CH.granary.capacity; write(sp, Math.max(0, read(sp) - 10)); emit(); select({ type: "path", p: "colony.food" }); }, title: "Writes colony.chambers.granary.stock − 10" }, "Rain floods the granary (−10)"))),
+          h("button", { type: "button", className: "ac-btn", "data-ac": "rain", disabled: !ok, onClick: function () { rain(); select({ type: "path", p: "colony.food" }); }, title: "Writes colony.chambers.granary.stock − 10" }, "Rain floods the granary (−10)"))),
       h("div", { className: "ac-sec", "data-ac": "writes" }, h("div", { className: "ac-h" }, "Writes · " + KL),
         h("div", { className: "ac-row" }, h("span", null, "writes so far"), h("span", { className: "ac-num" }, ok ? String(k.writes) : "–")),
         h("div", { className: "ac-row" }, h("span", null, "last"), h("span", { className: "ac-num", title: k.last ? k.last.path : "" }, k.last ? k.last.path.replace("colony.", "") + " = " + v(k.last.value) : "–")),
@@ -514,6 +515,27 @@
       h(Mo.Menu, { id: "settings-menu", anchorEl: anchor, open: !!anchor, onClose: close, "data-gui-inspector-control": "true", anchorOrigin: { vertical: "bottom", horizontal: "right" }, transformOrigin: { vertical: "top", horizontal: "right" } },
         items.map(function (it) { return h(Mo.MenuItem, { key: it.key, "data-settings-item": it.key, onClick: function () { close(); it.onClick(); } }, h(Mo.ListItemIcon, null, it.icon), h(Mo.ListItemText, null, it.label)); })));
   }
+  // ── the rain action (toolbar button and the intro phrase share it) ──
+  function rain() { var sp = "colony.chambers.granary.stock", v0 = read(sp), v = Math.max(0, v0 - 10); write(sp, v); emit();
+    var ex = K.me.explain("colony.food"), m = ex && ex.meta; return { from: v0, to: v, recomputed: m && m.sourcePath === sp && m.recomputed ? m.recomputed.slice() : [] }; }
+  // ── intro: "only what depends on it recomputes" runs the rain and lists the kernel's meta.recomputed inline ──
+  function derivedCount() { var c = ["colony.broodNeed", "colony.workers", "colony.nurses", "colony.scouts", "colony.carried", "colony.recruited", "colony.food", "colony.treesKnown",
+      "colony.ants.workers", "colony.ants.nurses", "colony.ants.scouts", "colony.ants.recruited", "colony.trees.known", "colony.chambers.nursery.brood"];
+    NAMES.forEach(function (n) { c.push("colony.chambers." + n + ".free"); }); EDGES.forEach(function (e) { ["bias", "strength", "cost"].forEach(function (f) { c.push("colony.trails." + e.id + "." + f); }); });
+    TREES.forEach(function (n) { ["trail", "attract"].forEach(function (f) { c.push("colony.trees." + n + "." + f); }); });
+    return c.filter(function (p) { var e = K.me.explain(p); return e && e.derivation && e.derivation.expression; }).length; }
+  function Reads() {
+    var k = useKernel(), rs = useState(null), res = rs[0], setRes = rs[1], os = useState(false), open = os[0], setOpen = os[1], ok = k.status === "ok";
+    var hover = function () { if (ok) select({ type: "chamber", n: "granary" }); };
+    var go = function () { if (!ok) return; var r = rain(); select({ type: "chamber", n: "granary" }); setRes({ head: "granary.stock " + r.from + " → " + r.to, rec: r.recomputed, total: derivedCount() }); setOpen(false); };
+    var n = res ? res.rec.length : 0, shown = res ? (open ? res.rec : res.rec.slice(0, 8)) : [];
+    return h(React.Fragment, null,
+      h("button", { type: "button", className: "ac-reads", "data-ac": "reads", disabled: !ok, onMouseEnter: hover, onFocus: hover, onClick: go, title: "Rain: writes colony.chambers.granary.stock − 10 and lists me.explain(\"colony.food\").meta.recomputed" }, "only what depends on it recomputes"), ".",
+      res ? h("span", { className: "ac-reads-out", "data-ac": "reads-out" },
+        h("span", { className: "ac-reads-h" }, res.head + " · ", h("b", null, n + " of " + res.total), " derived paths recomputed"),
+        shown.map(function (p, x) { return h("span", { key: x, className: "ac-reads-chip" }, me(p)); }),
+        n > 8 ? h("button", { type: "button", className: "ac-reads-more", "data-ac": "reads-more", onClick: function () { setOpen(!open); } }, open ? "less" : "+" + (n - 8) + " more") : null) : null);
+  }
   function TopBar(p) {
     // when the path doesn't fit, the middle segments collapse to "…" (a link to the parent), so the page's own name always shows in full
     var cst = useState("measure"), mode = cst[0], setMode = cst[1], col = mode === "col", pathRef = useRef(null), last = PATH.length - 1;
@@ -542,7 +564,7 @@
     N("Box", "main", { component: "main", sx: { maxWidth: 1180, mx: "auto", px: { xs: 2, sm: 4 }, pt: { xs: 3, sm: 4.5 }, pb: 8 } }, [
       N("Typography", "kicker", { component: "p", sx: { fontSize: ".75rem", fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: "text.secondary", mb: 1 } }, ["Smart Cities · " + KL]),
       N("Typography", "title", { component: "h1", sx: { fontSize: "clamp(2rem, 5vw, 2.75rem)", fontWeight: 800, letterSpacing: "-.02em", lineHeight: 1.1, mb: 1 } }, ["Ant City"]),
-      N("Typography", "lede", { component: "p", sx: { color: "text.secondary", mb: 3, maxWidth: 720 } }, ["Scouts search the surface for trees; a find becomes a trail home and a recruitment wave that spreads ant to ant. The colony lives in .me: trail weights, routes and the queen's influence are kernel values, and every arrival is a write."]),
+      N("Typography", "lede", { component: "p", sx: { color: "text.secondary", mb: 3, maxWidth: 720 } }, ["Each ant is ", me("colony.ants[i]"), " with ", me("colony.ants[i].carry"), " and ", me(".role"), "; one rule, ", me('colony.trails[1]["="]("cost", "length / (1 + strength)")'), ", and one total, ", me('colony["="]("food", "chambers.pantry.stock + chambers.granary.stock + chambers.cellar.stock")'), ". Rain floods the granary and ", h(Reads)]),
       N("ACDashboard", "colony"),
       N("ACRelated", "related"),
     ]),
