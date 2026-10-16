@@ -170,10 +170,11 @@
       m = /^orders\.(\d+)\./.exec(p); if (m) { var o = orders.filter(function (x) { return x.id === +m[1]; })[0]; if (o) { var n = NODES[o.node]; return { x: n.x, y: n.y, o: o }; } }
       if (/^fleet\./.test(p)) return { x: 60, y: 40 }; return null; },
     trace: function (tr) { var src = fx.where(tr.path) || { x: 60, y: 40 }, seen = {}, i = 0;
-      tr.recomputed.forEach(function (p) { var w = fx.where(p); if (!w) return; var key = Math.round(w.x) + "," + Math.round(w.y) + p.split(".")[0]; if (w.b) w.b.pulse = performance.now() + i * 25;
+      tr.recomputed.forEach(function (p) { var w = fx.where(p); if (!w || (/^fleet\./.test(p) && !/^fleet\./.test(tr.path))) return;   // fleet aggregates have no place on the floor: the ripple stays at the source robot
+      var key = Math.round(w.x) + "," + Math.round(w.y) + p.split(".")[0]; if (w.b) w.b.pulse = performance.now() + i * 25;
         if (!seen[key] && (Math.abs(w.x - src.x) + Math.abs(w.y - src.y) > 4)) { seen[key] = 1; if (i < 220) fx.line(src.x, src.y, w.x, w.y, "ripple", i * 18); }
         if (w.o) fx.at(w.x, w.y, "order"); i++; });
-      fx.at(src.x, src.y, "src"); },
+      fx.at(src.x, src.y, "src"); if (!/^fleet\./.test(tr.path)) fx.at(src.x, src.y, "src"); },
     link: function (b, o) { var n = NODES[o.node]; fx.line(b.x, b.y, n.x, n.y, "assign"); },
     pick: function (b) { fx.at(b.x, b.y, "pick"); }, drop: function (b) { fx.at(b.x, b.y, "drop"); },
     aisle: function (L, all) { var x = AX(AIS.indexOf(L)); fx.at(x, (TOP + BOT) / 2, "aisle"); (all.recomputed || []).forEach(function (p, i) { var w = fx.where(p); if (w) { if (w.b) w.b.pulse = performance.now() + i * 30; fx.line(x, (TOP + BOT) / 2, w.x, w.y, "ripple", i * 30); } }); },
@@ -223,6 +224,7 @@
     ".wf-k summary{cursor:pointer;list-style:none;font:11.5px/1.5 " + MONO + ";color:" + TX2 + "}.wf-k summary::-webkit-details-marker{display:none}.wf-k .ok{color:var(--mui-palette-success-main,#2e9d6e)}.wf-k .bad{color:var(--mui-palette-error-main,#e5534b)}.wf-k div{font:11px/1.6 " + MONO + ";color:" + TX2 + ";overflow-wrap:anywhere}",
     ".wf-side{font-size:14px;line-height:1.6}.wf-side h2{margin:0 0 8px;font-size:1.2rem;font-weight:800}.wf-step{border:1px solid " + DIV + ";border-radius:12px;padding:10px 12px 2px;margin:0 0 12px;background:" + PAPER + ";scroll-margin-top:64px;transition:border-color .2s}.wf-step.on{border-color:" + PRI + "}",
     ".wf-step h3{margin:0 0 4px;font-size:14px;font-weight:800;display:flex;gap:8px;align-items:baseline}.wf-step h3 b{display:inline-grid;place-items:center;min-width:20px;height:20px;border-radius:50%;font-size:11px;border:1px solid " + PRI + ";color:" + PRI + "}.wf-step p{margin:0 0 8px;font-size:13px}.wf-step .wf-bar{margin:0 0 10px}",
+    ".wf-reads{all:unset;cursor:pointer;color:" + PRI + ";border-bottom:1px dashed " + PRI + "}.wf-reads:hover,.wf-reads:focus-visible{border-bottom-style:solid}.wf-reads-out{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:8px}.wf-reads-h{width:100%;font-size:12.5px}.wf-reads-chip{border:1px solid " + DIV + ";border-radius:6px;padding:1px 6px;line-height:1.5}.wf-reads-more{all:unset;cursor:pointer;font-size:12px;color:" + PRI + ";padding:0 4px}",
     ".wf-me{font-family:" + MONO + ";font-size:12px}.wf-cap{margin:6px 2px 0;font-size:12px;line-height:1.5;color:" + TX2 + "}",
     ".wf-rel{margin:32px 0 8px}.wf-rel h2{margin:0 0 10px;font-size:1.35rem;font-weight:800}.wf-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}@media (max-width:900px){.wf-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (max-width:480px){.wf-cards{grid-template-columns:1fr}}",
     ".wf-card2{display:flex;flex-direction:column;border:1px solid " + DIV + ";border-radius:14px;overflow:hidden;background:" + PAPER + ";color:inherit;text-decoration:none;transition:transform .15s,border-color .15s}.wf-card2:hover{transform:translateY(-2px);border-color:" + PRI + "}.wf-card2 .img{display:block;aspect-ratio:1200/630;background:var(--mui-palette-action-hover,rgba(128,128,128,.12));overflow:hidden}.wf-card2 img{width:100%;height:100%;object-fit:cover;display:block}.wf-card2 .tx{display:flex;flex-direction:column;gap:3px;padding:10px 12px 12px}.wf-card2 b{font-size:14px;font-weight:800}.wf-card2 small{font-size:12px;line-height:1.4;color:" + TX2 + "}",
@@ -534,6 +536,24 @@
       h(Mo.Menu, { id: "settings-menu", anchorEl: anchor, open: !!anchor, onClose: close, "data-gui-inspector-control": "true", anchorOrigin: { vertical: "bottom", horizontal: "right" }, transformOrigin: { vertical: "top", horizontal: "right" } },
         items.map(function (it) { return h(Mo.MenuItem, { key: it.key, "data-settings-item": it.key, onClick: function () { close(); it.onClick(); } }, h(Mo.ListItemIcon, null, it.icon), h(Mo.ListItemText, null, it.label)); })));
   }
+  // ── intro: "only what depends on it recomputes" drains a real battery and lists the kernel's meta.recomputed inline ──
+  function derivedCount() { var c = [], i; for (i = 1; i <= bots.length; i++) ["canTake", "eta", "low", "range"].forEach(function (f) { c.push("robots." + i + "." + f); });
+    orders.forEach(function (o) { ["eta", "late"].forEach(function (f) { c.push("orders." + o.id + "." + f); }); });
+    ["fleet.avgBattery", "fleet.carrying", "fleet.available", "fleet.lowCount"].forEach(function (p) { c.push(p); });
+    return c.filter(function (p) { var e = K.me.explain(p); return e && e.derivation && e.derivation.expression; }).length; }
+  function pickBot() { var ok = bots.filter(function (b) { return (read(RP(b) + ".battery") || 0) > 12; }); return ok.filter(function (b) { return b.order; })[0] || ok[0] || null; }
+  function Reads() {
+    var k = useKernel(), rs = useState(null), res = rs[0], setRes = rs[1], os = useState(false), open = os[0], setOpen = os[1], ok = k.status === "ok";
+    var hover = function () { if (!ok) return; var b = pickBot(); if (b) { b.pulse = performance.now(); select({ type: "robot", i: b.id }); } };
+    var go = function () { if (!ok) return; var b = pickBot(); if (!b) return; var tr = actions.drain(b.id); if (!tr) return; setRes({ id: b.id, order: b.order, rec: tr.recomputed.slice(), total: derivedCount() }); setOpen(false); };
+    var n = res ? res.rec.length : 0, shown = res ? (open ? res.rec : res.rec.slice(0, 8)) : [];
+    return h(React.Fragment, null,
+      h("button", { type: "button", className: "wf-reads", "data-wf": "reads", disabled: !ok, onMouseEnter: hover, onFocus: hover, onClick: go, title: "Drains a robot's battery to 12 through the kernel and lists me.explain(…).meta.recomputed" }, "only what depends on it recomputes"), ".",
+      res ? h("span", { className: "wf-reads-out", "data-wf": "reads-out" },
+        h("span", { className: "wf-reads-h" }, "robot " + res.id + " battery → 12 · ", h("b", null, n + " of " + res.total), " derived paths recomputed" + (res.order ? " · order " + res.order : "")),
+        shown.map(function (p, x) { return h("span", { key: x, className: "wf-reads-chip" }, me(p)); }),
+        n > 8 ? h("button", { type: "button", className: "wf-reads-more", "data-wf": "reads-more", onClick: function () { setOpen(!open); } }, open ? "less" : "+" + (n - 8) + " more") : null) : null);
+  }
   function TopBar(p) {
     // when the path doesn't fit, the middle segments collapse to "…" (a link to the parent), so the page's own name always shows in full
     var cst = useState("measure"), mode = cst[0], setMode = cst[1], col = mode === "col", pathRef = useRef(null), last = PATH.length - 1;
@@ -562,7 +582,7 @@
     N("Box", "main", { component: "main", sx: { maxWidth: 1440, mx: "auto", px: { xs: 1.5, sm: 3 }, pt: { xs: 2.5, sm: 3.5 }, pb: 8 } }, [
       N("Typography", "kicker", { component: "p", sx: { fontSize: ".75rem", fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: "text.secondary", mb: 1 } }, ["Robots · " + KL]),
       N("Typography", "title", { component: "h1", sx: { fontSize: "clamp(1.9rem, 5vw, 2.6rem)", fontWeight: 800, letterSpacing: "-.02em", lineHeight: 1.1, mb: 1 } }, ["Warehouse Fleet"]),
-      N("Typography", "lede", { component: "p", sx: { color: "text.secondary", mb: 3, maxWidth: 760 } }, ["Twenty robots pick and deliver orders. Batteries, tasks and routes are paths in .me; canTake, eta and late are rules declared once for the whole fleet. Drain a battery or block an aisle and only what depends on it recomputes."]),
+      N("Typography", "lede", { component: "p", sx: { color: "text.secondary", mb: 3, maxWidth: 760 } }, ["Each robot is ", me("robots[i]"), " with ", me("robots[i].battery"), " and ", me(".task"), "; one rule, ", me('robots["[i]"]["="]("canTake", "battery > fleet.threshold && !busy && !charging")'), ", and one aggregate, ", me('fleet["="]("available", "robots[].canTake")'), ". Drain a battery and ", h(Reads)]),
       N("WFDashboard", "fleet"),
       N("WFRelated", "related"),
     ]),

@@ -172,7 +172,7 @@
       if (/^city\./.test(p)) return { x: 70, y: 36 }; return null; },
     trace: function (tr, quiet) { var src = fx.where(tr.path) || { x: 70, y: 36 }, seen = {}, n = 0;
       if (quiet) { tr.recomputed.forEach(function (p) { var w = fx.where(p); if (w && w.b && p.indexOf(tr.path.split(".").slice(0, 2).join(".") + ".") !== 0) w.b.pulse = performance.now(); }); return; }   // the simulation's own writes: a soft pulse on other dependents only
-      tr.recomputed.forEach(function (p) { var w = fx.where(p); if (!w) return; var key = Math.round(w.x) + "," + Math.round(w.y) + p.split(".")[0]; if (w.b) w.b.pulse = performance.now() + n * 25;
+      tr.recomputed.forEach(function (p) { var w = fx.where(p); if (!w || (/^city\./.test(p) && !/^city\./.test(tr.path))) return;   // city aggregates have no place on the map: ripples stay with the couriers var key = Math.round(w.x) + "," + Math.round(w.y) + p.split(".")[0]; if (w.b) w.b.pulse = performance.now() + n * 25;
         if (!seen[key] && (Math.abs(w.x - src.x) + Math.abs(w.y - src.y) > 4)) { seen[key] = 1; if (n < 200) fx.line(src.x, src.y, w.x, w.y, "ripple", n * 18); }
         if (w.o) fx.at(w.x, w.y, "order"); n++; });
       fx.at(src.x, src.y, "src"); },
@@ -180,7 +180,7 @@
     link: function (b, o) { fx.line(b.x, b.y, o.home.x, o.home.y, "assign"); },
     drop: function (home) { fx.at(home.x, home.y, "drop"); },
     street: function (sid, all) { var e = EDGES[sid], A = NODES[e.a], B = NODES[e.b], x = (A.x + B.x) / 2, y = (A.y + B.y) / 2; fx.at(x, y, "street");
-      (all.recomputed || []).forEach(function (p, n) { var w = fx.where(p); if (w) { if (w.b) w.b.pulse = performance.now() + n * 30; fx.line(x, y, w.x, w.y, "ripple", n * 30); } }); },
+      (all.recomputed || []).forEach(function (p, n) { var w = /^city\./.test(p) ? null : fx.where(p); if (w) { if (w.b) w.b.pulse = performance.now() + n * 30; fx.line(x, y, w.x, w.y, "ripple", n * 30); } }); },
   };
 
   // ── audiences: each customer's orders → that customer OR ops; the fleet → ops; OR = one ME.wrapSecretV1 per member ──
@@ -488,8 +488,33 @@
     ["https://neurons-me.github.io/.me/Demos/Robots/Swarm/", "https://neurons-me.github.io/.me/Demos/Robots/Swarm/assets/swarm-og.png", "Rescue Swarm", "Drones search a disaster zone under fog."]];
   var PATH = [{ text: "me://", href: "https://neurons-me.github.io/.me/", title: ".me" }, { text: "Demos", href: "https://neurons-me.github.io/.me/Demos/", title: ".me demos" },
     { text: "SmartCities", href: "https://neurons-me.github.io/smart-cities/", title: "Smart Cities" }, { text: "CityDelivery", href: null, title: "This page" }];
-  var PAGE = { kicker: "Smart Cities · Robots · " + KL, title: "City Delivery", lede: "Sidewalk robots and drones deliver parcels across a city grid. Couriers, lights and streets are paths in .me; eta, canTake and late are rules declared once. Flip a light or close a street and only the ETAs that depend on it recompute.",
+  var PAGE = { kicker: "Smart Cities · Robots · " + KL, title: "City Delivery", lede: h(React.Fragment, null, "Each courier is ", me("couriers[i]"), " with ", me("couriers[i].battery"), " and ", me(".dist"), "; one rule, ", me('couriers["[i]"]["="]("eta", "dist / speed + next.wait")'), ", and one aggregate, ", me('city["="]("delivering", "couriers[].delivering")'), ". Close a street and ", h(Reads)),
     api: function () { return window.CityDeliveryKernel; }, global: "__cd", expose: function () { return { K: K, bots: function () { return bots; }, orders: function () { return orders; }, select: select, actions: actions, audiences: audiences, rescale: rescale, wms: wms, EDGES: EDGES, LIGHTS: LIGHTS }; } };
+
+  // ── intro: the last phrase runs a real action and lists the kernel's meta.recomputed inline ──
+  (function () { var st = document.createElement("style"); st.textContent = ".cd-reads{all:unset;cursor:pointer;color:" + PRI + ";border-bottom:1px dashed " + PRI + "}.cd-reads:hover,.cd-reads:focus-visible{border-bottom-style:solid}.cd-reads-out{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:8px}.cd-reads-h{width:100%;font-size:12.5px}.cd-reads-chip{border:1px solid " + DIV + ";border-radius:6px;padding:1px 6px;line-height:1.5}.cd-reads-more{all:unset;cursor:pointer;font-size:12px;color:" + PRI + ";padding:0 4px}"; document.head.appendChild(st); })();
+  function derivedCount() { return DERIVED().filter(function (p) { var e = K.me.explain(p); return e && e.derivation && e.derivation.expression; }).length; }
+  function Reads() {
+    var k = useKernel(), rs = useState(null), res = rs[0], setRes = rs[1], os = useState(false), open = os[0], setOpen = os[1], ok = k.status === "ok";
+    var hover = function () { if (ok) READS.preview(); };
+    var go = function () { if (!ok) return; var r = READS.run(); if (!r || !r.tr) return; setRes({ head: r.head, rec: r.tr.recomputed.slice(), total: derivedCount() }); setOpen(false); };
+    var n = res ? res.rec.length : 0, shown = res ? (open ? res.rec : res.rec.slice(0, 8)) : [];
+    return h(React.Fragment, null,
+      h("button", { type: "button", className: "cd-reads", "data-cd": "reads", disabled: !ok, onMouseEnter: hover, onFocus: hover, onClick: go, title: READS.title }, "only what depends on it recomputes"), ".",
+      res ? h("span", { className: "cd-reads-out", "data-cd": "reads-out" },
+        h("span", { className: "cd-reads-h" }, res.head + " · ", h("b", null, n + " of " + res.total), " derived paths recomputed"),
+        shown.map(function (p, x) { return h("span", { key: x, className: "cd-reads-chip" }, me(p)); }),
+        n > 8 ? h("button", { type: "button", className: "cd-reads-more", "data-cd": "reads-more", onClick: function () { setOpen(!open); } }, open ? "less" : "+" + (n - 8) + " more") : null) : null);
+  }
+  function DERIVED() { var c = []; LIGHTS.forEach(function (l) { c.push("lights." + l.id + ".wait"); }); c.push("lights.sky.wait");
+    bots.forEach(function (b) { ["eta", "canTake", "low"].forEach(function (f) { c.push(CP(b) + "." + f); }); });
+    orders.forEach(function (o) { ["eta", "late"].forEach(function (f) { c.push("orders." + o.id + "." + f); }); });
+    return c.concat(["city.delivering", "city.available", "city.avgBattery", "city.inAir"]); }
+  function busyStreet() { var cnt = {}; bots.forEach(function (b) { if (b.air || !b.path) return; Object.keys(EDGES).forEach(function (sid) { if (!EDGES[sid].closed && usesStreet(b.path, b.seg, sid)) cnt[sid] = (cnt[sid] || 0) + 1; }); });
+    var best = null; Object.keys(cnt).forEach(function (s) { if (!best || cnt[s] > cnt[best]) best = s; }); return best; }
+  var READS = { title: "Closes the street most robots are routed through (streets.<id>.closed) and lists me.explain(…).meta.recomputed",
+    preview: function () { var s = busyStreet(); if (s) select({ type: "street", s: s }); },
+    run: function () { var s = busyStreet(); if (!s) return null; var tr = actions.close(s); return { tr: tr, head: "street " + s + " closed · " + (tr ? tr.reroutes : 0) + (tr && tr.reroutes === 1 ? " robot" : " robots") + " re-routed" }; } };
   function KernelCard() { var k = useKernel(), st = MK.state;
     return h("section", { className: "cd-card", style: { gridColumn: "1 / -1" } }, h("details", { className: "cd-k", "data-cd": "kernel" },
       h("summary", null, "Kernel · ", link(MK.KERNEL.npm, KL), " · ", st.state === "ok" ? h("span", { className: "ok" }, "sha256 verified") : st.state === "error" ? h("span", { className: "bad" }, "failed: " + st.text) : "loading…"),

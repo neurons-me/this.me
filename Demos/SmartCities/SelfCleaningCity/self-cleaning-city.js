@@ -429,8 +429,31 @@
     ["https://neurons-me.github.io/.me/Demos/Robots/Swarm/", "https://neurons-me.github.io/.me/Demos/Robots/Swarm/assets/swarm-og.png", "Rescue Swarm", "Drones search a disaster zone under fog."]];
   var PATH = [{ text: "me://", href: "https://neurons-me.github.io/.me/", title: ".me" }, { text: "Demos", href: "https://neurons-me.github.io/.me/Demos/", title: ".me demos" },
     { text: "SmartCities", href: "https://neurons-me.github.io/smart-cities/", title: "Smart Cities" }, { text: "SelfCleaningCity", href: null, title: "This page" }];
-  var PAGE = { kicker: "Smart Cities · Robots · " + KL, title: "Self-Cleaning City", lede: "Bin sensors report their fill; waste robots go where the city is fullest. Bins, colonias and robots are paths in .me; full, the colonia averages and the dispatch pressure are rules and aggregates declared once. A bin fills and only its colonia recomputes.",
+  var PAGE = { kicker: "Smart Cities · Robots · " + KL, title: "Self-Cleaning City", lede: h(React.Fragment, null, "Each sensor writes ", me("colonias[1].bins[3].fill"), "; one rule, ", me('colonias[1].bins["[i]"]["="]("full", "fill >= city.threshold")'), ", and one aggregate, ", me('colonias["[i]"]["="]("fullN", "colonias[i].bins[].full")'), ". A bin fills and ", h(Reads)),
     api: function () { return window.SelfCleaningKernel; }, global: "__sc", expose: function () { return { K: K, bots: function () { return bots; }, BINS: BINS, select: select, actions: actions, audiences: audiences, rescale: rescale, wms: wms }; } };
+
+  // ── intro: the last phrase runs a real action and lists the kernel's meta.recomputed inline ──
+  (function () { var st = document.createElement("style"); st.textContent = ".sc-reads{all:unset;cursor:pointer;color:" + PRI + ";border-bottom:1px dashed " + PRI + "}.sc-reads:hover,.sc-reads:focus-visible{border-bottom-style:solid}.sc-reads-out{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:8px}.sc-reads-h{width:100%;font-size:12.5px}.sc-reads-chip{border:1px solid " + DIV + ";border-radius:6px;padding:1px 6px;line-height:1.5}.sc-reads-more{all:unset;cursor:pointer;font-size:12px;color:" + PRI + ";padding:0 4px}"; document.head.appendChild(st); })();
+  function derivedCount() { return DERIVED().filter(function (p) { var e = K.me.explain(p); return e && e.derivation && e.derivation.expression; }).length; }
+  function Reads() {
+    var k = useKernel(), rs = useState(null), res = rs[0], setRes = rs[1], os = useState(false), open = os[0], setOpen = os[1], ok = k.status === "ok";
+    var hover = function () { if (ok) READS.preview(); };
+    var go = function () { if (!ok) return; var r = READS.run(); if (!r || !r.tr) return; setRes({ head: r.head, rec: r.tr.recomputed.slice(), total: derivedCount() }); setOpen(false); };
+    var n = res ? res.rec.length : 0, shown = res ? (open ? res.rec : res.rec.slice(0, 8)) : [];
+    return h(React.Fragment, null,
+      h("button", { type: "button", className: "sc-reads", "data-sc": "reads", disabled: !ok, onMouseEnter: hover, onFocus: hover, onClick: go, title: READS.title }, "only what depends on it recomputes"), ".",
+      res ? h("span", { className: "sc-reads-out", "data-sc": "reads-out" },
+        h("span", { className: "sc-reads-h" }, res.head + " · ", h("b", null, n + " of " + res.total), " derived paths recomputed"),
+        shown.map(function (p, x) { return h("span", { key: x, className: "sc-reads-chip" }, me(p)); }),
+        n > 8 ? h("button", { type: "button", className: "sc-reads-more", "data-sc": "reads-more", onClick: function () { setOpen(!open); } }, open ? "less" : "+" + (n - 8) + " more") : null) : null);
+  }
+  function DERIVED() { var c = []; BINS.forEach(function (b) { c.push(BP(b) + ".full"); }); COL.forEach(function (x) { ["avgFill", "fullN", "pressure"].forEach(function (f) { c.push("colonias." + x.id + "." + f); }); });
+    bots.forEach(function (b) { ["canTake", "eta", "targetFill"].forEach(function (f) { c.push(RP(b) + "." + f); }); });
+    return c.concat(["city.avgFill", "city.fullBins", "city.working", "city.available", "city.avgLoad"]); }
+  function nextBin() { var th = read("city.threshold") || 80; return BINS.filter(function (b) { return !b.assigned && b.w < th && audiences.can("c" + b.c); }).sort(function (a, b) { return b.w - a.w; })[0] || null; }
+  var READS = { title: "Fills the fullest bin that is not yet full (colonias.c.bins.k.fill = 96) and lists me.explain(…).meta.recomputed",
+    preview: function () { var b = nextBin(); if (b) select({ type: "bin", c: b.c, k: b.k }); },
+    run: function () { var b = nextBin(); if (!b) return null; var tr = actions.fill(b.c, b.k); return { tr: tr, head: "bin " + b.c + "." + b.k + " (" + COL[b.c - 1].name + ") → 96 %" }; } };
   function KernelCard() { var k = useKernel(), st = MK.state;
     return h("section", { className: "sc-card", style: { gridColumn: "1 / -1" } }, h("details", { className: "sc-k", "data-sc": "kernel" },
       h("summary", null, "Kernel · ", link(MK.KERNEL.npm, KL), " · ", st.state === "ok" ? h("span", { className: "ok" }, "sha256 verified") : st.state === "error" ? h("span", { className: "bad" }, "failed: " + st.text) : "loading…"),
