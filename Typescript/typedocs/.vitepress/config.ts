@@ -65,6 +65,7 @@ export default defineConfig({
           { text: 'Plurality Is Grammar', link: '/Plurality-Is-Grammar' },
           { text: 'Operators & Logic', link: '/Operators' },
           { text: 'Syntax', link: '/Syntax' },
+          { text: 'Collection Aggregates', link: '/Aggregates' },
           { text: 'Proxy Calls', link: '/Proxy-Calls' },
           { text: 'Runtime Surface', link: '/Runtime-Surface' },
           { text: 'Memory', link: '/Memory' },

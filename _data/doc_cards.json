@@ -41,6 +41,12 @@
   "desc": "Why a path has its value: formula, inputs, and the last wave (k, recomputed, changed, sourcePath).",
   "img": "/.me/docs/assets/card-explain.webp"
  },
+ "/.me/docs/Aggregates.html": {
+  "href": "https://neurons-me.github.io/.me/docs/Aggregates.html",
+  "title": "Collection aggregates",
+  "desc": "robots[] counts, robots[].battery sums: live in formulas, shown in explain().",
+  "img": "/.me/docs/assets/card-aggregates.webp"
+ },
  "/.me/docs/O-k.html": {
   "href": "https://neurons-me.github.io/.me/docs/O-k.html",
   "title": "What is O(k)?",

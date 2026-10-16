@@ -17,7 +17,7 @@ Kernel: **this.me 4.2.1** ([npm](https://www.npmjs.com/package/this.me)) ⓘ
 Each example ran on 4.2.1 in a fresh `new ME()`; the result is what it returned.
 {: .doc-kernel-more}
 
-An operator is called as a bracketed key on a path: `me.path["op"](arg)`. Selectors (`[i]`, filters, ranges, `x[]`) are path syntax, not operators: see [.me Syntax](./Syntax.html#selectors-).
+An operator is called as a bracketed key on a path: `me.path["op"](arg)`. Selectors (`[i]`, filters, ranges, `x[]`) are path syntax, not operators: see [.me Syntax](./Syntax.html#selectors-). Collection aggregates `x[]` (count) and `x[].f` (sum) are path syntax too: see [Aggregates](./Aggregates.html).
 
 | Operator | Name | Example | Result on 4.2.1 | Details |
 |---|---|---|---|---|

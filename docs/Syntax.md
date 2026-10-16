@@ -126,6 +126,8 @@ me("fleet.fuelX2");                                     // 1400
 - The collection is bound from the root, even inside a scoped formula: write `fleet.trucks[].fuel`, not `trucks[].fuel`. Per member, use `[i]`.
 - The literal key `[]` is written with a quoted selector: `z["[]"].w`.
 
+Examples, `explain()` output, booleans, limitations and cost: [Collection aggregates](./Aggregates.html).
+
 ## Operators
 
 An operator is a bracketed key called on a path, such as `me.order["="]("total", "subtotal + tax")` or `me.wallet["_"]("key")`. The full set (`@`, `_`, `~`, `__` / `->`, `=`, `?`, `-`), one verified example each: [.me Operators](./Operators.html).
