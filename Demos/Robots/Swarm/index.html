@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Rescue Swarm · .me</title>
+<meta name="description" content="Drones search a collapsed district under fog of war. Battery, signal and zones are paths in .me; coverage, canAssist and reachable are rules declared once. A detection or a lost drone recomputes only its dependents, on this.me 4.2.1."/>
+<link rel="canonical" href="https://neurons-me.github.io/.me/Demos/Robots/Swarm/"/>
+<meta property="og:title" content="Rescue Swarm · .me"/>
+<meta property="og:description" content="Drones search a disaster zone under fog; a detection or a lost drone recomputes only what depends on it, in .me."/>
+<meta property="og:image" content="https://neurons-me.github.io/.me/Demos/Robots/Swarm/assets/swarm-og.png"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:image:type" content="image/png"/>
+<meta property="og:image:alt" content="A disaster zone under fog: drones with sensor cones, trails and mesh links, heat signatures of victims pulsing"/>
+<meta property="og:url" content="https://neurons-me.github.io/.me/Demos/Robots/Swarm/"/>
+<meta property="og:type" content="website"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Rescue Swarm · .me"/>
+<meta name="twitter:description" content="Drones search a disaster zone under fog; a detection or a lost drone recomputes only what depends on it, in .me."/>
+<meta name="twitter:image" content="https://neurons-me.github.io/.me/Demos/Robots/Swarm/assets/swarm-og.png"/>
+<link rel="icon" type="image/png" href="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1760629064/neurons.me_b50f6a.png"/>
+<!-- .GUI theme: page-scoped storage keys, neurons.me dark by default -->
+<script>
+  window.__thisGuiThemeScope = { scopeId: "rescue-swarm", themeModeKey: "rescue-swarm.themeMode", themeIdKey: "rescue-swarm.themeId", defaultMode: "dark" };
+  try {
+    var q = new URLSearchParams(location.search).get("mode");
+    if (q === "light" || q === "dark") localStorage.setItem("rescue-swarm.themeMode", q);
+    if (!localStorage.getItem("rescue-swarm.themeMode")) localStorage.setItem("rescue-swarm.themeMode", "dark");
+    if (!localStorage.getItem("rescue-swarm.themeId")) localStorage.setItem("rescue-swarm.themeId", "neurons.me");
+  } catch (e) {}
+</script>
+<!-- No icon font: every icon on this page is inline SVG. If a .GUI component ever renders an icon-font span, hide it. -->
+<style>.material-symbols-rounded,.material-symbols-outlined,.material-icons{display:none!important}html,body{margin:0}#boot-error{font:13px/1.5 ui-monospace,Menlo,monospace;color:#c97e7e;padding:24px;display:none}</style>
+<!-- Pinned dependencies (jsDelivr, exact versions, Subresource Integrity). The kernel (this.me 4.2.1) is fetched with SRI in the worker. -->
+<script src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/this.gui@4.2.0/dist/this.gui.umd.js" integrity="sha384-tAyskhiyJweQ9xXPVOSEJ0OQDE+lFsqRJvGRb8LVoqLbdNxYmJEhW21+fxcAYG0d" crossorigin="anonymous"></script>
+<!-- .me syntax colours (shared: /.me/assets/me-syntax/), from the .GUI theme tokens -->
+<link rel="stylesheet" href="../../../assets/me-syntax/me-syntax.css?v=1"/>
+<script src="../../../assets/me-syntax/me-syntax.js?v=1"></script>
+</head>
+<body>
+<div id="root"></div>
+<noscript><p style="font:15px/1.6 system-ui;padding:24px;max-width:720px">Rescue Swarm: a drone swarm held in a this.me 4.2.1 kernel. This page needs JavaScript.</p></noscript>
+<div id="boot-error">.GUI (this.gui@4.2.0) or React failed to load, so this page cannot render.</div>
+<script>if (!window.GUI || !window.React || !window.ReactDOM) document.getElementById("boot-error").style.display = "block";</script>
+<script src="../../../assets/me-kernel/me-kernel.js?v=1"></script>
+<!-- Run buttons in the steps: one shared new ME() for the page, blocks run in page order -->
+<script>window.MeRunShared = true;</script>
+<script src="../../../assets/me-run/me-run.js?v=1"></script>
+<script src="./swarm.js?v=0.1.0"></script>
+</body>
+</html>
