@@ -56,7 +56,9 @@
     me.victims["[i]"]["="]("eta", "rescuer.eta");
     me.victims["[i]"]["="]("urgent", "heat < 35.5");
     for (var z = 1; z <= NZ; z++) { me.zones[z].cells((ZW / CELL) * (ZH / CELL)); me.zones[z].scanned(0); me.zones[z].victims(0); }
-    var cov = []; for (z = 1; z <= NZ; z++) cov.push("zones[" + z + "].coverage"); me.swarm["="]("coverage", "(" + cov.join(" + ") + ") / " + NZ);
+    me.swarm["="]("coverage", "zones[].coverage / zones[]");   // aggregate over the 12 zones
+    // swarm counts: a boolean field sums as its count of true. Each drone write re-scans the drones for every aggregate, so up to 60 drones.
+    if (!lite()) { me.swarm["="]("assisting", "drones[].canAssist"); me.swarm["="]("relays", "drones[].needsRelay"); }
     drones = []; victims = []; cells = new Uint8Array(GX * GY); zScan = new Array(NZ + 1).fill(0); zDirty = {}; fog.reset();
     for (var i = 1; i <= N; i++) { var a = (i / N) * Math.PI * .5, rr0 = 40 + (i % 6) * 14, x = BASE.x + Math.cos(-a) * rr0, y = BASE.y + Math.sin(-a) * rr0, d = me.drones[i], sp = r1(9 + (i * 7 % 6) * .8), home = 1 + ((i - 1) % NZ);
       d.battery(70 + (i * 13) % 30); d.signal(100); d.sees(0); d.speed(sp); d.dist(0); d.zone(zoneOf(x, y)); d.pos(Math.round(x) + "," + Math.round(y)); d.task(home);
@@ -388,14 +390,15 @@
   }
   function Swarm() {
     var k = useKernel(), cur = useSel(), ok = k.status === "ok", alive = 0, relay = 0, assist = 0;
-    if (ok) drones.forEach(function (d) { if (d.alive) alive++; if (read(DP(d) + ".needsRelay") === true) relay++; if (read(DP(d) + ".canAssist") === true) assist++; });
-    var kpi = function (id, label, val, p) { var on = cur && cur.type === "swarm" && cur.p === p; return h("button", { type: "button", key: id, className: "sw-kpi", "data-sw": "kpi-" + id, "aria-pressed": on ? "true" : "false", disabled: !p, onClick: p ? function () { select({ type: "swarm", p: p }); } : undefined, title: p ? "me.explain(\"" + p + "\")" : "count of values read from the kernel" }, h("small", null, label), h("b", null, ok ? V(val) : "–")); };
+    var ag = !lite(); if (ok) drones.forEach(function (d) { if (d.alive) alive++; if (!ag && read(DP(d) + ".needsRelay") === true) relay++; if (!ag && read(DP(d) + ".canAssist") === true) assist++; });
+    if (ok && ag) { assist = read("swarm.assisting"); relay = read("swarm.relays"); }
+    var kpi = function (id, label, val, p) { var on = cur && cur.type === "swarm" && cur.p === p; return h("button", { type: "button", key: id, className: "sw-kpi", "data-sw": "kpi-" + id, "aria-pressed": on ? "true" : "false", disabled: !p, onClick: p ? function () { select({ type: "swarm", p: p }); } : undefined, title: p ? "me.explain(\"" + p + "\")" : "tallied by the page" }, h("small", null, label), h("b", null, ok ? V(val) : "–")); };
     return h("section", { className: "sw-card", "data-sw": "swarm" }, h("div", { className: "sw-h" }, "Swarm · " + k.N + " drones · " + KL),
-      h("div", { className: "sw-kpis" }, kpi("alive", "flying", alive + "/" + k.N, null), kpi("assist", "canAssist = true", assist, null), kpi("relay", "needsRelay = true", relay, null),
+      h("div", { className: "sw-kpis" }, kpi("alive", "flying", alive + "/" + k.N, null), kpi("assist", ag ? "swarm.assisting" : "canAssist = true", assist, ag ? "swarm.assisting" : null), kpi("relay", ag ? "swarm.relays" : "needsRelay = true", relay, ag ? "swarm.relays" : null),
         kpi("coverage", "swarm.coverage %", ok ? Math.round(read("swarm.coverage") * 10) / 10 : 0, "swarm.coverage"), kpi("found", "swarm.found", read("swarm.found"), "swarm.found"), kpi("assisted", "swarm.assisted", read("swarm.assisted"), "swarm.assisted")),
       h("div", { className: "sw-row", style: { marginTop: 6 } }, h("span", null, "writes · writes/s · fps"), h("span", { className: "sw-num", "data-sw": "rate" }, ok ? k.writes + " · " + Math.round(k.writes / Math.max(1, (performance.now() - k.t0) / 1000)) + " · " + (k.fps || "–") : "–")),
       h("div", { className: "sw-row" }, h("span", null, "recomputed (traced) · seed"), h("span", { className: "sw-num" }, ok ? k.recomputes + " · " + (k.seedMs || 0).toFixed(1) + " ms" : "–")),
-      lite() ? h("div", { className: "sw-note" }, "At " + k.N + " drones the map writes less often, links each drone to its mesh parent only and traces your actions, not every scan.") : null);
+      lite() ? h("div", { className: "sw-note" }, "At " + k.N + " drones the map writes less often, links each drone to its mesh parent only and traces your actions, not every scan. The swarm counts (drones[].canAssist, drones[].needsRelay) are off: each drone write would re-scan all " + k.N + " drones, so the page tallies them.") : null);
   }
   function Trace() {
     var k = useKernel(), tr = k.trace;
@@ -466,6 +469,9 @@
     { t: "Rules for the whole swarm", map: [["Reserve 25 ↔ 60", function () { actions.reserve(); }]],
       body: function () { return ["Declared once under ", me('["[i]"]'), ", for every drone now and later. All of them read ", me("swarm.reserve"), ", so changing it recomputes every ", me("canAssist"), " and nothing else. ", link(L_OPS, "Operators")]; },
       code: 'me.swarm.reserve(25)\nme.drones["[i]"]["="]("needsRelay", "signal < 40")\nme.drones["[i]"]["="]("canAssist", "battery > swarm.reserve && signal >= 40 && !sees")\nme.drones["[i]"]["="]("eta", "dist / speed")\nme("drones[1].canAssist")\nme("drones[1].eta")' },
+    { t: "Count the swarm", map: [["Show swarm.assisting", function () { select({ type: "swarm", p: "swarm.assisting" }); }], ["swarm.coverage", function () { select({ type: "swarm", p: "swarm.coverage" }); }]],
+      body: function () { return [me("drones[].canAssist"), " sums a boolean field: each ", me("true"), " counts as 1, so it is how many drones can assist. ", me("zones[].coverage / zones[]"), " is the mean coverage. The explain lists each as an input with ", me('kind: "aggregate"'), ". Each drone write re-scans the collection, so the swarm counts are declared up to 60 drones. ", link(DOCS + "Aggregates.html", "Aggregates")]; },
+      code: 'me.drones[2].battery(20)\nme.drones[2].signal(30)\nme.drones[2].sees(0)\nme.swarm["="]("assisting", "drones[].canAssist")\nme.swarm["="]("relays", "drones[].needsRelay")\nme("swarm.assisting")\nme("swarm.relays")\nme.explain("swarm.assisting").derivation.inputs[0].aggregate' },
     { t: "Zones count their coverage", map: [["Show zone 6", function () { select({ type: "zone", z: 6 }); }]],
       body: function () { return ["Every cell a sensor cone clears adds to ", me("zones[z].scanned"), "; ", me("coverage"), " and ", me("priority"), " follow. Only the zone that was scanned recomputes."]; },
       code: 'me.zones["[i]"]["="]("coverage", "scanned / cells * 100")\nme.zones["[i]"]["="]("priority", "victims * 10 + (100 - coverage)")\nme.zones[6].cells(180)\nme.zones[6].victims(0)\nme.zones[6].scanned(63)\nme("zones[6].coverage")\nme("zones[6].priority")' },

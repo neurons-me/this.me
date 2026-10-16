@@ -61,7 +61,7 @@
   }
   var lite = function () { return K.N > 100; };   // at 1000 robots the sim writes only on arrival and does not trace every write
   function simWrite(path, v) { if (lite()) write(path, v); else traced(path, v, false); }
-  var THRESH = 30;
+  var THRESH = 30, aggOn = function (n) { return n <= 100; };
   function seed(ME) {
     var me = new ME(), N = K.N, t = performance.now(); K.me = null;
     me.fleet.name("Warehouse Fleet"); me.fleet.size(N); me.fleet.threshold(THRESH); me.fleet.delivered(0);
@@ -76,8 +76,10 @@
     for (var i = 1; i <= N; i++) { var start = CORR[(i * 7) % CORR.length], r = me.robots[i], b0 = 45 + (i * 37) % 55, sp = r1(1.2 + ((i * 13) % 9) / 10);
       r.battery(b0); r.busy(0); r.charging(0); r.speed(sp); r.dist(0); r.pos(start); r.task(0); r.carry(0);
       bots.push({ id: i, at: start, path: null, seg: 0, t: 0, x: NODES[start].x, y: NODES[start].y, ang: 0, wait: (i % 10) * .15, phase: "idle", order: 0, pulse: 0, sp: sp }); }
-    if (N <= 100) { var bat = [], car = []; for (var j = 1; j <= N; j++) { bat.push("robots[" + j + "].battery"); car.push("robots[" + j + "].carry"); }
-      me.fleet["="]("avgBattery", "(" + bat.join(" + ") + ") / fleet.size"); me.fleet["="]("carrying", car.join(" + ")); }
+    // fleet aggregates over the collection: robots[] counts, robots[].f sums (a true counts as 1). Each robot write re-scans
+    // the collection for every aggregate on it, so they are declared up to 100 robots.
+    if (aggOn(N)) { me.fleet["="]("avgBattery", "robots[].battery / robots[]"); me.fleet["="]("carrying", "robots[].carry");
+      me.fleet["="]("available", "robots[].canTake"); me.fleet["="]("lowCount", "robots[].low"); }
     K.me = me; K.seedMs = performance.now() - t; K.writes = 0; K.recomputes = 0; K.traces = []; K.trace = null; K.t0 = performance.now(); nextOrder = 1;
     for (var o = 0; o < Math.min(8, Math.ceil(N / 3)); o++) addOrder();
   }
@@ -362,18 +364,18 @@
   // ── the cards under the map: fleet, last propagation, explain, audiences, kernel ──
   var V = function (x) { return x === undefined ? "–" : x === null ? "null" : typeof x === "object" ? JSON.stringify(x) : String(x); };
   function Fleet() {
-    var k = useKernel(), cur = useSel(), ok = k.status === "ok", avail = 0, carrying = 0;
-    if (ok) bots.forEach(function (b) { var L = cache[b.id] || look(b); if (L.can === true) avail++; if (L.carry) carrying++; });
+    var k = useKernel(), cur = useSel(), ok = k.status === "ok", ag = aggOn(k.N), avail = 0, carrying = 0;
+    if (ok && !ag) bots.forEach(function (b) { var L = cache[b.id] || look(b); if (L.can === true) avail++; if (L.carry) carrying++; });
     var queued = orders.filter(function (o) { return o.status === "queued"; }).length;
-    var kpi = function (id, label, val, p) { var on = cur && cur.type === "fleet" && cur.p === p; return h("button", { type: "button", key: id, className: "wf-kpi", "data-wf": "kpi-" + id, "aria-pressed": on ? "true" : "false", disabled: !p, onClick: p ? function () { select({ type: "fleet", p: p }); } : undefined, title: p ? "me.explain(\"" + p + "\")" : "count of the values read from the kernel" }, h("small", null, label), h("b", null, ok ? V(val) : "–")); };
+    var kpi = function (id, label, val, p) { var on = cur && cur.type === "fleet" && cur.p === p; return h("button", { type: "button", key: id, className: "wf-kpi", "data-wf": "kpi-" + id, "aria-pressed": on ? "true" : "false", disabled: !p, onClick: p ? function () { select({ type: "fleet", p: p }); } : undefined, title: p ? "me.explain(\"" + p + "\")" : "tallied by the page from per-robot reads (aggregates are off above 100 robots)" }, h("small", null, label), h("b", null, ok ? V(val) : "–")); };
     return h("section", { className: "wf-card", "data-wf": "fleet" }, h("div", { className: "wf-h" }, "Fleet · " + k.N + " robots · " + KL),
       h("div", { className: "wf-kpis" },
-        kpi("avail", "canTake = true", avail, null), kpi("carrying", "fleet.carrying", k.N <= 100 ? read("fleet.carrying") : carrying, k.N <= 100 ? "fleet.carrying" : null),
-        kpi("avg", "fleet.avgBattery", k.N <= 100 ? Math.round(read("fleet.avgBattery") * 10) / 10 : "–", k.N <= 100 ? "fleet.avgBattery" : null),
+        kpi("avail", ag ? "fleet.available" : "canTake = true", ag ? read("fleet.available") : avail, ag ? "fleet.available" : null), kpi("carrying", ag ? "fleet.carrying" : "carrying", ag ? read("fleet.carrying") : carrying, ag ? "fleet.carrying" : null),
+        kpi("avg", "fleet.avgBattery", ag ? Math.round(read("fleet.avgBattery") * 10) / 10 : "–", ag ? "fleet.avgBattery" : null),
         kpi("delivered", "fleet.delivered", read("fleet.delivered"), "fleet.delivered"), kpi("queued", "orders queued", queued, null), kpi("recomputes", "recomputed (traced)", k.recomputes, null)),
       h("div", { className: "wf-row", style: { marginTop: 6 } }, h("span", null, "writes · writes/s · fps"), h("span", { className: "wf-num", "data-wf": "rate" }, ok ? k.writes + " · " + Math.round(k.writes / Math.max(1, (performance.now() - k.t0) / 1000)) + " · " + (k.fps || "–") : "–")),
       h("div", { className: "wf-row" }, h("span", null, "seed " + k.N + " robots + 6 rules"), h("span", { className: "wf-num" }, ok && k.seedMs != null ? k.seedMs.toFixed(1) + " ms" : "–")),
-      k.N > 100 ? h("div", { className: "wf-note" }, "At " + k.N + " robots the floor writes on arrival only and traces your actions, not every move; fleet sums are declared up to 100 robots.") : null);
+      k.N > 100 ? h("div", { className: "wf-note" }, "At " + k.N + " robots the floor writes on arrival only and traces your actions, not every move. The fleet aggregates (robots[].canTake, robots[].battery / robots[]) are off: each robot write would re-scan all " + k.N + " robots for every aggregate, so the page tallies these numbers itself.") : null);
   }
   function Trace() {
     var k = useKernel(), tr = k.trace;
@@ -395,7 +397,7 @@
           tabs: [p + ".canTake", p + ".eta", p + ".low", p + ".range"].concat(task ? ["orders." + task + ".eta", "orders." + task + ".late"] : []) }; }
       else if (cur.type === "order") { var q = "orders." + cur.j;
         d = { title: "Order " + cur.j, rows: ["item", "aisle", "slot", "station", "sla", "status"].map(function (f) { return [q + "." + f, read(q + "." + f)]; }).concat([[q + ".robot", read(q + ".robot")]]), tabs: [q + ".eta", q + ".late", q + ".status"] }; }
-      else if (cur.type === "aisle") { d = { title: "Aisle " + cur.L, rows: [["aisles." + cur.L + ".blocked", read("aisles." + cur.L + ".blocked")]], tabs: ["aisles." + cur.L + ".blocked"], note: "Blocking writes this value; robots routed through the aisle re-plan and write their new dist, so only their eta (and their order's eta) recompute." }; }
+      else if (cur.type === "aisle") { d = { title: "Aisle " + cur.L, rows: [["aisles." + cur.L + ".blocked", read("aisles." + cur.L + ".blocked")]], tabs: ["aisles." + cur.L + ".blocked"], note: "Blocking writes this value; robots routed through the aisle re-plan and write their new dist, so only their eta, their order's eta and the fleet aggregates over robots[] recompute." }; }
       else if (cur.type === "fleet") d = { title: cur.p, rows: [[cur.p, read(cur.p)]], tabs: [cur.p] };
     }
     var path = d ? (tab && d.tabs.indexOf(tab) >= 0 ? tab : tab === "canTake" ? d.tabs[0] : d.tabs[0]) : null, ex = path ? K.me.explain(path) : null;
@@ -437,13 +439,16 @@
       body: function () { return ["One ", me('["="]'), " under ", me('["[i]"]'), " declares the rule for every member, present and future. All of them read ", me("fleet.threshold"), ", so changing it recomputes every ", me("canTake"), " and nothing else. ", link(L_OPS, "Operators")]; },
       code: 'me.fleet.threshold(30)\nme.robots["[i]"]["="]("canTake", "battery > fleet.threshold && !busy && !charging")\nme.robots["[i]"]["="]("eta", "dist / speed")\nme("robots[1].canTake")\nme("robots[1].eta")' },
     { t: "Drain a battery", map: [["Drain robot 1", function () { actions.drain(1); }]],
-      body: function () { return ["One write, and only that robot's dependents recompute. The explain shows the expression, its inputs and ", me("meta.recomputed"), ". ", link(L_EXP, "Explain")]; },
+      body: function () { return ["One write, and only that robot's dependents recompute (plus the fleet aggregates over robots[], see step 4). The explain shows the expression, its inputs and ", me("meta.recomputed"), ". ", link(L_EXP, "Explain")]; },
       code: 'me.robots[1].battery(12)\nme("robots[1].canTake")\nme.explain("robots[1].canTake")' },
+    { t: "Count the fleet", map: [["Show fleet.available", function () { select({ type: "fleet", p: "fleet.available" }); }], ["fleet.avgBattery", function () { select({ type: "fleet", p: "fleet.avgBattery" }); }]],
+      body: function () { return [me("robots[]"), " counts the robots, ", me("robots[].battery"), " sums a field, and a boolean field sums as its count of ", me("true"), ": ", me("robots[].canTake"), " is how many can take an order. The explain shows it as one input with ", me('kind: "aggregate"'), ". Every robot write re-scans the collection, so the floor declares these up to 100 robots. ", link(DOCS + "Aggregates.html", "Aggregates")]; },
+      code: 'me.robots[2].battery(70)\nme.robots[2].busy(0)\nme.robots[2].charging(0)\nme.fleet["="]("available", "robots[].canTake")\nme.fleet["="]("avgBattery", "robots[].battery / robots[]")\nme("fleet.available")\nme("fleet.avgBattery")\nme.explain("fleet.available").derivation.inputs[0].aggregate' },
     { t: "Orders point at robots", map: [["Add order", function () { actions.order(); }]],
       body: function () { return ["The dispatcher writes ", me('orders[j].robot["->"]("robots.i")'), "; the order's ", me("eta"), " and ", me("late"), " read through the pointer, so a robot's new ", me("dist"), " reaches its order. ", link(L_PTR, "Pointers")]; },
       code: 'me.orders[1].sla(30)\nme.orders[1].robot["->"]("robots.1")\nme.orders["[i]"]["="]("eta", "robot.eta")\nme.orders["[i]"]["="]("late", "robot.eta > sla")\nme.robots[1].dist(60)\nme("orders[1].eta")\nme("orders[1].late")' },
     { t: "Block an aisle", map: [["Block / open aisle C", function () { actions.block("C"); }]],
-      body: function () { return ["Robots routed through the aisle re-plan and write their new ", me("dist"), ". Their ", me("eta"), " and their order's ", me("eta"), " recompute; the rest of the fleet does not. The ripples go from the aisle to exactly those."]; },
+      body: function () { return ["Robots routed through the aisle re-plan and write their new ", me("dist"), ". Their ", me("eta"), ", their order's ", me("eta"), " and the fleet aggregates recompute; the other robots do not. The ripples go from the aisle to exactly those."]; },
       code: 'me.aisles.C.blocked(1)\nme.robots[1].dist(31.5)\nme.explain("orders[1].eta").meta.recomputed' },
     { t: "100 or 1000 robots", map: [["100", function () { rescale(100); }], ["1000", function () { rescale(1000); }], ["20", function () { rescale(20); }]],
       body: function () { return ["The rules stay the same: robot 1000 gets ", me("canTake"), " the moment it has a battery. A write still recomputes its own dependents only. ", link(DOCS + "Extreme-Fan-Out.html", "Extreme Fan-Out")]; },
