@@ -593,7 +593,7 @@
     N("Box", "main", { component: "main", sx: { maxWidth: 1440, mx: "auto", px: { xs: 1.5, sm: 3 }, pt: { xs: 2.5, sm: 3.5 }, pb: 8 } }, [
       N("Typography", "kicker", { component: "p", sx: { fontSize: ".75rem", fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: "text.secondary", mb: 1 } }, ["Robots · " + KL]),
       N("Typography", "title", { component: "h1", sx: { fontSize: "clamp(1.9rem, 5vw, 2.6rem)", fontWeight: 800, letterSpacing: "-.02em", lineHeight: 1.1, mb: 1 } }, ["Rescue Swarm"]),
-      N("Typography", "lede", { component: "p", sx: { color: "text.secondary", mb: 3, maxWidth: 760 } }, ["Drones search a collapsed district under fog. Their batteries, signal and zones are paths in .me; coverage, canAssist and reachable are rules declared once. A heat signature or a drone going down recomputes only what depends on it, and the swarm re-allocates."]),
+      N("Typography", "lede", { component: "p", sx: { color: "text.secondary", mb: 3, maxWidth: 760 } }, ["Each drone is ", me("drones[i]"), " with ", me("drones[i].battery"), " and ", me(".signal"), "; one rule, ", me('drones["[i]"]["="]("canAssist", "battery > swarm.reserve && signal >= 40 && !sees")'), ", and one aggregate, ", me('swarm["="]("coverage", "zones[].coverage / zones[]")'), ". A drone goes down and only what reads it recomputes."]),
       N("SWDashboard", "swarm"),
       N("SWRelated", "related"),
     ]),
