@@ -244,6 +244,7 @@
     ".sw-k summary{cursor:pointer;list-style:none;font:11.5px/1.5 " + MONO + ";color:" + TX2 + "}.sw-k summary::-webkit-details-marker{display:none}.sw-k .ok{color:var(--mui-palette-success-main,#2e9d6e)}.sw-k .bad{color:var(--mui-palette-error-main,#e5534b)}.sw-k div{font:11px/1.6 " + MONO + ";color:" + TX2 + ";overflow-wrap:anywhere}",
     ".sw-side{font-size:14px;line-height:1.6}.sw-side h2{margin:0 0 8px;font-size:1.2rem;font-weight:800}.sw-step{border:1px solid " + DIV + ";border-radius:12px;padding:10px 12px 2px;margin:0 0 12px;background:" + PAPER + ";scroll-margin-top:64px;transition:border-color .2s}.sw-step.on{border-color:" + PRI + "}",
     ".sw-step h3{margin:0 0 4px;font-size:14px;font-weight:800;display:flex;gap:8px;align-items:baseline}.sw-step h3 b{display:inline-grid;place-items:center;min-width:20px;height:20px;border-radius:50%;font-size:11px;border:1px solid " + PRI + ";color:" + PRI + "}.sw-step p{margin:0 0 8px;font-size:13px}.sw-step .sw-bar{margin:0 0 10px}",
+    ".sw-reads{all:unset;cursor:pointer;color:" + PRI + ";border-bottom:1px dashed " + PRI + "}.sw-reads:hover,.sw-reads:focus-visible{border-bottom-style:solid}.sw-reads-out{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:8px}.sw-reads-h{width:100%;font-size:12.5px}.sw-reads-chip{border:1px solid " + DIV + ";border-radius:6px;padding:1px 6px;line-height:1.5}.sw-reads-more{all:unset;cursor:pointer;font-size:12px;color:" + PRI + ";padding:0 4px}",
     ".sw-me{font-family:" + MONO + ";font-size:12px}.sw-cap{margin:6px 2px 0;font-size:12px;line-height:1.5;color:" + TX2 + "}",
     ".sw-rel{margin:32px 0 8px}.sw-rel h2{margin:0 0 10px;font-size:1.35rem;font-weight:800}.sw-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}@media (max-width:900px){.sw-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (max-width:480px){.sw-cards{grid-template-columns:1fr}}",
     ".sw-card2{display:flex;flex-direction:column;border:1px solid " + DIV + ";border-radius:14px;overflow:hidden;background:" + PAPER + ";color:inherit;text-decoration:none;transition:transform .15s,border-color .15s}.sw-card2:hover{transform:translateY(-2px);border-color:" + PRI + "}.sw-card2 .img{display:block;aspect-ratio:1200/630;background:var(--mui-palette-action-hover,rgba(128,128,128,.12));overflow:hidden}.sw-card2 img{width:100%;height:100%;object-fit:cover;display:block}.sw-card2 .tx{display:flex;flex-direction:column;gap:3px;padding:10px 12px 12px}.sw-card2 b{font-size:14px;font-weight:800}.sw-card2 small{font-size:12px;line-height:1.4;color:" + TX2 + "}",
@@ -565,6 +566,26 @@
       h(Mo.Menu, { id: "settings-menu", anchorEl: anchor, open: !!anchor, onClose: close, "data-gui-inspector-control": "true", anchorOrigin: { vertical: "bottom", horizontal: "right" }, transformOrigin: { vertical: "top", horizontal: "right" } },
         items.map(function (it) { return h(Mo.MenuItem, { key: it.key, "data-settings-item": it.key, onClick: function () { close(); it.onClick(); } }, h(Mo.ListItemIcon, null, it.icon), h(Mo.ListItemText, null, it.label)); })));
   }
+  // ── intro: "only what reads it recomputes" drops a real drone and lists the kernel's meta.recomputed inline ──
+  function derivedCount() { var c = [], i; for (i = 1; i <= drones.length; i++) ["needsRelay", "canAssist", "eta", "range"].forEach(function (f) { c.push("drones." + i + "." + f); });
+    for (i = 1; i <= NZ; i++) ["coverage", "priority"].forEach(function (f) { c.push("zones." + i + "." + f); });
+    for (i = 1; i <= victims.length; i++) ["reachable", "eta", "urgent"].forEach(function (f) { c.push("victims." + i + "." + f); });
+    ["swarm.coverage", "swarm.assisting", "swarm.relays"].forEach(function (p) { c.push(p); });
+    return c.filter(function (p) { var e = K.me.explain(p); return e && e.derivation && e.derivation.expression; }).length; }
+  function pickDrone() { var v = victims.filter(function (v) { return v.rescuer && v.status !== "assisted" && drones[v.rescuer - 1] && drones[v.rescuer - 1].alive; })[0];
+    if (v) return drones[v.rescuer - 1]; return drones.filter(function (d) { return d.alive; })[0] || null; }
+  function Reads() {
+    var k = useKernel(), rs = useState(null), res = rs[0], setRes = rs[1], os = useState(false), open = os[0], setOpen = os[1], ok = k.status === "ok";
+    var hover = function () { if (!ok) return; var d = pickDrone(); if (d) { d.pulse = performance.now(); select({ type: "drone", i: d.id }); } };
+    var go = function () { if (!ok) return; var d = pickDrone(); if (!d) return; var all = actions.drop(d.id); if (!all) return; setRes({ id: d.id, rec: all.recomputed.slice(), victims: all.victims.slice(), total: derivedCount() }); setOpen(false); };
+    var n = res ? res.rec.length : 0, shown = res ? (open ? res.rec : res.rec.slice(0, 8)) : [];
+    return h(React.Fragment, null,
+      h("button", { type: "button", className: "sw-reads", "data-sw": "reads", disabled: !ok, onMouseEnter: hover, onFocus: hover, onClick: go, title: "Drops a drone through the kernel and lists me.explain(…).meta.recomputed" }, "only what reads it recomputes"), ".",
+      res ? h("span", { className: "sw-reads-out", "data-sw": "reads-out" },
+        h("span", { className: "sw-reads-h" }, "drone " + res.id + " down · ", h("b", null, n + " of " + res.total), " derived paths recomputed" + (res.victims.length ? " · victims " + res.victims.join(", ") : "")),
+        shown.map(function (p, x) { return h("span", { key: x, className: "sw-reads-chip" }, me(p)); }),
+        n > 8 ? h("button", { type: "button", className: "sw-reads-more", "data-sw": "reads-more", onClick: function () { setOpen(!open); } }, open ? "less" : "+" + (n - 8) + " more") : null) : null);
+  }
   function TopBar(p) {
     // when the path doesn't fit, the middle segments collapse to "…" (a link to the parent), so the page's own name always shows in full
     var cst = useState("measure"), mode = cst[0], setMode = cst[1], col = mode === "col", pathRef = useRef(null), last = PATH.length - 1;
@@ -593,7 +614,7 @@
     N("Box", "main", { component: "main", sx: { maxWidth: 1440, mx: "auto", px: { xs: 1.5, sm: 3 }, pt: { xs: 2.5, sm: 3.5 }, pb: 8 } }, [
       N("Typography", "kicker", { component: "p", sx: { fontSize: ".75rem", fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: "text.secondary", mb: 1 } }, ["Robots · " + KL]),
       N("Typography", "title", { component: "h1", sx: { fontSize: "clamp(1.9rem, 5vw, 2.6rem)", fontWeight: 800, letterSpacing: "-.02em", lineHeight: 1.1, mb: 1 } }, ["Rescue Swarm"]),
-      N("Typography", "lede", { component: "p", sx: { color: "text.secondary", mb: 3, maxWidth: 760 } }, ["Each drone is ", me("drones[i]"), " with ", me("drones[i].battery"), " and ", me(".signal"), "; one rule, ", me('drones["[i]"]["="]("canAssist", "battery > swarm.reserve && signal >= 40 && !sees")'), ", and one aggregate, ", me('swarm["="]("coverage", "zones[].coverage / zones[]")'), ". A drone goes down and only what reads it recomputes."]),
+      N("Typography", "lede", { component: "p", sx: { color: "text.secondary", mb: 3, maxWidth: 760 } }, ["Each drone is ", me("drones[i]"), " with ", me("drones[i].battery"), " and ", me(".signal"), "; one rule, ", me('drones["[i]"]["="]("canAssist", "battery > swarm.reserve && signal >= 40 && !sees")'), ", and one aggregate, ", me('swarm["="]("coverage", "zones[].coverage / zones[]")'), ". A drone goes down and ", h(Reads)]),
       N("SWDashboard", "swarm"),
       N("SWRelated", "related"),
     ]),
