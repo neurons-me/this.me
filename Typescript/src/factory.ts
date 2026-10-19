@@ -1,5 +1,5 @@
 import { ME } from "./me.ts";
-import { normalizeCanonicalHandle, normalizeCanonicalSpace } from "./me-uri.ts";
+import { normalizeCanonicalHandle, normalizeConfiguredSpace } from "./me-uri.ts";
 import type { MEOptions, MEProxy } from "./types.ts";
 
 export interface ThisMeInit {
@@ -24,7 +24,7 @@ function isThisMeInit(value: unknown): value is ThisMeInit {
 
 function normalizeFactorySpace(rawSpace: string): string {
   if (!String(rawSpace || "").trim()) return "";
-  return normalizeCanonicalSpace(rawSpace);
+  return normalizeConfiguredSpace(rawSpace);
 }
 
 function configureIdentity(runtime: ThisMeKernel, input: ThisMeInit): ThisMeKernel {

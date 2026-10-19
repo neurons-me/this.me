@@ -221,8 +221,28 @@ ops("ops.beansKg"); // readable when the key matches
 - Still open from 4.1.0: #2 (formulas not in snapshots), #5 (numeric segment
   after a dot in formula text), #6 (path identity), log growth.
 
-## 4.1.0
+## Unreleased - declared roots (merged onto 4.2.0 for the VM release candidate; version number NOT decided)
 
+Name resolution under a root the runtime declares for itself. Nothing changes for callers that pass no declared
+spaces: context-free parsing and formatting keep their two-label minimum.
+
+- **Added:** a root the runtime declares (`localhost`, `here`, `neurons.me`) may have one or more labels, and
+  names inside it (`jabellae.localhost`) resolve against it. The longest declared space that fits wins; a name
+  is never split without that context.
+  - `validateKnownSpaces(spaces)`: checks a declaration where it is configured and names the bad entry.
+  - `parseMeUri(uri, { knownSpaces })`, `formatCanonicalMeUri({ ..., knownSpaces })` and
+    `canonicalizeHumanIdentity(..., { knownSpaces })` accept a one-label space only when it is declared.
+  - `parseMeSpaceUri` / `tryParseMeSpaceUri` / `formatMeSpaceUri`: `me://<space>` addresses a declared space
+    itself, with optional `[selector]` and `/path`. `me://ana.here` is refused as a space (it is a namespace).
+  - `createThisMe({ name, space })`: an explicitly configured root may be one label.
+  - `projectDnsHostToNamespace` returns `INVALID_KNOWN_SPACES` for a bad declaration instead of throwing.
+- **Changed:** `projectDnsHostToNamespace` checks the declared spaces before the `localhost` / `*.local`
+  transport-only rule, which remains the answer for undeclared hosts. A declared `localhost` or `<host>.local`
+  now resolves as the space it was declared to be.
+- **Compatibility:** a consumer that calls `validateKnownSpaces` or `parseMeSpaceUri` needs this version or later.
+  monad.ai declares `this.me ^4.2.0` for that reason and refuses to start against an older one.
+
+## 4.1.0
 Correctness release for derived values (`=`). Several cases returned a stale
 or placeholder value without any error; they are fixed, and two behaviors
 change as a result (see **Changed**). Minor version rather than a patch

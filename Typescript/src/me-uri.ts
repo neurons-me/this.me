@@ -34,6 +34,10 @@ export interface ParseCanonicalMeUriOptions {
   knownSpaces?: readonly string[];
 }
 
+export interface ParseMeUriOptions {
+  knownSpaces?: readonly string[];
+}
+
 export interface CanonicalizeHumanIdentityOptions {
   knownSpaces?: readonly string[];
 }
@@ -42,9 +46,41 @@ export interface CanonicalizeLegacyAtOperatorOptions {
   knownSpaces?: readonly string[];
 }
 
+/**
+ * `me://<space>`: the space itself, with no handle in front of it. Only a space the runtime declared can be
+ * addressed this way, so the reference always carries the context that made it a space.
+ */
+export interface MeCanonicalSpaceUri {
+  scheme: "me";
+  raw: string;
+  href: string;
+  space: string;
+  selector: MeCanonicalSelector | null;
+  path: string | null;
+  segments: string[];
+}
+
+export interface ParseMeSpaceUriOptions {
+  /** The spaces the runtime declares. Required: without them nothing says that a bare name is a space. */
+  knownSpaces: readonly string[];
+}
+
+export interface FormatMeSpaceUriInput {
+  space: string;
+  knownSpaces: readonly string[];
+  selector?: string | MeCanonicalSelector | null;
+  path?: string | null;
+}
+
 export interface FormatCanonicalMeUriInput {
   handle: string;
   space: string;
+  /**
+   * Spaces the runtime itself declares. A space of a single label (`localhost`, `here`) is only a valid space
+   * when it is declared here: without that context there is no telling where the handle ends and the space
+   * begins, so the two-label minimum still applies.
+   */
+  knownSpaces?: readonly string[];
   selector?: string | MeCanonicalSelector | null;
   path?: string | null;
 }
@@ -53,6 +89,7 @@ export type MeDnsProjectionFailureReason =
   | "INVALID_HOST"
   | "TRANSPORT_ONLY_HOST"
   | "UNKNOWN_SPACE"
+  | "INVALID_KNOWN_SPACES"
   | "NOT_CANONICAL_NAMESPACE";
 
 export type MeDnsProjectionResult =
@@ -136,12 +173,29 @@ function normalizeHostishValue(rawValue: unknown): string {
     .toLowerCase();
 }
 
+/**
+ * A space the runtime declares for itself (its root, or one it knows): one or more labels. This is a statement
+ * made by configuration, not something read off a request, so a single label is as valid as several.
+ */
+export function normalizeConfiguredSpace(rawSpace: unknown): string {
+  const normalized = normalizeHostishValue(assertNonEmpty(rawSpace, "Space"));
+  const labels = normalized.split(".").map((label) => label.trim()).filter(Boolean);
+  if (labels.length < 1) {
+    throw new Error(`Invalid space "${rawSpace}": expected at least one label.`);
+  }
+  for (const label of labels) {
+    assertPattern(label, LABEL_RE, "space label", String(rawSpace));
+  }
+  return labels.join(".");
+}
+
 function normalizeKnownSpaces(knownSpaces: readonly string[] | undefined): string[] {
   if (!knownSpaces?.length) return [];
   const unique = new Set<string>();
   for (const rawSpace of knownSpaces) {
-    unique.add(normalizeCanonicalSpace(rawSpace));
+    unique.add(normalizeConfiguredSpace(rawSpace));
   }
+  // Longest first, so the longest known suffix of a name is the one that wins.
   return Array.from(unique).sort((left, right) => {
     const labelDelta = right.split(".").length - left.split(".").length;
     if (labelDelta !== 0) return labelDelta;
@@ -149,13 +203,49 @@ function normalizeKnownSpaces(knownSpaces: readonly string[] | undefined): strin
   });
 }
 
-function parseCanonicalNamespace(rawNamespace: unknown): MeCanonicalNamespace {
+/**
+ * Checks a runtime's declared spaces once, where they are configured (at startup), and returns them normalized
+ * and ordered longest first. A bad entry throws here with the entry named, instead of surfacing later as a
+ * failure on every request that happens to be resolved against it.
+ */
+export function validateKnownSpaces(knownSpaces: readonly string[] | undefined): string[] {
+  try {
+    return normalizeKnownSpaces(knownSpaces);
+  } catch (error) {
+    throw new Error(`Invalid known space: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+/**
+ * A space named next to a handle. Two or more labels stand on their own; a single label is only a space when
+ * the runtime has declared it, because nothing else says where the handle stops.
+ */
+function normalizeSpaceInContext(rawSpace: unknown, knownSpaces: readonly string[] | undefined): string {
+  const configured = normalizeConfiguredSpace(rawSpace);
+  if (configured.includes(".")) return configured;
+  if (normalizeKnownSpaces(knownSpaces).includes(configured)) return configured;
+  throw new Error(`Invalid canonical space "${rawSpace}": expected at least two labels.`);
+}
+
+function parseCanonicalNamespace(rawNamespace: unknown, knownSpaces?: readonly string[]): MeCanonicalNamespace {
   const namespace = assertNonEmpty(rawNamespace, "Canonical namespace")
     .replace(/^me:\/\//i, "")
     .trim()
     .toLowerCase();
 
   const labels = namespace.split(".").map((label) => label.trim()).filter(Boolean);
+
+  // With the runtime's own spaces to go by, the name is one handle label followed by a known space; the
+  // longest known space that fits wins. Whatever does not fit one falls through to the context-free reading
+  // below, so nothing is guessed: a name with more than one label before a known space is not split for you.
+  for (const space of normalizeKnownSpaces(knownSpaces)) {
+    const spaceLabels = space.split(".").length;
+    if (labels.length === spaceLabels + 1 && labels.slice(1).join(".") === space) {
+      const handle = normalizeCanonicalHandle(labels[0]);
+      return { handle, space, value: `${handle}.${space}` };
+    }
+  }
+
   if (labels.length < 3) {
     throw new Error(`Invalid canonical namespace "${rawNamespace}": expected handle.space with a dotted space.`);
   }
@@ -246,8 +336,8 @@ function serializeSelector(selector: string | MeCanonicalSelector | null | undef
   return `[${parsed.value}]`;
 }
 
-function findLongestKnownSpaceSuffix(host: string, knownSpaces: readonly string[]): string | null {
-  for (const knownSpace of normalizeKnownSpaces(knownSpaces)) {
+function findLongestKnownSpaceSuffix(host: string, normalizedKnownSpaces: readonly string[]): string | null {
+  for (const knownSpace of normalizedKnownSpaces) {
     if (host === knownSpace || host.endsWith(`.${knownSpace}`)) {
       return knownSpace;
     }
@@ -273,7 +363,7 @@ export function normalizeCanonicalSpace(rawSpace: unknown): string {
 
 export function formatCanonicalMeUri(input: FormatCanonicalMeUriInput): string {
   const handle = normalizeCanonicalHandle(input.handle);
-  const space = normalizeCanonicalSpace(input.space);
+  const space = normalizeSpaceInContext(input.space, input.knownSpaces);
   const selector = serializeSelector(input.selector);
   const path = input.path == null || String(input.path).trim() === ""
     ? ""
@@ -281,7 +371,7 @@ export function formatCanonicalMeUri(input: FormatCanonicalMeUriInput): string {
   return `me://${handle}.${space}${selector}${path}`;
 }
 
-export function parseMeUri(rawInput: string): MeCanonicalUri {
+export function parseMeUri(rawInput: string, options: ParseMeUriOptions = {}): MeCanonicalUri {
   const raw = assertNonEmpty(rawInput, "me:// URI");
   if (!raw.toLowerCase().startsWith("me://")) {
     throw new Error(`Invalid me URI "${rawInput}": expected "me://" scheme.`);
@@ -308,12 +398,13 @@ export function parseMeUri(rawInput: string): MeCanonicalUri {
     selectorPart = head.slice(openIndex + 1, closeIndex).trim();
   }
 
-  const namespace = parseCanonicalNamespace(namespacePart);
+  const namespace = parseCanonicalNamespace(namespacePart, options.knownSpaces);
   const selector = parseCanonicalSelector(selectorPart);
   const path = slashIndex >= 0 ? parseCanonicalPath(pathPart) : null;
   const href = formatCanonicalMeUri({
     handle: namespace.handle,
     space: namespace.space,
+    knownSpaces: options.knownSpaces,
     selector,
     path: path?.value ?? null,
   });
@@ -339,11 +430,101 @@ export function tryParseMeUri(rawInput: string): MeCanonicalUri | null {
   }
 }
 
+function assertDeclaredSpace(rawSpace: unknown, knownSpaces: readonly string[] | undefined, input: string): string {
+  const declared = normalizeKnownSpaces(knownSpaces);
+  if (declared.length === 0) {
+    throw new Error(`Cannot read "${input}" as a space: no declared spaces were given.`);
+  }
+  const space = normalizeConfiguredSpace(rawSpace);
+  if (!declared.includes(space)) {
+    const owner = declared.find((candidate) => space.endsWith(`.${candidate}`));
+    if (owner) {
+      throw new Error(`"${input}" names something inside "${owner}", not the space itself; parse it as a namespace.`);
+    }
+    throw new Error(`Unknown canonical space "${space}" in "${input}".`);
+  }
+  return space;
+}
+
+/**
+ * Formats `me://<space>[selector]/path`. The space must be one the runtime declared (any number of labels).
+ */
+export function formatMeSpaceUri(input: FormatMeSpaceUriInput): string {
+  const space = assertDeclaredSpace(input.space, input.knownSpaces, String(input.space ?? ""));
+  const selector = serializeSelector(input.selector);
+  const path = input.path == null || String(input.path).trim() === ""
+    ? ""
+    : `/${parseCanonicalPath(String(input.path)).value}`;
+  return `me://${space}${selector}${path}`;
+}
+
+/**
+ * Reads `me://<space>[selector]/path` as a reference to a declared space itself (`me://here`, `me://neurons.me`).
+ * `parseMeUri` is unchanged and still insists on a handle; this is the other half of the model: the root a
+ * runtime declares, addressed as itself. A name that is a handle inside a declared space (`me://ana.here`) is
+ * refused here, and an undeclared name is not a space.
+ */
+export function parseMeSpaceUri(rawInput: string, options: ParseMeSpaceUriOptions): MeCanonicalSpaceUri {
+  const raw = assertNonEmpty(rawInput, "me:// URI");
+  if (!raw.toLowerCase().startsWith("me://")) {
+    throw new Error(`Invalid me URI "${rawInput}": expected "me://" scheme.`);
+  }
+
+  const withoutScheme = raw.slice(5);
+  if (!withoutScheme.trim()) {
+    throw new Error(`Invalid me URI "${rawInput}": missing namespace.`);
+  }
+
+  const slashIndex = withoutScheme.indexOf("/");
+  const head = (slashIndex >= 0 ? withoutScheme.slice(0, slashIndex) : withoutScheme).trim();
+  const pathPart = slashIndex >= 0 ? withoutScheme.slice(slashIndex + 1) : "";
+
+  let spacePart = head;
+  let selectorPart: string | null = null;
+  const openIndex = head.indexOf("[");
+  if (openIndex >= 0) {
+    const closeIndex = head.lastIndexOf("]");
+    if (closeIndex < openIndex || closeIndex !== head.length - 1) {
+      throw new Error(`Invalid me URI "${rawInput}": malformed selector.`);
+    }
+    spacePart = head.slice(0, openIndex).trim();
+    selectorPart = head.slice(openIndex + 1, closeIndex).trim();
+  }
+
+  const space = assertDeclaredSpace(spacePart.toLowerCase(), options?.knownSpaces, rawInput);
+  const selector = parseCanonicalSelector(selectorPart);
+  const path = slashIndex >= 0 ? parseCanonicalPath(pathPart) : null;
+  const href = formatMeSpaceUri({
+    space,
+    knownSpaces: options.knownSpaces,
+    selector,
+    path: path?.value ?? null,
+  });
+
+  return {
+    scheme: "me",
+    raw,
+    href,
+    space,
+    selector,
+    path: path?.value ?? null,
+    segments: path?.segments ?? [],
+  };
+}
+
+export function tryParseMeSpaceUri(rawInput: string, options: ParseMeSpaceUriOptions): MeCanonicalSpaceUri | null {
+  try {
+    return parseMeSpaceUri(rawInput, options);
+  } catch {
+    return null;
+  }
+}
+
 export function parseCanonicalMeUri(
   rawInput: string,
   options: ParseCanonicalMeUriOptions = {},
 ): MeCanonicalUri {
-  const parsed = parseMeUri(rawInput);
+  const parsed = parseMeUri(rawInput, { knownSpaces: options.knownSpaces });
   const knownSpaces = normalizeKnownSpaces(options.knownSpaces);
   if (knownSpaces.length > 0 && !knownSpaces.includes(parsed.space)) {
     throw new Error(`Unknown canonical space "${parsed.space}" in "${rawInput}".`);
@@ -362,8 +543,8 @@ export function canonicalizeHumanIdentity(
   }
 
   const handle = normalizeCanonicalHandle(parts[0]);
-  const space = normalizeCanonicalSpace(parts[1]);
-  const uri = formatCanonicalMeUri({ handle, space });
+  const space = normalizeSpaceInContext(parts[1], options.knownSpaces);
+  const uri = formatCanonicalMeUri({ handle, space, knownSpaces: options.knownSpaces });
   parseCanonicalMeUri(uri, options);
 
   return {
@@ -407,55 +588,37 @@ export function projectDnsHostToNamespace(
     };
   }
 
-  if (host === "localhost" || host.endsWith(".local")) {
-    return {
-      ok: false,
-      kind: "invalid",
-      rawHost,
-      host,
-      matchedSpace: null,
-      prefixLabels: [],
-      reason: "TRANSPORT_ONLY_HOST",
-    };
-  }
-
   const labels = host.split(".").map((label) => label.trim()).filter(Boolean);
-  if (labels.length < 2) {
-    return {
-      ok: false,
-      kind: "invalid",
-      rawHost,
-      host,
-      matchedSpace: null,
-      prefixLabels: labels,
-      reason: "INVALID_HOST",
-    };
-  }
-  for (const label of labels) {
-    if (!LABEL_RE.test(label)) {
-      return {
-        ok: false,
-        kind: "invalid",
-        rawHost,
-        host,
-        matchedSpace: null,
-        prefixLabels: labels,
-        reason: "INVALID_HOST",
-      };
-    }
+  const invalid = (
+    reason: MeDnsProjectionFailureReason,
+    matchedSpace: string | null = null,
+    prefixLabels: string[] = labels,
+  ): MeDnsProjectionResult => ({ ok: false, kind: "invalid", rawHost, host, matchedSpace, prefixLabels, reason });
+
+  // The runtime's declared spaces decide first. A bad declaration is a configuration fault, reported as such
+  // (validateKnownSpaces catches it at startup); it must never throw out of a request.
+  let normalizedKnownSpaces: string[];
+  try {
+    normalizedKnownSpaces = normalizeKnownSpaces(knownSpaces);
+  } catch {
+    return invalid("INVALID_KNOWN_SPACES");
   }
 
-  const matchedSpace = findLongestKnownSpaceSuffix(host, knownSpaces);
+  const matchedSpace = findLongestKnownSpaceSuffix(host, normalizedKnownSpaces);
+
   if (!matchedSpace) {
-    return {
-      ok: false,
-      kind: "invalid",
-      rawHost,
-      host,
-      matchedSpace: null,
-      prefixLabels: labels,
-      reason: "UNKNOWN_SPACE",
-    };
+    // Not under anything the runtime declared. A name that is only a way of reaching a machine (localhost,
+    // *.local) says nothing about a space; anything else is simply not one of ours.
+    if (host === "localhost" || host.endsWith(".local")) return invalid("TRANSPORT_ONLY_HOST", null, []);
+    if (labels.length < 2) return invalid("INVALID_HOST");
+    for (const label of labels) {
+      if (!LABEL_RE.test(label)) return invalid("INVALID_HOST");
+    }
+    return invalid("UNKNOWN_SPACE");
+  }
+
+  for (const label of labels) {
+    if (!LABEL_RE.test(label)) return invalid("INVALID_HOST");
   }
 
   const prefix = host === matchedSpace ? "" : host.slice(0, -(matchedSpace.length + 1));
@@ -473,15 +636,7 @@ export function projectDnsHostToNamespace(
   }
 
   if (prefixLabels.length !== 1) {
-    return {
-      ok: false,
-      kind: "invalid",
-      rawHost,
-      host,
-      matchedSpace,
-      prefixLabels,
-      reason: "NOT_CANONICAL_NAMESPACE",
-    };
+    return invalid("NOT_CANONICAL_NAMESPACE", matchedSpace, prefixLabels);
   }
 
   const handle = normalizeCanonicalHandle(prefixLabels[0]);
@@ -496,6 +651,6 @@ export function projectDnsHostToNamespace(
     handle,
     space: matchedSpace,
     namespace,
-    uri: formatCanonicalMeUri({ handle, space: matchedSpace }),
+    uri: formatCanonicalMeUri({ handle, space: matchedSpace, knownSpaces: [matchedSpace] }),
   };
 }
