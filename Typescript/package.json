@@ -1,7 +1,7 @@
 {
   "name": "this.me",
   "version": "4.2.1",
-  "description": "Centralize the Self, Distribute the Data.",
+  "description": "Centralize the Self, Distribute the Data. — A declarative semantic kernel: a reactive knowledge graph addressed by paths, with encrypted scopes and explainable derived values.",
   "type": "module",
   "main": "./dist/me.cjs",
   "module": "./dist/me.es.js",
@@ -79,17 +79,22 @@
     "vitepress": "^1.6.4"
   },
   "keywords": [
+    "me://",
+    "knowledge-graph",
+    "semantic-kernel",
     "encrypted-state",
-    "knowledge graph",
     "local-first",
-    "Namespace Resolution Protocol",
-    "NRP",
     "ai-memory",
-    "graph-database"
+    "nrp",
+    "namespace-resolution-protocol"
   ],
   "license": "MIT",
-  "author": "suiGn",
-  "homepage": "https://neurons.me",
+  "author": {
+    "name": "sui.gn",
+    "url": "https://neurons.me",
+    "email": "dev@neurons.me"
+  },
+  "homepage": "https://neurons-me.github.io/.me/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/neurons-me/.me.git"
