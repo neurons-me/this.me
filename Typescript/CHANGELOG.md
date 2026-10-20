@@ -1,5 +1,11 @@
 # TypeScript .me Changelog
 
+## 4.2.2
+
+Package metadata only. **No code change**: the kernel behaves exactly as in 4.2.1.
+
+- `description`, `keywords`, `homepage` and `author` brought in line with the other neurons.me packages.
+
 ## 4.2.1
 
 Performance release. **No behavior change**: every value, `explain()` result, memory, hash and snapshot is the

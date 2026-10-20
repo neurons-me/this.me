@@ -1,6 +1,6 @@
 {
   "name": "this.me",
-  "version": "4.2.1",
+  "version": "4.2.2",
   "description": "Centralize the Self, Distribute the Data. — A declarative semantic kernel: a reactive knowledge graph addressed by paths, with encrypted scopes and explainable derived values.",
   "type": "module",
   "main": "./dist/me.cjs",
