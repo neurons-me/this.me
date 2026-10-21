@@ -232,5 +232,23 @@
   "title": "mlearning.studio",
   "desc": "Datasets and benchmark results (GTFS, BigDaMa).",
   "img": "/.me/docs/assets/card-gtfs.webp"
+ },
+ "/.me/docs/Space-Structure.html": {
+  "href": "https://neurons-me.github.io/.me/docs/Space-Structure.html",
+  "title": "Mathematical Structure of a Space",
+  "desc": "Theory: a prefix-closed tree of positions, R : P × Γ ⇀ M, S = (P, ≤, Γ, M, R) and K = (S, π, Σ, H, D).",
+  "img": "/.me/docs/assets/card-semantic.webp"
+ },
+ "/.me/docs/Is-Me-A-Category.html": {
+  "href": "https://neurons-me.github.io/.me/docs/Is-Me-A-Category.html",
+  "title": "Is .me a Category?",
+  "desc": "Theory: H_t → G_t → C_t = FreeCat(G_t), typed traces, two partialities, ConeSubst(P̂).",
+  "img": "/.me/docs/assets/card-pointer.webp"
+ },
+ "https://suign.github.io/Equations.html": {
+  "href": "https://suign.github.io/Equations.html",
+  "title": "The Equations",
+  "desc": "Every original formula on suign.github.io, one line each, with its source.",
+  "img": "/.me/docs/assets/card-axioms.webp"
  }
 }
